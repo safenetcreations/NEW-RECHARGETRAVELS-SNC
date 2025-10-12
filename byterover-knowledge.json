@@ -1,0 +1,51 @@
+[
+  {
+    "timestamp": "2025-10-11T08:08:05.552Z",
+    "summary": "Redesigned luxury multi-tier header & concierge navigation system.",
+    "details": [
+      "Introduced a glassmorphism top bar, dynamic stats ribbon, and reimagined desktop call-to-actions in src/components/Header.tsx.",
+      "Refined header navigation styling to adapt on scroll and align with the elevated brand experience in src/components/header/NavigationMenu.tsx.",
+      "Curated a concierge-focused mobile drawer with signature journeys, services, and contact channels."
+    ],
+    "files": [
+      "src/components/Header.tsx",
+      "src/components/header/NavigationMenu.tsx"
+    ]
+  },
+  {
+    "timestamp": "2025-10-12T14:22:36.762Z",
+    "summary": "Restored the original multi-column Recharge footer across the site.",
+    "details": [
+      "Replaced the concierge glassmorphism footer with the legacy explore/services/about columns in src/components/ui/RechargeFooter.tsx.",
+      "Reinstated the static contact details, privacy/terms quick links, and animated social icons to match the pre-redesign experience.",
+      "Mounted the AIFAQChatbot globally from the footer so the floating travel assistant remains accessible."
+    ],
+    "files": [
+      "src/components/ui/RechargeFooter.tsx"
+    ]
+  },
+  {
+    "timestamp": "2025-10-12T14:31:44.446Z",
+    "summary": "Reimagined the Recharge footer with a Sri Lankan jungle concierge theme.",
+    "details": [
+      "Built a hero panel featuring Leopard Conservancy messaging, ranger-led safari highlights, and MCP concierge calls-to-action in src/components/ui/RechargeFooter.tsx.",
+      "Structured supporting sections for newsletter capture, concierge contact capsule, social lounge, navigation clusters, and conservation stat tiles.",
+      "Maintained the floating AIFAQChatbot mount and ensured scroll-to-top plus privacy/terms links remain accessible."
+    ],
+    "files": [
+      "src/components/ui/RechargeFooter.tsx"
+    ]
+  },
+  {
+    "timestamp": "2025-10-12T16:01:36.858Z",
+    "summary": "Streamlined the site header to prevent stacked double-bar appearance.",
+    "details": [
+      "Removed the desktop announcement bar and stat ribbon from src/components/Header.tsx so only a single nav row renders.",
+      "Relocated concierge contact chips and the language switcher into the primary action cluster, keeping the layout compact on scroll.",
+      "Preserved existing desktop navigation, mobile drawer logic, and MCP concierge hooks while simplifying the visual hierarchy."
+    ],
+    "files": [
+      "src/components/Header.tsx"
+    ]
+  }
+]

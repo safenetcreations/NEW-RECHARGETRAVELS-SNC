@@ -1,0 +1,45 @@
+# Legacy workflow - Kept for backward compatibility
+# Use deploy-production.yml or deploy-staging.yml instead
+
+name: Deploy to Firebase Hosting (Legacy)
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: ℹ️ Workflow Notice
+        run: |
+          echo "::warning::This is a legacy workflow. Please use the following workflows instead:"
+          echo "::warning::- deploy-production.yml for production deployments"
+          echo "::warning::- deploy-staging.yml for staging/preview deployments"
+          echo ""
+          echo "Redirecting to appropriate workflow..."
+
+      - name: 🔀 Trigger appropriate workflow
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const environment = '${{ github.event.inputs.environment }}';
+            const workflow = environment === 'production' ? 'deploy-production.yml' : 'deploy-staging.yml';
+            
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: workflow,
+              ref: context.ref
+            });
+            
+            core.notice(`Triggered ${workflow} for ${environment} deployment`);

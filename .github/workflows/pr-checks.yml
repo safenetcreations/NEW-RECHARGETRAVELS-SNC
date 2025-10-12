@@ -1,0 +1,179 @@
+name: PR Checks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  code-quality:
+    name: Code Quality Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: 📦 Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            admin/node_modules
+            ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: 📌 Install dependencies
+        run: |
+          npm ci --prefer-offline --no-audit
+          cd admin && npm ci --prefer-offline --no-audit
+
+      - name: 🔍 TypeScript check
+        id: typecheck
+        run: |
+          echo "### 🔍 TypeScript Check" >> $GITHUB_STEP_SUMMARY
+          if npm run typecheck; then
+            echo "✅ TypeScript check passed" >> $GITHUB_STEP_SUMMARY
+            echo "result=success" >> $GITHUB_OUTPUT
+          else
+            echo "❌ TypeScript check failed" >> $GITHUB_STEP_SUMMARY
+            echo "result=failure" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+      - name: 🎨 ESLint check
+        id: lint
+        run: |
+          echo "### 🎨 ESLint Check" >> $GITHUB_STEP_SUMMARY
+          if npm run lint; then
+            echo "✅ ESLint check passed" >> $GITHUB_STEP_SUMMARY
+            echo "result=success" >> $GITHUB_OUTPUT
+          else
+            echo "❌ ESLint check failed" >> $GITHUB_STEP_SUMMARY
+            echo "Please run \`npm run lint:fix\` to fix auto-fixable issues" >> $GITHUB_STEP_SUMMARY
+            echo "result=failure" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+      - name: 📊 Bundle size check
+        run: |
+          npm run build:fast
+          echo "### 📊 Bundle Size Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "| File | Size | Gzipped |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|------|---------|" >> $GITHUB_STEP_SUMMARY
+          
+          # Analyze bundle sizes
+          for file in dist/assets/*.js; do
+            if [ -f "$file" ]; then
+              SIZE=$(du -h "$file" | cut -f1)
+              GZIPPED=$(gzip -c "$file" | wc -c | awk '{print int($1/1024)"KB"}')
+              echo "| $(basename "$file") | $SIZE | $GZIPPED |" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: 🔐 Run security audit
+        run: |
+          echo "### 🔐 Security Audit" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Run npm audit
+          if npm audit --audit-level=high; then
+            echo "✅ No high or critical vulnerabilities found" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Security vulnerabilities detected" >> $GITHUB_STEP_SUMMARY
+            echo "Run \`npm audit fix\` to fix vulnerabilities" >> $GITHUB_STEP_SUMMARY
+          fi
+        continue-on-error: true
+
+      - name: 🔍 Check for secrets
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+        continue-on-error: true
+
+  performance-check:
+    name: Performance Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: 📦 Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            admin/node_modules
+            ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: 📌 Install dependencies
+        run: |
+          npm ci --prefer-offline --no-audit
+
+      - name: 🏃 Build project
+        run: npm run build:fast
+
+      - name: 📊 Analyze build performance
+        run: |
+          echo "### 📊 Build Performance" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Count TypeScript files
+          TS_FILES=$(find src -name "*.ts" -o -name "*.tsx" | wc -l)
+          echo "- TypeScript files: $TS_FILES" >> $GITHUB_STEP_SUMMARY
+          
+          # Count components
+          COMPONENTS=$(find src/components -name "*.tsx" | wc -l)
+          echo "- React components: $COMPONENTS" >> $GITHUB_STEP_SUMMARY
+          
+          # Total bundle size
+          TOTAL_SIZE=$(du -sh dist | cut -f1)
+          echo "- Total build size: $TOTAL_SIZE" >> $GITHUB_STEP_SUMMARY
+
+  pr-labels:
+    name: Auto Label PR
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 🏷️ Label PR based on files
+        uses: actions/labeler@v4
+        with:
+          repo-token: "${{ secrets.GITHUB_TOKEN }}"
+          configuration-path: .github/labeler.yml
+        continue-on-error: true

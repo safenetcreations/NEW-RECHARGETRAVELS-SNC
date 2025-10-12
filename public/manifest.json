@@ -1,0 +1,44 @@
+
+{
+  "name": "Recharge Travels - Driver Platform",
+  "short_name": "Recharge Travels",
+  "description": "Professional driver platform for Sri Lankan travel services",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0D9488",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "categories": ["travel", "transport", "business"],
+  "lang": "en",
+  "shortcuts": [
+    {
+      "name": "Driver Dashboard",
+      "short_name": "Dashboard",
+      "description": "Access your driver dashboard",
+      "url": "/driver-dashboard",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Register as Driver",
+      "short_name": "Register",
+      "description": "Start your driver registration",
+      "url": "/driver-registration",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    }
+  ]
+}

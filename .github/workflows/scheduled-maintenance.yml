@@ -1,0 +1,133 @@
+name: Scheduled Maintenance
+
+on:
+  schedule:
+    # Run every Sunday at 2 AM UTC
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+
+jobs:
+  dependency-updates:
+    name: Check for dependency updates
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: 📦 Check for outdated dependencies
+        run: |
+          echo "### 📦 Dependency Status Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Main Project:**" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          npm outdated || true
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Admin Panel:**" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cd admin && npm outdated || true
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: 🔐 Security audit
+        run: |
+          echo "### 🔐 Security Audit Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          npm audit --production || true
+
+  cleanup-artifacts:
+    name: Cleanup old artifacts
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 🗑️ Delete old artifacts
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const days = 7;
+            const ms_per_day = 24 * 60 * 60 * 1000;
+            const now = Date.now();
+            const cutoff = new Date(now - days * ms_per_day).toISOString();
+            
+            const artifacts = await github.rest.actions.listArtifactsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100
+            });
+            
+            let deleted = 0;
+            for (const artifact of artifacts.data.artifacts) {
+              if (artifact.created_at < cutoff) {
+                await github.rest.actions.deleteArtifact({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  artifact_id: artifact.id
+                });
+                deleted++;
+              }
+            }
+            
+            console.log(`Deleted ${deleted} artifacts older than ${days} days`);
+
+  cache-cleanup:
+    name: Cleanup GitHub Actions cache
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 🧹 Cleanup caches
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const caches = await github.rest.actions.getActionsCacheList({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100
+            });
+            
+            // Keep only the 10 most recent caches
+            const sortedCaches = caches.data.actions_caches.sort((a, b) => 
+              new Date(b.created_at) - new Date(a.created_at)
+            );
+            
+            let deleted = 0;
+            for (let i = 10; i < sortedCaches.length; i++) {
+              await github.rest.actions.deleteActionsCacheById({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                cache_id: sortedCaches[i].id
+              });
+              deleted++;
+            }
+            
+            console.log(`Deleted ${deleted} old caches`);
+
+  performance-report:
+    name: Generate performance report
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📊 Analyze repository stats
+        run: |
+          echo "### 📊 Repository Statistics" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Count files by type
+          echo "**File Count by Type:**" >> $GITHUB_STEP_SUMMARY
+          echo "- TypeScript/TSX: $(find src -name "*.ts" -o -name "*.tsx" | wc -l)" >> $GITHUB_STEP_SUMMARY
+          echo "- Components: $(find src/components -name "*.tsx" | wc -l)" >> $GITHUB_STEP_SUMMARY
+          echo "- CSS/Styles: $(find src -name "*.css" | wc -l)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Repository size
+          echo "**Repository Size:**" >> $GITHUB_STEP_SUMMARY
+          echo "- Total: $(du -sh . | cut -f1)" >> $GITHUB_STEP_SUMMARY
+          echo "- Source: $(du -sh src | cut -f1)" >> $GITHUB_STEP_SUMMARY
+          echo "- Node modules: $(du -sh node_modules 2>/dev/null | cut -f1 || echo 'Not installed')" >> $GITHUB_STEP_SUMMARY

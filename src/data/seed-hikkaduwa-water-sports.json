@@ -1,0 +1,73 @@
+{
+  "slug": "hikkaduwa-water-sports",
+  "name": "Hikkaduwa Water Sports & Marine Adventures",
+  "heroImageURL": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fhikka-hero-3840x2160.webp?alt=media",
+  "seo": {
+    "title": "Hikkaduwa Water Sports | Surfing, Snorkelling & Jet‑Ski Tours – Recharge Travels",
+    "description": "Catch perfect waves, snorkel living coral reefs and ride jet‑skis along Sri Lanka's iconic west coast. Book your Hikkaduwa water‑sports adventure with Recharge Travels."
+  },
+  "introParagraph": "Once a sleepy fishing village, Hikkaduwa has evolved into Sri Lanka's water‑sports capital—where gentle reef breaks greet first‑time surfers, technicolour coral gardens lure snorkellers and adrenaline junkies rev their jet‑skis across turquoise swells. With Recharge Travels you'll paddle out with ISA‑certified instructors, glide above sea‑turtle sanctuaries and toast sunset on a stand‑up paddle board safari. All gear, insurance and hotel transfers are handled by our crew, leaving you free to chase the perfect splash from dawn till dusk.",
+  "highlights": [
+    { 
+      "icon": "🏄‍♂️", 
+      "title": "Beginner‑Friendly Surf",      
+      "blurb60": "Ride mellow reef breaks with pro coaches and soft‑top boards included." 
+    },
+    { 
+      "icon": "🐢",  
+      "title": "Turtle Reef Snorkel",          
+      "blurb60": "Float over hard corals while green turtles glide inches away." 
+    },
+    { 
+      "icon": "🚤",  
+      "title": "Jet‑Ski & Banana Boat",        
+      "blurb60": "Crank up the throttle or enjoy group giggles on towables." 
+    },
+    { 
+      "icon": "🛶",  
+      "title": "Sunset SUP Lagoon Safari",     
+      "blurb60": "Paddle glassy canals fringed by palms and mangroves as the sky turns pink." 
+    }
+  ],
+  "routes": [
+    {
+      "routeName": "Half‑Day Surf & Snorkel Combo",
+      "duration": "5 hrs / 10 km coastline",
+      "distanceKm": 10,
+      "bestClass": "Surf van + boat tender",
+      "mapGPXUrl": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/routes%2Fhikka-surf-snorkel.gpx?alt=media"
+    },
+    {
+      "routeName": "Jet‑Ski Thrill Circuit",
+      "duration": "2 hrs / 15 km loop",
+      "distanceKm": 15,
+      "bestClass": "Yamaha WaveRunner",
+      "mapGPXUrl": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/routes%2Fhikka-jetski.gpx?alt=media"
+    },
+    {
+      "routeName": "SUP Sunset Cruise",
+      "duration": "1.5 hrs / 4 km lagoon",
+      "distanceKm": 4,
+      "bestClass": "Inflatable SUP",
+      "mapGPXUrl": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/routes%2Fhikka-sup-lagoon.gpx?alt=media"
+    }
+  ],
+  "galleryImages": [
+    { 
+      "url": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fgallery-hikka1.webp?alt=media", 
+      "alt": "Surfer carving a small clean wave in Hikkaduwa" 
+    },
+    { 
+      "url": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fgallery-hikka2.webp?alt=media", 
+      "alt": "Snorkeller hovering above coral and sea turtles" 
+    },
+    { 
+      "url": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fgallery-hikka3.webp?alt=media", 
+      "alt": "Jet‑ski spraying water against orange sunset backdrop" 
+    }
+  ],
+  "faqTag": "hikkaduwa-water-sports",
+  "ctaHeadline": "Dive Into Hikkaduwa's Liquid Playground",
+  "ctaSub": "From surfboard to snorkel mask, Recharge Travels supplies everything—just bring your sense of adventure.",
+  "videoURL": "https://www.youtube.com/embed/HikkaduwaWaterSports"
+}

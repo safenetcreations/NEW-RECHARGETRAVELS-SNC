@@ -1,0 +1,73 @@
+{
+  "slug": "pilgrimage-tours",
+  "name": "Sri Lanka Pilgrimage Tours",
+  "heroImageURL": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fpilgrimage-hero-3840x2160.webp?alt=media",
+  "seo": {
+    "title": "Pilgrimage Tours Sri Lanka | Buddhist, Hindu & Christian Shrines – Recharge Travels",
+    "description": "Walk in the footsteps of saints and kings: climb Adam's Peak at dawn, venerate the Sacred Bo Tree and worship at Kataragama & Madhu Church on a multi‑faith pilgrimage curated by Recharge Travels."
+  },
+  "introParagraph": "From the golden spire of Kandy's Temple of the Tooth to the windswept summit of Adam's Peak, Sri Lanka is a crossroads of sacred traditions stretching back 2,300 years. Our Pilgrimage Tours trace those holy footprints—linking Buddhist, Hindu, Christian and Muslim shrines in a seamless journey of faith. Guided by local custodians, you'll meditate beneath the 2,300‑year‑old Sri Maha Bodhi, join torch‑lit devotees ascending Sri Pada at midnight, and experience the vibrant inter‑faith rituals of Kataragama. Each step is cushioned by Recharge Travels comfort: private transport, heritage hotels near the shrines, and round‑the‑clock support for body and soul alike.",
+  "highlights": [
+    { 
+      "icon": "🙏", 
+      "title": "Temple of the Tooth",    
+      "blurb60": "Witness the evening 'Thevava' puja where the Buddha's Tooth Relic is revered by drummers and dancers." 
+    },
+    { 
+      "icon": "⛰️", 
+      "title": "Adam's Peak (Sri Pada)", 
+      "blurb60": "Night‑time climb with sunrise worship at the sacred footprint revered by multiple faiths." 
+    },
+    { 
+      "icon": "🌳", 
+      "title": "Sri Maha Bodhi, Anuradhapura", 
+      "blurb60": "Pray beneath the world's oldest historically‑planted tree—descendant of Buddha's enlightenment tree." 
+    },
+    { 
+      "icon": "🕌", 
+      "title": "Kataragama Multi‑Faith Shrine", 
+      "blurb60": "Join Buddhists, Hindus & Muslims in fiery devotional rituals on the Menik Ganga's banks." 
+    }
+  ],
+  "routes": [
+    {
+      "routeName": "Sacred Triangle Circuit",
+      "duration": "3 days / 350 km",
+      "distanceKm": 350,
+      "bestClass": "AC mini‑coach with guide",
+      "mapGPXUrl": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/routes%2Fsacred-triangle-route.gpx?alt=media"
+    },
+    {
+      "routeName": "Adam's Peak Overnight Ascent",
+      "duration": "1 night / 12 km trail",
+      "distanceKm": 12,
+      "bestClass": "On foot + support jeep",
+      "mapGPXUrl": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/routes%2Fadams-peak-route.gpx?alt=media"
+    },
+    {
+      "routeName": "Northern Marian Route",
+      "duration": "2 days / 280 km",
+      "distanceKm": 280,
+      "bestClass": "Private van",
+      "mapGPXUrl": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/routes%2Fnorthern-marian-route.gpx?alt=media"
+    }
+  ],
+  "galleryImages": [
+    { 
+      "url": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fgallery-pilgrim1.webp?alt=media", 
+      "alt": "Torch‑lit pilgrims climbing Adam's Peak just before dawn" 
+    },
+    { 
+      "url": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fgallery-pilgrim2.webp?alt=media", 
+      "alt": "Monks drumming during evening puja at Kandy's Temple of the Tooth" 
+    },
+    { 
+      "url": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fgallery-pilgrim3.webp?alt=media", 
+      "alt": "Devotees tying prayer flags beneath the Sri Maha Bodhi tree" 
+    }
+  ],
+  "faqTag": "pilgrimage-tours",
+  "ctaHeadline": "Follow Sacred Footsteps Across Sri Lanka",
+  "ctaSub": "Recharge Travels handles every detail—from temple permits to respectful dress—so you can focus on the journey within.",
+  "videoURL": "https://www.youtube.com/embed/PilgrimageSriLanka"
+}

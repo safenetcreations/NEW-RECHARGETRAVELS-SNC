@@ -1,0 +1,73 @@
+{
+  "slug": "lagoon-safari",
+  "name": "Lagoon Safaris & Mangrove Cruises",
+  "heroImageURL": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Flagoon-hero-3840x2160.webp?alt=media",
+  "seo": {
+    "title": "Lagoon Safari Sri Lanka | Mangrove Tunnels, Cinnamon Islands & Birdlife – Recharge Travels",
+    "description": "Glide through emerald mangrove tunnels, visit floating cinnamon islands and spot crocodiles, kingfishers & monitor lizards on Sri Lanka's best lagoon safaris."
+  },
+  "introParagraph": "Away from the surf‑lashed coast, Sri Lanka's lagoons whisper with bird‑song, cinnamon aromas and the quiet dip of a paddle. Recharge Travels' Lagoon Safaris steer you into this hidden water‑world—where knitted mangrove roots create secret tunnels and stilt fishermen still cast by moonlight. Drift past floating cinnamon workshops, watch brahminy kites dive for mullet, feel doctor fish nibble your feet and, if luck strikes, glimpse a mugger crocodile sliding off a muddy bank. With licensed boatmen, life‑jackets, insurance and naturalist guides, we turn a simple cruise into a living lesson in coastal ecology and culture.",
+  "highlights": [
+    { 
+      "icon": "🌳", 
+      "title": "Mangrove Tunnels",       
+      "blurb60": "Navigate leafy cathedrals alive with mud‑skippers and brahminy kites." 
+    },
+    { 
+      "icon": "🛶", 
+      "title": "Cinnamon Island Visit",  
+      "blurb60": "Meet a family peeling cinnamon bark the same way for centuries." 
+    },
+    { 
+      "icon": "🐊", 
+      "title": "Wildlife Spotting",      
+      "blurb60": "Watch water monitors, kingfishers and (with luck) shy crocodiles." 
+    },
+    { 
+      "icon": "🐟", 
+      "title": "Natural Fish‑Spa Stop",  
+      "blurb60": "Let tiny garra fish exfoliate your feet at a floating deck." 
+    }
+  ],
+  "routes": [
+    {
+      "routeName": "Madu Ganga Half‑Day Safari",
+      "duration": "4 hrs / 14 km waterways",
+      "distanceKm": 14,
+      "bestClass": "Motorised eco‑boat",
+      "mapGPXUrl": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/routes%2Fmadu-ganga-safari.gpx?alt=media"
+    },
+    {
+      "routeName": "Negombo Sunset Lagoon Cruise",
+      "duration": "2.5 hrs / 8 km canal loop",
+      "distanceKm": 8,
+      "bestClass": "Covered catamaran",
+      "mapGPXUrl": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/routes%2Fnegombo-lagoon.gpx?alt=media"
+    },
+    {
+      "routeName": "Kalpitiya Mangrove Canoe",
+      "duration": "3 hrs / 6 km paddle",
+      "distanceKm": 6,
+      "bestClass": "Guided kayak",
+      "mapGPXUrl": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/routes%2Fkalpitiya-mangrove.gpx?alt=media"
+    }
+  ],
+  "galleryImages": [
+    { 
+      "url": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fgallery-lagoon1.webp?alt=media", 
+      "alt": "Boat entering a mangrove tunnel on Madu Ganga lagoon safari" 
+    },
+    { 
+      "url": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fgallery-lagoon2.webp?alt=media", 
+      "alt": "Local worker peeling Ceylon cinnamon bark on a floating island" 
+    },
+    { 
+      "url": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fgallery-lagoon3.webp?alt=media", 
+      "alt": "Kingfisher perched above calm lagoon waters at sunset" 
+    }
+  ],
+  "faqTag": "lagoon-safari",
+  "ctaHeadline": "Discover Sri Lanka's Secret Water Worlds",
+  "ctaSub": "Secure your seat on a guided lagoon safari with Recharge Travels—boats, permits and naturalist commentary included.",
+  "videoURL": "https://www.youtube.com/embed/LagoonSafariSL"
+}

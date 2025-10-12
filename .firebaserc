@@ -1,0 +1,18 @@
+{
+  "projects": {
+    "default": "recharge-travels-73e76"
+  },
+  "targets": {
+    "recharge-travels-73e76": {
+      "hosting": {
+        "main": [
+          "recharge-travels-73e76"
+        ],
+        "admin": [
+          "recharge-travels-admin"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

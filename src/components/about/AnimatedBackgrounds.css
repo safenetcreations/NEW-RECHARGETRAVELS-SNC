@@ -1,0 +1,662 @@
+
+/* Sri Lankan Nature Animation System */
+
+/* Color Variables */
+:root {
+  --waterfall: #4FC3F7;
+  --beach: #FFD54F;  
+  --tea: #66BB6A;
+  --dark: #1a1a1a;
+  --waterfall-deep: #1E40AF;
+  --waterfall-mist: #F0F9FF;
+  --jungle-green: #065F46;
+  --sunset-orange: #EA580C;
+  --sunset-gold: #F59E0B;
+  --ocean-blue: #0284C7;
+  --tea-green: #16A34A;
+  --mist-gray: #6B7280;
+  --earth-brown: #92400E;
+}
+
+/* === WATERFALL HERO SECTION === */
+.waterfall-hero {
+  background: linear-gradient(135deg, 
+    rgba(26,26,26,0.8) 0%, 
+    rgba(30,64,175,0.6) 50%, 
+    rgba(6,95,70,0.8) 100%
+  );
+  position: relative;
+  overflow: hidden;
+}
+
+/* Mountain Silhouettes */
+.mountain-silhouettes {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.mountain {
+  position: absolute;
+  bottom: 0;
+  background: linear-gradient(to top, rgba(6,95,70,0.9), rgba(6,95,70,0.3));
+  clip-path: polygon(0% 100%, 20% 60%, 40% 70%, 60% 40%, 80% 55%, 100% 100%);
+  animation: mountain-sway 15s ease-in-out infinite;
+}
+
+.mountain-1 {
+  width: 100%;
+  height: 40%;
+  z-index: 3;
+  animation-delay: 0s;
+}
+
+.mountain-2 {
+  width: 100%;
+  height: 50%;
+  z-index: 2;
+  clip-path: polygon(0% 100%, 15% 70%, 35% 50%, 55% 65%, 75% 45%, 100% 100%);
+  animation-delay: -5s;
+}
+
+.mountain-3 {
+  width: 100%;
+  height: 60%;
+  z-index: 1;
+  clip-path: polygon(0% 100%, 25% 55%, 45% 40%, 65% 60%, 85% 35%, 100% 100%);
+  animation-delay: -10s;
+}
+
+@keyframes mountain-sway {
+  0%, 100% { transform: translateX(0) scale(1); }
+  50% { transform: translateX(-2px) scale(1.01); }
+}
+
+/* Waterfall Animation */
+.waterfall-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 4;
+}
+
+.waterfall-drop {
+  position: absolute;
+  width: 2px;
+  height: 15px;
+  background: linear-gradient(to bottom, 
+    rgba(79,195,247,0.8) 0%, 
+    rgba(240,249,255,0.9) 50%, 
+    rgba(79,195,247,0.6) 100%
+  );
+  border-radius: 50%;
+  animation: waterfall-fall linear infinite;
+  box-shadow: 0 0 4px rgba(79,195,247,0.5);
+}
+
+@keyframes waterfall-fall {
+  0% { 
+    top: -20px; 
+    opacity: 0; 
+    transform: scale(0.5);
+  }
+  10% { 
+    opacity: 1; 
+    transform: scale(1);
+  }
+  90% { 
+    opacity: 0.8; 
+    transform: scale(1.2);
+  }
+  100% { 
+    top: 100vh; 
+    opacity: 0; 
+    transform: scale(0.5);
+  }
+}
+
+/* Mist Effects */
+.mist-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 30%;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.mist-particle {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: radial-gradient(circle, rgba(240,249,255,0.4) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: mist-rise ease-out infinite;
+  filter: blur(2px);
+}
+
+@keyframes mist-rise {
+  0% { 
+    bottom: -20px; 
+    opacity: 0; 
+    transform: scale(0.5) translateX(0);
+  }
+  20% { 
+    opacity: 0.6; 
+    transform: scale(1) translateX(10px);
+  }
+  80% { 
+    opacity: 0.3; 
+    transform: scale(1.5) translateX(-15px);
+  }
+  100% { 
+    bottom: 100%; 
+    opacity: 0; 
+    transform: scale(2) translateX(20px);
+  }
+}
+
+/* Tropical Vegetation */
+.tropical-vegetation {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 6;
+}
+
+.palm-tree {
+  position: absolute;
+  bottom: 10%;
+  width: 60px;
+  height: 200px;
+  background: linear-gradient(to top, 
+    rgba(6,95,70,0.8) 0%, 
+    rgba(6,95,70,0.4) 100%
+  );
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  transform-origin: bottom center;
+  animation: palm-sway 8s ease-in-out infinite;
+}
+
+.palm-left {
+  left: 5%;
+  animation-delay: 0s;
+}
+
+.palm-right {
+  right: 5%;
+  animation-delay: -2s;
+  transform: scaleX(-1);
+}
+
+.palm-tree::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 40px;
+  background: radial-gradient(ellipse, rgba(6,95,70,0.9) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+@keyframes palm-sway {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(3deg); }
+  75% { transform: rotate(-3deg); }
+}
+
+.jungle-foliage {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 25%;
+  background: linear-gradient(to top, 
+    rgba(6,95,70,0.9) 0%, 
+    rgba(6,95,70,0.3) 100%
+  );
+  clip-path: polygon(0% 100%, 5% 80%, 15% 90%, 25% 75%, 35% 85%, 45% 70%, 55% 80%, 65% 65%, 75% 75%, 85% 60%, 95% 70%, 100% 100%);
+  animation: foliage-rustle 12s ease-in-out infinite;
+}
+
+@keyframes foliage-rustle {
+  0%, 100% { transform: scaleY(1) translateY(0); }
+  50% { transform: scaleY(1.02) translateY(-2px); }
+}
+
+/* === BEACH PARADISE SECTION === */
+.beach-paradise {
+  background: linear-gradient(135deg, 
+    var(--sunset-orange) 0%, 
+    var(--sunset-gold) 30%, 
+    var(--ocean-blue) 70%, 
+    var(--waterfall-deep) 100%
+  );
+  position: relative;
+  overflow: hidden;
+}
+
+/* Sunset Gradient Animation */
+.sunset-gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, 
+    rgba(234,88,12,0.8) 0%, 
+    rgba(245,158,11,0.6) 30%, 
+    rgba(2,132,199,0.4) 70%, 
+    rgba(30,64,175,0.8) 100%
+  );
+  animation: sunset-shift 20s ease-in-out infinite;
+  z-index: 1;
+}
+
+@keyframes sunset-shift {
+  0%, 100% { 
+    background: linear-gradient(45deg, 
+      rgba(234,88,12,0.8) 0%, 
+      rgba(245,158,11,0.6) 30%, 
+      rgba(2,132,199,0.4) 70%, 
+      rgba(30,64,175,0.8) 100%
+    );
+  }
+  50% { 
+    background: linear-gradient(135deg, 
+      rgba(245,158,11,0.9) 0%, 
+      rgba(234,88,12,0.7) 30%, 
+      rgba(30,64,175,0.5) 70%, 
+      rgba(2,132,199,0.8) 100%
+    );
+  }
+}
+
+/* Ocean Waves */
+.waves-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 30%;
+  z-index: 2;
+}
+
+.ocean-wave {
+  position: absolute;
+  bottom: 0;
+  left: -100%;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(to top, 
+    rgba(2,132,199,0.8) 0%, 
+    rgba(2,132,199,0.4) 50%, 
+    transparent 100%
+  );
+  border-radius: 50%;
+  animation: wave-motion linear infinite;
+}
+
+.wave-1 {
+  animation-duration: 8s;
+  height: 80%;
+}
+
+.wave-2 {
+  animation-duration: 12s;
+  height: 60%;
+  animation-delay: -2s;
+}
+
+.wave-3 {
+  animation-duration: 15s;
+  height: 40%;
+  animation-delay: -4s;
+}
+
+@keyframes wave-motion {
+  0% { 
+    left: -100%; 
+    transform: translateY(0) rotate(0deg);
+  }
+  50% { 
+    transform: translateY(-10px) rotate(1deg);
+  }
+  100% { 
+    left: 100%; 
+    transform: translateY(0) rotate(0deg);
+  }
+}
+
+/* Beach Palm Trees */
+.beach-palms {
+  position: absolute;
+  bottom: 15%;
+  left: 0;
+  width: 100%;
+  height: 40%;
+  z-index: 3;
+}
+
+.beach-palm {
+  position: absolute;
+  bottom: 0;
+  width: 8px;
+  height: 120px;
+  background: linear-gradient(to top, 
+    rgba(146,64,14,0.9) 0%, 
+    rgba(146,64,14,0.6) 100%
+  );
+  border-radius: 4px;
+  transform-origin: bottom center;
+  animation: beach-palm-sway 10s ease-in-out infinite;
+}
+
+.beach-palm-1 {
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.beach-palm-2 {
+  left: 50%;
+  animation-delay: -2s;
+  height: 100px;
+}
+
+.beach-palm-3 {
+  right: 15%;
+  animation-delay: -4s;
+  height: 110px;
+}
+
+.beach-palm::before {
+  content: '';
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 30px;
+  background: radial-gradient(circle, rgba(22,163,74,0.9) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+@keyframes beach-palm-sway {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(5deg); }
+  75% { transform: rotate(-5deg); }
+}
+
+/* === TEA PLANTATION SECTION === */
+.tea-plantation {
+  background: linear-gradient(135deg, 
+    var(--tea-green) 0%, 
+    var(--jungle-green) 50%, 
+    var(--mist-gray) 100%
+  );
+  position: relative;
+  overflow: hidden;
+}
+
+/* Rolling Hills */
+.tea-hills {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.hill {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background: linear-gradient(to top, rgba(22,163,74,0.8), rgba(22,163,74,0.4));
+  animation: hill-undulate 18s ease-in-out infinite;
+}
+
+.hill-1 {
+  height: 30%;
+  clip-path: polygon(0% 100%, 10% 70%, 30% 80%, 50% 60%, 70% 75%, 90% 65%, 100% 100%);
+  z-index: 3;
+}
+
+.hill-2 {
+  height: 40%;
+  clip-path: polygon(0% 100%, 20% 65%, 40% 55%, 60% 70%, 80% 50%, 100% 100%);
+  z-index: 2;
+  animation-delay: -6s;
+}
+
+.hill-3 {
+  height: 50%;
+  clip-path: polygon(0% 100%, 15% 60%, 35% 45%, 55% 65%, 75% 40%, 95% 55%, 100% 100%);
+  z-index: 1;
+  animation-delay: -12s;
+}
+
+@keyframes hill-undulate {
+  0%, 100% { transform: scaleY(1) translateY(0); }
+  50% { transform: scaleY(1.05) translateY(-5px); }
+}
+
+/* Tea Plantation Terraces */
+.tea-terraces {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 60%;
+  z-index: 4;
+}
+
+.terrace {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(22,163,74,0.6) 20%, 
+    rgba(22,163,74,0.8) 50%, 
+    rgba(22,163,74,0.6) 80%, 
+    transparent 100%
+  );
+  animation: terrace-shimmer 8s ease-in-out infinite;
+}
+
+.terrace-1 {
+  bottom: 20%;
+  animation-delay: 0s;
+}
+
+.terrace-2 {
+  bottom: 35%;
+  animation-delay: -2s;
+}
+
+.terrace-3 {
+  bottom: 50%;
+  animation-delay: -4s;
+}
+
+@keyframes terrace-shimmer {
+  0%, 100% { opacity: 0.6; transform: scaleX(1); }
+  50% { opacity: 1; transform: scaleX(1.02); }
+}
+
+/* Tea Picker Silhouette */
+.tea-picker {
+  position: absolute;
+  bottom: 25%;
+  left: 20%;
+  width: 30px;
+  height: 40px;
+  background: linear-gradient(to bottom, 
+    rgba(26,26,26,0.8) 0%, 
+    rgba(26,26,26,0.9) 100%
+  );
+  clip-path: polygon(40% 0%, 60% 0%, 65% 20%, 70% 40%, 75% 60%, 80% 80%, 85% 100%, 15% 100%, 20% 80%, 25% 60%, 30% 40%, 35% 20%);
+  animation: tea-picker-move 12s ease-in-out infinite;
+  z-index: 5;
+}
+
+@keyframes tea-picker-move {
+  0%, 100% { 
+    left: 20%; 
+    transform: scaleX(1);
+  }
+  50% { 
+    left: 70%; 
+    transform: scaleX(-1);
+  }
+}
+
+/* Tea Mist Clouds */
+.tea-mist-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 6;
+  pointer-events: none;
+}
+
+.tea-cloud {
+  position: absolute;
+  top: 20%;
+  width: 100px;
+  height: 50px;
+  background: radial-gradient(ellipse, rgba(107,114,128,0.4) 0%, transparent 70%);
+  border-radius: 50px;
+  animation: tea-cloud-drift linear infinite;
+  filter: blur(3px);
+}
+
+@keyframes tea-cloud-drift {
+  0% { 
+    left: -10%; 
+    opacity: 0; 
+    transform: scale(0.8);
+  }
+  20% { 
+    opacity: 0.6; 
+    transform: scale(1);
+  }
+  80% { 
+    opacity: 0.4; 
+    transform: scale(1.2);
+  }
+  100% { 
+    left: 110%; 
+    opacity: 0; 
+    transform: scale(0.8);
+  }
+}
+
+/* WhatsApp Floating Button */
+.whatsapp-floating {
+  animation: whatsapp-pulse 2s infinite;
+}
+
+@keyframes whatsapp-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+
+/* Service Card Enhancements */
+.service-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.service-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(15px);
+}
+
+/* FAQ Item Enhancements */
+.faq-item {
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.faq-item:hover {
+  backdrop-filter: blur(15px);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .waterfall-drop {
+    width: 1px;
+    height: 10px;
+  }
+  
+  .palm-tree {
+    width: 40px;
+    height: 120px;
+  }
+  
+  .beach-palm {
+    width: 6px;
+    height: 80px;
+  }
+  
+  .tea-picker {
+    width: 20px;
+    height: 30px;
+  }
+  
+  .mist-particle {
+    width: 15px;
+    height: 15px;
+  }
+  
+  .tea-cloud {
+    width: 60px;
+    height: 30px;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .waterfall-drop,
+  .mist-particle,
+  .ocean-wave,
+  .palm-tree,
+  .beach-palm,
+  .tea-picker,
+  .tea-cloud,
+  .mountain,
+  .hill,
+  .terrace {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+  
+  .service-card:hover,
+  .faq-item:hover {
+    transform: none !important;
+  }
+}

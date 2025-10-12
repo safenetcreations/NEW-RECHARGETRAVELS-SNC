@@ -1,0 +1,71 @@
+[
+  {
+    "timestamp": "2025-10-11T08:38:38.207Z",
+    "summary": "Stabilized Signup form flow by restoring try/catch/finally balance and resilient error typing.",
+    "details": [
+      "Reintroduced a finally block in src/pages/Signup.tsx so the loading indicator resets even on auth rejection.",
+      "Normalized email/password placeholder indentation to avoid JSX whitespace artifacts.",
+      "Hardened toast messaging by guarding against non-Error throwables."
+    ],
+    "files": [
+      "src/pages/Signup.tsx"
+    ]
+  },
+  {
+    "timestamp": "2025-10-11T09:08:01.367Z",
+    "summary": "Removed Sinhala/Tamil content and locked UX to English-only messaging.",
+    "details": [
+      "Collapsed translation context and nav toggles to English-only, deleting Sinhala/Tamil assets and mobile switchers across destination pages.",
+      "Refactored Yalu assistants, voice bots, and hero modules to drop multilingual greetings, inputs, and MCP language wiring.",
+      "Scrubbed remaining greetings/comments referencing Ayubowan/Vanakkam so UI copy is exclusively English."
+    ],
+    "files": [
+      "src/contexts/LanguageContext.tsx",
+      "src/components/LanguageSwitcher.tsx",
+      "src/components/ramayana/RamayanaHero.tsx",
+      "src/components/DestinationPage.tsx",
+      "src/pages/destinations/Negombo.tsx",
+      "src/pages/destinations/Matara.tsx",
+      "src/pages/destinations/Tangalle.tsx",
+      "src/pages/destinations/Kalpitiya.tsx",
+      "src/pages/destinations/Anuradhapura.tsx",
+      "src/pages/destinations/Wadduwa.tsx",
+      "src/pages/destinations/Badulla.tsx",
+      "src/pages/destinations/Polonnaruwa.tsx",
+      "src/pages/destinations/Mannar.tsx",
+      "src/pages/destinations/Ratnapura.tsx",
+      "src/pages/destinations/Mirissa.tsx",
+      "src/pages/destinations/AdamsPeak.tsx",
+      "src/components/YaluEdgeAgent.tsx",
+      "src/components/EnhancedYaluVoiceAgent.tsx",
+      "src/components/SmartYaluAgent.tsx",
+      "src/components/SimpleYaluChatbot.tsx",
+      "src/components/EnhancedYaluLeopardAgent.tsx",
+      "src/components/IntelligentYalu.tsx",
+      "src/components/YaluRechargeAgent.tsx",
+      "src/components/SmartYaluAgent.tsx"
+    ]
+  },
+  {
+    "timestamp": "2025-10-11T13:06:20.904Z",
+    "summary": "Crafted a cinematic, Sri Lanka-inspired footer with animated Yalu leopard runner.",
+    "details": [
+      "Replaced the legacy multi-column footer with a gradient glassmorphism layout celebrating concierge journeys, immersive moments, and island storytelling in src/components/ui/RechargeFooter.tsx.",
+      "Introduced a Framer Motion leopard runner SVG gliding above the footer to honour the Yalu AI persona and add kinetic energy.",
+      "Added concierge/voice-agent CTAs, dispatch signup, and refreshed navigation clusters aligned to luxury brand colours."
+    ],
+    "files": [
+      "src/components/ui/RechargeFooter.tsx"
+    ]
+  },
+  {
+    "timestamp": "2025-10-11T17:58:30.187Z",
+    "summary": "Temporarily removed the SVG leopard runner from footer for later animation swap.",
+    "details": [
+      "Deleted the Framer Motion leopard helper in src/components/ui/RechargeFooter.tsx so current footer stays static until we integrate a real animation."
+    ],
+    "files": [
+      "src/components/ui/RechargeFooter.tsx"
+    ]
+  }
+]
