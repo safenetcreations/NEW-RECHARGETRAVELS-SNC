@@ -92,6 +92,7 @@ const AdminRedirect = () => {
     </div>
   );
 };
+
 const HeroImageUpload = lazy(() => import('@/pages/HeroImageUpload'));
 const SeedData = lazy(() => import('@/pages/SeedData'));
 const BookingConfirmation = lazy(() => import('@/pages/BookingConfirmation'));
