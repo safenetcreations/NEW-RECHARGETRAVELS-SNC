@@ -3,6 +3,8 @@ import { Calendar, Users, MapPin, Star, Check, ArrowRight, Sparkles } from 'luci
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { getDocs, collection, query, orderBy, where } from 'firebase/firestore';
+import { LazyLoadImage } from 'react-lazy-load-image-component';
+import 'react-lazy-load-image-component/src/effects/blur.css';
 import { db } from '@/services/firebaseService';
 
 interface TravelPackage {
@@ -92,9 +94,10 @@ const TravelPackages = () => {
             >
               {/* Image Section */}
               <div className="relative h-64 overflow-hidden">
-                <img
-                  src={pkg.image}
+                <LazyLoadImage
                   alt={pkg.name}
+                  effect="blur"
+                  src={pkg.image}
                   className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />

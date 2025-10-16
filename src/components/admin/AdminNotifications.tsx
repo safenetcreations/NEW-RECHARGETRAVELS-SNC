@@ -1,32 +1,79 @@
-
-import { useState, useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
-import { dbService, authService, storageService } from '@/lib/firebase-services'
+import { dbService } from '@/lib/firebase-services'
 import { useWhatsAppIntegration } from '@/hooks/useWhatsAppIntegration'
 import { toast } from 'sonner'
-import { 
-  Bell, 
-  MessageSquare, 
-  Send,
-  Users,
-  Clock,
-  CheckCircle
-} from 'lucide-react'
+import { Bell, CheckCircle, Clock, MessageSquare, Send, Users } from 'lucide-react'
 
-interface Notification {
+type RecipientType = 'drivers' | 'customers' | 'all'
+
+type NotificationRecord = {
   id: string
   type: 'verification_update' | 'booking_confirmation' | 'system_announcement'
   title: string
   message: string
-  recipient_type: 'drivers' | 'customers' | 'all'
+  recipient_type: RecipientType
   status: 'pending' | 'sent' | 'failed'
+  created_at?: string
+  createdAt?: any
+  sent_count?: number
+  total_recipients?: number
+}
+
+type Notification = {
+  id: string
+  type: NotificationRecord['type']
+  title: string
+  message: string
+  recipient_type: RecipientType
+  status: NotificationRecord['status']
   created_at: string
   sent_count: number
   total_recipients: number
+}
+
+type Recipient = {
+  id?: string
+  whatsapp_number?: string
+  first_name?: string
+  last_name?: string
+  displayName?: string
+  phone?: string
+  recipient_type?: RecipientType
+}
+
+const DEFAULT_NOTIFICATION: Notification = {
+  id: '',
+  type: 'system_announcement',
+  title: '',
+  message: '',
+  recipient_type: 'all',
+  status: 'pending',
+  created_at: new Date().toISOString(),
+  sent_count: 0,
+  total_recipients: 0
+}
+
+const normalizeNotification = (record: NotificationRecord): Notification => {
+  const createdSource = record.created_at ?? record.createdAt
+  const createdAt =
+    typeof createdSource === 'string'
+      ? createdSource
+      : createdSource?.toDate
+        ? createdSource.toDate().toISOString()
+        : new Date().toISOString()
+
+  return {
+    ...DEFAULT_NOTIFICATION,
+    ...record,
+    created_at: createdAt,
+    sent_count: record.sent_count ?? 0,
+    total_recipients: record.total_recipients ?? 0
+  }
 }
 
 const AdminNotifications = () => {
@@ -34,27 +81,81 @@ const AdminNotifications = () => {
   const [newNotification, setNewNotification] = useState({
     title: '',
     message: '',
-    recipient_type: 'all' as 'drivers' | 'customers' | 'all'
+    recipient_type: 'all' as RecipientType
   })
   const [isSending, setIsSending] = useState(false)
   const { sendWhatsAppMessage } = useWhatsAppIntegration()
 
   useEffect(() => {
-    fetchNotifications()
+    void fetchNotifications()
   }, [])
 
   const fetchNotifications = async () => {
     try {
-      const { data, error } = await supabase
-        .from('admin_notifications')
-        .select('*')
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      setNotifications(data || [])
+      const records = await dbService.list('admin_notifications')
+      const normalized = (records as NotificationRecord[]).map(normalizeNotification)
+      normalized.sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      )
+      setNotifications(normalized)
     } catch (error) {
       console.error('Error fetching notifications:', error)
     }
+  }
+
+  const collectRecipients = async (recipientType: RecipientType): Promise<Recipient[]> => {
+    const recipients: Recipient[] = []
+
+    const safeList = async (
+      collection: string,
+      filters?: Array<{ field: string; operator: any; value: unknown }>
+    ) => {
+      try {
+        return await dbService.list(collection, filters)
+      } catch (error) {
+        console.warn(`Unable to fetch ${collection}:`, error)
+        return []
+      }
+    }
+
+    if (recipientType === 'drivers' || recipientType === 'all') {
+      const driverFilters =
+        recipientType === 'drivers'
+          ? [{ field: 'overall_verification_status', operator: '==', value: 'approved' }]
+          : undefined
+
+      const drivers = (await safeList('drivers', driverFilters)) as Recipient[]
+      recipients.push(
+        ...drivers.map((driver) => ({
+          ...driver,
+          recipient_type: 'drivers' as RecipientType
+        }))
+      )
+    }
+
+    if (recipientType === 'customers' || recipientType === 'all') {
+      const userProfiles = (await safeList('user_profiles')) as Recipient[]
+      const fallbackCustomers = (await safeList('customers')) as Recipient[]
+      const customerList = userProfiles.length > 0 ? userProfiles : fallbackCustomers
+
+      recipients.push(
+        ...customerList.map((customer) => ({
+          ...customer,
+          recipient_type: 'customers' as RecipientType
+        }))
+      )
+    }
+
+    const uniqueByNumber = new Map<string, Recipient>()
+    for (const recipient of recipients) {
+      const phone = recipient.whatsapp_number ?? recipient.phone
+      if (!phone) continue
+      if (!uniqueByNumber.has(phone)) {
+        uniqueByNumber.set(phone, recipient)
+      }
+    }
+
+    return Array.from(uniqueByNumber.values())
   }
 
   const sendNotification = async () => {
@@ -64,75 +165,53 @@ const AdminNotifications = () => {
     }
 
     setIsSending(true)
+
     try {
-      // Create notification record
-      const { data: notification, error: notificationError } = await supabase
-        .from('admin_notifications')
-        .insert({
-          type: 'system_announcement',
-          title: newNotification.title,
-          message: newNotification.message,
-          recipient_type: newNotification.recipient_type,
-          status: 'pending'
-        })
-        .select()
-        .single()
+      const notificationRecord = await dbService.create('admin_notifications', {
+        type: 'system_announcement',
+        title: newNotification.title,
+        message: newNotification.message,
+        recipient_type: newNotification.recipient_type,
+        status: 'pending',
+        sent_count: 0,
+        total_recipients: 0,
+        created_at: new Date().toISOString()
+      })
 
-      if (notificationError) throw notificationError
-
-      // Get recipient phone numbers
-      let recipientQuery = dbService.list('drivers'('whatsapp_number, first_name, last_name')
-      
-      if (newNotification.recipient_type === 'drivers') {
-        recipientQuery = recipientQuery.eq('overall_verification_status', 'approved')
-      }
-
-      const { data: recipients, error: recipientsError } = await recipientQuery
-
-      if (recipientsError) throw recipientsError
+      const recipients = await collectRecipients(newNotification.recipient_type)
 
       let sentCount = 0
-      const totalRecipients = recipients?.length || 0
+      for (const recipient of recipients) {
+        const phone = recipient.whatsapp_number ?? recipient.phone
+        if (!phone) continue
 
-      // Send WhatsApp messages
-      for (const recipient of recipients || []) {
         try {
-          const message = `*${newNotification.title}*
-
-${newNotification.message}
-
-*Recharge Travels Team*`
-
+          const message = `*${newNotification.title}*\n\n${newNotification.message}\n\n*Recharge Travels Team*`
           await sendWhatsAppMessage({
-            to: recipient.whatsapp_number,
+            to: phone,
             message
           })
           sentCount++
         } catch (error) {
-          console.error(`Failed to send to ${recipient.whatsapp_number}:`, error)
+          console.error(`Failed to send to ${phone}:`, error)
         }
       }
 
-      // Update notification status
-      await supabase
-        .from('admin_notifications')
-        .update({
-          status: sentCount === totalRecipients ? 'sent' : 'failed',
-          sent_count: sentCount,
-          total_recipients: totalRecipients
-        })
-        .eq('id', notification.id)
+      await dbService.update('admin_notifications', notificationRecord.id, {
+        status: sentCount === recipients.length ? 'sent' : 'failed',
+        sent_count: sentCount,
+        total_recipients: recipients.length
+      })
 
-      toast.success(`Notification sent to ${sentCount}/${totalRecipients} recipients`)
-      
-      // Reset form
+      toast.success(`Notification sent to ${sentCount}/${recipients.length} recipients`)
+
       setNewNotification({
         title: '',
         message: '',
         recipient_type: 'all'
       })
-      
-      fetchNotifications()
+
+      await fetchNotifications()
     } catch (error) {
       console.error('Error sending notification:', error)
       toast.error('Failed to send notification')
@@ -141,18 +220,16 @@ ${newNotification.message}
     }
   }
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'sent':
-        return 'bg-green-100 text-green-800'
-      case 'failed':
-        return 'bg-red-100 text-red-800'
-      default:
-        return 'bg-yellow-100 text-yellow-800'
-    }
-  }
+  const statusStyles = useMemo(
+    () => ({
+      sent: 'bg-green-100 text-green-800',
+      failed: 'bg-red-100 text-red-800',
+      pending: 'bg-yellow-100 text-yellow-800'
+    }),
+    []
+  )
 
-  const getStatusIcon = (status: string) => {
+  const statusIcon = (status: Notification['status']) => {
     switch (status) {
       case 'sent':
         return <CheckCircle className="h-4 w-4" />
@@ -165,43 +242,48 @@ ${newNotification.message}
 
   return (
     <div className="space-y-6">
-      {/* Send New Notification */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">
-            <MessageSquare className="h-5 w-5 mr-2" />
+            <MessageSquare className="mr-2 h-5 w-5" />
             Send New Notification
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <label className="text-sm font-medium block mb-2">Notification Title</label>
+            <label className="mb-2 block text-sm font-medium">Notification Title</label>
             <Input
               value={newNotification.title}
-              onChange={(e) => setNewNotification(prev => ({ ...prev, title: e.target.value }))}
+              onChange={(event) =>
+                setNewNotification((prev) => ({ ...prev, title: event.target.value }))
+              }
               placeholder="Enter notification title..."
             />
           </div>
 
           <div>
-            <label className="text-sm font-medium block mb-2">Message</label>
+            <label className="mb-2 block text-sm font-medium">Message</label>
             <Textarea
               value={newNotification.message}
-              onChange={(e) => setNewNotification(prev => ({ ...prev, message: e.target.value }))}
+              onChange={(event) =>
+                setNewNotification((prev) => ({ ...prev, message: event.target.value }))
+              }
               placeholder="Enter your message here..."
               rows={4}
             />
           </div>
 
           <div>
-            <label className="text-sm font-medium block mb-2">Recipients</label>
+            <label className="mb-2 block text-sm font-medium">Recipients</label>
             <select
               value={newNotification.recipient_type}
-              onChange={(e) => setNewNotification(prev => ({ 
-                ...prev, 
-                recipient_type: e.target.value as 'drivers' | 'customers' | 'all' 
-              }))}
-              className="w-full px-3 py-2 border rounded-md"
+              onChange={(event) =>
+                setNewNotification((prev) => ({
+                  ...prev,
+                  recipient_type: event.target.value as RecipientType
+                }))
+              }
+              className="w-full rounded-md border px-3 py-2"
             >
               <option value="all">All Users</option>
               <option value="drivers">Approved Drivers Only</option>
@@ -209,66 +291,62 @@ ${newNotification.message}
             </select>
           </div>
 
-          <Button 
-            onClick={sendNotification} 
-            disabled={isSending}
-            className="w-full"
-          >
-            <Send className="h-4 w-4 mr-2" />
-            {isSending ? 'Sending...' : 'Send Notification'}
+          <Button onClick={sendNotification} disabled={isSending} className="w-full">
+            <Send className="mr-2 h-4 w-4" />
+            {isSending ? 'Sending…' : 'Send Notification'}
           </Button>
         </CardContent>
       </Card>
 
-      {/* Notification History */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">
-            <Bell className="h-5 w-5 mr-2" />
+            <Users className="mr-2 h-5 w-5" />
             Notification History
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          {notifications.length === 0 ? (
-            <div className="text-center py-8 text-gray-600">
-              <Bell className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-              <p>No notifications sent yet</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {notifications.map((notification) => (
-                <div key={notification.id} className="border rounded-lg p-4">
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex-1">
-                      <h4 className="font-semibold">{notification.title}</h4>
-                      <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      {getStatusIcon(notification.status)}
-                      <Badge className={getStatusColor(notification.status)}>
-                        {notification.status}
-                      </Badge>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between text-sm text-gray-500">
-                    <div className="flex items-center space-x-4">
-                      <span className="flex items-center">
-                        <Users className="h-4 w-4 mr-1" />
-                        {notification.recipient_type}
-                      </span>
-                      <span>
-                        {notification.sent_count}/{notification.total_recipients} sent
-                      </span>
-                    </div>
-                    <span>
-                      {new Date(notification.created_at).toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
+        <CardContent className="space-y-4">
+          {notifications.length === 0 && (
+            <p className="text-sm text-muted-foreground">No notifications sent yet.</p>
           )}
+
+          {notifications.map((notification) => (
+            <div
+              key={notification.id}
+              className="rounded-xl border border-border bg-card/40 p-4 shadow-sm"
+            >
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h3 className="text-lg font-semibold">{notification.title}</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {notification.message}
+                  </p>
+                </div>
+                <Badge
+                  variant="secondary"
+                  className={statusStyles[notification.status] ?? statusStyles.pending}
+                >
+                  <span className="mr-1">{statusIcon(notification.status)}</span>
+                  {notification.status.toUpperCase()}
+                </Badge>
+              </div>
+
+              <div className="mt-4 grid gap-2 text-xs text-muted-foreground md:grid-cols-3">
+                <div>
+                  <span className="font-medium">Recipients:</span>{' '}
+                  {notification.recipient_type.toUpperCase()}
+                </div>
+                <div>
+                  <span className="font-medium">Sent:</span>{' '}
+                  {notification.sent_count}/{notification.total_recipients}
+                </div>
+                <div>
+                  <span className="font-medium">Created:</span>{' '}
+                  {new Date(notification.created_at).toLocaleString()}
+                </div>
+              </div>
+            </div>
+          ))}
         </CardContent>
       </Card>
     </div>

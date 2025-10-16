@@ -488,12 +488,15 @@ const LuxuryExperienceDetail = () => {
       <EnhancedBookingModal
         isOpen={showBookingModal}
         onClose={() => setShowBookingModal(false)}
-        type="experience"
+        type="tour"
         itemTitle={experience.title}
         tourData={{
+          id: experience.id ?? experience.slug ?? 'experience',
+          name: experience.title,
           price: experience.price.amount,
           duration: experience.duration,
-          groupSize: experience.groupSize
+          description: experience.shortDescription ?? '',
+          features: experience.highlights ?? []
         }}
       />
     </div>

@@ -84,10 +84,10 @@ export default function Blog() {
                     </Button>
                     {categories?.map((category) => (
                       <Button
-                        key={category.category_id}
-                        variant={selectedCategory === category.category_id ? 'default' : 'ghost'}
+                        key={category.id}
+                        variant={selectedCategory === category.id ? 'default' : 'ghost'}
                         className="w-full justify-start"
-                        onClick={() => setSelectedCategory(category.category_id)}
+                        onClick={() => setSelectedCategory(category.id)}
                       >
                         {category.name}
                       </Button>
@@ -128,7 +128,7 @@ export default function Blog() {
               ) : filteredPosts && filteredPosts.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {filteredPosts.map((post) => (
-                    <Card key={post.article_id} className="group hover:shadow-lg transition-shadow">
+                    <Card key={post.id} className="group hover:shadow-lg transition-shadow">
                       <Link to={`/blog/${post.slug}`}>
                         {post.featured_image && (
                           <div className="aspect-video overflow-hidden rounded-t-lg">

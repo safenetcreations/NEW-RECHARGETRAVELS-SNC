@@ -1,357 +1,306 @@
 import React from 'react'
-import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import {
-  ArrowUp,
-  Binoculars,
-  Compass,
-  Facebook,
-  Instagram,
-  Leaf,
-  Mail,
-  MapPin,
-  MoonStar,
-  Mountain,
-  PawPrint,
-  Phone,
-  Send,
-  Sparkles,
-  Sun,
-  TreePalm,
-  Twitter,
-  Waves,
-  Youtube
-} from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { TreePine, Phone, Mail, MapPin, Leaf, Bird, Palmtree, Mountain, Waves, Sun } from 'lucide-react'
+import FooterSocial from '../footer/FooterSocial'
+import FooterBottom from '../footer/FooterBottom'
 import AIFAQChatbot from '@/components/chat/AIFAQChatbot'
 
-const safariHighlights = [
-  {
-    icon: PawPrint,
-    title: 'Yala Dusk Patrol',
-    description: 'Guide-led leopard tracking with thermal scopes and field tea service under the jungle canopy.'
-  },
-  {
-    icon: Waves,
-    title: 'Weligama Moon Tides',
-    description: 'Starlit catamaran voyages with marine biologists and acoustic hydrophones for whale song.'
-  },
-  {
-    icon: Mountain,
-    title: 'Ella Ridge Awakening',
-    description: 'Sunrise hikes, kettledrum breakfast rituals, and slow-brew Ceylon tea above the clouds.'
-  }
-]
-
-const navigationColumns = [
-  {
-    title: 'Signature Safaris',
-    links: [
-      { label: 'Leopard Dawn Patrol', href: '/tours/luxury-safari' },
-      { label: 'Wilpattu Waterhole Watch', href: '/tours/wildtours' },
-      { label: 'Nocturnal Jungle Listening', href: '/experiences/jungle-camping' },
-      { label: 'Cinnamon Trail Hideouts', href: '/hotels' }
-    ]
-  },
-  {
-    title: 'Island Realms',
-    links: [
-      { label: 'Knuckles Cloud Forest', href: '/tours/ecotourism' },
-      { label: 'Sacred Cultural Triangle', href: '/tours/cultural-heritage' },
-      { label: 'Mirissa Blue Ocean Route', href: '/experiences/whale-watching' },
-      { label: 'Tea Country Panoramas', href: '/tours/hill-country' }
-    ]
-  },
-  {
-    title: 'Concierge Rituals',
-    links: [
-      { label: 'AI Journey Studio', href: '/book-now' },
-      { label: 'Heli & Seaplane Pairings', href: '/transport/airport-transfers' },
-      { label: 'Heritage Host Pair Program', href: '/about/social' },
-      { label: 'Sustainability Ledger', href: '/about/sustainability' }
-    ]
-  }
-]
-
-const conservationStats = [
-  {
-    icon: Binoculars,
-    value: '92',
-    label: 'protected observation hides stewarded with park rangers.'
-  },
-  {
-    icon: Leaf,
-    value: '87%',
-    label: 'renewable-powered lodges across Recharge signature stays.'
-  },
-  {
-    icon: Compass,
-    value: '24/7',
-    label: 'concierge guidance via MCP co-planning desk and voice link.'
-  }
-]
-
-const socialLinks = [
-  { icon: Facebook, href: 'https://facebook.com/rechargetravels', hover: 'hover:text-blue-400' },
-  { icon: Instagram, href: 'https://instagram.com/rechargetravels', hover: 'hover:text-pink-400' },
-  { icon: Twitter, href: 'https://twitter.com/rechargetravels', hover: 'hover:text-blue-300' },
-  { icon: Youtube, href: 'https://youtube.com/rechargetravels', hover: 'hover:text-red-400' }
-]
-
 const RechargeFooter: React.FC = () => {
-  const currentYear = new Date().getFullYear()
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
   return (
     <>
-      <footer className="relative overflow-hidden bg-[#05121b] text-slate-100">
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute inset-0 opacity-80" style={{ background: 'radial-gradient(circle at 15% 20%, rgba(255, 173, 78, 0.18), transparent 55%)' }} />
-          <div className="absolute inset-0 opacity-60" style={{ background: 'radial-gradient(circle at 80% 10%, rgba(34, 197, 246, 0.16), transparent 50%)' }} />
-          <div className="absolute inset-0 bg-gradient-to-br from-[#03121a] via-[#051c29] to-[#041420]" />
+      <footer className="relative overflow-hidden bg-gradient-to-br from-emerald-950 via-green-900 to-teal-950 text-white">
+        {/* Jungle Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 left-0 w-full h-full" 
+               style={{
+                 backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2334d399' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+               }}
+          />
         </div>
 
-        <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
-          <motion.div
-            className="grid gap-10 lg:grid-cols-[1.35fr_1fr]"
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
-          >
-            <div className="space-y-8 rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur">
-              <div className="inline-flex items-center gap-3 rounded-full border border-white/15 bg-black/30 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-amber-100">
-                <PawPrint className="h-4 w-4 text-amber-300" />
-                Leopard Conservancy Circle
-              </div>
+        {/* Animated Floating Leaves */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <Leaf className="absolute top-10 left-[10%] w-8 h-8 text-emerald-400/20 animate-float" style={{ animationDelay: '0s', animationDuration: '6s' }} />
+          <Leaf className="absolute top-20 right-[15%] w-6 h-6 text-green-400/20 animate-float" style={{ animationDelay: '2s', animationDuration: '8s' }} />
+          <Leaf className="absolute bottom-32 left-[20%] w-7 h-7 text-teal-400/20 animate-float" style={{ animationDelay: '4s', animationDuration: '7s' }} />
+          <Leaf className="absolute top-40 right-[30%] w-5 h-5 text-emerald-400/20 animate-float" style={{ animationDelay: '1s', animationDuration: '9s' }} />
+          <Bird className="absolute top-16 right-[5%] w-8 h-8 text-yellow-400/20 animate-fly" />
+          <Bird className="absolute bottom-40 left-[8%] w-6 h-6 text-amber-400/20 animate-fly" style={{ animationDelay: '3s' }} />
+        </div>
 
-              <div className="space-y-4">
-                <h2 className="text-3xl font-bold leading-tight text-white md:text-4xl">
-                  Journey through Sri Lankan wilderness where leopard trails, emerald tea peaks, and moonlit bays interlace.
-                </h2>
-                <p className="text-base text-slate-300 md:text-lg">
-                  The 21sr dev MCP concierge fuses ranger telemetry, figma-perfect itineraries, and storyteller hosts to choreograph every ritual — from dawn safaris to coastal banquets.
-                </p>
-              </div>
+        {/* Jungle Canopy Top Border */}
+        <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-green-950/50 to-transparent">
+          <div className="absolute -top-8 left-0 right-0 flex justify-around">
+            <Palmtree className="w-16 h-16 text-emerald-600/40 transform rotate-12" />
+            <TreePine className="w-20 h-20 text-green-700/40 transform -rotate-6" />
+            <Palmtree className="w-14 h-14 text-teal-600/40 transform rotate-6" />
+            <TreePine className="w-18 h-18 text-emerald-700/40" />
+            <Palmtree className="w-16 h-16 text-green-600/40 transform -rotate-12" />
+          </div>
+        </div>
 
-              <div className="flex flex-wrap gap-4">
-                <Button
-                  asChild
-                  size="lg"
-                  className="group bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500 text-slate-900 hover:shadow-[0_18px_42px_rgba(251,191,36,0.35)]"
-                >
-                  <Link to="/book-now">
-                    <Sparkles className="mr-2 h-5 w-5 transition-transform group-hover:rotate-12" />
-                    Design My Jungle Escape
+        <div className="container mx-auto px-4 py-12 relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+            {/* Brand Section - Enhanced Jungle Theme */}
+            <div className="space-y-6">
+              <div className="relative">
+                <div className="absolute -inset-2 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-lg blur-xl"></div>
+                <div className="relative flex items-center space-x-3 mb-6 bg-gradient-to-r from-emerald-900/50 to-teal-900/50 p-4 rounded-xl border border-emerald-500/30">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-emerald-400 blur-md rounded-full opacity-50"></div>
+                    <TreePine className="h-10 w-10 text-emerald-400 relative z-10 drop-shadow-[0_0_10px_rgba(52,211,153,0.5)]" />
+                  </div>
+                  <Link to="/" className="text-2xl font-bold bg-gradient-to-r from-emerald-200 to-teal-200 bg-clip-text text-transparent">
+                    Recharge Travels
                   </Link>
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-amber-200/50 bg-amber-50/10 text-amber-100 hover:bg-amber-50/20"
-                  onClick={scrollToTop}
-                >
-                  <Binoculars className="mr-2 h-5 w-5 text-amber-200" />
-                  Preview Experience Deck
-                </Button>
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-3">
-                {safariHighlights.map(({ icon: Icon, title, description }) => (
-                  <div key={title} className="rounded-2xl border border-white/10 bg-black/25 p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-200/10">
-                        <Icon className="h-5 w-5 text-amber-200" />
-                      </div>
-                      <p className="text-sm font-semibold text-white">{title}</p>
-                    </div>
-                    <p className="mt-3 text-sm text-slate-300">{description}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <motion.div
-              className="space-y-6 rounded-3xl border border-white/10 bg-[#071c29]/80 p-8 backdrop-blur"
-              initial={{ opacity: 0, x: 40 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.7, delay: 0.1 }}
-            >
-              <div>
-                <h3 className="text-xl font-semibold text-white">Moonlit Dispatch</h3>
-                <p className="mt-2 text-sm text-slate-300">
-                  Tracker-lens stories, turtle hatchery alerts, and tea master rituals, twice a month.
-                </p>
-                <form className="mt-6 flex flex-col gap-3" onSubmit={(event) => event.preventDefault()}>
-                  <Input
-                    required
-                    type="email"
-                    placeholder="you@sunrisetrails.com"
-                    className="border-white/20 bg-white/10 text-slate-100 placeholder:text-slate-400 focus:border-amber-300 focus:ring-amber-300"
-                  />
-                  <Button
-                    type="submit"
-                    className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-teal-400 via-emerald-400 to-lime-400 text-slate-900 hover:shadow-[0_16px_32px_rgba(34,197,94,0.28)]"
-                  >
-                    <Send className="h-4 w-4" />
-                    Join the Dispatch
-                  </Button>
-                </form>
-              </div>
-
-              <div className="space-y-4 rounded-2xl border border-white/10 bg-white/5 p-5">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-300/20">
-                    <Sun className="h-5 w-5 text-amber-200" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-amber-100">Twilight Concierge</p>
-                    <p className="text-xs text-slate-300">Voice & MCP live co-planning</p>
-                  </div>
-                </div>
-                <div className="space-y-3 text-sm text-slate-200">
-                  <div className="flex items-center gap-3">
-                    <Phone className="h-4 w-4 text-amber-200" />
-                    <a href="tel:+94777721999" className="hover:text-amber-200">
-                      +94 7777 21 999
-                    </a>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Mail className="h-4 w-4 text-amber-200" />
-                    <a href="mailto:concierge@rechargetravels.com" className="hover:text-amber-200">
-                      concierge@rechargetravels.com
-                    </a>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <MapPin className="h-4 w-4 text-amber-200" />
-                    <span>Colombo • Yala • Sigiriya field ateliers</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-400/15">
-                    <MoonStar className="h-5 w-5 text-indigo-200" />
-                  </div>
-                  <p className="text-sm text-slate-200">
-                    After-dark leopard listening with sound bathing & MCP journey updates.
-                  </p>
                 </div>
               </div>
-            </motion.div>
-          </motion.div>
-
-          <motion.div
-            className="mt-16 grid gap-8 lg:grid-cols-[1.1fr_3fr]"
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7, delay: 0.1 }}
-          >
-            <div className="space-y-6 rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-              <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-rose-500">
-                  <TreePalm className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <p className="text-lg font-semibold text-white">Recharge Travels</p>
-                  <p className="text-xs uppercase tracking-[0.28em] text-amber-100">
-                    Sri Lankan Jungle Atelier
-                  </p>
-                </div>
-              </div>
-              <p className="text-sm text-slate-300">
-                Tailored wildlife, wellness, and cultural odysseys anchored in conservation pillars, community partnerships, and figma-led journey visualisations crafted by the 21sr dev concierge pod.
+              
+              <p className="text-emerald-100/90 leading-relaxed text-sm backdrop-blur-sm">
+                🌿 Your gateway to Sri Lanka's wild heart. Experience the untamed beauty of tropical rainforests, 
+                majestic elephants, elusive leopards, and pristine beaches. Let nature recharge your soul.
               </p>
-              <div className="flex flex-wrap gap-3">
-                {socialLinks.map(({ icon: Icon, href, hover }) => (
-                  <a
-                    key={href}
-                    href={href}
-                    target="_blank"
-                    rel="noreferrer"
-                    className={`flex h-9 w-9 items-center justify-center rounded-full bg-black/35 text-slate-300 transition-transform duration-200 hover:-translate-y-0.5 ${hover}`}
-                  >
-                    <Icon size={16} />
-                  </a>
+              
+              {/* Social Media + Certifications in One Line */}
+              <div className="flex items-center gap-4 flex-wrap">
+                <FooterSocial />
+                
+                {/* Certifications */}
+                <div className="flex gap-2 items-center">
+                  <div className="flex items-center gap-1.5 text-xs bg-emerald-900/50 text-emerald-200 px-3 py-2 rounded-lg border border-emerald-600/50 backdrop-blur-sm hover:bg-emerald-800/50 transition-all duration-300">
+                    <span className="text-base">🏛️</span>
+                    <span className="font-semibold">Licensed</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs bg-teal-900/50 text-teal-200 px-3 py-2 rounded-lg border border-teal-600/50 backdrop-blur-sm hover:bg-teal-800/50 transition-all duration-300">
+                    <span className="text-base">🌿</span>
+                    <span className="font-semibold">Eco-Certified</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs bg-green-900/50 text-green-200 px-3 py-2 rounded-lg border border-green-600/50 backdrop-blur-sm hover:bg-green-800/50 transition-all duration-300">
+                    <span className="text-base">🦋</span>
+                    <span className="font-semibold">Conservation</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Links - Jungle Style */}
+            <div>
+              <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
+                <Mountain className="w-5 h-5 text-emerald-400" />
+                <span className="bg-gradient-to-r from-emerald-300 to-teal-300 bg-clip-text text-transparent">
+                  Adventures
+                </span>
+              </h3>
+              <ul className="space-y-3">
+                {[
+                  { to: '/tours', label: '🗺️ Safari Tours', icon: '🦁' },
+                  { to: '/destinations', label: '🏝️ Destinations', icon: '🌊' },
+                  { to: '/experiences', label: '✨ Experiences', icon: '🎯' },
+                  { to: '/transport/airport-transfers', label: '🚗 Transport', icon: '🚙' },
+                  { to: '/about', label: '🌿 About Us', icon: '🌱' },
+                  { to: '/blog', label: '📖 Travel Blog', icon: '✍️' }
+                ].map((link) => (
+                  <li key={link.to}>
+                    <Link 
+                      to={link.to} 
+                      className="group flex items-center text-emerald-100/80 hover:text-emerald-300 transition-all duration-300"
+                    >
+                      <span className="mr-2 group-hover:scale-110 transition-transform">{link.icon}</span>
+                      <span className="group-hover:translate-x-1 transition-transform">{link.label}</span>
+                    </Link>
+                  </li>
                 ))}
+              </ul>
+            </div>
+
+            {/* Top Destinations - Wildlife Focus */}
+            <div>
+              <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
+                <Palmtree className="w-5 h-5 text-teal-400" />
+                <span className="bg-gradient-to-r from-teal-300 to-emerald-300 bg-clip-text text-transparent">
+                  Wild Spots
+                </span>
+              </h3>
+              <ul className="space-y-3">
+                {[
+                  { to: '/tours/wildtours/parks/yala', label: 'Yala National Park', icon: '🐆' },
+                  { to: '/tours/wildtours/parks/wilpattu', label: 'Wilpattu Forest', icon: '🦌' },
+                  { to: '/tours/wildtours/parks/sinharaja', label: 'Sinharaja Rainforest', icon: '🌳' },
+                  { to: '/tours/wildtours/parks/udawalawe', label: 'Udawalawe Safari', icon: '🐘' },
+                  { to: '/tours/wildtours/parks/horton-plains', label: 'Horton Plains', icon: '🏔️' }
+                ].map((dest) => (
+                  <li key={dest.to}>
+                    <Link 
+                      to={dest.to} 
+                      className="group flex items-center text-emerald-100/80 hover:text-teal-300 transition-all duration-300"
+                    >
+                      <span className="mr-2 group-hover:scale-110 transition-transform">{dest.icon}</span>
+                      <span className="group-hover:translate-x-1 transition-transform">{dest.label}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Contact Info - Jungle Style */}
+            <div>
+              <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
+                <Waves className="w-5 h-5 text-cyan-400" />
+                <span className="bg-gradient-to-r from-cyan-300 to-emerald-300 bg-clip-text text-transparent">
+                  Get in Touch
+                </span>
+              </h3>
+              
+              <div className="space-y-4">
+                <a href="tel:+94777721999" 
+                   className="group flex items-center space-x-3 p-3 rounded-lg bg-emerald-900/30 hover:bg-emerald-800/40 border border-emerald-700/30 hover:border-emerald-600/50 transition-all duration-300 backdrop-blur-sm">
+                  <Phone className="h-5 w-5 text-emerald-400 group-hover:scale-110 transition-transform" />
+                  <span className="text-emerald-100/90 group-hover:text-emerald-200">+94 7777 21 999</span>
+                </a>
+                
+                <a href="mailto:info@rechargetravels.com" 
+                   className="group flex items-center space-x-3 p-3 rounded-lg bg-teal-900/30 hover:bg-teal-800/40 border border-teal-700/30 hover:border-teal-600/50 transition-all duration-300 backdrop-blur-sm">
+                  <Mail className="h-5 w-5 text-teal-400 group-hover:scale-110 transition-transform" />
+                  <span className="text-teal-100/90 group-hover:text-teal-200 text-sm">info@rechargetravels.com</span>
+                </a>
+                
+                <div className="flex items-start space-x-3 p-3 rounded-lg bg-cyan-900/30 border border-cyan-700/30 backdrop-blur-sm">
+                  <MapPin className="h-5 w-5 text-cyan-400 mt-1 flex-shrink-0" />
+                  <span className="text-cyan-100/90 text-sm">Colombo + Jaffna, Sri Lanka</span>
+                </div>
               </div>
             </div>
+          </div>
 
-            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-              {navigationColumns.map((column) => (
-                <div key={column.title} className="space-y-4 rounded-3xl border border-white/5 bg-black/20 p-6">
-                  <h4 className="text-lg font-semibold text-white">{column.title}</h4>
-                  <ul className="space-y-3 text-sm text-slate-300">
-                    {column.links.map((link) => (
-                      <li key={link.label}>
-                        <Link
-                          to={link.href}
-                          className="group inline-flex items-center gap-2 transition-colors duration-200 hover:text-amber-200"
-                        >
-                          <span className="h-1.5 w-1.5 rounded-full bg-amber-400/60 transition-all duration-200 group-hover:bg-amber-200" />
-                          <span className="underline-offset-4 group-hover:underline">{link.label}</span>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-
-          <motion.div
-            className="mt-16 grid gap-6 rounded-3xl border border-white/10 bg-white/5 p-6 sm:grid-cols-2 lg:grid-cols-3"
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7, delay: 0.15 }}
-          >
-            {conservationStats.map(({ icon: Icon, value, label }) => (
-              <div key={value} className="flex items-start gap-4 rounded-2xl bg-black/25 p-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-400/20">
-                  <Icon className="h-6 w-6 text-emerald-200" />
-                </div>
+          {/* Newsletter Section */}
+          <div className="mt-8 p-6 rounded-2xl bg-gradient-to-r from-emerald-900/50 via-teal-900/50 to-green-900/50 border border-emerald-600/30 backdrop-blur-sm">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <Sun className="w-10 h-10 text-amber-400 animate-pulse" />
                 <div>
-                  <p className="text-3xl font-semibold text-white">{value}</p>
-                  <p className="mt-2 text-sm text-slate-300">{label}</p>
+                  <h4 className="text-xl font-bold text-emerald-100 mb-0.5">Join Our Jungle Newsletter 🌴</h4>
+                  <p className="text-emerald-200/80 text-xs">Get exclusive safari deals, wildlife tips & adventure stories!</p>
                 </div>
               </div>
-            ))}
-          </motion.div>
-        </div>
-
-        <div className="border-t border-white/10 bg-black/20">
-          <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-4 py-6 text-sm text-slate-300 sm:px-6 md:flex-row md:justify-between">
-            <div className="flex flex-col items-center gap-2 text-center md:flex-row md:gap-4 md:text-left">
-              <span>© {currentYear} Recharge Travels & Tours (Pvt) Ltd. All rites reserved.</span>
-              <span className="hidden h-4 w-px bg-white/20 md:block" />
-              <span>Licensed Sri Lanka Tourism • Leopard & Marine Stewardship Charter</span>
+              <div className="flex gap-2 w-full md:w-auto">
+                <input 
+                  type="email" 
+                  placeholder="your@email.com" 
+                  className="px-3 py-2 text-sm rounded-lg bg-white/10 border border-emerald-500/30 text-white placeholder-emerald-300/50 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 backdrop-blur-sm flex-1 md:w-56"
+                />
+                <button className="px-4 py-2 text-sm bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/50 whitespace-nowrap">
+                  Subscribe 🦜
+                </button>
+              </div>
             </div>
-            <div className="flex items-center gap-4">
-              <Link to="/legal/privacy" className="transition-colors hover:text-amber-200">
-                Privacy
-              </Link>
-              <Link to="/legal/terms" className="transition-colors hover:text-amber-200">
-                Terms
-              </Link>
-              <motion.button
-                onClick={scrollToTop}
-                className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/15 bg-white/10 text-white transition hover:border-amber-200/60 hover:text-amber-100"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.92 }}
+          </div>
+
+          {/* Bottom Section with Jungle Floor Effect */}
+          <div className="relative mt-8 pt-6 border-t border-emerald-700/30">
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent"></div>
+            <FooterBottom isDarkMode={true} />
+          </div>
+
+          {/* Crafted By Section - Leopard Skin Theme with Light Animation */}
+          <div className="relative mt-6 pt-4 border-t border-amber-700/20">
+            <div className="text-center">
+              <a 
+                href="https://www.safenetcreations.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-block group"
               >
-                <ArrowUp className="h-5 w-5" />
-              </motion.button>
+                <p className="leopard-animated-text text-5xl font-black tracking-wider hover:scale-105 transition-transform duration-300 cursor-pointer">
+                  Crafted by <span className="highlight-text">www.safenetcreations.com</span>
+                </p>
+              </a>
             </div>
           </div>
         </div>
+
+        {/* Jungle Floor Bottom */}
+        <div className="h-4 bg-gradient-to-r from-emerald-950 via-green-950 to-teal-950"></div>
       </footer>
 
       <AIFAQChatbot />
+
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap');
+        
+        .leopard-animated-text {
+          font-family: 'Righteous', cursive;
+          background: linear-gradient(135deg, 
+            #D2691E 0%, 
+            #000000 8%, 
+            #CD853F 15%, 
+            #000000 20%, 
+            #D2691E 28%, 
+            #1a1a1a 32%,
+            #CD853F 40%, 
+            #000000 45%,
+            #D2691E 52%, 
+            #1a1a1a 58%,
+            #CD853F 65%, 
+            #000000 70%,
+            #D2691E 78%, 
+            #1a1a1a 83%,
+            #CD853F 90%, 
+            #000000 95%,
+            #D2691E 100%
+          );
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          text-shadow: 
+            2px 2px 6px rgba(0, 0, 0, 0.6),
+            0 0 15px rgba(210, 105, 30, 0.4);
+          filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.8));
+          position: relative;
+        }
+
+        .highlight-text {
+          position: relative;
+          display: inline-block;
+          background: linear-gradient(
+            90deg,
+            #D2691E 0%,
+            #FFD700 20%,
+            #FFF8DC 40%,
+            #FFD700 60%,
+            #D2691E 80%,
+            #D2691E 100%
+          );
+          background-size: 200% auto;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          animation: lightSweep 3s linear infinite;
+        }
+
+        @keyframes lightSweep {
+          0% {
+            background-position: 200% center;
+          }
+          100% {
+            background-position: -200% center;
+          }
+        }
+        
+        @keyframes float {
+          0%, 100% { transform: translateY(0) rotate(0deg); }
+          50% { transform: translateY(-20px) rotate(10deg); }
+        }
+        @keyframes fly {
+          0%, 100% { transform: translateX(0) translateY(0); }
+          50% { transform: translateX(30px) translateY(-15px); }
+        }
+        .animate-float {
+          animation: float 6s ease-in-out infinite;
+        }
+        .animate-fly {
+          animation: fly 10s ease-in-out infinite;
+        }
+      `}</style>
     </>
   )
 }

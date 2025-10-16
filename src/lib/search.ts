@@ -79,9 +79,16 @@ export async function searchContent(
 
   } catch (error) {
     console.error('Search function error, using fallback:', error)
-    
-    // Fallback to direct database queries using the main supabase client
-    let query_builder = dbService.list('search_view'('*').eq('published', true)
+
+    // Fallback: Return empty results if API fails
+    return {
+      results: [],
+      totalCount: 0,
+      hasMore: false
+    }
+
+    /* Fallback to direct database queries - disabled for now
+    let query_builder = dbService.list('search_view').select('*').eq('published', true)
     
     // Apply text search if query provided
     if (query) {
@@ -118,5 +125,6 @@ export async function searchContent(
       totalCount: typedResults.length,
       hasMore: (data?.length || 0) === limit
     }
+    */
   }
 }

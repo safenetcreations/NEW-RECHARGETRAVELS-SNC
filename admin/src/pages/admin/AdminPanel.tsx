@@ -11,6 +11,7 @@ import SettingsSection from '@/components/admin/panel/SettingsSection';
 import HotelsSection from '@/components/admin/panel/HotelsSection';
 import BookingsSection from '@/components/admin/panel/BookingsSection';
 import ToursSection from '@/components/admin/panel/ToursSection';
+import ToursManagement from '@/components/admin/panel/ToursManagement';
 import ActivitiesSection from '@/components/admin/panel/ActivitiesSection';
 import DriversSection from '@/components/admin/panel/DriversSection';
 import ReviewsSection from '@/components/admin/panel/ReviewsSection';
@@ -27,9 +28,11 @@ import HeroSectionManager from '@/components/admin/panel/HeroSectionManager';
 import TestimonialsManager from '@/components/admin/panel/TestimonialsManager';
 import WhyChooseUsManager from '@/components/admin/panel/WhyChooseUsManager';
 import HomepageStatsManager from '@/components/admin/panel/HomepageStatsManager';
+import AboutSriLankaManagement from '@/components/admin/panel/AboutSriLankaManagement';
 
 const AdminPanel: React.FC = () => {
-  const [activeSection, setActiveSection] = useState('ai-test');
+  const [activeSection, setActiveSection] = useState('dashboard');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   console.log('🎯 AdminPanel component rendering, activeSection:', activeSection);
 
@@ -47,6 +50,8 @@ const AdminPanel: React.FC = () => {
           return <TestimonialsManager />;
         case 'about-section':
           return <div className="p-6"><h2 className="text-2xl font-bold">About Section Manager - Coming Soon</h2></div>;
+        case 'about-sri-lanka':
+          return <AboutSriLankaManagement />;
         case 'why-choose-us':
           return <WhyChooseUsManager />;
         case 'homepage-stats':
@@ -55,6 +60,8 @@ const AdminPanel: React.FC = () => {
         case 'hotels':
           return <HotelsSection />;
         case 'tours':
+          return <ToursManagement />;
+        case 'tours-old':
           return <ToursSection />;
         case 'activities':
           return <ActivitiesSection />;
@@ -116,16 +123,23 @@ const AdminPanel: React.FC = () => {
           <meta name="description" content="Complete admin panel for managing website content" />
         </Helmet>
 
-        <div className="flex min-h-screen bg-gray-50">
-          <AdminSidebar 
-            activeSection={activeSection} 
-            onSectionChange={setActiveSection} 
+        <div className="flex min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-blue-50">
+          <AdminSidebar
+            activeSection={activeSection}
+            onSectionChange={setActiveSection}
+            isMobileMenuOpen={isMobileMenuOpen}
+            onMobileMenuClose={() => setIsMobileMenuOpen(false)}
           />
-          
-          <main className="flex-1 overflow-y-auto">
-            <AdminHeader activeSection={activeSection} />
-            <div className="p-6">
-              {renderActiveSection()}
+
+          <main className="flex-1 overflow-y-auto bg-gradient-to-br from-slate-50/50 via-purple-50/30 to-blue-50/50 lg:ml-0">
+            <AdminHeader
+              activeSection={activeSection}
+              onMobileMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            />
+            <div className="p-4 sm:p-6 lg:p-8">
+              <div className="max-w-7xl mx-auto">
+                {renderActiveSection()}
+              </div>
             </div>
           </main>
         </div>

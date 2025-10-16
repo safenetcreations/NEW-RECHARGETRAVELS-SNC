@@ -1,6 +1,14 @@
 
 import React, { useEffect } from 'react'
 import { Helmet } from 'react-helmet-async'
+import {
+  heroStats,
+  timelineEvents,
+  achievementHighlights,
+  fleetVehicles,
+  reviewPlatforms,
+  customerReviews,
+} from '@/data/about/rechargeHistory'
 
 const AboutRechargeTravel = () => {
   useEffect(() => {
@@ -62,6 +70,13 @@ const AboutRechargeTravel = () => {
     alert('Content saved successfully! In a production environment, this would update your database.')
     closeAdmin()
   }
+
+  const stats = heroStats
+  const timelineData = timelineEvents
+  const achievements = achievementHighlights
+  const fleetData = fleetVehicles
+  const reviewPlatformData = reviewPlatforms
+  const reviews = customerReviews
 
   return (
     <>
@@ -221,6 +236,10 @@ const AboutRechargeTravel = () => {
 
         .timeline-content.success {
           border-left: 5px solid var(--success-green);
+        }
+
+        .timeline-content.milestone {
+          border-left: 5px solid var(--accent-gold);
         }
 
         .timeline-images-recharge {
@@ -401,22 +420,15 @@ const AboutRechargeTravel = () => {
             <h1 className="text-6xl mb-4 font-bold">Recharge Travels</h1>
             <p className="text-2xl mb-8 opacity-90">A Journey of Resilience Since 2014</p>
             <div className="stats-recharge">
-              <div className="stat-item-recharge">
-                <span className="stat-number-recharge">11+</span>
-                <span className="text-lg opacity-80">Years of Service</span>
-              </div>
-              <div className="stat-item-recharge">
-                <span className="stat-number-recharge">50+</span>
-                <span className="text-lg opacity-80">Vehicles</span>
-              </div>
-              <div className="stat-item-recharge">
-                <span className="stat-number-recharge">60+</span>
-                <span className="text-lg opacity-80">Professional Drivers</span>
-              </div>
-              <div className="stat-item-recharge">
-                <span className="stat-number-recharge">15,000+</span>
-                <span className="text-lg opacity-80">Happy Travelers</span>
-              </div>
+              {stats.map((stat) => (
+                <div key={stat.id} className="stat-item-recharge">
+                  <span className="stat-number-recharge">{stat.value}</span>
+                  <span className="text-lg opacity-80">{stat.label}</span>
+                  {stat.supportingText ? (
+                    <span className="block text-sm opacity-70 mt-1">{stat.supportingText}</span>
+                  ) : null}
+                </div>
+              ))}
             </div>
           </div>
         </section>
@@ -440,111 +452,39 @@ const AboutRechargeTravel = () => {
         <section className="timeline-section-recharge" id="timeline">
           <h2 className="text-5xl font-bold text-center mb-12 text-blue-600">Our Journey Through Time</h2>
           <div className="timeline-recharge">
-            {/* 2014 */}
-            <div className="timeline-item-recharge">
-              <div className="timeline-year-recharge">2014</div>
-              <div className="timeline-content success fade-in-element">
-                <h3 className="text-2xl font-semibold text-blue-600 mb-4">The Beginning</h3>
-                <p className="mb-4">Recharge Travels was founded in Colombo with a vision to provide exceptional travel services. Starting with humble beginnings, we set out to redefine tourism in Sri Lanka.</p>
-                <div className="timeline-images-recharge">
-                  <div className="timeline-image-recharge">First Office Photo</div>
-                  <div className="timeline-image-recharge">Founding Team</div>
+            {timelineData.map((event) => {
+              const contentClass = `timeline-content fade-in-element ${event.type}`
+              return (
+                <div key={event.id} className="timeline-item-recharge">
+                  <div className="timeline-year-recharge">{event.yearRange}</div>
+                  <div className={contentClass}>
+                    <h3 className="text-2xl font-semibold text-blue-600 mb-4">{event.title}</h3>
+                    {event.location ? (
+                      <p className="text-sm font-semibold uppercase tracking-wide text-blue-500 mb-2">
+                        {event.location}
+                      </p>
+                    ) : null}
+                    <p className="mb-4">{event.description}</p>
+                    {event.highlights.length ? (
+                      <ul className="mb-4 list-disc list-inside text-gray-700 space-y-1">
+                        {event.highlights.map((highlight) => (
+                          <li key={highlight}>{highlight}</li>
+                        ))}
+                      </ul>
+                    ) : null}
+                    {event.galleryPlaceholders.length ? (
+                      <div className="timeline-images-recharge">
+                        {event.galleryPlaceholders.map((label) => (
+                          <div key={label} className="timeline-image-recharge">
+                            {label}
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
                 </div>
-              </div>
-            </div>
-
-            {/* 2015 */}
-            <div className="timeline-item-recharge">
-              <div className="timeline-year-recharge">2015</div>
-              <div className="timeline-content success fade-in-element">
-                <h3 className="text-2xl font-semibold text-blue-600 mb-4">Expansion & Recognition</h3>
-                <p className="mb-4">Opened our second office in Colombo Bambalapitiya and received official approval from the Sri Lankan Tourism Board as a certified travel agency. This marked our official entry into the professional tourism sector.</p>
-                <div className="timeline-images-recharge">
-                  <div className="timeline-image-recharge">Tourism Board Certificate</div>
-                  <div className="timeline-image-recharge">Bambalapitiya Office</div>
-                </div>
-              </div>
-            </div>
-
-            {/* 2018 */}
-            <div className="timeline-item-recharge">
-              <div className="timeline-year-recharge">2018</div>
-              <div className="timeline-content success fade-in-element">
-                <h3 className="text-2xl font-semibold text-blue-600 mb-4">Major Milestone</h3>
-                <p className="mb-4">Opened our flagship operation base in Katunayake on over 2 acres of land near CMB Airport. The facility was inaugurated by Tourism Minister John Amarathunga with MP Selvam Adaikalanathan in attendance. Our fleet grew to 50+ vehicles with 60 professional drivers.</p>
-                <div className="timeline-images-recharge">
-                  <div className="timeline-image-recharge">Grand Opening Ceremony</div>
-                  <div className="timeline-image-recharge">Fleet at Katunayake</div>
-                  <div className="timeline-image-recharge">Minister's Visit</div>
-                  <div className="timeline-image-recharge">Operations Center</div>
-                </div>
-              </div>
-            </div>
-
-            {/* 2017-2019 Awards */}
-            <div className="timeline-item-recharge">
-              <div className="timeline-year-recharge">2017-19</div>
-              <div className="timeline-content success fade-in-element">
-                <h3 className="text-2xl font-semibold text-blue-600 mb-4">Excellence Recognized</h3>
-                <p className="mb-4">Received TripAdvisor Certificate of Excellence for three consecutive years (2017, 2018, 2019). Opened our Jaffna branch at Cargills Square. Established partnerships with major platforms including GetTransfer and Booking.com.</p>
-                <div className="timeline-images-recharge">
-                  <div className="timeline-image-recharge">TripAdvisor Awards</div>
-                  <div className="timeline-image-recharge">Jaffna Branch</div>
-                </div>
-              </div>
-            </div>
-
-            {/* 2019 Crisis & Recovery */}
-            <div className="timeline-item-recharge">
-              <div className="timeline-year-recharge">2019</div>
-              <div className="timeline-content crisis fade-in-element">
-                <h3 className="text-2xl font-semibold text-blue-600 mb-4">Crisis & Remarkable Recovery</h3>
-                <p className="mb-4">April's Easter bombings severely impacted tourism. However, in August, we secured a major contract with the Bohra Muslim community, providing 50 buses and transporting over 15,000 people across Sri Lanka for 2 weeks. This helped us recover and grow stronger.</p>
-                <div className="timeline-images-recharge">
-                  <div className="timeline-image-recharge">Bohra Event Fleet</div>
-                  <div className="timeline-image-recharge">Community Service</div>
-                </div>
-              </div>
-            </div>
-
-            {/* 2020-2022 Pandemic */}
-            <div className="timeline-item-recharge">
-              <div className="timeline-year-recharge">2020-22</div>
-              <div className="timeline-content crisis fade-in-element">
-                <h3 className="text-2xl font-semibold text-blue-600 mb-4">Pandemic Challenges</h3>
-                <p className="mb-4">COVID-19 forced airport closure from February 2020. Six months of complete curfew led to vehicles being stolen and office vandalism. Despite these setbacks, we persevered and began our slow recovery in 2022.</p>
-                <div className="timeline-images-recharge">
-                  <div className="timeline-image-recharge">Empty Airport</div>
-                  <div className="timeline-image-recharge">Team During Crisis</div>
-                </div>
-              </div>
-            </div>
-
-            {/* 2022-2024 Economic Crisis */}
-            <div className="timeline-item-recharge">
-              <div className="timeline-year-recharge">2022-24</div>
-              <div className="timeline-content crisis fade-in-element">
-                <h3 className="text-2xl font-semibold text-blue-600 mb-4">Economic Challenges</h3>
-                <p className="mb-4">Sri Lanka's worst economic crisis created unprecedented challenges. Despite immense pressure on operations and vehicle payments, we maintained our commitment to service and kept our core team together.</p>
-                <div className="timeline-images-recharge">
-                  <div className="timeline-image-recharge">Team Resilience</div>
-                  <div className="timeline-image-recharge">Adaptation Strategies</div>
-                </div>
-              </div>
-            </div>
-
-            {/* 2025 Comeback */}
-            <div className="timeline-item-recharge">
-              <div className="timeline-year-recharge">2025</div>
-              <div className="timeline-content success fade-in-element">
-                <h3 className="text-2xl font-semibold text-blue-600 mb-4">The Phoenix Rises</h3>
-                <p className="mb-4">Mid-2025 marks our triumphant return! With renewed energy and determination, Recharge Travels is back to reclaim our position as Sri Lanka's premier tourist operator. Our journey of resilience continues stronger than ever.</p>
-                <div className="timeline-images-recharge">
-                  <div className="timeline-image-recharge">New Beginning</div>
-                  <div className="timeline-image-recharge">Future Vision</div>
-                </div>
-              </div>
-            </div>
+              )
+            })}
           </div>
         </section>
 
@@ -552,36 +492,13 @@ const AboutRechargeTravel = () => {
         <section className="achievements-recharge" id="achievements">
           <h2 className="text-5xl font-bold text-center mb-12 text-blue-600">Our Achievements</h2>
           <div className="achievement-grid-recharge">
-            <div className="achievement-card fade-in-element">
-              <div className="text-5xl mb-5">🏆</div>
-              <h3 className="text-2xl font-semibold mb-4">TripAdvisor Excellence</h3>
-              <p>Certificate of Excellence winner for 3 consecutive years (2017-2019)</p>
-            </div>
-            <div className="achievement-card fade-in-element">
-              <div className="text-5xl mb-5">🤝</div>
-              <h3 className="text-2xl font-semibold mb-4">Major Partnerships</h3>
-              <p>Trusted partner of GetTransfer, Booking.com, and other global platforms</p>
-            </div>
-            <div className="achievement-card fade-in-element">
-              <div className="text-5xl mb-5">🚌</div>
-              <h3 className="text-2xl font-semibold mb-4">Large Scale Operations</h3>
-              <p>Successfully managed transport for 15,000+ people in a single event</p>
-            </div>
-            <div className="achievement-card fade-in-element">
-              <div className="text-5xl mb-5">⭐</div>
-              <h3 className="text-2xl font-semibold mb-4">Customer Satisfaction</h3>
-              <p>Thousands of positive reviews across all major platforms</p>
-            </div>
-            <div className="achievement-card fade-in-element">
-              <div className="text-5xl mb-5">✈️</div>
-              <h3 className="text-2xl font-semibold mb-4">Airport Specialists</h3>
-              <p>24/7 airport transfer services with strategic location near CMB</p>
-            </div>
-            <div className="achievement-card fade-in-element">
-              <div className="text-5xl mb-5">🌍</div>
-              <h3 className="text-2xl font-semibold mb-4">Island-Wide Coverage</h3>
-              <p>Operations in Colombo, Katunayake, and Jaffna</p>
-            </div>
+            {achievements.map((item) => (
+              <div key={item.id} className="achievement-card fade-in-element">
+                <div className="text-5xl mb-5">{item.icon}</div>
+                <h3 className="text-2xl font-semibold mb-4">{item.title}</h3>
+                <p>{item.description}</p>
+              </div>
+            ))}
           </div>
         </section>
 
@@ -589,34 +506,18 @@ const AboutRechargeTravel = () => {
         <section className="fleet-recharge" id="fleet">
           <h2 className="text-5xl font-bold text-center mb-12 text-blue-600">Our Fleet</h2>
           <div className="fleet-gallery-recharge">
-            <div className="vehicle-card fade-in-element">
-              <div className="vehicle-image-recharge">Luxury Car Photo</div>
-              <div className="p-5">
-                <h3 className="text-xl font-semibold text-blue-600 mb-2">Luxury Sedans</h3>
-                <p className="text-gray-600">Premium vehicles for executive travel</p>
+            {fleetData.map((vehicle) => (
+              <div key={vehicle.id} className="vehicle-card fade-in-element">
+                <div className="vehicle-image-recharge">{vehicle.imageLabel}</div>
+                <div className="p-5">
+                  <h3 className="text-xl font-semibold text-blue-600 mb-2">{vehicle.name}</h3>
+                  <p className="text-gray-600">{vehicle.description}</p>
+                  {vehicle.capacityNote ? (
+                    <p className="text-sm text-gray-500 mt-3">{vehicle.capacityNote}</p>
+                  ) : null}
+                </div>
               </div>
-            </div>
-            <div className="vehicle-card fade-in-element">
-              <div className="vehicle-image-recharge">SUV Photo</div>
-              <div className="p-5">
-                <h3 className="text-xl font-semibold text-blue-600 mb-2">SUVs</h3>
-                <p className="text-gray-600">Comfortable vehicles for family tours</p>
-              </div>
-            </div>
-            <div className="vehicle-card fade-in-element">
-              <div className="vehicle-image-recharge">Van Photo</div>
-              <div className="p-5">
-                <h3 className="text-xl font-semibold text-blue-600 mb-2">Tourist Vans</h3>
-                <p className="text-gray-600">Spacious vans for group travel</p>
-              </div>
-            </div>
-            <div className="vehicle-card fade-in-element">
-              <div className="vehicle-image-recharge">Bus Photo</div>
-              <div className="p-5">
-                <h3 className="text-xl font-semibold text-blue-600 mb-2">Tourist Buses</h3>
-                <p className="text-gray-600">Large capacity buses for events</p>
-              </div>
-            </div>
+            ))}
           </div>
         </section>
 
@@ -624,35 +525,25 @@ const AboutRechargeTravel = () => {
         <section className="reviews-recharge" id="reviews">
           <h2 className="text-5xl font-bold text-center mb-12 text-blue-600">What Our Customers Say</h2>
           <div className="review-platforms-recharge">
-            <div className="text-center">
-              <div className="platform-icon-recharge">T</div>
-              <p className="font-semibold">TripAdvisor</p>
-            </div>
-            <div className="text-center">
-              <div className="platform-icon-recharge">G</div>
-              <p className="font-semibold">Google Reviews</p>
-            </div>
-            <div className="text-center">
-              <div className="platform-icon-recharge">F</div>
-              <p className="font-semibold">Facebook</p>
-            </div>
+            {reviewPlatformData.map((platform) => (
+              <div key={platform.id} className="text-center">
+                <div className="platform-icon-recharge">{platform.icon}</div>
+                <p className="font-semibold">{platform.label}</p>
+              </div>
+            ))}
           </div>
           <div className="review-grid-recharge">
-            <div className="review-card fade-in-element">
-              <div className="text-yellow-400 text-xl mb-4">★★★★★</div>
-              <p className="italic mb-4">"Excellent service! Professional drivers and well-maintained vehicles. Highly recommended for airport transfers."</p>
-              <p className="font-bold text-blue-600">- John D., TripAdvisor</p>
-            </div>
-            <div className="review-card fade-in-element">
-              <div className="text-yellow-400 text-xl mb-4">★★★★★</div>
-              <p className="italic mb-4">"Used Recharge Travels for our family vacation. They made our Sri Lanka tour unforgettable!"</p>
-              <p className="font-bold text-blue-600">- Sarah M., Google</p>
-            </div>
-            <div className="review-card fade-in-element">
-              <div className="text-yellow-400 text-xl mb-4">★★★★★</div>
-              <p className="italic mb-4">"Reliable and punctual. They handled our large group event transportation perfectly."</p>
-              <p className="font-bold text-blue-600">- Ahmed K., Facebook</p>
-            </div>
+            {reviews.map((review) => (
+              <div key={review.id} className="review-card fade-in-element">
+                <div className="text-yellow-400 text-xl mb-4">
+                  {'★'.repeat(review.rating).padEnd(5, '☆')}
+                </div>
+                <p className="italic mb-4">"{review.quote}"</p>
+                <p className="font-bold text-blue-600">
+                  - {review.author}, {review.platform}
+                </p>
+              </div>
+            ))}
           </div>
         </section>
 

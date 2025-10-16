@@ -8,7 +8,8 @@ import ArticleCard from '../components/cms/ArticleCard'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { getArticle, getArticles, type Article } from '@/lib/cms-queries'
+import { getArticle, getArticles } from '@/lib/cms-queries';
+import type { Article } from '@/lib/firebase-cms';
 import ReactMarkdown from 'react-markdown'
 
 const ArticleDetail = () => {
@@ -272,7 +273,7 @@ const ArticleDetail = () => {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {relatedArticles.map((relatedArticle) => (
-                <ArticleCard key={relatedArticle.article_id} article={relatedArticle} />
+                <ArticleCard key={relatedArticle.id} article={relatedArticle} />
               ))}
             </div>
           </div>

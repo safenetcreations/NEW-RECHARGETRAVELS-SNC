@@ -107,24 +107,52 @@ export const useAdminDashboard = () => {
     try {
       setLoading(true);
       
-      // Fetch basic stats
-      const today = new Date().toISOString().split('T')[0];
-      const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
+      const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+      const today = new Date();
 
-      const [bookingsCount, todayBookingsCount, monthlyBookings, usersCount] = await Promise.all([
-        dbService.list('bookings'('*'),
-        dbService.list('bookings'('*').gte('created_at', today),
-        dbService.list('bookings'('total_price').gte('created_at', startOfMonth),
-        dbService.list('profiles'('*')
+      const [bookingsRaw, usersRaw] = await Promise.all([
+        dbService.list('bookings'),
+        dbService.list('user_profiles')
       ]);
 
-      const monthlyRevenue = monthlyBookings.data?.reduce((sum, booking) => sum + (Number(booking.total_price) || 0), 0) || 0;
+      const bookings = (bookingsRaw as Array<any>) ?? [];
+      const users = (usersRaw as Array<any>) ?? [];
+
+      const toDate = (value: any): Date | null => {
+        if (!value) return null;
+        if (typeof value === 'string') return new Date(value);
+        if (value?.toDate) return value.toDate();
+        return null;
+      };
+
+      const totalBookings = bookings.length;
+
+      const todayBookings = bookings.filter((booking) => {
+        const created = toDate(booking.created_at ?? booking.createdAt);
+        if (!created) return false;
+        return (
+          created.getFullYear() === today.getFullYear() &&
+          created.getMonth() === today.getMonth() &&
+          created.getDate() === today.getDate()
+        );
+      }).length;
+
+      const monthlyBookings = bookings.filter((booking) => {
+        const created = toDate(booking.created_at ?? booking.createdAt);
+        if (!created) return false;
+        return created >= startOfMonth;
+      });
+
+      const monthlyRevenue = monthlyBookings.reduce((sum, booking) => {
+        const price = Number(booking.total_price ?? booking.amount ?? 0);
+        return sum + (Number.isFinite(price) ? price : 0);
+      }, 0);
 
       setStats({
-        totalBookings: bookingsCount.count || 0,
-        todayBookings: todayBookingsCount.count || 0,
+        totalBookings,
+        todayBookings,
         monthlyRevenue,
-        activeUsers: usersCount.count || 0
+        activeUsers: users.length
       });
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);

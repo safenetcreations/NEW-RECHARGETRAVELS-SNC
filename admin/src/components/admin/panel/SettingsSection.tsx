@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Save, Globe, Mail, Shield, Palette } from 'lucide-react';
+import { Save, Globe, Mail, Shield, Palette, Key } from 'lucide-react';
 
 const SettingsSection: React.FC = () => {
   const [settings, setSettings] = useState({
@@ -17,21 +17,52 @@ const SettingsSection: React.FC = () => {
     allowRegistration: true,
     emailNotifications: true,
   });
+  const [apiKey, setApiKey] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
-  const handleSave = () => {
-    // Implementation for saving settings
-    console.log('Saving settings:', settings);
+  const handleSave = async () => {
+    setIsSaving(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      // Save other settings
+      console.log('Saving settings:', settings);
+
+      // Save the API key
+      const response = await fetch('/api/save-api-key', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ apiKey }),
+      });
+
+      if (response.ok) {
+        setSuccess('Settings saved successfully!');
+      } else {
+        setError('Error saving API key');
+      }
+    } catch (err) {
+      setError('An unexpected error occurred.');
+    }
+
+    setIsSaving(false);
   };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-gray-900">System Settings</h2>
-        <Button onClick={handleSave} className="bg-green-600 hover:bg-green-700">
-          <Save className="w-4 h-4 mr-2" />
-          Save All Changes
+        <Button onClick={handleSave} className="bg-green-600 hover:bg-green-700" disabled={isSaving}>
+          {isSaving ? 'Saving...' : <><Save className="w-4 h-4 mr-2" />Save All Changes</>}
         </Button>
       </div>
+
+      {error && <p className="text-red-500">{error}</p>}
+      {success && <p className="text-green-500">{success}</p>}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* General Settings */}
@@ -161,6 +192,26 @@ const SettingsSection: React.FC = () => {
             <Button variant="outline" className="w-full">
               Reset to Default Theme
             </Button>
+          </CardContent>
+        </Card>
+
+        {/* API Key Settings */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Key className="w-5 h-5" />
+              API Key Settings
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Gemini API Key</label>
+              <Input
+                type="password"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+              />
+            </div>
           </CardContent>
         </Card>
       </div>

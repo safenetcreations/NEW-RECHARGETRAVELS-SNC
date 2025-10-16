@@ -7,7 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
-import { dbService, authService, storageService } from '@/lib/firebase-services';
+import { collection, query, orderBy, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import { toast } from 'sonner';
 import { Plus, Edit, Trash2, Search, Filter, MapPin, Star, Users, Wifi, Car, Coffee, Dumbbell, Building } from 'lucide-react';
 
@@ -57,12 +58,10 @@ const HotelsSection: React.FC = () => {
   const fetchHotels = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('hotels')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
+      const hotelsCollection = collection(db, 'hotels');
+      const q = query(hotelsCollection, orderBy('created_at', 'desc'));
+      const snapshot = await getDocs(q);
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Hotel[];
       setHotels(data || []);
     } catch (error) {
       console.error('Error fetching hotels:', error);
@@ -74,15 +73,12 @@ const HotelsSection: React.FC = () => {
 
   const handleCreateHotel = async () => {
     try {
-      const { error } = await supabase
-        .from('hotels')
-        .insert([{
-          ...formData,
-          user_rating: 0,
-          images: []
-        }]);
-      
-      if (error) throw error;
+      await addDoc(collection(db, 'hotels'), {
+        ...formData,
+        user_rating: 0,
+        images: [],
+        created_at: new Date().toISOString(),
+      });
       toast.success('Hotel created successfully');
       fetchHotels();
       setShowCreateDialog(false);
@@ -97,12 +93,8 @@ const HotelsSection: React.FC = () => {
     if (!editingHotel) return;
     
     try {
-      const { error } = await supabase
-        .from('hotels')
-        .update(formData)
-        .eq('id', editingHotel.id);
-      
-      if (error) throw error;
+      const hotelDoc = doc(db, 'hotels', editingHotel.id);
+      await updateDoc(hotelDoc, formData);
       toast.success('Hotel updated successfully');
       fetchHotels();
       setShowEditDialog(false);
@@ -117,12 +109,8 @@ const HotelsSection: React.FC = () => {
     if (!confirm('Are you sure you want to delete this hotel?')) return;
     
     try {
-      const { error } = await supabase
-        .from('hotels')
-        .delete()
-        .eq('id', id);
-      
-      if (error) throw error;
+      const hotelDoc = doc(db, 'hotels', id);
+      await deleteDoc(hotelDoc);
       toast.success('Hotel deleted successfully');
       fetchHotels();
     } catch (error) {
@@ -133,12 +121,8 @@ const HotelsSection: React.FC = () => {
 
   const toggleHotelStatus = async (id: string, currentStatus: boolean) => {
     try {
-      const { error } = await supabase
-        .from('hotels')
-        .update({ is_active: !currentStatus })
-        .eq('id', id);
-      
-      if (error) throw error;
+      const hotelDoc = doc(db, 'hotels', id);
+      await updateDoc(hotelDoc, { is_active: !currentStatus });
       toast.success(`Hotel ${!currentStatus ? 'activated' : 'deactivated'} successfully`);
       fetchHotels();
     } catch (error) {

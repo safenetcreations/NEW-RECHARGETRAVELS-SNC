@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { dbService, authService, storageService } from '@/lib/firebase-services';
+import { collection, query, orderBy, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import { toast } from 'sonner';
 import { Search, Star, Trash2, CheckCircle, XCircle, Filter } from 'lucide-react';
 
@@ -36,53 +37,18 @@ const ReviewsSection: React.FC = () => {
     try {
       setLoading(true);
       
-      // Fetch reviews from multiple tables
-      const [hotelReviewsResult, activityReviewsResult, driverReviewsResult] = await Promise.all([
-        supabase
-          .from('hotel_reviews')
-          .select('*, hotels(name)')
-          .order('created_at', { ascending: false }),
-        supabase
-          .from('activity_reviews')
-          .select('*, activities(name)')
-          .order('created_at', { ascending: false }),
-        supabase
-          .from('driver_reviews')
-          .select('*, drivers(name)')
-          .order('created_at', { ascending: false })
+      const [hotelReviews, activityReviews, driverReviews] = await Promise.all([
+        getDocs(query(collection(db, 'hotel_reviews'), orderBy('created_at', 'desc'))),
+        getDocs(query(collection(db, 'activity_reviews'), orderBy('created_at', 'desc'))),
+        getDocs(query(collection(db, 'driver_reviews'), orderBy('created_at', 'desc'))),
       ]);
 
       const allReviews: Review[] = [];
 
-      // Process hotel reviews
-      if (hotelReviewsResult && 'data' in hotelReviewsResult && hotelReviewsResult.data) {
-        allReviews.push(...(hotelReviewsResult.data as any[]).map(review => ({
-          ...review,
-          comment: (review as any).review_text || '',
-          table_name: 'hotels',
-          item_name: (review as any).hotels?.name || 'Unknown Hotel'
-        })));
-      }
+      hotelReviews.forEach(doc => allReviews.push({ id: doc.id, ...doc.data(), table_name: 'hotels' } as Review));
+      activityReviews.forEach(doc => allReviews.push({ id: doc.id, ...doc.data(), table_name: 'activities' } as Review));
+      driverReviews.forEach(doc => allReviews.push({ id: doc.id, ...doc.data(), table_name: 'drivers' } as Review));
 
-      // Process activity reviews
-      if (activityReviewsResult && 'data' in activityReviewsResult && activityReviewsResult.data) {
-        allReviews.push(...(activityReviewsResult.data as any[]).map(review => ({
-          ...review,
-          table_name: 'activities',
-          item_name: (review as any).activities?.name || 'Unknown Activity'
-        })));
-      }
-
-      // Process driver reviews
-      if (driverReviewsResult && 'data' in driverReviewsResult && driverReviewsResult.data) {
-        allReviews.push(...(driverReviewsResult.data as any[]).map(review => ({
-          ...review,
-          table_name: 'drivers',
-          item_name: (review as any).drivers?.name || 'Unknown Driver'
-        })));
-      }
-
-      // Sort by creation date
       allReviews.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       
       setReviews(allReviews);
@@ -101,12 +67,9 @@ const ReviewsSection: React.FC = () => {
       else if (review.table_name === 'activities') tableName = 'activity_reviews';
       else if (review.table_name === 'drivers') tableName = 'driver_reviews';
       
-      const { error } = await supabase
-        .from(tableName as any)
-        .update({ is_verified: true })
-        .eq('id', review.id);
+      const reviewDoc = doc(db, tableName, review.id);
+      await updateDoc(reviewDoc, { is_verified: true });
       
-      if (error) throw error;
       toast.success('Review verified successfully');
       fetchReviews();
     } catch (error) {
@@ -124,12 +87,9 @@ const ReviewsSection: React.FC = () => {
       else if (review.table_name === 'activities') tableName = 'activity_reviews';
       else if (review.table_name === 'drivers') tableName = 'driver_reviews';
       
-      const { error } = await supabase
-        .from(tableName as any)
-        .delete()
-        .eq('id', review.id);
+      const reviewDoc = doc(db, tableName, review.id);
+      await deleteDoc(reviewDoc);
       
-      if (error) throw error;
       toast.success('Review deleted successfully');
       fetchReviews();
     } catch (error) {

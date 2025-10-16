@@ -3,7 +3,8 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import DestinationCard from './DestinationCard'
-import { getFeaturedDestinations, type Destination } from '@/lib/cms-queries'
+import { getFeaturedDestinations } from '@/lib/cms-queries';
+import type { Destination } from '@/lib/firebase-cms';
 import { ArrowRight } from 'lucide-react'
 
 const FeaturedDestinations = () => {
@@ -69,7 +70,7 @@ const FeaturedDestinations = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {destinations.map((destination) => (
-            <DestinationCard key={destination.dest_id} destination={destination} />
+            <DestinationCard key={destination.id} destination={destination} />
           ))}
         </div>
       </div>

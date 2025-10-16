@@ -1,6 +1,5 @@
 
-/* Enhanced Font Loading with Preconnect */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap');
+/* Fonts are now loaded in index.html for better performance */
 @import "react-day-picker/dist/style.css";
 @tailwind base;
 @tailwind components;
@@ -135,13 +134,14 @@
     font-family: 'Inter', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     line-height: 1.6;
     color: hsl(var(--foreground));
-    background-color: hsl(var(--background));
+    background-color: hsl(var(--background)) !important;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-display: swap;
     box-sizing: border-box;
     scroll-behavior: smooth;
     text-size-adjust: 100%;
+    min-height: 100vh;
   }
 
   body {
@@ -151,6 +151,13 @@
     line-height: 1.6;
     font-size: 16px;
     -webkit-text-size-adjust: 100%;
+    min-height: 100vh;
+    background-color: hsl(var(--background)) !important;
+  }
+  
+  #root {
+    min-height: 100vh;
+    background-color: hsl(var(--background)) !important;
   }
 
   *,

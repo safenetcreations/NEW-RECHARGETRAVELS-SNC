@@ -267,22 +267,21 @@ const Header = () => {
               onAnimationTrigger={handleLogoAnimation}
               isScrolled={isScrolled}
             />
-            <div className="hidden xl:flex flex-col">
+            <div className="hidden lg:flex flex-col">
               <span
-                className={`text-xs font-semibold uppercase tracking-[0.28em] ${
-                  isScrolled ? "text-slate-500" : "text-white/60"
+                className={`text-[0.65rem] font-bold uppercase tracking-[0.22em] ${
+                  isScrolled ? "text-slate-700" : "text-white/90"
                 }`}
               >
-                Designers of million-dollar journeys
+                Recharge Travels
               </span>
               <div
-                className={`mt-1 flex items-center gap-3 text-[0.72rem] ${
-                  isScrolled ? "text-slate-500" : "text-white/60"
+                className={`flex items-center gap-2 text-[0.6rem] ${
+                  isScrolled ? "text-slate-500" : "text-white/70"
                 }`}
               >
-                <Star className="h-3.5 w-3.5 text-amber-400" />
-                4.98★ global guest happiness
-                <span className="hidden 2xl:inline">• Ultra-curated & discreet</span>
+                <Star className="h-2.5 w-2.5 text-amber-400" />
+                Sri Lanka's Premier Travel Agency
               </div>
             </div>
           </div>
@@ -291,7 +290,7 @@ const Header = () => {
             animatingItem={animatingItem}
             onMenuClick={handleMenuClick}
             isScrolled={isScrolled}
-            className="hidden lg:flex flex-1 justify-center"
+            className="hidden lg:flex flex-1 justify-center ml-6"
           />
 
           <div className="ml-auto flex items-center gap-2">

@@ -32,6 +32,8 @@ const FooterSocial: React.FC = () => {
           <a
             key={social.label}
             href={social.href}
+            target="_blank"
+            rel="noopener noreferrer"
             aria-label={social.label}
             className="w-10 h-10 bg-slate-800 hover:bg-blue-600 text-slate-300 hover:text-white rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900"
           >

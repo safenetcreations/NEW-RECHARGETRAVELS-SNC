@@ -1,6 +1,7 @@
 
+import { collection, query, where, getDocs, doc, getDoc, addDoc, updateDoc, orderBy, QueryConstraint } from 'firebase/firestore';
+import { db, auth } from '@/lib/firebase';
 import type { Booking, BookingFormData, BookingFilters } from '../types';
-import { dbService, authService, storageService } from '@/lib/firebase-services';
 
 // Transform database row to our Booking type
 const transformDbBookingToBooking = (dbBooking: any): Booking => {
@@ -38,31 +39,32 @@ const transformDbBookingToBooking = (dbBooking: any): Booking => {
 
 export const bookingService = {
   async getBookings(filters?: BookingFilters): Promise<Booking[]> {
-    let query = supabase
-      .from('driver_bookings')
-      .select('*')
-      .order('created_at', { ascending: false });
+    const bookingsCollection = collection(db, 'driver_bookings');
+    const constraints: QueryConstraint[] = [orderBy('created_at', 'desc')];
 
     if (filters?.status) {
-      query = query.in('booking_status', filters.status);
+      constraints.push(where('booking_status', 'in', filters.status));
     }
 
     if (filters?.searchQuery) {
-      query = query.or(`customer_notes.ilike.%${filters.searchQuery}%,pickup_location.ilike.%${filters.searchQuery}%`);
+      // Firestore does not support 'or' queries in the same way as Supabase.
+      // This is a simplified search on one field.
+      constraints.push(where('customer_notes', '>=', filters.searchQuery));
+      constraints.push(where('customer_notes', '<=', filters.searchQuery + '\uf8ff'));
     }
 
-    const { data, error } = await query;
+    const q = query(bookingsCollection, ...constraints);
+    const snapshot = await getDocs(q);
+    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-    if (error) throw error;
     return (data || []).map(transformDbBookingToBooking);
   },
 
   async createBooking(data: BookingFormData): Promise<Booking> {
-    // Get current user for customer_id
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = auth.currentUser;
     
     const bookingData = {
-      customer_id: user?.id || '',
+      customer_id: user?.uid || '',
       driver_id: '',
       vehicle_id: '',
       pickup_location: data.pickupLocation.address,
@@ -78,29 +80,16 @@ export const bookingService = {
       currency: 'LKR',
       booking_status: 'pending' as const,
       customer_notes: `Contact: ${data.contactName} (${data.contactEmail}, ${data.contactPhone})`,
+      created_at: new Date(),
+      updated_at: new Date(),
     };
 
-    const { data: booking, error } = await supabase
-      .from('driver_bookings')
-      .insert(bookingData)
-      .select()
-      .single();
-
-    if (error) throw error;
+    const docRef = await addDoc(collection(db, 'driver_bookings'), bookingData);
     
-    const newBooking = transformDbBookingToBooking(booking);
+    const newBooking = transformDbBookingToBooking({ id: docRef.id, ...bookingData });
 
-    // Send booking confirmation
-    try {
-      console.log('Sending booking confirmation for:', booking.id);
-      await supabase.functions.invoke('send-booking-confirmation', {
-        body: { bookingId: booking.id }
-      });
-      console.log('Booking confirmation sent successfully');
-    } catch (confirmationError) {
-      console.error('Failed to send booking confirmation:', confirmationError);
-      // Don't throw error here - booking was created successfully
-    }
+    // The function invocation needs to be replaced with a Firebase Cloud Function call
+    console.log('Booking confirmation logic to be implemented with Firebase Cloud Functions');
     
     return newBooking;
   },
@@ -112,59 +101,44 @@ export const bookingService = {
     if (data.specialRequirements) updateData.special_requirements = data.specialRequirements;
     if (data.driverId) updateData.driver_id = data.driverId;
 
-    const { data: booking, error } = await supabase
-      .from('driver_bookings')
-      .update(updateData)
-      .eq('id', id)
-      .select()
-      .single();
+    const bookingDoc = doc(db, 'driver_bookings', id);
+    await updateDoc(bookingDoc, updateData);
 
-    if (error) throw error;
+    const snapshot = await getDoc(bookingDoc);
+    const updatedBooking = transformDbBookingToBooking({ id: snapshot.id, ...snapshot.data() });
     
-    return transformDbBookingToBooking(booking);
+    return updatedBooking;
   },
 
   async cancelBooking(id: string): Promise<void> {
-    const { error } = await supabase
-      .from('driver_bookings')
-      .update({ booking_status: 'cancelled' })
-      .eq('id', id);
-
-    if (error) throw error;
+    const bookingDoc = doc(db, 'driver_bookings', id);
+    await updateDoc(bookingDoc, { booking_status: 'cancelled' });
   },
 
   async getUserBookings(): Promise<Booking[]> {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = auth.currentUser;
     
     if (!user) return [];
 
-    const { data, error } = await supabase
-      .from('driver_bookings')
-      .select('*')
-      .eq('customer_id', user.id)
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
+    const bookingsCollection = collection(db, 'driver_bookings');
+    const q = query(bookingsCollection, where('customer_id', '==', user.uid), orderBy('created_at', 'desc'));
+    const snapshot = await getDocs(q);
+    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     
     return (data || []).map(transformDbBookingToBooking);
   },
 
   async getDrivers(): Promise<any[]> {
-    const { data, error } = await supabase
-      .from('drivers')
-      .select('*')
-      .eq('is_active', true);
+    const driversCollection = collection(db, 'drivers');
+    const q = query(driversCollection, where('is_active', '==', true));
+    const snapshot = await getDocs(q);
+    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-    if (error) return [];
     return data || [];
   },
 
   async assignDriver(bookingId: string, driverId: string): Promise<void> {
-    const { error } = await supabase
-      .from('driver_bookings')
-      .update({ driver_id: driverId })
-      .eq('id', bookingId);
-
-    if (error) throw error;
+    const bookingDoc = doc(db, 'driver_bookings', bookingId);
+    await updateDoc(bookingDoc, { driver_id: driverId });
   },
 };

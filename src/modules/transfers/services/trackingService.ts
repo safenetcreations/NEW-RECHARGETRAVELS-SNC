@@ -1,6 +1,25 @@
+import type { TrackingData, Location, Notification } from '../types'
+import { authService, dbService } from '@/lib/firebase-services'
 
-import type { TrackingData, Location, Notification } from '../types';
-import { dbService, authService, storageService } from '@/lib/firebase-services';
+const toDate = (value: any): Date => {
+  if (!value) return new Date(0)
+  if (value instanceof Date) return value
+  if (typeof value === 'string') return new Date(value)
+  if (value?.toDate) return value.toDate()
+  return new Date(0)
+}
+
+const normalizeTrackingRecord = (record: any): TrackingData => ({
+  id: record.id,
+  bookingId: record.booking_id ?? record.bookingId ?? '',
+  driverId: record.driver_id ?? record.driverId ?? '',
+  latitude: Number(record.latitude ?? 0),
+  longitude: Number(record.longitude ?? 0),
+  heading: record.heading !== undefined ? Number(record.heading) : undefined,
+  speed: record.speed_kmh !== undefined ? Number(record.speed_kmh) : undefined,
+  accuracy: record.accuracy ? Number(record.accuracy) : 10,
+  timestamp: toDate(record.created_at ?? record.createdAt)
+})
 
 export const trackingService = {
   async updateDriverLocation(
@@ -8,153 +27,105 @@ export const trackingService = {
     driverId: string,
     location: { latitude: number; longitude: number; heading?: number; speed?: number }
   ): Promise<void> {
-    const { error } = await dbService.create('driver_locations',({
+    await dbService.create('driver_locations', {
       booking_id: bookingId,
       driver_id: driverId,
       latitude: location.latitude,
       longitude: location.longitude,
       heading: location.heading,
-      speed_kmh: location.speed,
-    });
-
-    if (error) throw error;
+      speed_kmh: location.speed
+    })
   },
 
   async getTrackingHistory(bookingId: string): Promise<TrackingData[]> {
-    const { data, error } = await supabase
-      .from('driver_locations')
-      .select('*')
-      .eq('booking_id', bookingId)
-      .order('created_at', { ascending: true });
+    const records = await dbService.list('driver_locations', [
+      { field: 'booking_id', operator: '==', value: bookingId }
+    ])
 
-    if (error) throw error;
-
-    return (data || []).map((item: any) => ({
-      id: item.id,
-      bookingId: item.booking_id,
-      driverId: item.driver_id,
-      latitude: item.latitude,
-      longitude: item.longitude,
-      heading: item.heading,
-      speed: item.speed_kmh,
-      accuracy: 10, // Default accuracy
-      timestamp: new Date(item.created_at),
-    }));
+    return (records as any[])
+      .map(normalizeTrackingRecord)
+      .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime())
   },
 
   async getLatestDriverLocation(bookingId: string): Promise<TrackingData | null> {
-    const { data, error } = await supabase
-      .from('driver_locations')
-      .select('*')
-      .eq('booking_id', bookingId)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single();
-
-    if (error) {
-      if (error.code === 'PGRST116') return null;
-      throw error;
-    }
-
-    return {
-      id: data.id,
-      bookingId: data.booking_id,
-      driverId: data.driver_id,
-      latitude: data.latitude,
-      longitude: data.longitude,
-      heading: data.heading,
-      speed: data.speed_kmh,
-      accuracy: 10, // Default accuracy
-      timestamp: new Date(data.created_at),
-    };
+    const history = await this.getTrackingHistory(bookingId)
+    if (history.length === 0) return null
+    return history[history.length - 1]
   },
 
   subscribeToDriverLocation(
     bookingId: string,
     callback: (location: TrackingData) => void
   ): () => void {
-    const channel = supabase
-      .channel(`driver_locations:${bookingId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'driver_locations',
-          filter: `booking_id=eq.${bookingId}`,
-        },
-        (payload) => {
-          const data = payload.new;
-          callback({
-            id: data.id,
-            bookingId: data.booking_id,
-            driverId: data.driver_id,
-            latitude: data.latitude,
-            longitude: data.longitude,
-            heading: data.heading,
-            speed: data.speed_kmh,
-            accuracy: 10,
-            timestamp: new Date(data.created_at),
-          });
-        }
-      )
-      .subscribe();
+    const unsubscribe = dbService.subscribe(
+      'driver_locations',
+      (records) => {
+        const sorted = (records as any[])
+          .filter((record) => record.booking_id === bookingId)
+          .map(normalizeTrackingRecord)
+          .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime())
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+        const latest = sorted[sorted.length - 1]
+        if (latest) {
+          callback(latest)
+        }
+      },
+      [{ field: 'booking_id', operator: '==', value: bookingId }]
+    )
+
+    return unsubscribe
   },
 
-  // Add the missing methods that useBookingTracking expects
   subscribeToTracking(
     bookingId: string,
     onUpdate: (data: TrackingData) => void,
-    onError: (error: Error) => void
+    _onError: (error: Error) => void
   ): () => void {
-    return this.subscribeToDriverLocation(bookingId, onUpdate);
+    return this.subscribeToDriverLocation(bookingId, onUpdate)
   },
 
   async updateLocation(
     bookingId: string,
     location: Omit<TrackingData, 'id' | 'bookingId' | 'driverId' | 'timestamp'>
   ): Promise<void> {
-    // Get current user to use as driver ID
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('User not authenticated');
+    const user = authService.getCurrentUser()
+    if (!user?.uid) {
+      throw new Error('User not authenticated')
+    }
 
-    await this.updateDriverLocation(bookingId, user.id, {
+    await this.updateDriverLocation(bookingId, user.uid, {
       latitude: location.latitude,
       longitude: location.longitude,
       heading: location.heading,
-      speed: location.speed,
-    });
+      speed: location.speed
+    })
   },
 
   async searchLocations(query: string): Promise<Location[]> {
-    try {
-      console.log('Searching locations for:', query);
-      
-      const { data, error } = await supabase.functions.invoke('search-locations', {
-        body: { query }
-      });
+    if (!query) {
+      return []
+    }
 
-      if (error) {
-        console.error('Location search error:', error);
-        throw new Error(error.message || 'Failed to search locations');
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`
+      )
+
+      if (!response.ok) {
+        throw new Error(`Location search failed: ${response.statusText}`)
       }
 
-      console.log('Location search results:', data);
-      
-      return (data.results || []).map((result: any) => ({
-        lat: result.lat,
-        lng: result.lng,
-        address: result.address,
-        name: result.name
-      }));
+      const results = (await response.json()) as Array<{ lat: string; lon: string; display_name: string }>
+
+      return results.map((result) => ({
+        lat: Number(result.lat),
+        lng: Number(result.lon),
+        address: result.display_name,
+        name: result.display_name
+      }))
     } catch (error) {
-      console.error('Location search service error:', error);
-      // Return empty array on error instead of throwing
-      return [];
+      console.error('Location search service error:', error)
+      return []
     }
   },
 
@@ -162,11 +133,7 @@ export const trackingService = {
     bookingId: string,
     callback: (notification: Notification) => void
   ): () => void {
-    // Mock implementation since we don't have notifications table in current schema
-    console.log('Notifications subscription not implemented for booking:', bookingId);
-    
-    return () => {
-      // Cleanup function
-    };
-  },
-};
+    console.log('Notifications subscription not implemented for booking:', bookingId)
+    return () => {}
+  }
+}

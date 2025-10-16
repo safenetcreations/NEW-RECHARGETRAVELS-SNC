@@ -22,6 +22,7 @@ import EmailTemplatesSection from '@/components/admin/panel/EmailTemplatesSectio
 import DashboardSection from '@/components/admin/panel/DashboardSection';
 import ActivitiesSection from '@/components/admin/panel/ActivitiesSection';
 import MediaSection from '@/components/admin/panel/MediaSection';
+import FooterSettingsSection from '@/components/admin/panel/FooterSettingsSection';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -164,14 +165,37 @@ const AdminPanel: React.FC = () => {
                 />
               </div>
               {authError && (
-                <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 p-3 rounded-md">
-                  <AlertCircle className="w-4 h-4" />
-                  {authError}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 p-3 rounded-md">
+                    <AlertCircle className="w-4 h-4" />
+                    {authError}
+                  </div>
+                  <div className="text-xs text-gray-600 bg-yellow-50 p-3 rounded-md">
+                    <p className="font-semibold mb-1">Valid passwords:</p>
+                    <ul className="list-disc list-inside space-y-1 font-mono">
+                      <li>admin2024</li>
+                      <li>recharge2024</li>
+                      <li>srilanka2024</li>
+                    </ul>
+                  </div>
                 </div>
               )}
               <Button type="submit" className="w-full h-12 bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700">
                 <Lock className="w-4 h-4 mr-2" />
                 Access Admin Panel
+              </Button>
+              <Button 
+                type="button" 
+                variant="outline"
+                onClick={() => {
+                  localStorage.removeItem('adminAuthenticated');
+                  setPassword('');
+                  setAuthError('');
+                  window.location.reload();
+                }}
+                className="w-full h-10 mt-2 text-xs"
+              >
+                Clear Cache & Retry
               </Button>
             </form>
             
@@ -314,6 +338,10 @@ const AdminPanel: React.FC = () => {
               <Mail className="w-3 h-3" />
               Email
             </TabsTrigger>
+            <TabsTrigger value="footer" className="flex items-center gap-1 text-xs">
+              <FileText className="w-3 h-3" />
+              Footer
+            </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center gap-1 text-xs">
               <Settings className="w-3 h-3" />
               Settings
@@ -454,6 +482,10 @@ const AdminPanel: React.FC = () => {
           
           <TabsContent value="email-templates">
             <EmailTemplatesSection />
+          </TabsContent>
+          
+          <TabsContent value="footer">
+            <FooterSettingsSection />
           </TabsContent>
           
           <TabsContent value="settings">

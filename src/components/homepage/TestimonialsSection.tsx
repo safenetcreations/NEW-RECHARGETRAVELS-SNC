@@ -1,6 +1,8 @@
 import { motion } from 'framer-motion';
 import { Star, Quote } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { LazyLoadImage } from 'react-lazy-load-image-component';
+import 'react-lazy-load-image-component/src/effects/blur.css';
 import { testimonialsService, homepageStatsService } from '@/services/cmsService';
 import type { Testimonial, HomepageStat } from '@/types/cms';
 
@@ -194,9 +196,10 @@ const TestimonialsSection = () => {
 
               {/* Author Info */}
               <div className="flex items-center gap-4">
-                <img
-                  src={testimonial.image}
+                <LazyLoadImage
                   alt={testimonial.name}
+                  effect="blur"
+                  src={testimonial.image}
                   className="w-14 h-14 rounded-full object-cover"
                 />
                 <div>

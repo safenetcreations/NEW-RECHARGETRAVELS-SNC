@@ -8,7 +8,8 @@ const NewsletterSection = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle subscription logic here
+    // TODO: Handle subscription logic here
+    console.log(`Subscribing with email: ${email}`);
     setSubscribed(true);
     setTimeout(() => setSubscribed(false), 3000);
   };

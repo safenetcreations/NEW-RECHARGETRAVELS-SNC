@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, Compass } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -8,6 +9,7 @@ import { searchContent } from '@/lib/search';
 import { useToast } from '@/hooks/use-toast';
 
 const HeroSearchBar = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
@@ -35,77 +37,13 @@ const HeroSearchBar = () => {
       return;
     }
 
-    setIsSearching(true);
-    
-    try {
-      console.log('Searching for:', searchQuery);
-      const results = await searchContent(searchQuery, {
-        regions: [],
-        categories: [],
-        contentType: 'all'
-      });
-      
-      console.log('Search results:', results);
-      
-      if (results.results.length === 0) {
-        toast({
-          title: "No Results",
-          description: "No destinations or articles found for your search",
-        });
-      } else {
-        toast({
-          title: "Search Complete",
-          description: `Found ${results.totalCount} results for "${searchQuery}"`,
-        });
-        // TODO: Navigate to search results page or show results
-      }
-    } catch (error) {
-      console.error('Search error:', error);
-      toast({
-        title: "Search Error",
-        description: "Failed to search. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSearching(false);
-    }
+    // Navigate to search results page with query
+    navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
   };
 
   const handleQuickSearch = async (destination: string) => {
-    setSearchQuery(destination);
-    setIsSearching(true);
-    
-    try {
-      console.log('Quick search for:', destination);
-      const results = await searchContent(destination, {
-        regions: [],
-        categories: [],
-        contentType: 'all'
-      });
-      
-      console.log('Quick search results:', results);
-      
-      if (results.results.length === 0) {
-        toast({
-          title: "No Results",
-          description: `No results found for "${destination}"`,
-        });
-      } else {
-        toast({
-          title: "Search Complete",
-          description: `Found ${results.totalCount} results for "${destination}"`,
-        });
-      }
-    } catch (error) {
-      console.error('Quick search error:', error);
-      toast({
-        title: "Search Error",
-        description: "Failed to search. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSearching(false);
-    }
+    // Navigate to search results page with the destination query
+    navigate(`/search?q=${encodeURIComponent(destination)}`);
   };
 
   return (

@@ -6,7 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { dbService, authService, storageService } from '@/lib/firebase-services';
+import { collection, query, orderBy, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import { toast } from 'sonner';
 import { Plus, Edit, Trash2, Search, Filter, MapPin, DollarSign, Users, Clock } from 'lucide-react';
 
@@ -59,12 +60,10 @@ const ToursSection: React.FC = () => {
   const fetchTours = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('tour_packages')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
+      const toursCollection = collection(db, 'tour_packages');
+      const q = query(toursCollection, orderBy('created_at', 'desc'));
+      const snapshot = await getDocs(q);
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Tour[];
       setTours(data || []);
     } catch (error) {
       console.error('Error fetching tours:', error);
@@ -76,11 +75,7 @@ const ToursSection: React.FC = () => {
 
   const handleCreateTour = async () => {
     try {
-      const { error } = await supabase
-        .from('tour_packages')
-        .insert([formData]);
-      
-      if (error) throw error;
+      await addDoc(collection(db, 'tour_packages'), formData);
       toast.success('Tour created successfully');
       fetchTours();
       setShowCreateDialog(false);
@@ -95,12 +90,8 @@ const ToursSection: React.FC = () => {
     if (!editingTour) return;
     
     try {
-      const { error } = await supabase
-        .from('tour_packages')
-        .update(formData)
-        .eq('id', editingTour.id);
-      
-      if (error) throw error;
+      const tourDoc = doc(db, 'tour_packages', editingTour.id);
+      await updateDoc(tourDoc, formData);
       toast.success('Tour updated successfully');
       fetchTours();
       setShowEditDialog(false);
@@ -152,12 +143,8 @@ const ToursSection: React.FC = () => {
     if (!confirm('Are you sure you want to delete this tour?')) return;
     
     try {
-      const { error } = await supabase
-        .from('tour_packages')
-        .delete()
-        .eq('id', id);
-      
-      if (error) throw error;
+      const tourDoc = doc(db, 'tour_packages', id);
+      await deleteDoc(tourDoc);
       toast.success('Tour deleted successfully');
       fetchTours();
     } catch (error) {

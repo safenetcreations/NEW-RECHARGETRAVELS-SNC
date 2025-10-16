@@ -1,0 +1,13 @@
+import { Helmet } from 'react-helmet-async';
+
+function App() {
+  return (
+    <>
+      <Helmet>
+        {/* Remove X-Frame-Options from meta tags - it should be set via HTTP headers */}
+        <title>Recharge Travels - Sri Lanka</title>
+      </Helmet>
+      {/* ...existing code... */}
+    </>
+  );
+}

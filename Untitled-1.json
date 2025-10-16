@@ -1,0 +1,6 @@
+{
+  "firestore": {
+    "rules": "firestore.rules",  // ✅ Points to correct file
+    "indexes": "firestore.indexes.json"  // ✅ Has indexes file
+  }
+}

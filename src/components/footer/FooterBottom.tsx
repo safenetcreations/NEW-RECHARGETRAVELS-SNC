@@ -18,7 +18,7 @@ const FooterBottom = ({ isDarkMode }: FooterBottomProps) => {
       </div>
       
       <div className={`text-sm text-center ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-        <p>&copy; 2024 Recharge Travels and Tours. All rights reserved. 🐆 🐘 🐋 🦚</p>
+        <p>&copy; 2025 Recharge Travels and Tours. All rights reserved. 🐆 🐘 🐋 🦚</p>
       </div>
     </div>
   )

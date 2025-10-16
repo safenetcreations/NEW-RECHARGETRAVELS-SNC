@@ -1,11 +1,11 @@
-
 import { useState, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Search, X } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { getRegions, getCategories, type Region, type Category } from '@/lib/cms-queries'
+import { getRegions, getCategories } from '@/lib/cms-queries';
+import type { Region, Category } from '@/lib/firebase-cms';
 
 interface SearchBarProps {
   onSearch: (query: string, filters: SearchFilters) => void
@@ -126,7 +126,7 @@ const SearchBar = ({ onSearch, loading }: SearchBarProps) => {
           </SelectTrigger>
           <SelectContent>
             {regions.map(region => (
-              <SelectItem key={region.region_id} value={region.region_id}>
+              <SelectItem key={region.id} value={region.id}>
                 {region.name}
               </SelectItem>
             ))}
@@ -139,7 +139,7 @@ const SearchBar = ({ onSearch, loading }: SearchBarProps) => {
           </SelectTrigger>
           <SelectContent>
             {categories.map(category => (
-              <SelectItem key={category.category_id} value={category.category_id}>
+              <SelectItem key={category.id} value={category.id}>
                 {category.name} ({category.type})
               </SelectItem>
             ))}
@@ -152,7 +152,7 @@ const SearchBar = ({ onSearch, loading }: SearchBarProps) => {
           <span className="text-sm text-gray-600">Active filters:</span>
           
           {filters.regions.map(regionId => {
-            const region = regions.find(r => r.region_id === regionId)
+            const region = regions.find(r => r.id === regionId)
             return region ? (
               <Badge key={regionId} variant="secondary" className="cursor-pointer">
                 {region.name}
@@ -165,7 +165,7 @@ const SearchBar = ({ onSearch, loading }: SearchBarProps) => {
           })}
 
           {filters.categories.map(categoryId => {
-            const category = categories.find(c => c.category_id === categoryId)
+            const category = categories.find(c => c.id === categoryId)
             return category ? (
               <Badge key={categoryId} variant="secondary" className="cursor-pointer">
                 {category.name}

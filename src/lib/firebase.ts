@@ -19,13 +19,37 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+let app;
+let analytics;
+let auth;
+let db;
+let storage;
+let functions;
 
-// Initialize Firebase services
-export const analytics = getAnalytics(app);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-export const storage = getStorage(app);
-export const functions = getFunctions(app);
+try {
+  app = initializeApp(firebaseConfig);
+  
+  // Initialize Firebase services
+  auth = getAuth(app);
+  db = getFirestore(app);
+  storage = getStorage(app);
+  functions = getFunctions(app);
+  
+  // Analytics only in browser environment
+  if (typeof window !== 'undefined') {
+    analytics = getAnalytics(app);
+  }
+  
+  console.log('✅ Firebase initialized successfully');
+} catch (error) {
+  console.error('❌ Firebase initialization error:', error);
+  // Create empty objects to prevent crashes
+  auth = null;
+  db = null;
+  storage = null;
+  functions = null;
+  analytics = null;
+}
 
+export { analytics, auth, db, storage, functions };
 export default app;

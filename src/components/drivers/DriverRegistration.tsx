@@ -90,12 +90,9 @@ const DriverRegistration = () => {
   }
 
   const uploadToSupabase = async (file: File, bucket: string, path: string) => {
-    const { data, error } = await storageService
-      .from(bucket)
-      .upload(path, file)
-    
-    if (error) throw error
-    return data
+    const fullPath = `${bucket}/${path}`;
+    const result = await storageService.upload(fullPath, file);
+    return result;
   }
 
   const handleSubmit = async (data: DriverFormData) => {

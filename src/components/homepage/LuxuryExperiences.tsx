@@ -1,5 +1,7 @@
 import { motion } from 'framer-motion';
 import { Sparkles, Camera, Palette, Heart, Mountain, Waves } from 'lucide-react';
+import { LazyLoadImage } from 'react-lazy-load-image-component';
+import 'react-lazy-load-image-component/src/effects/blur.css';
 
 const LuxuryExperiences = () => {
   const experiences = [
@@ -80,9 +82,10 @@ const LuxuryExperiences = () => {
             >
               {/* Background Image */}
               <div className="absolute inset-0">
-                <img
-                  src={experience.image}
+                <LazyLoadImage
                   alt={experience.title}
+                  effect="blur"
+                  src={experience.image}
                   className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />

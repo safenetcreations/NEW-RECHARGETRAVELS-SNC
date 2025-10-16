@@ -1,131 +1,95 @@
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Search, Edit, Trash2, Eye, Calendar } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { PlusCircle, MoreHorizontal } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { getDocs, collection, query, orderBy } from 'firebase/firestore';
+import { db } from '@/services/firebaseService';
+
+interface Post {
+  id: string;
+  title: string;
+  author: string;
+  date: string;
+  category: string;
+}
 
 const PostsSection: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const mockPosts = [
-    {
-      id: '1',
-      title: 'Top 10 Places to Visit in Sri Lanka',
-      slug: 'top-10-places-sri-lanka',
-      excerpt: 'Discover the most beautiful destinations across the pearl of the Indian Ocean.',
-      status: 'published',
-      published_at: '2024-01-15',
-      tags: ['Travel', 'Sri Lanka', 'Tourism'],
-      featured_image: '/api/placeholder/300/200'
-    },
-    {
-      id: '2',
-      title: 'Ceylon Tea: A Journey Through History',
-      slug: 'ceylon-tea-history',
-      excerpt: 'Learn about the rich heritage of Ceylon tea and its significance to Sri Lankan culture.',
-      status: 'draft',
-      published_at: null,
-      tags: ['Culture', 'Tea', 'History'],
-      featured_image: null
-    }
-  ];
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        setLoading(true);
+        const q = query(
+          collection(db, 'blog_posts'),
+          orderBy('date', 'desc')
+        );
+        const snapshot = await getDocs(q);
+        const data = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() })) as Post[];
+        setPosts(data);
+      } catch (error) {
+        console.error('Error fetching blog posts:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'published': return 'bg-green-100 text-green-800';
-      case 'draft': return 'bg-yellow-100 text-yellow-800';
-      case 'archived': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
+    fetchPosts();
+  }, []);
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Blog Posts</h2>
-        <Button className="flex items-center gap-2">
-          <Plus className="w-4 h-4" />
-          Create Post
-        </Button>
+        <h2 className="text-2xl font-bold text-gray-900">Blog Posts</h2>
+        <Link to="/admin/posts/new">
+          <Button className="bg-blue-600 hover:bg-blue-700">
+            <PlusCircle className="w-4 h-4 mr-2" />
+            Create New Post
+          </Button>
+        </Link>
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-          <Input
-            placeholder="Search posts..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-      </div>
-
-      <div className="grid gap-4">
-        {mockPosts.map((post) => (
-          <Card key={post.id}>
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <CardTitle className="text-lg">{post.title}</CardTitle>
-                    <Badge className={getStatusColor(post.status)}>
-                      {post.status}
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-2">/{post.slug}</p>
-                  {post.excerpt && (
-                    <p className="text-sm text-muted-foreground">{post.excerpt}</p>
-                  )}
-                </div>
-                {post.featured_image && (
-                  <img 
-                    src={post.featured_image} 
-                    alt={post.title}
-                    className="w-16 h-16 object-cover rounded ml-4"
-                  />
-                )}
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {post.tags.length > 0 && (
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {post.tags.map((tag) => (
-                      <Badge key={tag} variant="secondary" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-                
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    {post.published_at && (
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" />
-                        Published {post.published_at}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="sm">
-                      <Eye className="w-4 h-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm">
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm" className="text-destructive">
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>All Posts ({posts.length})</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <table className="w-full">
+            <thead>
+              <tr className="border-b">
+                <th className="text-left p-4">Title</th>
+                <th className="text-left p-4">Category</th>
+                <th className="text-left p-4">Author</th>
+                <th className="text-left p-4">Date</th>
+                <th className="text-right p-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan={5} className="text-center p-8">Loading...</td>
+                </tr>
+              ) : (
+                posts.map(post => (
+                  <tr key={post.id} className="border-b hover:bg-gray-50">
+                    <td className="p-4 font-medium">{post.title}</td>
+                    <td className="p-4">{post.category}</td>
+                    <td className="p-4">{post.author}</td>
+                    <td className="p-4">{post.date}</td>
+                    <td className="p-4 text-right">
+                      <Button variant="ghost" size="icon">
+                        <MoreHorizontal className="w-4 h-4" />
+                      </Button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </CardContent>
+      </Card>
     </div>
   );
 };

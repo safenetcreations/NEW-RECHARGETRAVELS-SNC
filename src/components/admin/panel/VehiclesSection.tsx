@@ -6,7 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
-import { dbService, authService, storageService } from '@/lib/firebase-services';
+import { collection, query, orderBy, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import { toast } from 'sonner';
 import { Plus, Edit, Trash2, Search, Car, Users, Fuel, Calendar, DollarSign, MapPin } from 'lucide-react';
 
@@ -64,12 +65,10 @@ const VehiclesSection: React.FC = () => {
   const fetchVehicles = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('vehicles')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
+      const vehiclesCollection = collection(db, 'vehicles');
+      const q = query(vehiclesCollection, orderBy('created_at', 'desc'));
+      const snapshot = await getDocs(q);
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Vehicle[];
       setVehicles(data || []);
     } catch (error) {
       console.error('Error fetching vehicles:', error);
@@ -81,14 +80,11 @@ const VehiclesSection: React.FC = () => {
 
   const handleCreateVehicle = async () => {
     try {
-      const { error } = await supabase
-        .from('vehicles')
-        .insert([{
-          ...formData,
-          images: []
-        }]);
-      
-      if (error) throw error;
+      await addDoc(collection(db, 'vehicles'), {
+        ...formData,
+        images: [],
+        created_at: new Date().toISOString(),
+      });
       toast.success('Vehicle created successfully');
       fetchVehicles();
       setShowCreateDialog(false);
@@ -103,12 +99,8 @@ const VehiclesSection: React.FC = () => {
     if (!editingVehicle) return;
     
     try {
-      const { error } = await supabase
-        .from('vehicles')
-        .update(formData)
-        .eq('id', editingVehicle.id);
-      
-      if (error) throw error;
+      const vehicleDoc = doc(db, 'vehicles', editingVehicle.id);
+      await updateDoc(vehicleDoc, formData);
       toast.success('Vehicle updated successfully');
       fetchVehicles();
       setShowEditDialog(false);
@@ -123,12 +115,8 @@ const VehiclesSection: React.FC = () => {
     if (!confirm('Are you sure you want to delete this vehicle?')) return;
     
     try {
-      const { error } = await supabase
-        .from('vehicles')
-        .delete()
-        .eq('id', id);
-      
-      if (error) throw error;
+      const vehicleDoc = doc(db, 'vehicles', id);
+      await deleteDoc(vehicleDoc);
       toast.success('Vehicle deleted successfully');
       fetchVehicles();
     } catch (error) {
@@ -139,12 +127,8 @@ const VehiclesSection: React.FC = () => {
 
   const toggleVehicleAvailability = async (id: string, currentStatus: boolean) => {
     try {
-      const { error } = await supabase
-        .from('vehicles')
-        .update({ is_available: !currentStatus })
-        .eq('id', id);
-      
-      if (error) throw error;
+      const vehicleDoc = doc(db, 'vehicles', id);
+      await updateDoc(vehicleDoc, { is_available: !currentStatus });
       toast.success(`Vehicle ${!currentStatus ? 'marked as available' : 'marked as unavailable'}`);
       fetchVehicles();
     } catch (error) {

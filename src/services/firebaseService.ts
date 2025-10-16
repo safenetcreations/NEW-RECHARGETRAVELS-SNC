@@ -143,26 +143,4 @@ export const functionsService = {
   }
 };
 
-// Export as supabase for compatibility if needed
-export const supabase = {
-  auth: authService,
-  from: (tableName: string) => {
-    // This is a simplified compatibility layer.
-    // You might need to expand this if you use more complex supabase features.
-    const table = collection(db, tableName);
-    return {
-      select: async (columns = '*') => {
-        const q = query(table);
-        const snapshot = await getDocs(q);
-        const data = snapshot.docs.map(doc => doc.data());
-        return { data, error: null };
-      },
-      // Add other supabase methods like insert, update, delete as needed
-    }
-  },
-  storage: storageService,
-  functions: functionsService,
-  rpc: functionsService.invoke
-};
 
-export default supabase;

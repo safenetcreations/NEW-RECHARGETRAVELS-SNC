@@ -251,8 +251,7 @@ const YaluEdgeAgent: React.FC<YaluEdgeAgentProps> = ({ isOpen, onClose }) => {
       if (!toolResponse) {
         const edgeResponse = await callEdgeFunction(
           messageText,
-          messages.map(m => ({ role: m.sender, content: m.text })),
-          'en'
+          messages.map(m => ({ role: m.sender, content: m.text }))
         )
 
         if (edgeResponse?.text) {

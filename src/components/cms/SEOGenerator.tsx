@@ -32,12 +32,16 @@ const SEOGenerator = ({
   const generateSEO = async () => {
     setLoading(true)
     try {
-      const { data, error } = await supabaseCMS.functions.invoke('generate-seo-content', {
-        body: {
-          contentType,
-          contentId
-        }
-      })
+      // TODO: Implement Firebase function for SEO generation
+      // const { data, error } = await supabaseCMS.functions.invoke('generate-seo-content', {
+      //   body: {
+      //     contentType,
+      //     contentId
+      //   }
+      // })
+      
+      const error = null;
+      const data = { data: { meta_title: '', meta_description: '' } }; // Placeholder
 
       if (error) throw error
 

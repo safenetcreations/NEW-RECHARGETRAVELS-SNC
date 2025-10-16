@@ -3,6 +3,8 @@ import { MapPin, Clock, Star, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { getDocs, collection, query, orderBy, where } from 'firebase/firestore';
+const { LazyLoadImage } = require('react-lazy-load-image-component');
+import 'react-lazy-load-image-component/src/effects/blur.css';
 import { db } from '@/services/firebaseService';
 
 interface Destination {
@@ -19,6 +21,10 @@ interface Destination {
   order: number;
   createdAt: any;
   updatedAt: any;
+  price?: number;
+  duration?: string;
+  rating?: number;
+  features?: string[];
 }
 
 const FeaturedDestinations = () => {
@@ -93,9 +99,10 @@ const FeaturedDestinations = () => {
                 <div className="relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500">
                   {/* Image Container */}
                   <div className="relative h-80 overflow-hidden">
-                    <img
-                      src={destination.image}
+                    <LazyLoadImage
                       alt={destination.name}
+                      effect="blur"
+                      src={destination.image}
                       className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
@@ -106,37 +113,45 @@ const FeaturedDestinations = () => {
                     </span>
 
                     {/* Price Badge */}
-                    <span className="absolute top-4 right-4 px-4 py-2 bg-blue-600 text-white rounded-full text-sm font-semibold">
-                      From ${destination.price}
-                    </span>
+                    {destination.price && (
+                      <span className="absolute top-4 right-4 px-4 py-2 bg-blue-600 text-white rounded-full text-sm font-semibold">
+                        From ${destination.price}
+                      </span>
+                    )}
                   </div>
 
                   {/* Content */}
                   <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
                     <h3 className="text-2xl font-bold mb-1">{destination.name}</h3>
-                    <p className="text-lg text-white/90 mb-2">{destination.title}</p>
+                    <p className="text-lg text-white/90 mb-2">{destination.name}</p>
                     <p className="text-white/80 text-sm mb-4 line-clamp-2">{destination.description}</p>
                     
                     {/* Meta Info */}
                     <div className="flex items-center gap-4 mb-4">
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-4 h-4" />
-                        <span className="text-sm">{destination.duration}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        <span className="text-sm">{destination.rating}</span>
-                      </div>
+                      {destination.duration && (
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-4 h-4" />
+                          <span className="text-sm">{destination.duration}</span>
+                        </div>
+                      )}
+                      {destination.rating && (
+                        <div className="flex items-center gap-1">
+                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                          <span className="text-sm">{destination.rating}</span>
+                        </div>
+                      )}
                     </div>
 
                     {/* Highlights */}
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {destination.features.map((feature, idx) => (
-                        <span key={idx} className="text-xs px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full">
-                          {feature}
-                        </span>
-                      ))}
-                    </div>
+                    {destination.features && destination.features.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {destination.features.map((feature, idx) => (
+                          <span key={idx} className="text-xs px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full">
+                            {feature}
+                          </span>
+                        ))}
+                      </div>
+                    )}
 
                     {/* CTA */}
                     <div className="flex items-center gap-2 text-white group-hover:gap-3 transition-all">

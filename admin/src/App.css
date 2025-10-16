@@ -15,31 +15,6 @@
   color-scheme: light;
 }
 
-/* Custom fonts */
-@font-face {
-  font-family: "Bebas Neue";
-  src: url("/fonts/BebasNeue-Regular.ttf") format("truetype");
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Open Sauce Sans";
-  src: url("/fonts/OpenSauceSans-Regular.ttf") format("truetype");
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Open Sauce Sans";
-  src: url("/fonts/OpenSauceSans-Bold.ttf") format("truetype");
-  font-weight: bold;
-  font-style: normal;
-  font-display: swap;
-}
-
 /* Reusable CSS classes */
 .container {
   padding-left: 1rem;

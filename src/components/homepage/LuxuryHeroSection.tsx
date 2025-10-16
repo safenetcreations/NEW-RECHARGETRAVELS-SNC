@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Car, Plane, MapPin, Calendar, Users, Clock, ChevronDown, Star, Shield, Headphones } from 'lucide-react';
+const { LazyLoadImage } = require('react-lazy-load-image-component');
+import 'react-lazy-load-image-component/src/effects/blur.css';
 import { Button } from '@/components/ui/button';
 import TransferBookingForm from '@/modules/transfers/components/TransferBookingForm';
 import { heroSlidesService } from '@/services/cmsService';
@@ -133,9 +135,10 @@ const LuxuryHeroSection = ({ hoveredRegion, onLocationsChange }: LuxuryHeroSecti
           className="absolute inset-0 z-0"
         >
           <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60 z-10" />
-          <img
-            src={currentSlideData.image}
+          <LazyLoadImage
             alt={currentSlideData.title}
+            effect="blur"
+            src={currentSlideData.image}
             className="w-full h-full object-cover"
           />
         </motion.div>
@@ -183,7 +186,7 @@ const LuxuryHeroSection = ({ hoveredRegion, onLocationsChange }: LuxuryHeroSecti
               </motion.p>
 
               {/* CTA Button (if configured in CMS) */}
-              {currentSlideData.ctaText && currentSlideData.ctaLink && (
+              {(currentSlideData as any).ctaText && (currentSlideData as any).ctaLink && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -194,8 +197,8 @@ const LuxuryHeroSection = ({ hoveredRegion, onLocationsChange }: LuxuryHeroSecti
                     asChild
                     className="bg-orange-600 hover:bg-orange-700 text-white font-semibold px-8 py-6 rounded-xl text-lg transition-all duration-300 transform hover:scale-105 shadow-2xl"
                   >
-                    <a href={currentSlideData.ctaLink}>
-                      {currentSlideData.ctaText}
+                    <a href={(currentSlideData as any).ctaLink}>
+                      {(currentSlideData as any).ctaText}
                     </a>
                   </Button>
                 </motion.div>
@@ -237,10 +240,11 @@ const LuxuryHeroSection = ({ hoveredRegion, onLocationsChange }: LuxuryHeroSecti
                   <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-end">
                     {/* Pickup Location */}
                     <div className="lg:col-span-1">
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">From</label>
+                      <label htmlFor="pickup-location" className="block text-sm font-semibold text-gray-700 mb-2">From</label>
                       <div className="relative">
                         <MapPin className="absolute left-3 top-3.5 w-5 h-5 text-gray-400" />
                         <input
+                          id="pickup-location"
                           type="text"
                           placeholder="Pickup location"
                           className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
@@ -251,10 +255,11 @@ const LuxuryHeroSection = ({ hoveredRegion, onLocationsChange }: LuxuryHeroSecti
 
                     {/* Destination */}
                     <div className="lg:col-span-1">
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">To</label>
+                      <label htmlFor="dropoff-location" className="block text-sm font-semibold text-gray-700 mb-2">To</label>
                       <div className="relative">
                         <MapPin className="absolute left-3 top-3.5 w-5 h-5 text-gray-400" />
                         <input
+                          id="dropoff-location"
                           type="text"
                           placeholder="Drop-off location"
                           className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
@@ -265,10 +270,11 @@ const LuxuryHeroSection = ({ hoveredRegion, onLocationsChange }: LuxuryHeroSecti
 
                     {/* Date */}
                     <div className="lg:col-span-1">
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Date</label>
+                      <label htmlFor="booking-date" className="block text-sm font-semibold text-gray-700 mb-2">Date</label>
                       <div className="relative">
                         <Calendar className="absolute left-3 top-3.5 w-5 h-5 text-gray-400" />
                         <input
+                          id="booking-date"
                           type="text"
                           placeholder="Select date"
                           className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
@@ -279,10 +285,11 @@ const LuxuryHeroSection = ({ hoveredRegion, onLocationsChange }: LuxuryHeroSecti
 
                     {/* Passengers */}
                     <div className="lg:col-span-1">
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Passengers</label>
+                      <label htmlFor="booking-passengers" className="block text-sm font-semibold text-gray-700 mb-2">Passengers</label>
                       <div className="relative">
                         <Users className="absolute left-3 top-3.5 w-5 h-5 text-gray-400" />
                         <input
+                          id="booking-passengers"
                           type="text"
                           placeholder="Guests"
                           className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"

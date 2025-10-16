@@ -16,7 +16,8 @@ import {
   addDoc,
   serverTimestamp,
   Timestamp,
-  writeBatch
+  writeBatch,
+  QueryConstraint
 } from 'firebase/firestore';
 import { 
   ref, 
@@ -36,30 +37,60 @@ import {
 } from 'firebase/auth';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { db, auth, storage } from './firebase';
+import { firebaseDb } from '@/lib/firebase-db';
 
 // Initialize Firebase Functions
 const functions = getFunctions();
 
 // Auth Services
 export const authService = {
-  async signUp(email: string, password: string, displayName?: string) {
-    const { user } = await createUserWithEmailAndPassword(auth, email, password);
-    if (displayName) {
-      await updateProfile(user, { displayName });
+  async signUp(emailOrOptions: string | { email: string; password: string; options?: any }, password?: string, displayName?: string): Promise<any> {
+    try {
+      if (typeof emailOrOptions === 'string') {
+        // Old signature
+        const { user } = await createUserWithEmailAndPassword(auth, emailOrOptions, password!);
+        if (displayName) {
+          await updateProfile(user, { displayName });
+        }
+        // Create user profile in Firestore
+        await setDoc(doc(db, 'users', user.uid), {
+          email: emailOrOptions,
+          displayName,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+        return user;
+      } else {
+        // New signature with options
+        const { email, password: pwd } = emailOrOptions;
+        const { user } = await createUserWithEmailAndPassword(auth, email, pwd);
+        await setDoc(doc(db, 'users', user.uid), {
+          email,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+        return { data: { user }, error: null };
+      }
+    } catch (error) {
+      if (typeof emailOrOptions === 'object') {
+        return { data: null, error };
+      }
+      throw error;
     }
-    // Create user profile in Firestore
-    await setDoc(doc(db, 'users', user.uid), {
-      email,
-      displayName,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    });
-    return user;
   },
 
   async signIn(email: string, password: string) {
     const { user } = await signInWithEmailAndPassword(auth, email, password);
     return user;
+  },
+
+  async signInWithPassword({ email, password }: { email: string; password: string }) {
+    try {
+      const user = await this.signIn(email, password);
+      return { data: { user }, error: null };
+    } catch (error) {
+      return { data: { user: null }, error };
+    }
   },
 
   async signOut() {
@@ -119,36 +150,41 @@ export const dbService = {
   },
 
   async list(collectionName: string, filters?: any[], orderByField?: string, limitCount?: number) {
-    let q = collection(db, collectionName);
-    
+    const baseRef = collection(db, collectionName);
+    const constraints: QueryConstraint[] = [];
+
     if (filters) {
       filters.forEach(filter => {
-        q = query(q, where(filter.field, filter.operator, filter.value));
+        constraints.push(where(filter.field, filter.operator, filter.value));
       });
     }
-    
+
     if (orderByField) {
-      q = query(q, orderBy(orderByField));
+      constraints.push(orderBy(orderByField));
     }
-    
+
     if (limitCount) {
-      q = query(q, limit(limitCount));
+      constraints.push(limit(limitCount));
     }
-    
+
+    const q = constraints.length > 0 ? query(baseRef, ...constraints) : baseRef;
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   },
 
   // Real-time subscriptions
   subscribe(collectionName: string, callback: (data: any[]) => void, filters?: any[]) {
-    let q = collection(db, collectionName);
-    
+    const baseRef = collection(db, collectionName);
+    const constraints: QueryConstraint[] = [];
+
     if (filters) {
       filters.forEach(filter => {
-        q = query(q, where(filter.field, filter.operator, filter.value));
+        constraints.push(where(filter.field, filter.operator, filter.value));
       });
     }
-    
+
+    const q = constraints.length > 0 ? query(baseRef, ...constraints) : baseRef;
+
     return onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       callback(data);
@@ -348,3 +384,7 @@ export default {
   functions: functionsService,
   cms: cmsService
 };
+
+export type Article = Record<string, any>;
+export type Destination = Record<string, any>;
+export const supabaseCMS = firebaseDb;

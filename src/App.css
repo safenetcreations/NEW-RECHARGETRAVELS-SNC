@@ -8,6 +8,14 @@
   }
   body {
     @apply bg-background text-foreground;
+    background-color: #FFFDF8 !important;
+  }
+  html {
+    background-color: #FFFDF8 !important;
+  }
+  #root {
+    min-height: 100vh;
+    background-color: #FFFDF8 !important;
   }
 }
 
@@ -29,34 +37,6 @@
 
 .radix-themes {
   color-scheme: light;
-}
-
-/* Optimized Custom fonts with better loading */
-@font-face {
-  font-family: "Bebas Neue";
-  src: url("/fonts/BebasNeue-Regular.ttf") format("truetype");
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-  font-preload: true;
-}
-
-@font-face {
-  font-family: "Open Sauce Sans";
-  src: url("/fonts/OpenSauceSans-Regular.ttf") format("truetype");
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-  font-preload: true;
-}
-
-@font-face {
-  font-family: "Open Sauce Sans";
-  src: url("/fonts/OpenSauceSans-Bold.ttf") format("truetype");
-  font-weight: bold;
-  font-style: normal;
-  font-display: swap;
-  font-preload: true;
 }
 
 /* Reusable CSS classes */

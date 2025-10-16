@@ -37,7 +37,7 @@ export function DroneFlythroughHero({
       <div className="absolute inset-0">
         {/* Main Waterfall Scene */}
         <div 
-          className="absolute inset-0 transition-transform duration-[10s] ease-linear"
+          className="absolute inset-0 transition-transform ease-linear [transition-duration:10s]"
           style={{
             backgroundImage: 'url(https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&h=1080&fit=crop)',
             backgroundSize: '120%',

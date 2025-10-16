@@ -89,21 +89,15 @@ export const ImageUploadSection: React.FC<ImageUploadSectionProps> = ({
   };
 
   const uploadSingleFile = async (file: File) => {
-    // Upload to Supabase Storage
+    // Upload to Firebase Storage
     const fileExt = file.name.split('.').pop();
     const fileName = `hotel_${entityId}_${Date.now()}.${fileExt}`;
-    const filePath = `hotels/${fileName}`;
+    const filePath = `images/hotels/${fileName}`;
 
-    const { data: uploadData, error: uploadError } = await storageService
-      .from('images')
-      .upload(filePath, file);
-
-    if (uploadError) throw uploadError;
+    const { path, url } = await storageService.upload(filePath, file);
 
     // Get public URL
-    const { data: { publicUrl } } = storageService
-      .from('images')
-      .getPublicUrl(filePath);
+    const publicUrl = url;
 
     // Save to database - only support hotels for now
     const { error: dbError } = await supabase

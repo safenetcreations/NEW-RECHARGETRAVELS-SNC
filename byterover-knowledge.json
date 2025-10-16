@@ -47,5 +47,17 @@
     "files": [
       "src/components/Header.tsx"
     ]
+  },
+  {
+    "timestamp": "2025-10-13T07:34:39.679Z",
+    "summary": "Ensured every routed page renders the global footer without manual duplication.",
+    "details": [
+      "Introduced a withSiteChrome helper in src/App.tsx that wraps selected routes with Header and Footer.",
+      "Applied the wrapper to experience listings, destination shells, admin utilities, and other pages that previously omitted the footer.",
+      "Extended the React imports to support ComponentType and hydrated the new layout without touching pages that already include their own footer."
+    ],
+    "files": [
+      "src/App.tsx"
+    ]
   }
 ]

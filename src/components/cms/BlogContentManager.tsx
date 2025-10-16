@@ -116,7 +116,7 @@ export const BlogContentManager = () => {
                   </SelectTrigger>
                   <SelectContent>
                     {categories?.map((category) => (
-                      <SelectItem key={category.category_id} value={category.category_id}>
+                      <SelectItem key={category.id} value={category.id}>
                         {category.name}
                       </SelectItem>
                     ))}
@@ -216,7 +216,7 @@ export const BlogContentManager = () => {
               ) : (
                 <div className="space-y-4">
                   {blogPosts?.map((post) => (
-                    <div key={post.article_id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div key={post.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <h3 className="font-semibold text-foreground">{post.title}</h3>

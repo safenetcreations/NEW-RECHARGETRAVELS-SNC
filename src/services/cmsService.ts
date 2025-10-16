@@ -600,7 +600,7 @@ export const homepageStatsService = {
       const docRef = doc(db, 'homepageStats', id);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
-        return { id: docSnap.id, ...doc.data() } as HomepageStat;
+        return { id: docSnap.id, ...docSnap.data() } as HomepageStat;
       }
       return null;
     } catch (error) {

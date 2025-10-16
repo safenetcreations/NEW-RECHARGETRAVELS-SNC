@@ -8,7 +8,8 @@ import DestinationCard from '../components/cms/DestinationCard'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
-import { getDestination, getRelatedDestinations, type Destination } from '@/lib/cms-queries'
+import { getDestination, getRelatedDestinations } from '@/lib/cms-queries';
+import type { Destination } from '@/lib/firebase-cms';
 import ReactMarkdown from 'react-markdown'
 
 const DestinationDetail = () => {
@@ -26,9 +27,9 @@ const DestinationDetail = () => {
         setDestination(destData)
 
         // Load related destinations
-        if (destData.region_id) {
-          const related = await getRelatedDestinations(destData.region_id, destData.dest_id)
-          setRelatedDestinations(related)
+        if (destData.region) {
+          const related = await getRelatedDestinations(destData.region.id, destData.id)
+          setRelatedDestinations(related as Destination[])
         }
       } catch (error) {
         console.error('Failed to load destination:', error)
@@ -211,7 +212,7 @@ const DestinationDetail = () => {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {relatedDestinations.map((relatedDest) => (
-                <DestinationCard key={relatedDest.dest_id} destination={relatedDest} />
+                <DestinationCard key={relatedDest.id} destination={relatedDest} />
               ))}
             </div>
           </div>

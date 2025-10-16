@@ -7,7 +7,8 @@ import ArticleCard from '../components/cms/ArticleCard'
 import SearchBar, { SearchFilters } from '../components/cms/SearchBar'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { getArticles, type Article } from '@/lib/cms-queries'
+import { getArticles } from '@/lib/cms-queries';
+import type { Article } from '@/lib/firebase-cms';
 import { ChevronLeft, ChevronRight, BookOpen } from 'lucide-react'
 
 const Articles = () => {
@@ -165,7 +166,7 @@ const Articles = () => {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               {articles.map((article) => (
-                <ArticleCard key={article.article_id} article={article} />
+                <ArticleCard key={article.id} article={article} />
               ))}
             </div>
 

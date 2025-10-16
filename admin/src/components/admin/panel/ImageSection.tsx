@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Upload, Search, Trash2, Eye, Download } from 'lucide-react';
+import { Upload, Search, Trash2, Eye, Download, Sparkles } from 'lucide-react';
+import ImageGenerationDialog from '@/components/admin/panel/ImageGenerationDialog';
 
 const ImageSection: React.FC = () => {
   const [uploadedImages, setUploadedImages] = useState([
@@ -11,6 +12,7 @@ const ImageSection: React.FC = () => {
     { id: 2, name: 'wildlife-tour.jpg', url: '/lovable-uploads/639e61ff-8943-44e1-9d85-4c5a16c0f1e2.png', size: '1.8 MB', uploaded: '2024-01-14' },
   ]);
   const [selectedImages, setSelectedImages] = useState<number[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -38,6 +40,10 @@ const ImageSection: React.FC = () => {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-gray-900">Image Gallery Management</h2>
         <div className="flex gap-2">
+          <Button onClick={() => setIsGenerating(true)} className="bg-blue-600 hover:bg-blue-700">
+            <Sparkles className="w-4 h-4 mr-2" />
+            Generate Image
+          </Button>
           <input
             type="file"
             multiple
@@ -62,6 +68,14 @@ const ImageSection: React.FC = () => {
           )}
         </div>
       </div>
+
+      <ImageGenerationDialog
+        isOpen={isGenerating}
+        onClose={() => setIsGenerating(false)}
+        onImageGenerated={(newImage) => {
+          setUploadedImages(prev => [...prev, newImage]);
+        }}
+      />
 
       {/* Search and Filter */}
       <Card>

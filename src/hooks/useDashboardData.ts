@@ -1,8 +1,17 @@
+import { useEffect, useState } from 'react'
+import { dbService } from '@/lib/firebase-services'
 
-import { useState, useEffect } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { dbService, authService, storageService } from '@/lib/firebase-services'
-import { toast } from 'sonner'
+type WithCreatedAt<T> = T & {
+  created_at?: string
+  createdAt?: any
+}
+
+const toDate = (value: any): Date | null => {
+  if (!value) return null
+  if (typeof value === 'string') return new Date(value)
+  if (value?.toDate) return value.toDate()
+  return null
+}
 
 export const useDashboardData = () => {
   const [totalHotels, setTotalHotels] = useState(0)
@@ -11,63 +20,51 @@ export const useDashboardData = () => {
   const [totalBookings, setTotalBookings] = useState(0)
   const [totalRevenue, setTotalRevenue] = useState(0)
   const [recentBookings, setRecentBookings] = useState<any[]>([])
-
-  const { data: hotelsData, isLoading: hotelsLoading, error: hotelsError } = useQuery({
-    queryKey: ['adminHotels'],
-    queryFn: async () => {
-      const { data, error } = await dbService.list('hotels'('*')
-      if (error) {
-        toast.error(`Error fetching hotels: ${error.message}`)
-        throw error
-      }
-      return data
-    }
-  })
-
-  const { data: usersData, isLoading: usersLoading, error: usersError } = useQuery({
-    queryKey: ['adminUsers'],
-    queryFn: async () => {
-      const { data, error } = await dbService.list('user_profiles'('*')
-      if (error) {
-        toast.error(`Error fetching users: ${error.message}`)
-        throw error
-      }
-      return data
-    }
-  })
-
-  const { data: bookingsData, isLoading: bookingsLoading, error: bookingsError } = useQuery({
-    queryKey: ['adminBookings'],
-    queryFn: async () => {
-      const { data, error } = await dbService.list('bookings'('*')
-      if (error) {
-        toast.error(`Error fetching bookings: ${error.message}`)
-        throw error
-      }
-      return data
-    }
-  })
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    if (hotelsData) {
-      setTotalHotels(hotelsData.length)
-      setActiveHotels(hotelsData.filter((hotel) => hotel.is_active).length)
-    }
-    if (usersData) {
-      setTotalUsers(usersData.length)
-    }
-    if (bookingsData) {
-      setTotalBookings(bookingsData.length)
-      // Calculate total revenue (simplified, assuming each booking is $100 for example)
-      setTotalRevenue(bookingsData.length * 100)
+    const load = async () => {
+      try {
+        setIsLoading(true)
 
-      // Get recent bookings (last 5)
-      const sortedBookings = [...bookingsData].sort((a, b) => {
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      })
-      setRecentBookings(sortedBookings.slice(0, 5))
+        const [hotels, users, bookings] = await Promise.all([
+          dbService.list('hotels'),
+          dbService.list('user_profiles'),
+          dbService.list('bookings')
+        ])
+
+        const hotelsList = (hotels as Array<{ is_active?: boolean }>) ?? []
+        const usersList = (users as unknown[]) ?? []
+        const bookingsList =
+          (bookings as Array<WithCreatedAt<{ total_price?: number }>>) ?? []
+
+        setTotalHotels(hotelsList.length)
+        setActiveHotels(hotelsList.filter((hotel) => hotel.is_active).length)
+        setTotalUsers(usersList.length)
+        setTotalBookings(bookingsList.length)
+
+        const total = bookingsList.reduce((sum, booking) => {
+          const price = Number(booking.total_price ?? 0)
+          return sum + (Number.isFinite(price) ? price : 0)
+        }, 0)
+        setTotalRevenue(total)
+
+        const sorted = [...bookingsList].sort((a, b) => {
+          const dateA = toDate(a.created_at ?? a.createdAt) ?? new Date(0)
+          const dateB = toDate(b.created_at ?? b.createdAt) ?? new Date(0)
+          return dateB.getTime() - dateA.getTime()
+        })
+
+        setRecentBookings(sorted.slice(0, 5))
+      } catch (error) {
+        console.error('Error loading dashboard data:', error)
+      } finally {
+        setIsLoading(false)
+      }
     }
-  }, [hotelsData, usersData, bookingsData])
+
+    void load()
+  }, [])
 
   return {
     totalHotels,
@@ -76,6 +73,6 @@ export const useDashboardData = () => {
     totalBookings,
     totalRevenue,
     recentBookings,
-    isLoading: hotelsLoading || usersLoading || bookingsLoading
+    isLoading
   }
 }

@@ -84,12 +84,15 @@ const BulkSEOGenerator = () => {
       try {
         setCurrentItem(item.title)
         
-        const { error } = await supabaseCMS.functions.invoke('generate-seo-content', {
-          body: {
-            contentType: item.type,
-            contentId: item.id
-          }
-        })
+        // TODO: Implement Firebase function for SEO generation
+        // const { error } = await supabaseCMS.functions.invoke('generate-seo-content', {
+        //   body: {
+        //     contentType: item.type,
+        //     contentId: item.id
+        //   }
+        // })
+        
+        const error = null; // Placeholder
 
         if (error) {
           console.error(`Error generating SEO for ${item.title}:`, error)

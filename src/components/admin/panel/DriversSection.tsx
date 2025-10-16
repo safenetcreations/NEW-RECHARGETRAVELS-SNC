@@ -6,7 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { dbService, authService, storageService } from '@/lib/firebase-services';
+import { collection, query, orderBy, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import { toast } from 'sonner';
 import { Plus, Edit, Trash2, Search, Star, Phone, Mail, Car, CheckCircle, XCircle } from 'lucide-react';
 
@@ -54,12 +55,10 @@ const DriversSection: React.FC = () => {
   const fetchDrivers = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('drivers')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
+      const driversCollection = collection(db, 'drivers');
+      const q = query(driversCollection, orderBy('created_at', 'desc'));
+      const snapshot = await getDocs(q);
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Driver[];
       setDrivers(data || []);
     } catch (error) {
       console.error('Error fetching drivers:', error);
@@ -73,12 +72,8 @@ const DriversSection: React.FC = () => {
     if (!confirm('Are you sure you want to delete this driver?')) return;
     
     try {
-      const { error } = await supabase
-        .from('drivers')
-        .delete()
-        .eq('id', id);
-      
-      if (error) throw error;
+      const driverDoc = doc(db, 'drivers', id);
+      await deleteDoc(driverDoc);
       toast.success('Driver deleted successfully');
       fetchDrivers();
     } catch (error) {
@@ -89,12 +84,8 @@ const DriversSection: React.FC = () => {
 
   const toggleDriverStatus = async (id: string, currentStatus: boolean) => {
     try {
-      const { error } = await supabase
-        .from('drivers')
-        .update({ is_active: !currentStatus })
-        .eq('id', id);
-      
-      if (error) throw error;
+      const driverDoc = doc(db, 'drivers', id);
+      await updateDoc(driverDoc, { is_active: !currentStatus });
       toast.success(`Driver ${!currentStatus ? 'activated' : 'deactivated'} successfully`);
       fetchDrivers();
     } catch (error) {
@@ -105,12 +96,8 @@ const DriversSection: React.FC = () => {
 
   const updateVerificationStatus = async (id: string, status: 'pending' | 'under_review' | 'approved' | 'rejected' | 'requires_update') => {
     try {
-      const { error } = await supabase
-        .from('drivers')
-        .update({ overall_verification_status: status })
-        .eq('id', id);
-      
-      if (error) throw error;
+      const driverDoc = doc(db, 'drivers', id);
+      await updateDoc(driverDoc, { overall_verification_status: status });
       toast.success('Driver verification status updated successfully');
       fetchDrivers();
     } catch (error) {
@@ -121,16 +108,13 @@ const DriversSection: React.FC = () => {
 
   const handleCreateDriver = async () => {
     try {
-      const { error } = await supabase
-        .from('drivers')
-        .insert([{
-          ...formData,
-          rating: 0,
-          total_reviews: 0,
-          overall_verification_status: 'pending'
-        }]);
-      
-      if (error) throw error;
+      await addDoc(collection(db, 'drivers'), {
+        ...formData,
+        rating: 0,
+        total_reviews: 0,
+        overall_verification_status: 'pending',
+        created_at: new Date().toISOString(),
+      });
       toast.success('Driver created successfully');
       fetchDrivers();
       setShowCreateDialog(false);
@@ -145,12 +129,8 @@ const DriversSection: React.FC = () => {
     if (!editingDriver) return;
     
     try {
-      const { error } = await supabase
-        .from('drivers')
-        .update(formData)
-        .eq('id', editingDriver.id);
-      
-      if (error) throw error;
+      const driverDoc = doc(db, 'drivers', editingDriver.id);
+      await updateDoc(driverDoc, formData);
       toast.success('Driver updated successfully');
       fetchDrivers();
       setShowEditDialog(false);

@@ -1,6 +1,7 @@
 
+import { collection, query, where, getDocs, doc, getDoc, addDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import type { Vehicle } from '../types';
-import { dbService, authService, storageService } from '@/lib/firebase-services';
 
 // Transform database row to our Vehicle type
 const transformDbVehicleToVehicle = (dbVehicle: any): Vehicle => {
@@ -40,12 +41,10 @@ const mapTypeToVehicleType = (type: string): Vehicle['vehicleType'] => {
 export const vehicleService = {
   async getAvailableVehicles(): Promise<Vehicle[]> {
     try {
-      const { data, error } = await supabase
-        .from('vehicles')
-        .select('*')
-        .eq('is_active', true);
-
-      if (error) throw error;
+      const vehiclesCollection = collection(db, 'vehicles');
+      const q = query(vehiclesCollection, where('is_active', '==', true));
+      const snapshot = await getDocs(q);
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       return (data || []).map(transformDbVehicleToVehicle);
     } catch (error) {
       console.error('Error fetching available vehicles:', error);
@@ -60,18 +59,13 @@ export const vehicleService = {
 
   async getVehicleById(id: string): Promise<Vehicle | null> {
     try {
-      const { data, error } = await supabase
-        .from('vehicles')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-      if (error) {
-        if (error.code === 'PGRST116') return null;
-        throw error;
+      const vehicleDoc = doc(db, 'vehicles', id);
+      const snapshot = await getDoc(vehicleDoc);
+      if (snapshot.exists()) {
+        return transformDbVehicleToVehicle({ id: snapshot.id, ...snapshot.data() });
+      } else {
+        return null;
       }
-      
-      return transformDbVehicleToVehicle(data);
     } catch (error) {
       console.error('Error fetching vehicle by id:', error);
       return null;
@@ -80,14 +74,10 @@ export const vehicleService = {
 
   async createVehicle(vehicleData: Omit<Vehicle, 'id'>): Promise<Vehicle> {
     try {
-      // Get a category_id for the vehicle type
-      const { data: categories } = await supabase
-        .from('vehicle_categories')
-        .select('id')
-        .ilike('name', `%${vehicleData.vehicleType}%`)
-        .limit(1);
-
-      const categoryId = categories?.[0]?.id || 'default-category-id';
+      const categoriesCollection = collection(db, 'vehicle_categories');
+      const q = query(categoriesCollection, where('name', '==', vehicleData.vehicleType));
+      const snapshot = await getDocs(q);
+      const categoryId = snapshot.docs[0]?.id || 'default-category-id';
 
       const dbData = {
         category_id: categoryId,
@@ -107,14 +97,8 @@ export const vehicleService = {
         is_active: vehicleData.isActive,
       };
 
-      const { data, error } = await supabase
-        .from('vehicles')
-        .insert(dbData)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return transformDbVehicleToVehicle(data);
+      const docRef = await addDoc(collection(db, 'vehicles'), dbData);
+      return transformDbVehicleToVehicle({ id: docRef.id, ...dbData });
     } catch (error) {
       console.error('Error creating vehicle:', error);
       throw error;

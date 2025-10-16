@@ -1,5 +1,7 @@
 import { motion } from 'framer-motion';
 import { Globe, Users, Leaf, Award } from 'lucide-react';
+import { LazyLoadImage } from 'react-lazy-load-image-component';
+import 'react-lazy-load-image-component/src/effects/blur.css';
 
 const AboutSriLanka = () => {
   const stats = [
@@ -63,26 +65,30 @@ const AboutSriLanka = () => {
           >
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-4">
-                <img
-                  src="https://images.unsplash.com/photo-1590165482129-1b8b27698780?q=80&w=600"
+                <LazyLoadImage
                   alt="Tea Plantations"
+                  effect="blur"
+                  src="https://images.unsplash.com/photo-1590165482129-1b8b27698780?q=80&w=600"
                   className="rounded-2xl shadow-lg w-full h-48 object-cover"
                 />
-                <img
-                  src="https://images.unsplash.com/photo-1586135084234-5d44cf8c5b94?q=80&w=600"
+                <LazyLoadImage
                   alt="Ancient Temple"
+                  effect="blur"
+                  src="https://images.unsplash.com/photo-1586135084234-5d44cf8c5b94?q=80&w=600"
                   className="rounded-2xl shadow-lg w-full h-64 object-cover"
                 />
               </div>
               <div className="space-y-4 mt-8">
-                <img
-                  src="https://images.unsplash.com/photo-1567157577867-05ccb1388e66?q=80&w=600"
+                <LazyLoadImage
                   alt="Beach Paradise"
+                  effect="blur"
+                  src="https://images.unsplash.com/photo-1567157577867-05ccb1388e66?q=80&w=600"
                   className="rounded-2xl shadow-lg w-full h-64 object-cover"
                 />
-                <img
-                  src="https://images.unsplash.com/photo-1596895203555-280dd1cf0226?q=80&w=600"
+                <LazyLoadImage
                   alt="Wildlife"
+                  effect="blur"
+                  src="https://images.unsplash.com/photo-1596895203555-280dd1cf0226?q=80&w=600"
                   className="rounded-2xl shadow-lg w-full h-48 object-cover"
                 />
               </div>
