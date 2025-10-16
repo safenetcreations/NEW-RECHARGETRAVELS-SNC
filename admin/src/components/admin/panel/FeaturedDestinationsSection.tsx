@@ -204,7 +204,7 @@ const FeaturedDestinationsSection: React.FC = () => {
                   </div>
 
                   <div className="flex flex-wrap gap-2 mb-4">
-                    {destination.features.map(feature => (
+                    {(destination.features || []).map(feature => (
                       <Badge key={feature} variant="outline">{feature}</Badge>
                     ))}
                   </div>
