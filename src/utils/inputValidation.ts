@@ -21,7 +21,7 @@ export const validateEmail = (email: string): boolean => {
 
 // Phone number validation (international format)
 export const validatePhone = (phone: string): boolean => {
-  const phoneRegex = /^\+?[\d\s\-\(\)]{10,15}$/;
+  const phoneRegex = /^\+?[\d\s-()]{10,15}$/;
   return phoneRegex.test(phone.replace(/\s/g, ''));
 };
 

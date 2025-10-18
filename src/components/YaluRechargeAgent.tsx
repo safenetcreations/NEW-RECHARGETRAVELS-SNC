@@ -397,20 +397,24 @@ Always end with: "How else may I assist you?"`
         
       case 'vehicleAvailability':
         // Check real-time fleet inventory
-        const vehicleData = await YaluFirebaseService.checkVehicleAvailability({
-          date: params?.date || new Date().toISOString().split('T')[0],
-          passengers: params?.passengers || 4
-        })
-        return YaluFirebaseService.formatVehicleResponse(vehicleData)
+        {
+          const vehicleData = await YaluFirebaseService.checkVehicleAvailability({
+            date: params?.date || new Date().toISOString().split('T')[0],
+            passengers: params?.passengers || 4
+          })
+          return YaluFirebaseService.formatVehicleResponse(vehicleData)
+        }
         
       case 'quoteTour':
         // Calculate tour pricing
-        const priceData = await YaluFirebaseService.calculateTourPrice({
-          tourId: params?.tourId || 'jaffna-cultural-tour',
-          pax: params?.pax || 2,
-          date: params?.date || new Date().toISOString().split('T')[0]
-        })
-        return YaluFirebaseService.formatTourPriceResponse(priceData)
+        {
+          const priceData = await YaluFirebaseService.calculateTourPrice({
+            tourId: params?.tourId || 'jaffna-cultural-tour',
+            pax: params?.pax || 2,
+            date: params?.date || new Date().toISOString().split('T')[0]
+          })
+          return YaluFirebaseService.formatTourPriceResponse(priceData)
+        }
         
       case 'bookService':
         // Initiate booking

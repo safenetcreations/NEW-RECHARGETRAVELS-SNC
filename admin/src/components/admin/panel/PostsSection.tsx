@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, MoreHorizontal } from 'lucide-react';
+import { PlusCircle, MoreHorizontal, Edit, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { getDocs, collection, query, orderBy } from 'firebase/firestore';
+import { getDocs, collection, query, orderBy, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '@/services/firebaseService';
+import { useToast } from '@/components/ui/use-toast';
 
 interface Post {
   id: string;
@@ -17,14 +18,15 @@ interface Post {
 const PostsSection: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
         setLoading(true);
         const q = query(
-          collection(db, 'blog_posts'),
-          orderBy('date', 'desc')
+          collection(db, 'posts'),
+          orderBy('createdAt', 'desc')
         );
         const snapshot = await getDocs(q);
         const data = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() })) as Post[];
@@ -38,6 +40,19 @@ const PostsSection: React.FC = () => {
 
     fetchPosts();
   }, []);
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Are you sure you want to delete this post?')) {
+      try {
+        await deleteDoc(doc(db, 'posts', id));
+        setPosts(posts.filter(post => post.id !== id));
+        toast({ title: 'Post deleted successfully' });
+      } catch (error) {
+        console.error('Error deleting post:', error);
+        toast({ title: 'Error deleting post', variant: 'destructive' });
+      }
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -79,8 +94,13 @@ const PostsSection: React.FC = () => {
                     <td className="p-4">{post.author}</td>
                     <td className="p-4">{post.date}</td>
                     <td className="p-4 text-right">
-                      <Button variant="ghost" size="icon">
-                        <MoreHorizontal className="w-4 h-4" />
+                      <Link to={`/admin/posts/edit/${post.id}`}>
+                        <Button variant="ghost" size="icon">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      </Link>
+                      <Button variant="ghost" size="icon" onClick={() => handleDelete(post.id)}>
+                        <Trash2 className="w-4 h-4" />
                       </Button>
                     </td>
                   </tr>

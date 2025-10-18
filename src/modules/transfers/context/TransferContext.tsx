@@ -11,16 +11,14 @@ const queryClient = new QueryClient({
   },
 });
 
-interface TransferContextValue {
-  // Add context values as needed
-}
+type TransferContextValue = Record<string, never>;
 
 const TransferContext = createContext<TransferContextValue | undefined>(undefined);
 
 export const TransferProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   return (
     <QueryClientProvider client={queryClient}>
-      <TransferContext.Provider value={{}}>
+      <TransferContext.Provider value={{} as TransferContextValue}>
         {children}
       </TransferContext.Provider>
     </QueryClientProvider>

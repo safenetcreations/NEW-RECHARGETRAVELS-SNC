@@ -61,7 +61,7 @@ export async function getDestinations(page = 1, limitVal = 12, regionName?: stri
   console.log('Fetching destinations:', { page, limit: limitVal, region: regionName, category: categoryName })
   
   const destinationsCollection = collection(db, 'destination');
-  let q = query(
+  const q = query(
     destinationsCollection,
     where('published', '==', true),
     orderBy('created_at', 'desc'),

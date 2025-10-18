@@ -7,7 +7,7 @@ export const validateEmail = (email: string): boolean => {
 };
 
 export const validatePhone = (phone: string): boolean => {
-  return /^[\d\s\-\+\(\)]+$/.test(phone);
+  return /^[\d\s-+()]+$/.test(phone);
 };
 
 export const sanitizeInput = (input: string): string => {

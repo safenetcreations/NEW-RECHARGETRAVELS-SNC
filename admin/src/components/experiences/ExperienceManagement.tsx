@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense, lazy } from 'react';
 import { 
   Plus, 
   Edit, 
@@ -40,7 +40,9 @@ import {
 import { luxuryExperienceService } from '@/services/luxuryExperienceService';
 import type { LuxuryExperience, ExperienceCategory } from '@/types/luxury-experience';
 import { toast } from 'sonner';
-import ExperienceForm from './ExperienceForm';
+import LoadingSpinner from '@/components/LoadingSpinner';
+
+const ExperienceForm = lazy(() => import('./ExperienceForm'));
 
 const ExperienceManagement = () => {
   const [experiences, setExperiences] = useState<LuxuryExperience[]>([]);
@@ -398,10 +400,12 @@ const ExperienceManagement = () => {
               {editingExperience ? 'Edit Experience' : 'Add New Experience'}
             </DialogTitle>
           </DialogHeader>
-          <ExperienceForm 
-            experience={editingExperience}
-            onClose={handleFormClose}
-          />
+          <Suspense fallback={<LoadingSpinner />}>
+            <ExperienceForm 
+              experience={editingExperience}
+              onClose={handleFormClose}
+            />
+          </Suspense>
         </DialogContent>
       </Dialog>
     </div>

@@ -1,25 +1,53 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Sparkles } from 'lucide-react';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '@/lib/firebase';
 import { useToast } from '@/components/ui/use-toast';
 
-const CreatePost: React.FC = () => {
+const EditPost: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [title, setTitle] = useState('');
   const [excerpt, setExcerpt] = useState('');
   const [content, setContent] = useState('');
   const [author, setAuthor] = useState('');
   const [category, setCategory] = useState('');
   const [image, setImage] = useState<File | null>(null);
+  const [imageUrl, setImageUrl] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchPost = async () => {
+      if (!id) return;
+      const docRef = doc(db, 'posts', id);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const post = docSnap.data();
+        setTitle(post.title);
+        setExcerpt(post.excerpt);
+        setContent(post.content);
+        setAuthor(post.author);
+        setCategory(post.category);
+        setImageUrl(post.imageUrl);
+      } else {
+        toast({
+          title: 'Post not found',
+          variant: 'destructive',
+        });
+        navigate('/admin/posts');
+      }
+    };
+    fetchPost();
+  }, [id, navigate, toast]);
 
   const handleGenerateContent = async () => {
     if (!title) {
@@ -31,7 +59,6 @@ const CreatePost: React.FC = () => {
       return;
     }
     setIsGenerating(true);
-    // Replace with your actual AI content generation logic
     const generatedContent = await new Promise<string>(resolve => {
       setTimeout(() => {
         resolve(`This is some AI generated content about ${title}.`);
@@ -43,50 +70,41 @@ const CreatePost: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !content) {
+    if (!id || !title || !content) {
       toast({
         title: 'Title and content are required',
-        description: 'Please fill out all required fields.',
         variant: 'destructive',
       });
       return;
     }
     setIsSubmitting(true);
     try {
-      let imageUrl = '';
+      let newImageUrl = imageUrl;
       if (image) {
         const imageRef = ref(storage, `posts/${Date.now()}_${image.name}`);
         const snapshot = await uploadBytes(imageRef, image);
-        imageUrl = await getDownloadURL(snapshot.ref);
+        newImageUrl = await getDownloadURL(snapshot.ref);
       }
 
-      await addDoc(collection(db, 'posts'), {
+      const docRef = doc(db, 'posts', id);
+      await updateDoc(docRef, {
         title,
         excerpt,
         content,
         author,
         category,
-        imageUrl,
-        createdAt: serverTimestamp(),
+        imageUrl: newImageUrl,
         updatedAt: serverTimestamp(),
       });
 
       toast({
-        title: 'Post created successfully',
+        title: 'Post updated successfully',
       });
-
-      // Clear the form
-      setTitle('');
-      setExcerpt('');
-      setContent('');
-      setAuthor('');
-      setCategory('');
-      setImage(null);
+      navigate('/admin/posts');
     } catch (error) {
-      console.error('Error creating post:', error);
+      console.error('Error updating post:', error);
       toast({
-        title: 'Error creating post',
-        description: 'An error occurred while creating the post. Please try again.',
+        title: 'Error updating post',
         variant: 'destructive',
       });
     } finally {
@@ -96,7 +114,7 @@ const CreatePost: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900">Create New Blog Post</h2>
+      <h2 className="text-2xl font-bold text-gray-900">Edit Blog Post</h2>
 
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -144,12 +162,13 @@ const CreatePost: React.FC = () => {
                 <div>
                   <Label htmlFor="image">Featured Image</Label>
                   <Input id="image" type="file" onChange={(e) => setImage(e.target.files ? e.target.files[0] : null)} />
+                  {imageUrl && !image && <img src={imageUrl} alt="Featured Image" className="mt-4 w-full h-auto" />}
                 </div>
               </CardContent>
             </Card>
 
             <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isSubmitting}>
-              {isSubmitting ? 'Creating Post...' : 'Create Post'}
+              {isSubmitting ? 'Updating Post...' : 'Update Post'}
             </Button>
           </div>
         </div>
@@ -158,4 +177,4 @@ const CreatePost: React.FC = () => {
   );
 };
 
-export default CreatePost;
+export default EditPost;

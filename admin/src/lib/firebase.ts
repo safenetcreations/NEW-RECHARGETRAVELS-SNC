@@ -18,16 +18,10 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-W2MJBDFDG3"
 };
 
-console.log('🔥 Firebase initializing with config:', {
-  projectId: firebaseConfig.projectId,
-  authDomain: firebaseConfig.authDomain
-});
-
 // Initialize Firebase
 let app;
 try {
   app = initializeApp(firebaseConfig);
-  console.log('✅ Firebase app initialized successfully');
 } catch (error) {
   console.error('❌ Firebase initialization error:', error);
   throw error;
@@ -43,7 +37,6 @@ export const functions = getFunctions(app);
 export let analytics;
 try {
   analytics = getAnalytics(app);
-  console.log('✅ Firebase Analytics initialized');
 } catch (error) {
   console.warn('⚠️ Firebase Analytics not available:', error);
 }

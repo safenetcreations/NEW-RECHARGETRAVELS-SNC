@@ -9,11 +9,15 @@ interface ErrorBoundaryState {
   errorInfo?: React.ErrorInfo;
 }
 
+interface ErrorBoundaryProps {
+  children?: React.ReactNode;
+}
+
 class ErrorBoundary extends React.Component<
-  React.PropsWithChildren<{}>,
+  ErrorBoundaryProps,
   ErrorBoundaryState
 > {
-  constructor(props: React.PropsWithChildren<{}>) {
+  constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false };
   }

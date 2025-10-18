@@ -19,8 +19,8 @@ export const initializeGA = () => {
     window.dataLayer = window.dataLayer || [];
     
     // Define gtag function
-    window.gtag = function() {
-      window.dataLayer.push(arguments);
+    window.gtag = (...args) => {
+      window.dataLayer.push(args);
     };
     
     // Set timestamp

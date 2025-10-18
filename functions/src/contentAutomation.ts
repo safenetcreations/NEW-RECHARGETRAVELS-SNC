@@ -20,7 +20,7 @@ export const dailyContentAutomation = functions.pubsub
         .orderBy('priority', 'desc')
         .get();
 
-      let contentToGenerate = scheduledContent.docs.map(doc => ({
+      const contentToGenerate = scheduledContent.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));

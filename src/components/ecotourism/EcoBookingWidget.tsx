@@ -19,6 +19,9 @@ const EcoBookingWidget = ({ tour, accommodations }: EcoBookingWidgetProps) => {
   const [groupSize, setGroupSize] = useState(2)
   const [selectedAccommodation, setSelectedAccommodation] = useState('')
   const [selectedTier, setSelectedTier] = useState('standard')
+  const selectedAccommodationDetails = accommodations?.find(
+    (acc) => acc.id === selectedAccommodation
+  )
 
   const calculateTotalPrice = () => {
     let basePrice = tour.price_per_person * groupSize
@@ -178,11 +181,11 @@ const EcoBookingWidget = ({ tour, accommodations }: EcoBookingWidgetProps) => {
             <span>${(tour.price_per_person * groupSize).toFixed(2)}</span>
           </div>
           
-          {selectedAccommodation && accommodations && (
+          {selectedAccommodationDetails && (
             <div className="flex justify-between text-sm">
               <span>Accommodation ({tour.duration_days} nights)</span>
               <span>
-                ${(accommodations.find(acc => acc.id === selectedAccommodation)?.price_per_night! * tour.duration_days * groupSize).toFixed(2)}
+                ${(selectedAccommodationDetails.price_per_night * tour.duration_days * groupSize).toFixed(2)}
               </span>
             </div>
           )}

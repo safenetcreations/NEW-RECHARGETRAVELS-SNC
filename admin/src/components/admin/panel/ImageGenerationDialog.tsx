@@ -48,7 +48,6 @@ const ImageGenerationDialog: React.FC<ImageGenerationDialogProps> = ({ isOpen, o
         return;
       }
 
-      // @ts-ignore
       const result = await google.generativeai.images.generate({ prompt, styles: [style] });
       if (result.error) {
         setError(result.error);

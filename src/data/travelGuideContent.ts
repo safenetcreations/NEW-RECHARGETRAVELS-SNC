@@ -221,7 +221,7 @@ export const travelGuideCategories: GuideCategory[] = [
           'Scenic train ride to Ella',
           'Tea factory tours and tastings',
           'Horton Plains National Park',
-          'Adam\'s Peak pilgrimage',
+          "Adam's Peak pilgrimage",
           'Colonial architecture in Nuwara Eliya'
         ],
         tips: [
@@ -243,7 +243,7 @@ export const travelGuideCategories: GuideCategory[] = [
       {
         id: 'water-sports',
         title: 'Water Sports & Activities',
-        content: `Sri Lanka\'s coastline and rivers offer diverse water sports including surfing, diving, snorkeling, white water rafting, and kitesurfing.`,
+        content: `Sri Lanka's coastline and rivers offer diverse water sports including surfing, diving, snorkeling, white water rafting, and kitesurfing.`,
         highlights: [
           'Surfing - Arugam Bay, Weligama, Mirissa',
           'Diving - Hikkaduwa, Trincomalee, Batticaloa',
@@ -387,7 +387,7 @@ export const travelGuideCategories: GuideCategory[] = [
       {
         id: 'tea-culture',
         title: 'Tea Culture & Experiences',
-        content: `As one of the world\'s largest tea exporters, Sri Lanka offers unique tea experiences from plantation visits to professional tastings.`,
+        content: `As one of the world's largest tea exporters, Sri Lanka offers unique tea experiences from plantation visits to professional tastings.`,
         highlights: [
           'Ceylon Tea - world-renowned quality',
           'Tea factory tours in hill country',

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, Suspense, lazy } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,8 +14,10 @@ import {
   ArrowUp,
   ArrowDown
 } from 'lucide-react';
-import DashboardCharts from './DashboardCharts';
 import TimeRangeFilter from './TimeRangeFilter';
+import LoadingSpinner from '@/components/LoadingSpinner';
+
+const DashboardCharts = lazy(() => import('./DashboardCharts'));
 
 const DashboardSection: React.FC = () => {
   const [timeRange, setTimeRange] = useState<'today' | 'week' | 'month' | 'year'>('month');
@@ -150,7 +152,9 @@ const DashboardSection: React.FC = () => {
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold text-gray-900">Analytics Overview</h2>
         </div>
-        <DashboardCharts timeRange={timeRange} />
+        <Suspense fallback={<LoadingSpinner />}>
+          <DashboardCharts timeRange={timeRange} />
+        </Suspense>
       </div>
 
       {/* Recent Activity & Quick Actions */}

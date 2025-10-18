@@ -1,34 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense, lazy } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { AdminGuard } from '@/components/admin/AdminGuard';
 import AdminSidebar from '@/components/admin/panel/AdminSidebar';
 import AdminHeader from '@/components/admin/panel/AdminHeader';
-import DashboardSection from '@/components/admin/panel/DashboardSection';
-import ContentSection from '@/components/admin/panel/ContentSection';
-import ImageSection from '@/components/admin/panel/ImageSection';
-import UsersSection from '@/components/admin/panel/UsersSection';
-import SettingsSection from '@/components/admin/panel/SettingsSection';
-import HotelsSection from '@/components/admin/panel/HotelsSection';
-import BookingsSection from '@/components/admin/panel/BookingsSection';
-import ToursSection from '@/components/admin/panel/ToursSection';
-import ToursManagement from '@/components/admin/panel/ToursManagement';
-import ActivitiesSection from '@/components/admin/panel/ActivitiesSection';
-import DriversSection from '@/components/admin/panel/DriversSection';
-import ReviewsSection from '@/components/admin/panel/ReviewsSection';
-import PagesSection from '@/components/admin/panel/PagesSection';
-import PostsSection from '@/components/admin/panel/PostsSection';
-import MediaSection from '@/components/admin/panel/MediaSection';
-import AnalyticsSection from '@/components/admin/panel/AnalyticsSection';
-import EmailTemplatesSection from '@/components/admin/panel/EmailTemplatesSection';
-import FeaturedDestinationsSection from '@/components/admin/panel/FeaturedDestinationsSection';
-import TravelPackagesSection from '@/components/admin/panel/TravelPackagesSection';
-import ExperienceManagement from '@/components/experiences/ExperienceManagement';
-import AITest from '@/components/admin/panel/AITest';
-import HeroSectionManager from '@/components/admin/panel/HeroSectionManager';
-import TestimonialsManager from '@/components/admin/panel/TestimonialsManager';
-import WhyChooseUsManager from '@/components/admin/panel/WhyChooseUsManager';
-import HomepageStatsManager from '@/components/admin/panel/HomepageStatsManager';
-import AboutSriLankaManagement from '@/components/admin/panel/AboutSriLankaManagement';
+import LoadingSpinner from '@/components/LoadingSpinner';
+
+const DashboardSection = lazy(() => import('@/components/admin/panel/DashboardSection'));
+const ContentSection = lazy(() => import('@/components/admin/panel/ContentSection'));
+const ImageSection = lazy(() => import('@/components/admin/panel/ImageSection'));
+const UsersManagement = lazy(() => import('@/components/admin/panel/UsersManagement'));
+const SettingsSection = lazy(() => import('@/components/admin/panel/SettingsSection'));
+const HotelsManagement = lazy(() => import('@/components/admin/panel/HotelsManagement'));
+const BookingsManagement = lazy(() => import('@/components/admin/panel/BookingsManagement'));
+const ToursSection = lazy(() => import('@/components/admin/panel/ToursSection'));
+const ToursManagement = lazy(() => import('@/components/admin/panel/ToursManagement'));
+const ActivitiesSection = lazy(() => import('@/components/admin/panel/ActivitiesSection'));
+const DriversManagement = lazy(() => import('@/components/admin/panel/DriversManagement'));
+const ReviewsSection = lazy(() => import('@/components/admin/panel/ReviewsSection'));
+const PagesSection = lazy(() => import('@/components/admin/panel/PagesSection'));
+const PagesManagement = lazy(() => import('@/components/admin/panel/PagesManagement'));
+const PostsSection = lazy(() => import('@/components/admin/panel/PostsSection'));
+const EditPost = lazy(() => import('@/pages/admin/EditPost'));
+const MediaSection = lazy(() => import('@/components/admin/panel/MediaSection'));
+const AnalyticsSection = lazy(() => import('@/components/admin/panel/AnalyticsSection'));
+const EmailTemplatesSection = lazy(() => import('@/components/admin/panel/EmailTemplatesSection'));
+const FeaturedDestinationsSection = lazy(() => import('@/components/admin/panel/FeaturedDestinationsSection'));
+const TravelPackagesSection = lazy(() => import('@/components/admin/panel/TravelPackagesSection'));
+const ExperienceManagement = lazy(() => import('@/components/experiences/ExperienceManagement'));
+const AITest = lazy(() => import('@/components/admin/panel/AITest'));
+const HeroSectionManager = lazy(() => import('@/components/admin/panel/HeroSectionManager'));
+const TestimonialsManager = lazy(() => import('@/components/admin/panel/TestimonialsManager'));
+const WhyChooseUsManager = lazy(() => import('@/components/admin/panel/WhyChooseUsManager'));
+const HomepageStatsManager = lazy(() => import('@/components/admin/panel/HomepageStatsManager'));
+const AboutSriLankaManagement = lazy(() => import('@/components/admin/panel/AboutSriLankaManagement'));
 
 const AdminPanel: React.FC = () => {
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -58,7 +62,7 @@ const AdminPanel: React.FC = () => {
           return <HomepageStatsManager />;
         // Services
         case 'hotels':
-          return <HotelsSection />;
+          return <HotelsManagement />;
         case 'tours':
           return <ToursManagement />;
         case 'tours-old':
@@ -68,13 +72,13 @@ const AdminPanel: React.FC = () => {
         case 'experiences':
           return <ExperienceManagement />;
         case 'drivers':
-          return <DriversSection />;
+          return <DriversManagement />;
         case 'bookings':
-          return <BookingsSection />;
+          return <BookingsManagement />;
         case 'reviews':
           return <ReviewsSection />;
         case 'users':
-          return <UsersSection />;
+          return <UsersManagement />;
         // Content
         case 'content':
           return <ContentSection />;
@@ -83,9 +87,11 @@ const AdminPanel: React.FC = () => {
         case 'images':
           return <ImageSection />;
         case 'pages':
-          return <PagesSection />;
+          return <PagesManagement />;
         case 'posts':
           return <PostsSection />;
+        case 'edit-post':
+            return <EditPost />;
         case 'media':
           return <MediaSection />;
         case 'analytics':
@@ -138,7 +144,9 @@ const AdminPanel: React.FC = () => {
             />
             <div className="p-4 sm:p-6 lg:p-8">
               <div className="max-w-7xl mx-auto">
-                {renderActiveSection()}
+                <Suspense fallback={<LoadingSpinner />}>
+                  {renderActiveSection()}
+                </Suspense>
               </div>
             </div>
           </main>

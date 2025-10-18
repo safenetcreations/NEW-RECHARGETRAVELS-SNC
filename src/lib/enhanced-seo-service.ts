@@ -44,9 +44,10 @@ export class EnhancedSEOService {
           structuredData: this.generateTourSchema('cultural')
         };
         
-      case 'destination':
+      case 'destination': {
         const destination = params?.destination || 'colombo';
         return this.generateDestinationSEO(destination);
+      }
         
       case 'hotels':
         return {
@@ -106,7 +107,7 @@ export class EnhancedSEOService {
       },
       ella: {
         title: 'Ella Travel Guide 2024 | Nine Arch Bridge, Train Rides & Hiking',
-        description: 'Ultimate Ella travel guide. Nine Arch Bridge, Little Adam\'s Peak, tea plantations, train rides. Best hotels, restaurants and adventure activities.',
+        description: "Ultimate Ella travel guide. Nine Arch Bridge, Little Adam's Peak, tea plantations, train rides. Best hotels, restaurants and adventure activities.",
         keywords: 'Ella Sri Lanka, Nine Arch Bridge, Ella train, Little Adams Peak, Ella hotels',
         canonicalUrl: `${this.baseUrl}/destinations/ella`,
         ogImage: 'https://images.unsplash.com/photo-1621164448191-a834de719ee4?q=80&w=2070'

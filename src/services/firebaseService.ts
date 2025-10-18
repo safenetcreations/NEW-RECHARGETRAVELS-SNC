@@ -138,7 +138,6 @@ export const storageService = {
 export const functionsService = {
   invoke: async (functionName: string, params?: any) => {
     // This would require setting up firebase functions
-    console.log('Function invoke:', functionName, params);
     return { data: { success: true }, error: null };
   }
 };
