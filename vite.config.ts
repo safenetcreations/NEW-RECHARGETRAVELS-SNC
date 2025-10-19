@@ -31,6 +31,13 @@ export default defineConfig(({ mode }) => ({
     cssCodeSplit: true,
     // Optimize asset handling
     assetsInlineLimit: 4096, // Inline assets smaller than 4KB
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'google-generative': ['@google/generative-ai'],
+        },
+      },
+    },
   },
   // Optimize dependencies
   optimizeDeps: {
@@ -44,6 +51,6 @@ export default defineConfig(({ mode }) => ({
       'date-fns',
       'framer-motion',
     ],
-    exclude: ['lovable-tagger'],
+    exclude: ['lovable-tagger', '@google/generative-ai'],
   },
 }));

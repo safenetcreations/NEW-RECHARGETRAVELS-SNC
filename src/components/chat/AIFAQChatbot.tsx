@@ -4,7 +4,6 @@ import { MessageCircle, X, Send, Bot, User, HelpCircle, Loader2 } from 'lucide-r
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Import the knowledge base from the external file
 import { SRI_LANKA_FAQ_TEXT, ICON_LIST } from './sriLankaKnowledgeBase';
@@ -55,6 +54,8 @@ const AIFAQChatbot: React.FC = () => {
       throw new Error('Gemini API key not configured');
     }
 
+    // Dynamically import to avoid bundling CommonJS code at startup
+    const { GoogleGenerativeAI } = await import('@google/generative-ai');
     const genAI = new GoogleGenerativeAI(API_KEY);
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 

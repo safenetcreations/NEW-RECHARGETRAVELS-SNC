@@ -1,9 +1,10 @@
-import React from 'react'
+import React, { lazy, Suspense } from 'react'
 import { Link } from 'react-router-dom'
 import { TreePine, Phone, Mail, MapPin, Leaf, Bird, Palmtree, Mountain, Waves, Sun } from 'lucide-react'
 import FooterSocial from '../footer/FooterSocial'
 import FooterBottom from '../footer/FooterBottom'
-import AIFAQChatbot from '@/components/chat/AIFAQChatbot'
+
+const AIFAQChatbot = lazy(() => import('@/components/chat/AIFAQChatbot'))
 
 const RechargeFooter: React.FC = () => {
   return (
@@ -222,7 +223,9 @@ const RechargeFooter: React.FC = () => {
         <div className="h-4 bg-gradient-to-r from-emerald-950 via-green-950 to-teal-950"></div>
       </footer>
 
-      <AIFAQChatbot />
+      <Suspense fallback={null}>
+        <AIFAQChatbot />
+      </Suspense>
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap');
