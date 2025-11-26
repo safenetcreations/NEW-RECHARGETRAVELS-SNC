@@ -1,0 +1,341 @@
+/* Ayurveda & Wellness Luxury Theme */
+/* Recharge Travels - High-End Retreat Experience */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+
+:root {
+  /* Primary Colors - Forest & Earth */
+  --color-forest: #2D4A3E;
+  --color-forest-deep: #1A3028;
+  --color-forest-light: #3D5E4F;
+
+  /* Accent Colors - Gold & Warmth */
+  --color-gold: #C9A962;
+  --color-gold-light: #E5D4A1;
+  --color-gold-dark: #A68B4B;
+  --color-champagne: #F7F3E8;
+
+  /* Earth Tones */
+  --color-terracotta: #C4785A;
+  --color-terracotta-light: #D99B7C;
+  --color-sand: #E8DFD0;
+  --color-sage: #9CAF94;
+
+  /* Neutrals */
+  --color-cream: #FDFBF7;
+  --color-ivory: #F9F6F0;
+  --color-charcoal: #2C2C2C;
+  --color-charcoal-light: #4A4A4A;
+  --color-muted: #8B8B8B;
+
+  /* Semantic Colors */
+  --background: var(--color-cream);
+  --background-alt: var(--color-ivory);
+  --foreground: var(--color-charcoal);
+  --foreground-muted: var(--color-muted);
+
+  --primary: var(--color-forest);
+  --primary-foreground: var(--color-cream);
+  --primary-hover: var(--color-forest-deep);
+
+  --secondary: var(--color-gold);
+  --secondary-foreground: var(--color-charcoal);
+  --secondary-hover: var(--color-gold-dark);
+
+  --accent: var(--color-terracotta);
+  --accent-foreground: var(--color-cream);
+
+  --card: #FFFFFF;
+  --card-foreground: var(--color-charcoal);
+  --card-border: rgba(201, 169, 98, 0.2);
+
+  --border: rgba(44, 74, 62, 0.1);
+  --border-gold: rgba(201, 169, 98, 0.3);
+
+  /* Typography */
+  --font-heading: 'Playfair Display', Georgia, serif;
+  --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 2rem;
+  --font-size-4xl: 2.5rem;
+  --font-size-5xl: 3.5rem;
+  --font-size-6xl: 4.5rem;
+
+  --line-height-tight: 1.1;
+  --line-height-snug: 1.3;
+  --line-height-normal: 1.6;
+  --line-height-relaxed: 1.8;
+
+  --letter-spacing-tight: -0.02em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.1em;
+  --letter-spacing-wider: 0.2em;
+  --letter-spacing-widest: 0.3em;
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  --spacing-3xl: 4rem;
+  --spacing-4xl: 6rem;
+  --spacing-5xl: 8rem;
+
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 20px;
+  --radius-2xl: 32px;
+  --radius-full: 9999px;
+
+  /* Shadows - Soft & Luxurious */
+  --shadow-sm: 0 2px 8px rgba(44, 74, 62, 0.04);
+  --shadow-md: 0 4px 20px rgba(44, 74, 62, 0.06);
+  --shadow-lg: 0 8px 40px rgba(44, 74, 62, 0.08);
+  --shadow-xl: 0 16px 60px rgba(44, 74, 62, 0.1);
+  --shadow-gold: 0 4px 30px rgba(201, 169, 98, 0.15);
+  --shadow-card: 0 4px 24px rgba(44, 74, 62, 0.05);
+  --shadow-card-hover: 0 12px 48px rgba(44, 74, 62, 0.12);
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-base: 300ms ease;
+  --transition-slow: 500ms ease;
+  --transition-slower: 800ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Z-Index Scale */
+  --z-base: 0;
+  --z-above: 10;
+  --z-modal: 100;
+  --z-overlay: 200;
+  --z-max: 999;
+}
+
+/* Base Resets */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px !important;
+}
+
+body {
+  font-family: var(--font-body) !important;
+  font-size: var(--font-size-base) !important;
+  line-height: var(--line-height-normal) !important;
+  color: var(--foreground) !important;
+  background-color: var(--background) !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography Hierarchy */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading) !important;
+  font-weight: 500 !important;
+  line-height: var(--line-height-tight) !important;
+  color: var(--foreground) !important;
+}
+
+h1 {
+  font-size: var(--font-size-5xl) !important;
+  letter-spacing: var(--letter-spacing-tight) !important;
+}
+
+h2 {
+  font-size: var(--font-size-4xl) !important;
+  letter-spacing: var(--letter-spacing-tight) !important;
+}
+
+h3 {
+  font-size: var(--font-size-3xl) !important;
+}
+
+h4 {
+  font-size: var(--font-size-2xl) !important;
+}
+
+h5 {
+  font-size: var(--font-size-xl) !important;
+}
+
+h6 {
+  font-size: var(--font-size-lg) !important;
+}
+
+p {
+  font-family: var(--font-body) !important;
+  line-height: var(--line-height-relaxed) !important;
+  color: var(--color-charcoal-light) !important;
+}
+
+/* Luxury Accent Text */
+.text-gold {
+  color: var(--color-gold) !important;
+}
+
+.text-forest {
+  color: var(--color-forest) !important;
+}
+
+.text-accent-line {
+  display: inline-block;
+  position: relative;
+}
+
+.text-accent-line::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, var(--color-gold), transparent);
+}
+
+/* Elegant Uppercase Labels */
+.label-luxury {
+  font-family: var(--font-body) !important;
+  font-size: var(--font-size-xs) !important;
+  font-weight: 500 !important;
+  letter-spacing: var(--letter-spacing-widest) !important;
+  text-transform: uppercase !important;
+  color: var(--color-gold) !important;
+}
+
+/* Decorative Elements */
+.divider-ornament {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  color: var(--color-gold);
+}
+
+.divider-ornament::before,
+.divider-ornament::after {
+  content: '';
+  width: 60px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
+}
+
+/* Button Styles */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-2xl);
+  font-family: var(--font-body) !important;
+  font-size: var(--font-size-sm) !important;
+  font-weight: 500 !important;
+  letter-spacing: var(--letter-spacing-wide) !important;
+  text-transform: uppercase !important;
+  text-decoration: none !important;
+  color: var(--primary-foreground) !important;
+  background-color: var(--primary) !important;
+  border: none !important;
+  border-radius: var(--radius-sm) !important;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover) !important;
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-2xl);
+  font-family: var(--font-body) !important;
+  font-size: var(--font-size-sm) !important;
+  font-weight: 500 !important;
+  letter-spacing: var(--letter-spacing-wide) !important;
+  text-transform: uppercase !important;
+  text-decoration: none !important;
+  color: var(--primary) !important;
+  background-color: transparent !important;
+  border: 1px solid var(--color-gold) !important;
+  border-radius: var(--radius-sm) !important;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.btn-secondary:hover {
+  background-color: var(--color-gold) !important;
+  color: var(--color-charcoal) !important;
+}
+
+/* Card Styles */
+.card-luxury {
+  background: var(--card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  transition: all var(--transition-slow);
+}
+
+.card-luxury:hover {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-8px);
+}
+
+/* Gold Gradient Overlays */
+.overlay-gold {
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(201, 169, 98, 0.1) 100%
+  );
+}
+
+.overlay-dark {
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(26, 48, 40, 0.8) 100%
+  );
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-ivory);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-sage);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-forest-light);
+}
+
+/* Selection */
+::selection {
+  background: var(--color-gold-light);
+  color: var(--color-forest-deep);
+}

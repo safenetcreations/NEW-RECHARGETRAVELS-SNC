@@ -1,0 +1,358 @@
+
+/* Cultural Heritage Admin Styles */
+.cultural-admin {
+  min-height: 100vh;
+  background: #f8f9fa;
+  font-family: 'Crimson Text', serif;
+}
+
+/* Navigation */
+.admin-nav {
+  background: white;
+  border-bottom: 2px solid #D4AF37;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: flex;
+  gap: 0;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  font-weight: 600;
+  transition: all 0.3s;
+  border-bottom: 2px solid transparent;
+  background: none;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  cursor: pointer;
+  color: #6b7280;
+}
+
+.nav-item:hover {
+  background: rgba(244, 185, 66, 0.1);
+  color: #8B1434;
+}
+
+.nav-item.active {
+  border-bottom-color: #D4AF37;
+  color: #8B1434;
+}
+
+/* Admin Content */
+.admin-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.admin-section {
+  display: none;
+}
+
+.admin-section.active {
+  display: block;
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Section Headers */
+.section-header {
+  display: flex;
+  justify-content: between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #D4AF37;
+}
+
+.section-title {
+  font-size: 2rem;
+  color: #8B1434;
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Tours Grid */
+.tours-grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.tour-card {
+  border: 2px solid #D4AF37;
+  border-radius: 8px;
+  transition: all 0.3s;
+}
+
+.tour-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.tour-header {
+  margin-bottom: 1rem;
+}
+
+.tour-name {
+  font-size: 1.25rem;
+  color: #8B1434;
+  font-weight: bold;
+  margin: 0 0 0.5rem 0;
+  font-family: 'Cinzel', serif;
+}
+
+.tour-meta {
+  color: #6b7280;
+  margin: 0;
+}
+
+.tour-highlights {
+  margin-bottom: 1.5rem;
+}
+
+.highlight-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.highlight-bullet {
+  color: #D4AF37;
+  margin-right: 0.5rem;
+  font-size: 1.2rem;
+}
+
+.tour-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Sites Grid */
+.sites-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.site-card {
+  border-left: 4px solid #D4AF37;
+  transition: all 0.3s;
+}
+
+.site-card:hover {
+  transform: translateX(4px);
+}
+
+.site-name {
+  font-size: 1.25rem;
+  color: #8B1434;
+  font-weight: bold;
+  margin: 0 0 1rem 0;
+  font-family: 'Cinzel', serif;
+}
+
+.site-details {
+  margin-bottom: 1.5rem;
+}
+
+.site-details p {
+  margin: 0 0 0.5rem 0;
+  color: #4b5563;
+}
+
+.detail-label {
+  color: #C65D00;
+  font-weight: 600;
+}
+
+.site-note {
+  color: #C65D00 !important;
+  font-style: italic;
+  margin-top: 0.5rem !important;
+}
+
+.site-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Form Styles */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.cultural-input {
+  border: 2px solid #d1d5db;
+  border-radius: 6px;
+  padding: 0.75rem;
+  transition: border-color 0.3s;
+}
+
+.cultural-input:focus {
+  outline: none;
+  border-color: #D4AF37;
+}
+
+/* Highlights Input */
+.highlights-input {
+  margin-top: 0.5rem;
+}
+
+.highlights-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.highlight-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f3f4f6;
+  padding: 0.75rem;
+  border-radius: 6px;
+}
+
+.highlight-text {
+  flex: 1;
+  color: #374151;
+}
+
+.highlight-remove {
+  background: none;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.highlight-remove:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* Button Styles */
+.btn-primary {
+  background: linear-gradient(to right, #8B1434, #C65D00);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-primary:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(139, 20, 52, 0.3);
+}
+
+.btn-secondary {
+  background: #D4AF37;
+  color: #4A2C2A;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-secondary:hover {
+  background: #F4B942;
+}
+
+.btn-edit {
+  background: #D4AF37;
+  color: #4A2C2A;
+  border: 1px solid #D4AF37;
+}
+
+.btn-edit:hover {
+  background: #F4B942;
+  color: #4A2C2A;
+}
+
+.btn-delete {
+  background: #ef4444;
+  color: white;
+  border: 1px solid #ef4444;
+}
+
+.btn-delete:hover {
+  background: #dc2626;
+}
+
+/* Modal Styles */
+.cultural-modal {
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .nav-container {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .sites-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .modal-actions {
+    flex-direction: column;
+  }
+}

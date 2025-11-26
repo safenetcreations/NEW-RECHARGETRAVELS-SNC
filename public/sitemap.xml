@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <!-- Homepage -->
+  <url>
+    <loc>https://www.rechargetravels.com/</loc>
+    <lastmod>2025-11-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.rechargetravels.com/" />
+    <xhtml:link rel="alternate" hreflang="ta" href="https://www.rechargetravels.com/ta/" />
+    <xhtml:link rel="alternate" hreflang="si" href="https://www.rechargetravels.com/si/" />
+  </url>
+
+  <!-- Main Pages -->
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/about</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/contact</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/book-now</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Tours -->
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/tours</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/tours/cultural</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/tours/beach-tours</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/tours/luxury</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/tours/honeymoon</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/tours/wellness</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/tours/photography</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/tours/ecotourism</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Destinations -->
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/destinations</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/destinations/colombo</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/destinations/kandy</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/destinations/galle</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/destinations/sigiriya</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/destinations/ella</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/destinations/jaffna</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/destinations/anuradhapura</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/destinations/polonnaruwa</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Transport -->
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/transport</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/transport/airport-transfers</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/transport/private-tours</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/transport/group-transport</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Experiences -->
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/experiences/train-journeys</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/experiences/tea-trails</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/experiences/pilgrimage-tours</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/experiences/whale-watching</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Family Activities -->
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/family-activities/family-train-journeys</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/family-activities/sigiriya-family-adventure</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Hotels -->
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/hotels</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Blog -->
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/blog</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Travel Guide - Comprehensive Sri Lanka Tourism Resource -->
+  <url>
+    <loc>https://www.rechargetravels.com/travel-guide</loc>
+    <lastmod>2025-11-26</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.rechargetravels.com/travel-guide" />
+    <xhtml:link rel="alternate" hreflang="ta" href="https://www.rechargetravels.com/ta/travel-guide" />
+    <xhtml:link rel="alternate" hreflang="si" href="https://www.rechargetravels.com/si/travel-guide" />
+  </url>
+
+  <!-- Driver Guide Services -->
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/tours/driver-guide</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Restaurant Guide -->
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/tours/restaurants</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Waterfall Guide -->
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/tours/waterfalls</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Wildlife Experience -->
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/wildlife-experience</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Ramayana Trail -->
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/tours/ramayana-trail</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Ayurveda Wellness Tour -->
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/tours/ayurveda-wellness</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Hill Country Tours -->
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/tours/hill-country</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Culinary Tours -->
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/tours/culinary</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Wild Tours -->
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/tours/wildtours</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Beach Tours -->
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/tours/beach-tours</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Activities -->
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/activities</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Vehicles -->
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/vehicles</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Drivers -->
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/drivers</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Login/Signup -->
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/login</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <url>
+    <loc>https://recharge-travels-73e76.web.app/signup</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- Admin Panel -->
+  <url>
+    <loc>https://recharge-travels-admin.web.app/</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+</urlset> 

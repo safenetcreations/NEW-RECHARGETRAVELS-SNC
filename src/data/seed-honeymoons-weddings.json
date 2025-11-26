@@ -1,0 +1,297 @@
+{
+  "slug": "honeymoons-weddings",
+  "seo": {
+    "title": "Sri Lanka Honeymoons & Destination Weddings | Budget to Luxury – Recharge Travels",
+    "description": "Plan your dream Sri Lanka honeymoon or destination wedding—beach vows, misty hill-country ceremonies, hot-air balloons, private safaris and luxury retreats. Budget, Signature & Luxury packages. Fully custom with Recharge Travels.",
+    "ogImageURL": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/romance%2Fromance-og-1200x630.webp?alt=media&token=romance-og"
+  },
+  "hero": {
+    "headline": "Sri Lanka Honeymoons & Destination Weddings",
+    "subheadline": "From barefoot beach vows to tea-country hideaways—crafted with love by Recharge Travels",
+    "heroImageURL": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/romance%2Fhero-beach-wedding-sunset.webp?alt=media&token=hero-romance",
+    "ctaPrimary": "Plan My Dream",
+    "ctaSecondary": "See Packages"
+  },
+  "honeymoons": {
+    "intro": "Hand-curated routes, private drivers, boutique stays, candle-lit dinners and once-in-a-lifetime experiences across Sri Lanka's most romantic corners.",
+    "tiers": [
+      {
+        "id": "budget",
+        "name": "Budget Bliss",
+        "priceFromUSD": 899,
+        "nights": 7,
+        "highlights": [
+          "3* boutique hotels",
+          "Private AC car & chauffeur",
+          "Romantic dinner for two",
+          "Sigiriya + Kandy + South Coast"
+        ],
+        "whatsIncluded": [
+          "Accommodation",
+          "Daily breakfast",
+          "Airport transfers",
+          "Chauffeur-guide",
+          "Entrance fees (Sigiriya, Temple of the Tooth)"
+        ],
+        "slug": "honeymoon-budget-bliss"
+      },
+      {
+        "id": "signature",
+        "name": "Signature Romance",
+        "priceFromUSD": 1599,
+        "nights": 10,
+        "highlights": [
+          "4*–5* boutique & villas",
+          "Private hot-air balloon (Sigiriya)",
+          "Tea-country pool villa",
+          "Couples spa ritual"
+        ],
+        "whatsIncluded": [
+          "Accommodation (4*–5*)",
+          "Half board",
+          "Balloon flight",
+          "Private scenic train ride (observation)",
+          "Sunset cruise"
+        ],
+        "slug": "honeymoon-signature-romance"
+      },
+      {
+        "id": "luxury",
+        "name": "Ultra-Luxe Hideaways",
+        "priceFromUSD": 3999,
+        "nights": 12,
+        "highlights": [
+          "5* luxury lodges & villas",
+          "Helicopter transfer (optional)",
+          "Private safari jeep & naturalist",
+          "Chef's table + wine pairing"
+        ],
+        "whatsIncluded": [
+          "Luxury accommodation",
+          "Private transfers",
+          "All experiences in Signature + upgrades",
+          "Dedicated 24/7 concierge"
+        ],
+        "slug": "honeymoon-ultra-luxe"
+      }
+    ],
+    "sampleItineraries": [
+      {
+        "title": "10 days Romantic Sri Lanka",
+        "days": [
+          {
+            "day": 1,
+            "title": "Colombo → Kandy",
+            "detail": "Private transfer, sunset at Kandy Lake, cultural show"
+          },
+          {
+            "day": 2,
+            "title": "Kandy → Sigiriya",
+            "detail": "Sigiriya at sunrise, private candle-lit dinner"
+          },
+          {
+            "day": 3,
+            "title": "Hot-air balloon over Cultural Triangle",
+            "detail": "Champagne breakfast, spa"
+          },
+          {
+            "day": 4,
+            "title": "Tea Country (Nuwara Eliya/Ella)",
+            "detail": "Scenic train, tea tasting & couples massage"
+          },
+          {
+            "day": 5,
+            "title": "Yala safari",
+            "detail": "Private jeep & naturalist"
+          },
+          {
+            "day": 6,
+            "title": "Mirissa/Weligama",
+            "detail": "Beach villa check-in, sunset cruise"
+          },
+          {
+            "day": 7,
+            "title": "Galle Fort",
+            "detail": "Photowalk, boutique shopping"
+          },
+          {
+            "day": 8,
+            "title": "Hikkaduwa lagoon safari or diving",
+            "detail": "Mangrove tunnels or coral reef"
+          },
+          {
+            "day": 9,
+            "title": "Free day",
+            "detail": "Private chef dinner at villa"
+          },
+          {
+            "day": 10,
+            "title": "Depart",
+            "detail": "Airport transfer"
+          }
+        ]
+      }
+    ]
+  },
+  "weddings": {
+    "intro": "From legal paperwork to petals, vows, elephants* and fireworks—Recharge Travels executes unforgettable, fully compliant destination weddings all over Sri Lanka.",
+    "venues": [
+      {
+        "type": "Beach",
+        "examples": ["Bentota", "Mirissa", "Passikudah", "Kalpitiya"]
+      },
+      {
+        "type": "Tea Country",
+        "examples": ["Hatton bungalows", "Nuwara Eliya manors"]
+      },
+      {
+        "type": "Cultural Triangle",
+        "examples": ["Sigiriya view lawns", "Dambulla resorts"]
+      },
+      {
+        "type": "Jaffna & North",
+        "examples": ["Mannar sandbanks ceremonies", "Delft Island elopements"]
+      }
+    ],
+    "packages": [
+      {
+        "id": "elopement",
+        "name": "Intimate Elopement",
+        "priceFromUSD": 1499,
+        "guestsUpTo": 10,
+        "includes": [
+          "Legal paperwork & officiant",
+          "Bouquet & boutonniere",
+          "Beachfront setup (arch, florals)",
+          "Pro photographer (2 hours)",
+          "Sunset champagne for two"
+        ],
+        "slug": "wedding-elopement"
+      },
+      {
+        "id": "signature-beach",
+        "name": "Signature Beach Wedding",
+        "priceFromUSD": 4999,
+        "guestsUpTo": 60,
+        "includes": [
+          "Full décor & floral styling",
+          "Live Kandyan drummers & dancers",
+          "Elephant blessing (ethical, optional*)",
+          "3-course dinner reception",
+          "DJ & lighting, on-the-day coordination"
+        ],
+        "slug": "wedding-signature-beach"
+      },
+      {
+        "id": "grand-cultural",
+        "name": "Grand Cultural Wedding",
+        "priceFromUSD": 12999,
+        "guestsUpTo": 200,
+        "includes": [
+          "Multi-day celebration & mehendi night",
+          "Kandyan Nilame attire or South Indian traditional",
+          "Elephant procession (ethical, sanctuary-partnered)",
+          "Fireworks & live band",
+          "Dedicated wedding producer + concierge"
+        ],
+        "slug": "wedding-grand-cultural"
+      }
+    ],
+    "complianceNote": "We follow Sri Lankan legal requirements for overseas couples and partner only with ethical sanctuaries when elephants are requested.* Alternatives: traditional drummers, cultural processions, horse-carriage, vintage cars.",
+    "addOns": [
+      "Hot-air balloon proposal shoot over Sigiriya",
+      "Private catamaran sunset party (Mirissa/Kalpitiya)",
+      "Helicopter arrival",
+      "Tea-country post-wedding photo session",
+      "Underwater 'trash the dress' snorkel shoot"
+    ]
+  },
+  "activitiesAddOns": [
+    "Whale watching (Mirissa / Trincomalee)",
+    "Scenic train Kandy → Ella",
+    "Kalpitiya kitesurfing for adventurous couples",
+    "Hikkaduwa water sports & lagoon safari",
+    "Jungle camping in Sinharaja / Knuckles",
+    "Sea cucumber hatchery tour (Jaffna Lagoon)",
+    "Cooking class + market-to-table dinner"
+  ],
+  "testimonials": [
+    {
+      "name": "Emma & Josh (UK)",
+      "text": "Recharge made our beach wedding effortless—legal paperwork, DJ, florals and a surprise elephant blessing—everything perfect."
+    },
+    {
+      "name": "Sofia & Mark (Spain)",
+      "text": "Our honeymoon tea-villa and private hot-air balloon ride felt like a movie. Best decision ever."
+    }
+  ],
+  "faq": [
+    {
+      "q": "Can foreigners legally get married in Sri Lanka?",
+      "a": "Yes. We handle affidavits, passport copies, birth certificates and registrar coordination. Plan for ~4 working days lead time for legal formalities."
+    },
+    {
+      "q": "Is the elephant blessing ethical?",
+      "a": "We only partner with vetted sanctuaries that meet welfare standards. If you prefer, we provide cultural alternatives—Kandyan drummers, vintage cars, horse carriages."
+    },
+    {
+      "q": "What's the best month for a beach wedding?",
+      "a": "Nov–Apr (south/west coasts) & May–Sep (east coast: Trincomalee, Passikudah) for the most reliable weather windows."
+    },
+    {
+      "q": "What's included in a typical honeymoon package?",
+      "a": "Private driver-guide, selected boutique stays, activities (Sigiriya, tea trails, safaris), breakfasts or half-board, and 24/7 concierge."
+    },
+    {
+      "q": "Can we customise every detail?",
+      "a": "Absolutely—menus, décor palettes, guest logistics, cultural ceremonies, transport, and post-wedding trips are all tailor-made."
+    },
+    {
+      "q": "How early should we secure a date and venue?",
+      "a": "Begin at least 9–12 months ahead so every legal formality, décor detail and guest room is locked-in long before your big day."
+    },
+    {
+      "q": "What sustainability options do you offer?",
+      "a": "Choose local, organic flowers, plastic-free décor, reef-safe confetti and give-back add-ons like tree-planting or community donations to keep your celebration planet-positive."
+    },
+    {
+      "q": "Is a destination wedding really cost-effective?",
+      "a": "With slimmer guest lists and bundled venue deals, couples often spend less than on a large hometown event—while upgrading the overall experience."
+    },
+    {
+      "q": "Can we combine our wedding and honeymoon?",
+      "a": "Yes—many couples roll straight into a tea-country mini-moon or beach retreat, turning one trip into a seamless celebration and escape."
+    },
+    {
+      "q": "Do you arrange guest activities beyond the big day?",
+      "a": "Yes—think lagoon cruises, wildlife safaris, cultural parades or spa days so guests enjoy a full holiday experience."
+    },
+    {
+      "q": "Can we include beauty and wellness treatments?",
+      "a": "Absolutely—bridal hair & makeup, spa rituals and pre-wedding wellness packages can be integrated for you and your party."
+    },
+    {
+      "q": "How is local culture woven into ceremonies?",
+      "a": "Options range from Kandyan drummers and dancers to Hindu blessings, Sri Maha Bodhi sapling plantings and regional menus that honour local heritage."
+    },
+    {
+      "q": "Why do modern couples choose destination weddings?",
+      "a": "They crave unique settings, intimate guest lists, cost efficiency and the freedom to merge wedding and honeymoon into one epic trip."
+    },
+    {
+      "q": "How do you handle safety, security and accessibility?",
+      "a": "We vet venues for 24-hour security, wheelchair-friendly layouts and emergency medical plans so every guest feels comfortable and safe."
+    },
+    {
+      "q": "What guest-service extras are available?",
+      "a": "Welcome hampers, childcare, dietary-specific catering and concierge for special requests are all part of our guest-care menu."
+    }
+  ],
+  "cta": {
+    "headline": "Start Designing Your Love Story in Sri Lanka",
+    "button": "Get My Custom Quote"
+  },
+  "contactForm": {
+    "successMessage": "Thank you! Our romance specialists will be in touch within 12 hours."
+  }
+}

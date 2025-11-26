@@ -1,0 +1,196 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      deploy_functions:
+        description: 'Deploy Firebase Functions'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+      deploy_rules:
+        description: 'Deploy Firestore Rules'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+# Prevent concurrent deployments
+concurrency:
+  group: production-deployment
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: 📦 Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            admin/node_modules
+            ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: 🏗️ Cache build outputs
+        uses: actions/cache@v4
+        with:
+          path: |
+            dist
+            admin/dist
+            .vite
+          key: ${{ runner.os }}-build-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-build-
+
+      - name: 📌 Install dependencies
+        run: |
+          npm ci --prefer-offline --no-audit
+          cd admin && npm ci --prefer-offline --no-audit
+
+      - name: 🔐 Setup environment variables
+        run: |
+          cat > .env << EOF
+          VITE_FIREBASE_API_KEY=${{ secrets.VITE_FIREBASE_API_KEY || 'AIzaSyBQf3QmHLF5I2fRiJL8R0qwJQGzHt7Gdsc' }}
+          VITE_FIREBASE_AUTH_DOMAIN=${{ secrets.VITE_FIREBASE_AUTH_DOMAIN || 'recharge-travels-73e76.firebaseapp.com' }}
+          VITE_FIREBASE_PROJECT_ID=${{ secrets.VITE_FIREBASE_PROJECT_ID || 'recharge-travels-73e76' }}
+          VITE_FIREBASE_STORAGE_BUCKET=${{ secrets.VITE_FIREBASE_STORAGE_BUCKET || 'recharge-travels-73e76.firebasestorage.app' }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID || '872522970644' }}
+          VITE_FIREBASE_APP_ID=${{ secrets.VITE_FIREBASE_APP_ID || '1:872522970644:web:9b826a012a3e0cc5f44c6b' }}
+          VITE_FIREBASE_MEASUREMENT_ID=${{ secrets.VITE_FIREBASE_MEASUREMENT_ID || 'G-D97PKVE58M' }}
+          VITE_GOOGLE_MAPS_API_KEY=${{ secrets.VITE_GOOGLE_MAPS_API_KEY || 'AIzaSyC7VYA7MK4M3cgqQgyBzeFiLUSTkEt08a8' }}
+          VITE_PAYHERE_MERCHANT_ID=${{ secrets.VITE_PAYHERE_MERCHANT_ID || '1234567' }}
+          VITE_PAYHERE_MERCHANT_SECRET=${{ secrets.VITE_PAYHERE_MERCHANT_SECRET || 'test-secret' }}
+          VITE_PAYMENT_ENV=${{ secrets.VITE_PAYMENT_ENV || 'production' }}
+          EOF
+          
+          cp .env admin/.env
+
+      - name: 🏃 Fast build main project
+        run: npm run build:fast
+        env:
+          NODE_ENV: production
+
+      - name: 🏃 Fast build admin project
+        run: cd admin && npm run build:fast
+        env:
+          NODE_ENV: production
+
+      - name: 📊 Build size report
+        run: |
+          echo "### 📊 Build Size Report" >> $GITHUB_STEP_SUMMARY
+          echo "| Build | Size |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Main | $(du -sh dist | cut -f1) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Admin | $(du -sh admin/dist | cut -f1) |" >> $GITHUB_STEP_SUMMARY
+
+      - name: 🚀 Deploy main site to Firebase
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
+          channelId: live
+          projectId: recharge-travels-73e76
+          target: main
+
+      - name: 🚀 Deploy admin site to Firebase
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
+          channelId: live
+          projectId: recharge-travels-73e76
+          target: admin
+
+      - name: 📋 Deploy Firestore rules
+        if: github.event.inputs.deploy_rules == 'true'
+        run: |
+          npm install -g firebase-tools
+          firebase deploy --only firestore:rules --token "${{ secrets.FIREBASE_TOKEN }}"
+
+      - name: 🔔 Send deployment notification
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: |
+            Production deployment ${{ job.status == 'success' && 'succeeded' || 'failed' }}
+            Branch: ${{ github.ref_name }}
+            Commit: ${{ github.sha }}
+            Author: ${{ github.actor }}
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        continue-on-error: true
+
+  create-release:
+    needs: build-and-deploy
+    if: success()
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🏷️ Get version
+        id: version
+        run: |
+          VERSION=$(date +%Y.%m.%d)-$(git rev-parse --short HEAD)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: 📝 Generate changelog
+        id: changelog
+        run: |
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -z "$PREVIOUS_TAG" ]; then
+            COMMITS=$(git log --pretty=format:"- %s (%h)" --no-merges -20)
+          else
+            COMMITS=$(git log --pretty=format:"- %s (%h)" --no-merges $PREVIOUS_TAG..HEAD)
+          fi
+          
+          echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
+          echo "## What's Changed" >> $GITHUB_OUTPUT
+          echo "$COMMITS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: 🏷️ Create release tag
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          release_name: Release v${{ steps.version.outputs.version }}
+          body: |
+            ${{ steps.changelog.outputs.CHANGELOG }}
+            
+            ## Deployment Details
+            - **Environment**: Production
+            - **Firebase Project**: recharge-travels-73e76
+            - **Deployed by**: @${{ github.actor }}
+            - **Commit**: ${{ github.sha }}
+          draft: false
+          prerelease: false

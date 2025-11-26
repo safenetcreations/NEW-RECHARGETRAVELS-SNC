@@ -1,0 +1,58 @@
+# Add labels to PRs based on file changes
+
+# Frontend changes
+frontend:
+  - src/**/*
+  - '*.tsx'
+  - '*.ts'
+  - '*.css'
+
+# Admin panel changes  
+admin:
+  - admin/**/*
+
+# Component changes
+components:
+  - src/components/**/*
+
+# Configuration changes
+config:
+  - '*.json'
+  - '*.yml'
+  - '*.yaml'
+  - '.env*'
+  - 'vite.config.*'
+
+# Documentation changes
+documentation:
+  - '*.md'
+  - docs/**/*
+
+# GitHub Actions changes
+ci/cd:
+  - .github/**/*
+
+# Dependencies
+dependencies:
+  - package.json
+  - package-lock.json
+  - admin/package.json
+  - admin/package-lock.json
+
+# Firebase related
+firebase:
+  - firebase.json
+  - .firebaserc
+  - firestore.rules
+  - firestore.indexes.json
+  - src/lib/firebase.ts
+
+# Performance related
+performance:
+  - vite.config.fast.ts
+  - src/lib/optimization/**/*
+
+# Security related
+security:
+  - src/lib/auth/**/*
+  - firestore.rules

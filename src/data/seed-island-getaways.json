@@ -1,0 +1,73 @@
+{
+  "slug": "island-getaways",
+  "name": "Island Getaways of Sri Lanka",
+  "heroImageURL": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fisland-hero-3840x2160.webp?alt=media",
+  "seo": {
+    "title": "Island Getaways Sri Lanka | Delft, Kayts & Mannar Sandbanks – Recharge Travels",
+    "description": "Chase wild ponies on Delft, snorkel coral reefs off Kayts and picnic on endless sandbanks in Mannar. Craft your perfect island‑hopping escape with Recharge Travels."
+  },
+  "introParagraph": "Just beyond Sri Lanka's northern coast lies an archipelago of untamed coral islets where feral ponies graze, Portuguese forts crumble and sandbanks glow silver beneath the Indian Ocean sun. Our Island Getaways whisk you across turquoise channels to Delft, Kayts, Mannar and more—pairing rustic charm with plush logistics. Speedboat transfers, beach BBQs and insider guides reveal stories of Chola kings, Dutch traders and Tamil fishing clans while keeping your toes buried in powder‑soft sand. Whether you crave shipwreck snorkels or flamingo‑filled lagoons, Recharge Travels turns the map's outer edges into your private playground.",
+  "highlights": [
+    { 
+      "icon": "🐎", 
+      "title": "Delft Wild Ponies",       
+      "blurb60": "Track Sri Lanka's only free‑roaming pony herds on Delft's sun‑bleached plains." 
+    },
+    { 
+      "icon": "🐠", 
+      "title": "Kayts Coral Gardens",    
+      "blurb60": "Snorkel vibrant reefs and WWII shipwrecks in crystal‑clear channels." 
+    },
+    { 
+      "icon": "🏖️", 
+      "title": "Mannar Sandbank Picnics",
+      "blurb60": "Boat to shifting white‑sand tongues where flamingos strut and crowds vanish." 
+    },
+    { 
+      "icon": "🏰", 
+      "title": "Colonial Forts & Temples", 
+      "blurb60": "Wander Portuguese ramparts and ancient Hindu shrines that guard the lagoons." 
+    }
+  ],
+  "routes": [
+    {
+      "routeName": "Jaffna Island‑Hop Day",
+      "duration": "1 day / 85 km",
+      "distanceKm": 85,
+      "bestClass": "Private speedboat + van",
+      "mapGPXUrl": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/routes%2Fjaffna-island-hop.gpx?alt=media"
+    },
+    {
+      "routeName": "Delft Overnight Castaway",
+      "duration": "2 days / 140 km",
+      "distanceKm": 140,
+      "bestClass": "Chartered catamaran",
+      "mapGPXUrl": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/routes%2Fdelft-overnight.gpx?alt=media"
+    },
+    {
+      "routeName": "Mannar Sandbank Escape",
+      "duration": "½ day / 40 km",
+      "distanceKm": 40,
+      "bestClass": "Rigid‑inflatable (RIB)",
+      "mapGPXUrl": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/routes%2Fmannar-sandbank.gpx?alt=media"
+    }
+  ],
+  "galleryImages": [
+    { 
+      "url": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fgallery-island1.webp?alt=media", 
+      "alt": "Wild ponies grazing on coral flats of Delft Island, Sri Lanka" 
+    },
+    { 
+      "url": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fgallery-island2.webp?alt=media", 
+      "alt": "Snorkeller above colourful coral reef near Kayts" 
+    },
+    { 
+      "url": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fgallery-island3.webp?alt=media", 
+      "alt": "Aerial view of endless sandbank curving into turquoise sea at Mannar" 
+    }
+  ],
+  "faqTag": "island-getaways",
+  "ctaHeadline": "Escape to Sri Lanka's Forgotten Isles",
+  "ctaSub": "Book your private island‑hopping adventure with Recharge Travels—boats, guides and beach feasts included.",
+  "videoURL": "https://www.youtube.com/embed/IslandGetawaysSL"
+}

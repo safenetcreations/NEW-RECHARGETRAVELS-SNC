@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Government Stamp Footer Design</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&family=Noto+Sans:wght@400;500;700&family=Noto+Sans+Sinhala:wght@400;700&family=Noto+Sans+Tamil:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .stamp-container {
+            background: linear-gradient(135deg, #003366 0%, #004080 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stamp-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="1" height="1" x="50" y="50" fill="white" opacity="0.03"/></svg>') repeat;
+            background-size: 10px 10px;
+        }
+        
+        .emblem-container {
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            padding: 2rem;
+            border-radius: 50%;
+        }
+        
+        .divider-line {
+            height: 40px;
+            width: 1px;
+            background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.3), transparent);
+        }
+        
+        .flag-gradient {
+            background: linear-gradient(90deg, #FFC72C 0%, #FFC72C 33%, #FF6B35 33%, #FF6B35 66%, #00A651 66%, #00A651 100%);
+            height: 3px;
+            width: 60px;
+            border-radius: 2px;
+            opacity: 0.8;
+        }
+        
+        .text-shadow {
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .stamp-border {
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 2rem;
+            background: rgba(255,255,255,0.02);
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Government Stamp Footer Section -->
+    <footer class="stamp-container py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="stamp-border">
+                <div class="flex flex-col items-center text-center">
+                    <!-- Emblem and Flag -->
+                    <div class="mb-8">
+                        <div class="emblem-container inline-block mb-4">
+                            <!-- Sri Lankan Emblem Placeholder -->
+                            <div class="w-24 h-24 bg-white/10 rounded-full flex items-center justify-center">
+                                <svg class="w-16 h-16 text-white/80" viewBox="0 0 100 100" fill="currentColor">
+                                    <!-- Simplified emblem representation -->
+                                    <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="2"/>
+                                    <path d="M50 20 L60 40 L80 40 L65 55 L70 75 L50 60 L30 75 L35 55 L20 40 L40 40 Z" fill="currentColor"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="flag-gradient mx-auto"></div>
+                    </div>
+
+                    <!-- Ministry Name in Three Languages -->
+                    <div class="mb-8">
+                        <h2 class="text-3xl font-bold text-white mb-2 text-shadow">Ministry of Fisheries</h2>
+                        <div class="flex items-center justify-center space-x-4 text-white/80">
+                            <span class="divider-line"></span>
+                            <h3 class="text-xl font-bold">ධීවර අමාත්‍යාංශය</h3>
+                            <span class="divider-line"></span>
+                            <h3 class="text-xl font-bold">மீன்வள அமைச்சு</h3>
+                            <span class="divider-line"></span>
+                        </div>
+                    </div>
+
+                    <!-- Government of Sri Lanka -->
+                    <div class="mb-8">
+                        <p class="text-lg text-white/90 mb-2">Government of Sri Lanka</p>
+                        <div class="flex items-center justify-center space-x-4 text-white/70 text-sm">
+                            <span>ශ්‍රී ලංකා රජය</span>
+                            <span class="text-white/30">|</span>
+                            <span>இலங்கை அரசாங்கம்</span>
+                        </div>
+                    </div>
+
+                    <!-- Official Seal Design -->
+                    <div class="mt-8 pt-8 border-t border-white/10 w-full">
+                        <div class="grid md:grid-cols-3 gap-8 text-white/70 text-sm">
+                            <div>
+                                <p class="font-semibold text-white/80 mb-2">Head Office</p>
+                                <p>New Secretariat Building</p>
+                                <p>Maligawatta, Colombo 10</p>
+                                <p>Sri Lanka</p>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-white/80 mb-2">Contact</p>
+                                <p>Tel: +94 11 2446183</p>
+                                <p>Fax: +94 11 2446184</p>
+                                <p>Email: info@fisheries.gov.lk</p>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-white/80 mb-2">Emergency</p>
+                                <p>Hotline: 1907</p>
+                                <p>Available 24/7</p>
+                                <p>All Languages</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Copyright -->
+                    <div class="mt-8 pt-8 border-t border-white/10 text-center">
+                        <p class="text-white/60 text-sm">
+                            © 2024 Ministry of Fisheries, Sri Lanka. All rights reserved.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Alternative Compact Version -->
+    <div class="mt-8 bg-gray-900 py-8">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center justify-between">
+                <!-- Left: Emblem and Ministry Name -->
+                <div class="flex items-center space-x-4 mb-4 md:mb-0">
+                    <div class="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center">
+                        <svg class="w-10 h-10 text-white/80" viewBox="0 0 100 100" fill="currentColor">
+                            <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="2"/>
+                            <path d="M50 20 L60 40 L80 40 L65 55 L70 75 L50 60 L30 75 L35 55 L20 40 L40 40 Z" fill="currentColor"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-white font-bold">Ministry of Fisheries</h3>
+                        <p class="text-white/60 text-sm">Government of Sri Lanka</p>
+                    </div>
+                </div>
+
+                <!-- Center: Trilingual Text -->
+                <div class="text-center mb-4 md:mb-0">
+                    <div class="flex items-center space-x-2 text-white/70 text-sm">
+                        <span>ධීවර අමාත්‍යාංශය</span>
+                        <span class="text-white/30">•</span>
+                        <span>மீன்வள அமைச்சு</span>
+                    </div>
+                </div>
+
+                <!-- Right: Flag -->
+                <div class="flag-gradient"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,73 @@
+{
+  "slug": "jungle-camping",
+  "name": "Jungle Camping & Rain‑Forest Adventures",
+  "heroImageURL": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fjungle-hero-3840x2160.webp?alt=media",
+  "seo": {
+    "title": "Jungle Camping Sri Lanka | Sinharaja, Knuckles & Wild Waterfalls – Recharge Travels",
+    "description": "Fall asleep to cicada choirs, wake to bird‑song dawns and trek hidden waterfalls on Sri Lanka's best jungle‑camping adventures. Book with Recharge Travels."
+  },
+  "introParagraph": "Trade hotel walls for a canvas roof and jungle symphony. Sri Lanka's rain‑forests shelter world‑record biodiversity—endemic birds, purple‑faced langurs and fragrant lianas twisting skyward. Recharge Travels' Jungle Camping packages pitch you deep inside Sinharaja, Knuckles and Wasgamuwa buffer zones with leave‑no‑trace camps, chef‑prepared meals and naturalist guides. By day, trace leopard tracks to secret waterfalls; by night, scan treetops for luminous lichen and firefly constellations. Safety, comfort and raw wilderness—no compromise.",
+  "highlights": [
+    { 
+      "icon": "🏕️", 
+      "title": "Leave‑No‑Trace Camps",       
+      "blurb60": "Raised platforms, eco‑loo tents and zero single‑use plastic keep nature pristine." 
+    },
+    { 
+      "icon": "🦋", 
+      "title": "Endemic Wildlife Walks",      
+      "blurb60": "Spot Ceylon hanging parrots, hump‑nosed lizards and elusive mouse‑deer with expert trackers." 
+    },
+    { 
+      "icon": "💧", 
+      "title": "Hidden Waterfall Swims",      
+      "blurb60": "Cool off under virgin cascades few tourists ever reach." 
+    },
+    { 
+      "icon": "🔥", 
+      "title": "Night‑Safari & Campfire",     
+      "blurb60": "Infra‑red scopes reveal nocturnal critters before stories & curry around the flames." 
+    }
+  ],
+  "routes": [
+    {
+      "routeName": "Sinharaja Rain‑Forest Immersion",
+      "duration": "2 days / 14 km trekking",
+      "distanceKm": 14,
+      "bestClass": "Eco‑camp + porter crew",
+      "mapGPXUrl": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/routes%2Fsinharaja-jungle-trek.gpx?alt=media"
+    },
+    {
+      "routeName": "Knuckles Cloud‑Forest Traverse",
+      "duration": "3 days / 25 km ridge hike",
+      "distanceKm": 25,
+      "bestClass": "Mobile fly‑camp",
+      "mapGPXUrl": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/routes%2Fknuckles-traverse.gpx?alt=media"
+    },
+    {
+      "routeName": "Wasgamuwa Wildlife Overnighter",
+      "duration": "1 night / 8 km river loop",
+      "distanceKm": 8,
+      "bestClass": "Jeep + boat combo",
+      "mapGPXUrl": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/routes%2Fwasgamuwa-river-loop.gpx?alt=media"
+    }
+  ],
+  "galleryImages": [
+    { 
+      "url": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fgallery-jungle1.webp?alt=media", 
+      "alt": "Canvas tents lit by lanterns deep in Sinharaja forest" 
+    },
+    { 
+      "url": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fgallery-jungle2.webp?alt=media", 
+      "alt": "Trekker standing beneath towering rainforest canopy of Knuckles" 
+    },
+    { 
+      "url": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fgallery-jungle3.webp?alt=media", 
+      "alt": "Campers swimming in hidden jungle waterfall pool" 
+    }
+  ],
+  "faqTag": "jungle-camping",
+  "ctaHeadline": "Answer the Call of Sri Lanka's Rain‑Forests",
+  "ctaSub": "Reserve your low‑impact jungle camp with Recharge Travels—gear, guides and gourmet fireside meals included.",
+  "videoURL": "https://www.youtube.com/embed/JungleCampingSL"
+}

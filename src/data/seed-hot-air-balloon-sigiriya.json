@@ -1,0 +1,66 @@
+{
+  "slug": "hot-air-balloon-sigiriya",
+  "name": "Hot‑Air Ballooning Over Sigiriya",
+  "heroImageURL": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fballoon-hero-3840x2160.webp?alt=media",
+  "seo": {
+    "title": "Hot‑Air Balloon Sigiriya | Sunrise Flights Over Sri Lanka's Cultural Triangle – Recharge Travels",
+    "description": "Float above the ancient rock fortress, emerald paddy fields and mist‑shrouded lakes at dawn. Book your Sigiriya hot‑air balloon adventure with Recharge Travels."
+  },
+  "introParagraph": "Nothing prepares you for the hush that falls when the burner quiets and your balloon drifts weightless over Sri Lanka's Cultural Triangle. Below, the Lion Rock of Sigiriya pierces morning mist; to the west, the stupas of Dambulla glint gold; and in every direction, jungle and paddies glow emerald under the rising sun. With Recharge Travels, you're in safe hands—Civil Aviation‑licensed pilots, GPS‑tracked chase crew, champagne breakfast on landing and seamless hotel transfers mean your only task is to soak up 360‑degree serenity from 1,500 feet in the air.",
+  "highlights": [
+    { 
+      "icon": "🌄", 
+      "title": "Sunrise Panorama",           
+      "blurb60": "Lift off at dawn for pink‑and‑gold light over Sigiriya Rock and the Knuckles Range." 
+    },
+    { 
+      "icon": "🛡️", 
+      "title": "Safety First",              
+      "blurb60": "CAA‑certified pilots, brand‑new Cameron balloons and 100 % passenger insurance." 
+    },
+    { 
+      "icon": "🥂", 
+      "title": "Champagne Landing",          
+      "blurb60": "Celebrate touchdown with sparkling wine & gourmet breakfast in a coconut grove." 
+    },
+    { 
+      "icon": "📸", 
+      "title": "Pro Photo Package",          
+      "blurb60": "On‑board GoPro + ground telephoto shots delivered digitally the same day." 
+    }
+  ],
+  "routes": [
+    {
+      "routeName": "Sigiriya Dawn Flight",
+      "duration": "1 hr flight / 10 km drift (weather‑dependent)",
+      "distanceKm": 10,
+      "bestClass": "10‑passenger Cameron Z‑90",
+      "mapGPXUrl": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/routes%2Fballoon-sigiriya-dawn.gpx?alt=media"
+    },
+    {
+      "routeName": "Private Charter Balloon",
+      "duration": "1 hr flight / custom route",
+      "distanceKm": 12,
+      "bestClass": "Exclusive 2‑4 pax basket",
+      "mapGPXUrl": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/routes%2Fballoon-private-charter.gpx?alt=media"
+    }
+  ],
+  "galleryImages": [
+    { 
+      "url": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fgallery-balloon1.webp?alt=media", 
+      "alt": "Hot‑air balloon floating past Sigiriya Rock at sunrise" 
+    },
+    { 
+      "url": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fgallery-balloon2.webp?alt=media", 
+      "alt": "View from balloon basket of misty paddy fields in Cultural Triangle" 
+    },
+    { 
+      "url": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fgallery-balloon3.webp?alt=media", 
+      "alt": "Couple toasting champagne after balloon landing in Sri Lanka" 
+    }
+  ],
+  "faqTag": "hot-air-balloon-sigiriya",
+  "ctaHeadline": "Rise Above Sri Lanka's Ancient Heart",
+  "ctaSub": "Seats fill months in advance—secure your sunrise flight with Recharge Travels today.",
+  "videoURL": "https://www.youtube.com/embed/HotAirBalloonSigiriya"
+}

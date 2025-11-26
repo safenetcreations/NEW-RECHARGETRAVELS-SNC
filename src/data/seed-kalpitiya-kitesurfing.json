@@ -1,0 +1,73 @@
+{
+  "slug": "kalpitiya-kitesurfing",
+  "name": "Kalpitiya Kitesurfing & Lagoon Adventures",
+  "heroImageURL": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fkite-hero-3840x2160.webp?alt=media",
+  "seo": {
+    "title": "Kalpitiya Kitesurfing | Flat‑Water Lagoons & Downwinders – Recharge Travels",
+    "description": "Master perfect wind, butter‑flat lagoons and epic ocean downwinders on Sri Lanka's northwest coast. Book your Kalpitiya kitesurf adventure with Recharge Travels."
+  },
+  "introParagraph": "Where the Indian Ocean kisses Puttalam Lagoon, steady trade winds and glass‑flat water create a kitesurfer's nirvana. Kalpitiya's season runs May–October and December–February, serving 20–28 knots side‑shore winds, mirror‑calm lagoons and wave spots all within a 10‑minute boat hop. With Recharge Travels, you'll train with IKO‑certified instructors, launch from uncrowded sandspits and chase sunset downwinders past spinner‑dolphin pods. Gear rentals, rescue boat cover, beachfront cabanas, BBQs and airport transfers—we handle every breeze‑chasing detail so you can focus on big airs and bigger smiles.",
+  "highlights": [
+    { 
+      "icon": "⛵", 
+      "title": "Butter‑Flat Lagoon",        
+      "blurb60": "Learn or freestyle on knee‑deep water with zero chop—progress 2× faster." 
+    },
+    { 
+      "icon": "💨", 
+      "title": "20‑28 Kn Trade Winds",      
+      "blurb60": "Reliable side‑shore thermals May–Oct & Dec–Feb mean ride every single day." 
+    },
+    { 
+      "icon": "🌊", 
+      "title": "Wave & Downwinder Spots",   
+      "blurb60": "Boat 10 min to Kappalady waves or join a 15‑km ocean downwinder back to base." 
+    },
+    { 
+      "icon": "🎓", 
+      "title": "IKO‑Certified School",      
+      "blurb60": "Radio helmets, brand‑new Duotone gear and seasoned instructors keep it safe." 
+    }
+  ],
+  "routes": [
+    {
+      "routeName": "Beginner 3‑Day IKO Course",
+      "duration": "3 days / 9 hrs coaching",
+      "distanceKm": 5,
+      "bestClass": "IKO Level 1‑2",
+      "mapGPXUrl": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/routes%2Fkalpitiya-beginner-course.gpx?alt=media"
+    },
+    {
+      "routeName": "Lagoon Freestyle Session",
+      "duration": "Half‑day / unlimited rides",
+      "distanceKm": 8,
+      "bestClass": "Advanced freestyle",
+      "mapGPXUrl": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/routes%2Fkalpitiya-lagoon-freestyle.gpx?alt=media"
+    },
+    {
+      "routeName": "Ocean Downwinder Safari",
+      "duration": "1 day / 15 km downwind",
+      "distanceKm": 15,
+      "bestClass": "Intermediate+",
+      "mapGPXUrl": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/routes%2Fkalpitiya-downwinder.gpx?alt=media"
+    }
+  ],
+  "galleryImages": [
+    { 
+      "url": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fgallery-kite1.webp?alt=media", 
+      "alt": "Kitesurfer boosting high above Kalpitiya Lagoon at sunset" 
+    },
+    { 
+      "url": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fgallery-kite2.webp?alt=media", 
+      "alt": "Over‑under photo of rider and clear turquoise water" 
+    },
+    { 
+      "url": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fgallery-kite3.webp?alt=media", 
+      "alt": "Group launching kites from a sandy island in Kalpitiya" 
+    }
+  ],
+  "faqTag": "kalpitiya-kitesurfing",
+  "ctaHeadline": "Ride Sri Lanka's Steadiest Wind Playground",
+  "ctaSub": "Reserve your kite package with Recharge Travels—gear, lessons, rescue & beachfront stays bundled.",
+  "videoURL": "https://www.youtube.com/embed/KalpitiyaKites"
+}

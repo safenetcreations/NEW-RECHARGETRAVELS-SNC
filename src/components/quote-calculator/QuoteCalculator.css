@@ -1,0 +1,1153 @@
+/**
+ * RECHARGE TRAVELS - Quote Calculator Styles
+ * ==========================================
+ * Modern, mobile-responsive styling
+ */
+
+/* ============================================
+   CSS VARIABLES
+   ============================================ */
+.quote-calculator-section {
+  --qc-primary: #1e7b4e;
+  --qc-primary-dark: #155a38;
+  --qc-primary-light: #e8f5ec;
+  --qc-secondary: #f59e0b;
+  --qc-accent: #0ea5e9;
+  --qc-success: #10b981;
+  --qc-warning: #f59e0b;
+  --qc-error: #ef4444;
+
+  --qc-gray-50: #f9fafb;
+  --qc-gray-100: #f3f4f6;
+  --qc-gray-200: #e5e7eb;
+  --qc-gray-300: #d1d5db;
+  --qc-gray-400: #9ca3af;
+  --qc-gray-500: #6b7280;
+  --qc-gray-600: #4b5563;
+  --qc-gray-700: #374151;
+  --qc-gray-800: #1f2937;
+  --qc-gray-900: #111827;
+
+  --qc-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --qc-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --qc-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --qc-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+
+  --qc-radius-sm: 6px;
+  --qc-radius: 12px;
+  --qc-radius-lg: 16px;
+  --qc-radius-xl: 24px;
+}
+
+/* ============================================
+   BASE STYLES
+   ============================================ */
+.quote-calculator {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--qc-gray-800);
+}
+
+/* ============================================
+   CALCULATOR HEADER
+   ============================================ */
+.quote-calculator .calculator-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.quote-calculator .calculator-header h2 {
+  font-size: 28px !important;
+  font-weight: 700 !important;
+  color: var(--qc-gray-900) !important;
+  margin-bottom: 8px !important;
+}
+
+.quote-calculator .calculator-header p {
+  font-size: 16px !important;
+  color: var(--qc-gray-500) !important;
+}
+
+/* ============================================
+   STEP PROGRESS
+   ============================================ */
+.quote-calculator .step-progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 32px;
+  padding: 0 20px;
+  overflow-x: auto;
+}
+
+.quote-calculator .step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  opacity: 0.5;
+}
+
+.quote-calculator .step.active {
+  opacity: 1;
+}
+
+.quote-calculator .step.current {
+  transform: scale(1.05);
+}
+
+.quote-calculator .step-icon {
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.quote-calculator .step-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--qc-gray-600);
+  white-space: nowrap;
+}
+
+.quote-calculator .step.current .step-title {
+  color: var(--qc-primary);
+  font-weight: 600;
+}
+
+.quote-calculator .step-line {
+  width: 40px;
+  height: 2px;
+  background: var(--qc-gray-200);
+  margin: 0 8px;
+}
+
+/* ============================================
+   CALCULATOR CONTENT
+   ============================================ */
+.quote-calculator .calculator-content {
+  background: white;
+  border-radius: var(--qc-radius-lg);
+  box-shadow: var(--qc-shadow-lg);
+  padding: 32px;
+}
+
+/* ============================================
+   PRICE PREVIEW
+   ============================================ */
+.quote-calculator .price-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  background: linear-gradient(135deg, var(--qc-primary-light), #d1fae5);
+  border-radius: var(--qc-radius);
+  margin-bottom: 24px;
+}
+
+.quote-calculator .price-preview .label {
+  font-size: 14px;
+  color: var(--qc-gray-600);
+}
+
+.quote-calculator .price-preview .price {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--qc-primary-dark);
+}
+
+.quote-calculator .price-preview .per-person {
+  font-size: 14px;
+  color: var(--qc-gray-500);
+}
+
+/* ============================================
+   STEP FORM STYLES
+   ============================================ */
+.quote-calculator .step-form h3 {
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  color: var(--qc-gray-800) !important;
+  margin-bottom: 8px !important;
+}
+
+.quote-calculator .step-description {
+  font-size: 14px;
+  color: var(--qc-gray-500);
+  margin-bottom: 24px;
+}
+
+.quote-calculator .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.quote-calculator .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.quote-calculator .form-group label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--qc-gray-700);
+}
+
+/* Number Input */
+.quote-calculator .number-input {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--qc-gray-50);
+  border: 1px solid var(--qc-gray-200);
+  border-radius: var(--qc-radius);
+  padding: 8px 16px;
+}
+
+.quote-calculator .number-input button {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: white;
+  border-radius: 50%;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--qc-primary);
+  cursor: pointer;
+  box-shadow: var(--qc-shadow-sm);
+  transition: all 0.2s;
+}
+
+.quote-calculator .number-input button:hover:not(:disabled) {
+  background: var(--qc-primary);
+  color: white;
+}
+
+.quote-calculator .number-input button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.quote-calculator .number-input span {
+  font-size: 24px;
+  font-weight: 600;
+  min-width: 40px;
+  text-align: center;
+}
+
+/* Form Inputs */
+.quote-calculator input[type="date"],
+.quote-calculator select {
+  padding: 12px 16px;
+  border: 1px solid var(--qc-gray-200);
+  border-radius: var(--qc-radius);
+  font-size: 16px;
+  background: white;
+  transition: border-color 0.2s;
+}
+
+.quote-calculator input[type="date"]:focus,
+.quote-calculator select:focus {
+  outline: none;
+  border-color: var(--qc-primary);
+  box-shadow: 0 0 0 3px var(--qc-primary-light);
+}
+
+.quote-calculator textarea {
+  padding: 12px 16px;
+  border: 1px solid var(--qc-gray-200);
+  border-radius: var(--qc-radius);
+  font-size: 14px;
+  resize: vertical;
+  font-family: inherit;
+  width: 100%;
+}
+
+.quote-calculator textarea:focus {
+  outline: none;
+  border-color: var(--qc-primary);
+}
+
+/* Date Summary */
+.quote-calculator .date-summary {
+  padding: 12px 16px;
+  background: var(--qc-gray-50);
+  border-radius: var(--qc-radius);
+  font-size: 14px;
+}
+
+.quote-calculator .nights-badge {
+  background: var(--qc-primary);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-left: 12px;
+}
+
+/* ============================================
+   DESTINATIONS STEP
+   ============================================ */
+.quote-calculator .region-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.quote-calculator .region-filters button {
+  padding: 8px 16px;
+  border: 1px solid var(--qc-gray-200);
+  background: white;
+  border-radius: 20px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.quote-calculator .region-filters button:hover {
+  border-color: var(--qc-primary);
+}
+
+.quote-calculator .region-filters button.active {
+  background: var(--qc-primary);
+  color: white;
+  border-color: var(--qc-primary);
+}
+
+.quote-calculator .destinations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.quote-calculator .destination-card {
+  position: relative;
+  padding: 16px;
+  border: 2px solid var(--qc-gray-200);
+  border-radius: var(--qc-radius);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.quote-calculator .destination-card:hover {
+  border-color: var(--qc-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--qc-shadow);
+}
+
+.quote-calculator .destination-card.selected {
+  border-color: var(--qc-primary);
+  background: var(--qc-primary-light);
+}
+
+.quote-calculator .dest-icon {
+  font-size: 32px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.quote-calculator .dest-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--qc-gray-800);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.quote-calculator .dest-region {
+  font-size: 11px;
+  color: var(--qc-gray-500);
+  display: block;
+}
+
+.quote-calculator .dest-fee {
+  font-size: 11px;
+  color: var(--qc-primary);
+  font-weight: 500;
+  display: block;
+  margin-top: 4px;
+}
+
+.quote-calculator .check-mark {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  background: var(--qc-primary);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+/* Selection Summary */
+.quote-calculator .selection-summary {
+  padding: 16px;
+  background: var(--qc-gray-50);
+  border-radius: var(--qc-radius);
+}
+
+.quote-calculator .selected-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.quote-calculator .tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: white;
+  border: 1px solid var(--qc-gray-200);
+  border-radius: 20px;
+  font-size: 13px;
+}
+
+.quote-calculator .tag button {
+  background: none;
+  border: none;
+  color: var(--qc-gray-400);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 0;
+  width: auto;
+  height: auto;
+}
+
+.quote-calculator .tag button:hover {
+  color: var(--qc-error);
+}
+
+/* ============================================
+   VEHICLES STEP
+   ============================================ */
+.quote-calculator .vehicles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.quote-calculator .vehicle-card {
+  position: relative;
+  padding: 20px;
+  border: 2px solid var(--qc-gray-200);
+  border-radius: var(--qc-radius);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.quote-calculator .vehicle-card:hover:not(.disabled) {
+  border-color: var(--qc-primary);
+  box-shadow: var(--qc-shadow);
+}
+
+.quote-calculator .vehicle-card.selected {
+  border-color: var(--qc-primary);
+  background: var(--qc-primary-light);
+}
+
+.quote-calculator .vehicle-card.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.quote-calculator .recommended-badge {
+  position: absolute;
+  top: -10px;
+  right: 12px;
+  padding: 4px 12px;
+  background: var(--qc-secondary);
+  color: white;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.quote-calculator .vehicle-card h4 {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  margin-bottom: 12px !important;
+}
+
+.quote-calculator .vehicle-specs {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--qc-gray-600);
+  margin-bottom: 12px;
+}
+
+.quote-calculator .vehicle-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.quote-calculator .feature-tag {
+  padding: 4px 10px;
+  background: var(--qc-gray-100);
+  border-radius: 12px;
+  font-size: 11px;
+  color: var(--qc-gray-600);
+}
+
+.quote-calculator .vehicle-price {
+  font-size: 14px;
+}
+
+.quote-calculator .vehicle-price .price {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--qc-primary);
+}
+
+.quote-calculator .vehicle-price .period {
+  color: var(--qc-gray-500);
+}
+
+.quote-calculator .too-small-notice {
+  margin-top: 12px;
+  padding: 8px;
+  background: var(--qc-error);
+  color: white;
+  border-radius: var(--qc-radius-sm);
+  font-size: 12px;
+  text-align: center;
+}
+
+/* Transfer Options */
+.quote-calculator .transfer-options {
+  padding: 20px;
+  background: var(--qc-gray-50);
+  border-radius: var(--qc-radius);
+}
+
+.quote-calculator .transfer-options h4 {
+  margin-bottom: 16px !important;
+}
+
+.quote-calculator .checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: white;
+  border-radius: var(--qc-radius-sm);
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+
+.quote-calculator .checkbox-label input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--qc-primary);
+}
+
+/* ============================================
+   ACCOMMODATION STEP
+   ============================================ */
+.quote-calculator .accommodation-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.quote-calculator .accommodation-card {
+  padding: 20px;
+  border: 2px solid var(--qc-gray-200);
+  border-radius: var(--qc-radius);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.quote-calculator .accommodation-card:hover {
+  border-color: var(--qc-primary);
+  box-shadow: var(--qc-shadow);
+}
+
+.quote-calculator .accommodation-card.selected {
+  border-color: var(--qc-primary);
+  background: var(--qc-primary-light);
+}
+
+.quote-calculator .accommodation-card h4 {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  margin-bottom: 8px !important;
+}
+
+.quote-calculator .accommodation-card .description {
+  font-size: 13px;
+  color: var(--qc-gray-600);
+  margin-bottom: 16px;
+}
+
+.quote-calculator .accommodation-card .includes {
+  margin-bottom: 12px;
+}
+
+.quote-calculator .accommodation-card .includes strong {
+  font-size: 12px;
+  color: var(--qc-gray-500);
+}
+
+.quote-calculator .accommodation-card .includes ul {
+  margin: 8px 0 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.quote-calculator .accommodation-card .includes li {
+  font-size: 13px;
+  color: var(--qc-gray-700);
+  padding: 2px 0;
+}
+
+.quote-calculator .accommodation-card .sample-hotels {
+  font-size: 12px;
+  color: var(--qc-gray-500);
+  margin-bottom: 16px;
+}
+
+.quote-calculator .accommodation-card .price {
+  border-top: 1px solid var(--qc-gray-200);
+  padding-top: 12px;
+}
+
+.quote-calculator .accommodation-card .price .amount {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--qc-primary);
+}
+
+.quote-calculator .accommodation-card .price .period {
+  font-size: 12px;
+  color: var(--qc-gray-500);
+}
+
+/* ============================================
+   ACTIVITIES STEP
+   ============================================ */
+.quote-calculator .activities-section {
+  margin-bottom: 32px;
+}
+
+.quote-calculator .activity-category {
+  margin-bottom: 24px;
+}
+
+.quote-calculator .activity-category h4 {
+  font-size: 16px !important;
+  margin-bottom: 12px !important;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--qc-gray-200);
+}
+
+.quote-calculator .activities-list,
+.quote-calculator .services-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.quote-calculator .activity-item,
+.quote-calculator .service-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--qc-gray-50);
+  border-radius: var(--qc-radius-sm);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.quote-calculator .activity-item:hover,
+.quote-calculator .service-item:hover {
+  background: var(--qc-gray-100);
+}
+
+.quote-calculator .activity-item input,
+.quote-calculator .service-item input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--qc-primary);
+}
+
+.quote-calculator .activity-info,
+.quote-calculator .service-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.quote-calculator .activity-info .name,
+.quote-calculator .service-info .name {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.quote-calculator .activity-info .duration,
+.quote-calculator .service-info .description {
+  font-size: 12px;
+  color: var(--qc-gray-500);
+}
+
+.quote-calculator .activity-item .price,
+.quote-calculator .service-item .price {
+  font-weight: 600;
+  color: var(--qc-primary);
+  font-size: 14px;
+}
+
+/* Trip Preview */
+.quote-calculator .trip-preview {
+  padding: 20px;
+  background: var(--qc-gray-50);
+  border-radius: var(--qc-radius);
+  margin-bottom: 24px;
+}
+
+.quote-calculator .trip-preview h4 {
+  margin-bottom: 16px !important;
+}
+
+.quote-calculator .preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.quote-calculator .preview-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.quote-calculator .preview-item .label {
+  font-size: 12px;
+  color: var(--qc-gray-500);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.quote-calculator .preview-item .value {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--qc-gray-800);
+}
+
+/* Special Requests */
+.quote-calculator .special-requests {
+  margin-bottom: 24px;
+}
+
+.quote-calculator .special-requests h4 {
+  margin-bottom: 12px !important;
+}
+
+/* ============================================
+   NAVIGATION
+   ============================================ */
+.quote-calculator .step-navigation {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--qc-gray-200);
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+.quote-calculator .btn-primary {
+  padding: 12px 32px;
+  background: var(--qc-primary);
+  color: white;
+  border: none;
+  border-radius: var(--qc-radius);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.quote-calculator .btn-primary:hover:not(:disabled) {
+  background: var(--qc-primary-dark);
+  transform: translateY(-1px);
+}
+
+.quote-calculator .btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.quote-calculator .btn-secondary {
+  padding: 12px 32px;
+  background: white;
+  color: var(--qc-gray-700);
+  border: 1px solid var(--qc-gray-300);
+  border-radius: var(--qc-radius);
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.quote-calculator .btn-secondary:hover {
+  background: var(--qc-gray-50);
+}
+
+.quote-calculator .btn-large {
+  padding: 16px 40px;
+  font-size: 18px;
+}
+
+.quote-calculator .btn-whatsapp {
+  padding: 12px 32px;
+  background: #25D366;
+  color: white;
+  border: none;
+  border-radius: var(--qc-radius);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.quote-calculator .btn-outline {
+  padding: 12px 32px;
+  background: transparent;
+  color: var(--qc-gray-600);
+  border: 1px solid var(--qc-gray-300);
+  border-radius: var(--qc-radius);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* ============================================
+   ERROR MESSAGES
+   ============================================ */
+.quote-calculator .error-messages {
+  padding: 16px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--qc-radius);
+  margin-bottom: 16px;
+}
+
+.quote-calculator .error-messages .error {
+  color: var(--qc-error);
+  font-size: 14px;
+  margin: 4px 0;
+}
+
+/* ============================================
+   QUOTE SUMMARY
+   ============================================ */
+.quote-calculator .quote-summary {
+  margin-top: 32px;
+  padding: 32px;
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+  border-radius: var(--qc-radius-lg);
+  border: 2px solid var(--qc-primary);
+}
+
+.quote-calculator .quote-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.quote-calculator .quote-header h2 {
+  font-size: 24px !important;
+  margin-bottom: 8px !important;
+}
+
+.quote-calculator .quote-id,
+.quote-calculator .valid-until {
+  font-size: 13px;
+  color: var(--qc-gray-600);
+}
+
+/* Main Price */
+.quote-calculator .main-price {
+  text-align: center;
+  padding: 24px;
+  background: white;
+  border-radius: var(--qc-radius);
+  margin-bottom: 16px;
+}
+
+.quote-calculator .main-price .total {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.quote-calculator .main-price .label {
+  font-size: 14px;
+  color: var(--qc-gray-500);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.quote-calculator .main-price .amount {
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--qc-primary-dark);
+}
+
+.quote-calculator .per-metrics {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 12px;
+  font-size: 14px;
+  color: var(--qc-gray-600);
+}
+
+/* Currency Options */
+.quote-calculator .currency-options {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.quote-calculator .currency-tag {
+  padding: 6px 12px;
+  background: white;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* Payment Terms */
+.quote-calculator .payment-terms {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.quote-calculator .payment-terms > div {
+  padding: 16px;
+  background: white;
+  border-radius: var(--qc-radius);
+  text-align: center;
+}
+
+.quote-calculator .payment-terms .label {
+  display: block;
+  font-size: 12px;
+  color: var(--qc-gray-500);
+  margin-bottom: 8px;
+}
+
+.quote-calculator .payment-terms .amount {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--qc-gray-800);
+}
+
+/* Toggle Details */
+.quote-calculator .toggle-details {
+  width: 100%;
+  padding: 12px;
+  background: white;
+  border: 1px solid var(--qc-gray-200);
+  border-radius: var(--qc-radius);
+  font-size: 14px;
+  cursor: pointer;
+  margin-bottom: 16px;
+}
+
+/* Detailed Breakdown */
+.quote-calculator .detailed-breakdown {
+  background: white;
+  border-radius: var(--qc-radius);
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.quote-calculator .breakdown-section {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--qc-gray-100);
+}
+
+.quote-calculator .breakdown-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.quote-calculator .breakdown-section h4 {
+  font-size: 14px !important;
+  color: var(--qc-gray-600) !important;
+  margin-bottom: 12px !important;
+}
+
+.quote-calculator .line-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 14px;
+}
+
+.quote-calculator .line-item.discount {
+  color: var(--qc-success);
+}
+
+.quote-calculator .subtotal {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 8px;
+  margin-top: 8px;
+  border-top: 1px dashed var(--qc-gray-200);
+  font-weight: 600;
+}
+
+/* Inclusions & Exclusions */
+.quote-calculator .inclusions-exclusions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.quote-calculator .inclusions,
+.quote-calculator .exclusions {
+  padding: 16px;
+  background: white;
+  border-radius: var(--qc-radius);
+}
+
+.quote-calculator .inclusions h4,
+.quote-calculator .exclusions h4 {
+  font-size: 14px !important;
+  margin-bottom: 12px !important;
+}
+
+.quote-calculator .inclusions ul,
+.quote-calculator .exclusions ul {
+  margin: 0;
+  padding: 0 0 0 20px;
+  font-size: 13px;
+}
+
+.quote-calculator .inclusions li,
+.quote-calculator .exclusions li {
+  padding: 4px 0;
+}
+
+/* Quote Actions */
+.quote-calculator .quote-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+/* Trust Badges */
+.quote-calculator .trust-badges {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--qc-gray-600);
+}
+
+/* ============================================
+   RESPONSIVE STYLES
+   ============================================ */
+@media (max-width: 768px) {
+  .quote-calculator {
+    padding: 12px;
+  }
+
+  .quote-calculator .calculator-content {
+    padding: 20px;
+  }
+
+  .quote-calculator .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .quote-calculator .step-progress {
+    justify-content: flex-start;
+    padding: 0;
+  }
+
+  .quote-calculator .step-title {
+    display: none;
+  }
+
+  .quote-calculator .step-line {
+    width: 20px;
+  }
+
+  .quote-calculator .destinations-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .quote-calculator .vehicles-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .quote-calculator .accommodation-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .quote-calculator .payment-terms {
+    grid-template-columns: 1fr;
+  }
+
+  .quote-calculator .inclusions-exclusions {
+    grid-template-columns: 1fr;
+  }
+
+  .quote-calculator .main-price .amount {
+    font-size: 36px;
+  }
+
+  .quote-calculator .per-metrics {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .quote-calculator .destinations-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .quote-calculator .step-navigation {
+    flex-direction: column;
+  }
+
+  .quote-calculator .step-navigation button {
+    width: 100%;
+  }
+}

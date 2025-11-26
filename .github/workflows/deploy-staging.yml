@@ -1,0 +1,139 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches:
+      - develop
+      - staging
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+# Allow only one deployment at a time for PRs
+concurrency:
+  group: staging-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: 📦 Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            admin/node_modules
+            ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: 🏗️ Cache build outputs
+        uses: actions/cache@v4
+        with:
+          path: |
+            dist
+            admin/dist
+            .vite
+          key: ${{ runner.os }}-staging-build-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-staging-build-
+
+      - name: 📌 Install dependencies
+        run: |
+          npm ci --prefer-offline --no-audit
+          cd admin && npm ci --prefer-offline --no-audit
+
+      - name: 🔐 Setup environment variables
+        run: |
+          cat > .env << EOF
+          VITE_FIREBASE_API_KEY=${{ secrets.VITE_FIREBASE_API_KEY || 'AIzaSyBQf3QmHLF5I2fRiJL8R0qwJQGzHt7Gdsc' }}
+          VITE_FIREBASE_AUTH_DOMAIN=${{ secrets.VITE_FIREBASE_AUTH_DOMAIN || 'recharge-travels-73e76.firebaseapp.com' }}
+          VITE_FIREBASE_PROJECT_ID=${{ secrets.VITE_FIREBASE_PROJECT_ID || 'recharge-travels-73e76' }}
+          VITE_FIREBASE_STORAGE_BUCKET=${{ secrets.VITE_FIREBASE_STORAGE_BUCKET || 'recharge-travels-73e76.firebasestorage.app' }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID || '872522970644' }}
+          VITE_FIREBASE_APP_ID=${{ secrets.VITE_FIREBASE_APP_ID || '1:872522970644:web:9b826a012a3e0cc5f44c6b' }}
+          VITE_FIREBASE_MEASUREMENT_ID=${{ secrets.VITE_FIREBASE_MEASUREMENT_ID || 'G-D97PKVE58M' }}
+          VITE_GOOGLE_MAPS_API_KEY=${{ secrets.VITE_GOOGLE_MAPS_API_KEY || 'AIzaSyC7VYA7MK4M3cgqQgyBzeFiLUSTkEt08a8' }}
+          VITE_PAYHERE_MERCHANT_ID=${{ secrets.VITE_PAYHERE_MERCHANT_ID || '1234567' }}
+          VITE_PAYHERE_MERCHANT_SECRET=${{ secrets.VITE_PAYHERE_MERCHANT_SECRET || 'test-secret' }}
+          VITE_PAYMENT_ENV=${{ secrets.VITE_PAYMENT_ENV || 'sandbox' }}
+          EOF
+          
+          cp .env admin/.env
+
+      - name: 🧪 Run tests
+        run: |
+          npm run typecheck || true
+          npm run lint || true
+        continue-on-error: true
+
+      - name: 🏃 Fast build main project
+        run: npm run build:fast
+        env:
+          NODE_ENV: development
+
+      - name: 🏃 Fast build admin project
+        run: cd admin && npm run build:fast
+        env:
+          NODE_ENV: development
+
+      - name: 📊 Build report
+        run: |
+          echo "### 📊 Staging Build Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Build Information:**" >> $GITHUB_STEP_SUMMARY
+          echo "- Branch: \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Commit: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Author: @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Build Sizes:**" >> $GITHUB_STEP_SUMMARY
+          echo "| Build | Size |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Main | $(du -sh dist | cut -f1) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Admin | $(du -sh admin/dist | cut -f1) |" >> $GITHUB_STEP_SUMMARY
+
+      - name: 🚀 Deploy preview to Firebase
+        id: deploy
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
+          projectId: recharge-travels-73e76
+          expires: 7d
+
+      - name: 💬 Comment preview URL on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const deployUrl = '${{ steps.deploy.outputs.details_url }}';
+            const comment = `### 🚀 Preview Deployment Ready!
+            
+            Your changes have been deployed to a preview environment:
+            
+            🔗 **Preview URL**: ${deployUrl}
+            
+            This preview will expire in 7 days.
+            
+            ---
+            <sub>Deployed by GitHub Actions 🤖</sub>`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });

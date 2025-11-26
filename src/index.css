@@ -1,0 +1,765 @@
+
+/* Fonts are now loaded in index.html for better performance */
+@import "react-day-picker/dist/style.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Enhanced Wildlife-Themed Design System */
+
+:root {
+  /* Wildlife Color Palette */
+  --color-background: 252 252 249; /* Coconut Cream */
+  --color-surface: 255 255 253;
+  --color-text: 19 52 59; /* Dark Teal */
+  --color-text-secondary: 98 108 113;
+  --color-primary: 255 107 26; /* Wild Orange */
+  --color-primary-hover: 230 96 23;
+  --color-primary-active: 204 85 20;
+  --color-secondary: 46 138 77; /* Jungle Green */
+  --color-secondary-hover: 41 124 69;
+  --color-secondary-active: 37 111 62;
+  --color-border: 94 82 64;
+  --color-btn-primary-text: 252 252 249;
+  --color-card-border: 94 82 64;
+  --color-card-border-inner: 94 82 64;
+  --color-error: 192 21 47;
+  --color-success: 46 138 77; /* Jungle Green */
+  --color-warning: 168 75 47;
+  --color-info: 98 108 113;
+  --color-focus-ring: 255 107 26;
+  --color-select-caret: 19 52 59;
+
+  /* Wildlife-specific colors */
+  --wild-orange: 20 100% 55%; /* #FF6B1A */
+  --jungle-green: 144 49% 35%; /* #2E8A4D */
+  --ocean-deep: 203 100% 36%; /* #0074B6 */
+  --peacock-teal: 174 100% 30%; /* #009988 */
+  --coconut-cream: 48 100% 99%; /* #FFFDF8 */
+  --granite-gray: 215 16% 47%; /* #374151 */
+  --ceylon-blue: 203 91% 53%; /* #3b82f6 */
+  --sunset-orange: 25 95% 53%; /* #ff6b1a */
+
+  /* Tailwind compatibility */
+  --background: 48 100% 99%; /* Coconut Cream */
+  --foreground: 215 16% 47%; /* Granite Gray */
+  --card: 48 100% 99%; /* Coconut Cream */
+  --card-foreground: 215 16% 47%; /* Granite Gray */
+  --popover: 0 0% 100%;
+  --popover-foreground: 215 16% 47%;
+  --primary: var(--wild-orange);
+  --primary-foreground: var(--coconut-cream);
+  --secondary: 210 40% 98%;
+  --secondary-foreground: 222.2 84% 4.9%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --accent: var(--peacock-teal);
+  --accent-foreground: var(--coconut-cream);
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: var(--wild-orange);
+  --radius: 0.5rem;
+}
+
+/* Dark mode colors */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+}
+
+/* Base styles */
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  /* Enhanced Typography with Better Font Loading */
+  .font-playfair {
+    font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+    font-display: swap;
+  }
+  
+  .font-poppins {
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-display: swap;
+  }
+  
+  .font-inter {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-display: swap;
+  }
+  
+  .font-dm-sans {
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-display: swap;
+  }
+  
+  .font-montserrat {
+    font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-display: swap;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply tracking-tight;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "kern" 1, "liga" 1;
+  }
+  
+  p {
+    text-rendering: optimizeSpeed;
+  }
+
+  html {
+    font-family: 'Inter', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    line-height: 1.6;
+    color: hsl(var(--foreground));
+    background-color: hsl(var(--background)) !important;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-display: swap;
+    box-sizing: border-box;
+    scroll-behavior: smooth;
+    text-size-adjust: 100%;
+    min-height: 100vh;
+  }
+
+  body {
+    @apply bg-background text-foreground font-inter;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+    min-height: 100vh;
+    background-color: hsl(var(--background)) !important;
+  }
+  
+  #root {
+    min-height: 100vh;
+    background-color: hsl(var(--background)) !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: inherit;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-poppins;
+    margin: 0;
+    font-weight: 600;
+    line-height: 1.2;
+    color: hsl(var(--foreground));
+    letter-spacing: -0.01em;
+  }
+
+  h1 { @apply text-4xl md:text-5xl lg:text-6xl; }
+  h2 { @apply text-3xl md:text-4xl lg:text-5xl; }
+  h3 { @apply text-2xl md:text-3xl; }
+  h4 { @apply text-xl md:text-2xl; }
+  h5 { @apply text-lg md:text-xl; }
+  h6 { @apply text-base md:text-lg; }
+
+  p {
+    margin: 0 0 1rem 0;
+  }
+
+  a {
+    color: hsl(var(--primary));
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  a:hover {
+    color: hsl(var(--primary) / 0.8);
+  }
+
+  /* Enhanced Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary));
+    border-radius: 10px;
+    transition: background 0.3s ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary) / 0.8);
+  }
+  
+  /* Firefox scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--primary)) hsl(var(--muted));
+  }
+}
+
+/* Enhanced Sri Lanka Travel Design System */
+@layer utilities {
+  /* Modern Color Utilities */
+  .text-wild-orange {
+    color: hsl(var(--wild-orange));
+  }
+  
+  .text-jungle-green {
+    color: hsl(var(--jungle-green));
+  }
+  
+  .text-ocean-deep {
+    color: hsl(var(--ocean-deep));
+  }
+  
+  .text-peacock-teal {
+    color: hsl(var(--peacock-teal));
+  }
+
+  .text-ceylon-blue {
+    color: hsl(var(--ceylon-blue));
+  }
+
+  .text-sunset-orange {
+    color: hsl(var(--sunset-orange));
+  }
+  
+  .rt-section-bg {
+    background: radial-gradient(circle at top left, #ffedd5 0, transparent 45%),
+      radial-gradient(circle at bottom right, #dcfce7 0, transparent 45%),
+      #fff9f1;
+  }
+  
+  .rt-card {
+    border-radius: 1.25rem;
+    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    background: #ffffff;
+  }
+  
+  .rt-tag {
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.45);
+    background: rgba(248, 250, 252, 0.9);
+  }
+  
+  .rt-tag--active {
+    border-color: #f97316;
+    background: rgba(249, 115, 22, 0.08);
+    color: #9a3412;
+  }
+  
+  .rt-chip-badge {
+    border-radius: 999px;
+    background: rgba(15, 118, 110, 0.08);
+    color: #065f46;
+  }
+  
+  .rt-badge-soft {
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.06);
+  }
+  
+  .rt-blur-panel {
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.36);
+    background: rgba(255, 255, 255, 0.88);
+  }
+  
+  .rt-pill-outline {
+    border-radius: 999px;
+    border: 1px dashed rgba(148, 163, 184, 0.7);
+  }
+  
+  .rt-gradient-pill {
+    background: linear-gradient(135deg, #ff7a35, #facc15);
+  }
+  
+  .bg-wild-orange {
+    background-color: hsl(var(--wild-orange));
+  }
+  
+  .bg-jungle-green {
+    background-color: hsl(var(--jungle-green));
+  }
+  
+  .bg-ocean-deep {
+    background-color: hsl(var(--ocean-deep));
+  }
+  
+  .bg-peacock-teal {
+    background-color: hsl(var(--peacock-teal));
+  }
+  
+  .bg-coconut-cream {
+    background-color: hsl(var(--coconut-cream));
+  }
+
+  .bg-ceylon-blue {
+    background-color: hsl(var(--ceylon-blue));
+  }
+
+  .bg-sunset-orange {
+    background-color: hsl(var(--sunset-orange));
+  }
+  
+  .border-wild-orange {
+    border-color: hsl(var(--wild-orange));
+  }
+  
+  .hover\:bg-wild-orange:hover {
+    background-color: hsl(var(--wild-orange));
+  }
+  
+  .hover\:bg-jungle-green:hover {
+    background-color: hsl(var(--jungle-green));
+  }
+
+  /* Modern Gradients */
+  .gradient-wildlife {
+    background: linear-gradient(135deg, hsl(var(--wild-orange)) 0%, hsl(var(--jungle-green)) 35%, hsl(var(--peacock-teal)) 70%, hsl(var(--ocean-deep)) 100%);
+  }
+
+  .gradient-sri-lanka {
+    background: linear-gradient(135deg, hsl(var(--wild-orange)) 0%, hsl(var(--jungle-green)) 50%, hsl(var(--ocean-deep)) 100%);
+  }
+  
+  .gradient-sunset {
+    background: linear-gradient(135deg, hsl(var(--wild-orange)) 0%, hsl(var(--sunset-orange)) 100%);
+  }
+
+  .gradient-ocean {
+    background: linear-gradient(135deg, hsl(var(--ocean-deep)) 0%, hsl(var(--peacock-teal)) 100%);
+  }
+
+  .gradient-forest {
+    background: linear-gradient(135deg, hsl(var(--jungle-green)) 0%, #4ade80 100%);
+  }
+
+  /* Glass Morphism Effects */
+  .glass {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+  }
+
+  .glass-dark {
+    background: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+  }
+
+  /* Modern Shadows */
+  .shadow-soft {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+
+  .shadow-medium {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+
+  .shadow-large {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+
+  .shadow-wildlife {
+    box-shadow: 0 20px 25px -5px hsl(var(--wild-orange) / 0.1), 0 10px 10px -5px hsl(var(--wild-orange) / 0.04);
+  }
+
+  /* Enhanced Animations */
+  .wildlife-ripple {
+    @apply transition-all duration-300 ease-out transform hover:scale-105;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .wildlife-ripple:hover {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+  
+  .wildlife-bounce {
+    animation: wildlife-bounce 2s ease-in-out infinite;
+  }
+  
+  .wildlife-pulse {
+    animation: wildlife-pulse 3s ease-in-out infinite;
+  }
+  
+  .wildlife-float {
+    animation: wildlife-float 4s ease-in-out infinite;
+  }
+
+  .animate-float {
+    animation: wildlife-float 6s ease-in-out infinite;
+  }
+
+  .animate-breathe {
+    animation: breathe 3s ease-in-out infinite;
+  }
+
+  .fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+    opacity: 0;
+  }
+
+  .fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  /* Interactive Elements */
+  .btn-primary {
+    @apply bg-wild-orange hover:bg-orange-600 text-white font-poppins font-semibold px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-wildlife;
+  }
+
+  .btn-secondary {
+    @apply bg-jungle-green hover:bg-green-700 text-white font-poppins font-semibold px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-medium;
+  }
+
+  .btn-outline {
+    @apply border-2 border-wild-orange text-wild-orange hover:bg-wild-orange hover:text-white font-poppins font-semibold px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-105;
+  }
+
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-large hover:-translate-y-2;
+  }
+
+  .card-interactive {
+    @apply card-hover cursor-pointer bg-white rounded-2xl border border-gray-100 overflow-hidden;
+  }
+
+  /* Typography Enhancements */
+  .text-gradient {
+    background: linear-gradient(135deg, hsl(var(--wild-orange)), hsl(var(--peacock-teal)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-hero {
+    @apply text-5xl md:text-6xl lg:text-7xl font-poppins font-bold leading-tight;
+  }
+
+  .text-section-title {
+    @apply text-3xl md:text-4xl lg:text-5xl font-poppins font-bold;
+  }
+
+  .text-card-title {
+    @apply text-xl md:text-2xl font-poppins font-semibold;
+  }
+
+  /* Layout Utilities */
+  .container-fluid {
+    @apply w-full max-w-none px-4 sm:px-6 lg:px-8;
+  }
+
+  .container-narrow {
+    @apply max-w-4xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .section-padding {
+    @apply py-16 md:py-24 lg:py-32;
+  }
+
+  .section-padding-sm {
+    @apply py-8 md:py-12 lg:py-16;
+  }
+
+  /* Enhanced Mobile Utilities */
+  .mobile-safe-area {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  /* Enhanced Focus States */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2;
+  }
+
+  /* Enhanced Loading States */
+  .loading-skeleton {
+    @apply animate-pulse bg-gray-200 rounded;
+  }
+
+  /* Enhanced Accessibility */
+  .sr-only {
+    @apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
+  }
+
+  /* Enhanced Touch Targets */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
+  /* Smooth scrolling for the entire page */
+  html, body {
+    scroll-behavior: smooth;
+  }
+
+  /* Loading animations */
+  @keyframes shimmer {
+    0% {
+      background-position: -200px 0;
+    }
+    100% {
+      background-position: calc(200px + 100%) 0;
+    }
+  }
+
+  .loading-skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200px 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  /* Page transition animations */
+  .page-enter {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  .page-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+  }
+
+  .page-exit {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .page-exit-active {
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.4s ease-in, transform 0.4s ease-in;
+  }
+}
+
+/* Enhanced Keyframe Animations */
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes wildlife-bounce {
+  0%, 100% { 
+    transform: translateY(0px) rotate(0deg); 
+  }
+  50% { 
+    transform: translateY(-8px) rotate(2deg); 
+  }
+}
+
+@keyframes wildlife-pulse {
+  0%, 100% { 
+    opacity: 1; 
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.8; 
+    transform: scale(1.05);
+  }
+}
+
+@keyframes wildlife-float {
+  0%, 100% { 
+    transform: translateY(0px) translateX(0px); 
+  }
+  25% { 
+    transform: translateY(-10px) translateX(5px); 
+  }
+  50% { 
+    transform: translateY(-5px) translateX(-5px); 
+  }
+  75% { 
+    transform: translateY(-15px) translateX(3px); 
+  }
+}
+
+@keyframes breathe {
+  0%, 100% { 
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% { 
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+/* Enhanced Navigation Dropdown Positioning Fixes */
+nav[data-radix-navigation-menu-root] {
+  position: relative;
+  z-index: 40;
+}
+
+/* Fix navigation menu text color with better contrast */
+[data-radix-navigation-menu-trigger] {
+  color: rgb(31, 41, 55) !important; /* gray-800 */
+  font-weight: 500 !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+[data-radix-navigation-menu-trigger]:hover {
+  color: rgb(17, 24, 39) !important; /* gray-900 */
+  transform: translateY(-1px) !important;
+}
+
+/* When header is not scrolled, use white text with better visibility */
+header:not(.scrolled) [data-radix-navigation-menu-trigger] {
+  color: white !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+header:not(.scrolled) [data-radix-navigation-menu-trigger]:hover {
+  color: rgba(255, 255, 255, 0.95) !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Enhanced dropdown positioning with better z-index management */
+[data-radix-navigation-menu-content] {
+  position: absolute !important;
+  top: 100% !important;
+  left: 0 !important;
+  margin-top: 0 !important;
+  z-index: 100 !important;
+  min-width: 200px !important;
+  background: white !important;
+  border-radius: 8px !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+/* Enhanced invisible bridge to prevent hover loss */
+[data-radix-navigation-menu-content]::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: transparent;
+}
+
+/* Improved viewport positioning */
+[data-radix-navigation-menu-viewport] {
+  position: relative !important;
+  transform-origin: top center !important;
+  width: var(--radix-navigation-menu-viewport-width) !important;
+  max-width: 90vw !important;
+}
+
+/* Enhanced z-index layering for nested elements */
+[data-radix-navigation-menu-content] {
+  z-index: 100 !important;
+}
+
+/* Ensure proper width and responsive behavior for dropdown content */
+[data-radix-navigation-menu-content] > div {
+  min-width: max-content;
+  max-width: 90vw;
+  overflow: hidden;
+}
+
+/* Fix for nested dropdowns with higher z-index */
+.relative > .absolute {
+  z-index: 110 !important;
+}
+
+/* Enhanced navigation link interactions */
+[data-radix-navigation-menu-link] {
+  cursor: pointer !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+/* Enhanced dropdown link interactions */
+[data-radix-navigation-menu-content] a {
+  cursor: pointer !important;
+  transition: all 0.2s ease-in-out !important;
+  border-radius: 6px !important;
+  margin: 2px 4px !important;
+}
+
+[data-radix-navigation-menu-content] a:hover {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+  transform: translateX(4px) !important;
+}
+
+/* Enhanced dropdown visibility management */
+[data-radix-navigation-menu-item]:hover [data-radix-navigation-menu-content],
+[data-radix-navigation-menu-content]:hover {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateY(0) !important;
+}
+
+/* Enhanced smooth transitions with better timing */
+[data-radix-navigation-menu-content] {
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transform: translateY(-4px) !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+[data-radix-navigation-menu-item]:hover [data-radix-navigation-menu-content] {
+  transform: translateY(0) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Mobile navigation improvements */
+@media (max-width: 768px) {
+  [data-radix-navigation-menu-content] {
+    position: static !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: transparent !important;
+    margin-top: 0 !important;
+  }
+  
+  [data-radix-navigation-menu-trigger] {
+    color: rgb(31, 41, 55) !important;
+    text-shadow: none !important;
+  }
+}

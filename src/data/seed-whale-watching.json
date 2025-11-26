@@ -1,0 +1,73 @@
+{
+  "slug": "whale-watching",
+  "name": "Whale Watching in Sri Lanka",
+  "heroImageURL": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fwhale-hero-3840x2160.webp?alt=media",
+  "seo": {
+    "title": "Whale Watching Sri Lanka | Mirissa, Trincomalee, Kalpitiya – Recharge Travels",
+    "description": "Spot blue whales, sperm whales and spinner dolphins off Sri Lanka's shores with eco‑certified captains. Plan your responsible marine safari with Recharge Travels."
+  },
+  "introParagraph": "Sri Lanka is one of the few places on earth where you can watch the planet's largest animal—the blue whale—mere kilometres from shore. From December to April, Mirissa's warm southern currents become a blue‑whale superhighway, while Trincomalee and Kalpitiya host migrating giants and playful spinner dolphins May through September. Join Recharge Travels' responsible marine safaris for record‑breaking sightings, on‑board naturalists and sunrise memories you'll never forget.",
+  "highlights": [
+    { 
+      "icon": "🐋", 
+      "title": "Blue Whale Encounters",   
+      "blurb60": "Mirissa's deep drop‑off puts you within 30 minutes of blue‑whale feeding grounds." 
+    },
+    { 
+      "icon": "🐬", 
+      "title": "Dolphin Super‑Pods",     
+      "blurb60": "Kalpitiya's lagoons teem with 1,000‑strong pods of spinner and bottlenose dolphins." 
+    },
+    { 
+      "icon": "🌅", 
+      "title": "Sunrise Sail",           
+      "blurb60": "Depart at dawn for golden‑hour photography and calmer seas." 
+    },
+    { 
+      "icon": "✅", 
+      "title": "Eco‑Certified Boats",     
+      "blurb60": "Licensed skippers follow World Cetacean Alliance guidelines—no chasing or crowding." 
+    }
+  ],
+  "routes": [
+    { 
+      "routeName": "Mirissa Morning Cruise",       
+      "duration": "3–4 hours", 
+      "distanceKm": 45, 
+      "bestClass": "Purpose‑built catamaran", 
+      "mapGPXUrl": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/routes%2Fmirissa-whale-route.gpx?alt=media" 
+    },
+    { 
+      "routeName": "Trincomalee Deep‑Sea Safari",  
+      "duration": "4 hours",   
+      "distanceKm": 60, 
+      "bestClass": "Speed boat (12 pax)",     
+      "mapGPXUrl": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/routes%2Ftrincomalee-whale-route.gpx?alt=media" 
+    },
+    { 
+      "routeName": "Kalpitiya Dolphin & Whale",    
+      "duration": "3 hours",   
+      "distanceKm": 35, 
+      "bestClass": "Rigid‑inflatable (RIB)",  
+      "mapGPXUrl": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/routes%2Fkalpitiya-whale-route.gpx?alt=media" 
+    }
+  ],
+  "galleryImages": [
+    { 
+      "url": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fgallery-whale1.webp?alt=media", 
+      "alt": "Blue whale fluking near Mirissa, Sri Lanka" 
+    },
+    { 
+      "url": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fgallery-whale2.webp?alt=media", 
+      "alt": "Spinner dolphins jumping beside a safari boat off Kalpitiya" 
+    },
+    { 
+      "url": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fgallery-whale3.webp?alt=media", 
+      "alt": "Tourists watching a sperm whale blow in Trincomalee" 
+    }
+  ],
+  "faqTag": "whale-watching",
+  "ctaHeadline": "Sail With Sri Lanka's Gentle Giants",
+  "ctaSub": "Secure your seat on a responsible, guide‑led whale safari with Recharge Travels today.",
+  "videoURL": "https://www.youtube.com/embed/WhaleWatchingSL"
+}

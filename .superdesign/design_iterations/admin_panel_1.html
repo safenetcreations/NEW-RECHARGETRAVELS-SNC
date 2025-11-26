@@ -1,0 +1,1980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel | Recharge Travels</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif !important;
+      background: #F8F9FA !important;
+      min-height: 100vh;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f1f1; }
+    ::-webkit-scrollbar-thumb { background: #c9a962; border-radius: 3px; }
+
+    /* Variables */
+    :root {
+      --primary: #2D4A3E;
+      --primary-dark: #1A3028;
+      --gold: #C9A962;
+      --gold-light: #E5D4A1;
+      --bg-light: #F8F9FA;
+      --bg-card: #FFFFFF;
+      --text-dark: #2C2C2C;
+      --text-muted: #6B7280;
+      --border: #E5E7EB;
+      --success: #10B981;
+      --danger: #EF4444;
+      --warning: #F59E0B;
+    }
+
+    /* Login Screen */
+    .login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    }
+
+    .login-card {
+      background: white;
+      padding: 3rem;
+      border-radius: 16px;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .login-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      color: var(--primary);
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .login-subtitle {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+
+    /* Admin Layout */
+    .admin-container {
+      display: none;
+      min-height: 100vh;
+    }
+
+    .admin-container.active {
+      display: flex;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: var(--primary);
+      color: white;
+      min-height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 100;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .sidebar-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+    }
+
+    .sidebar-nav {
+      padding: 1rem 0;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.875rem 1.5rem;
+      color: rgba(255,255,255,0.7);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+    }
+
+    .nav-item:hover, .nav-item.active {
+      background: rgba(255,255,255,0.1);
+      color: white;
+      border-left-color: var(--gold);
+    }
+
+    .nav-item i {
+      width: 20px;
+      height: 20px;
+    }
+
+    .nav-section {
+      padding: 0.5rem 1.5rem;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.4);
+      margin-top: 1rem;
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      margin-left: 260px;
+      padding: 2rem;
+    }
+
+    /* Header */
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    .page-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.75rem;
+      color: var(--text-dark);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    /* Cards */
+    .content-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      margin-bottom: 1.5rem;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-title {
+      font-weight: 600;
+      color: var(--text-dark);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card-body {
+      padding: 1.5rem;
+    }
+
+    /* Form Elements */
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-dark);
+      margin-bottom: 0.5rem;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.9375rem;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(201, 169, 98, 0.1);
+    }
+
+    .form-textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-gold {
+      background: var(--gold);
+      color: var(--primary-dark);
+    }
+
+    .btn-gold:hover {
+      background: var(--gold-light);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-dark);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+
+    .btn-sm {
+      padding: 0.5rem 1rem;
+      font-size: 0.8125rem;
+    }
+
+    /* Table */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .data-table th {
+      text-align: left;
+      padding: 0.875rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      background: #F9FAFB;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .data-table td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    .data-table tr:hover {
+      background: #FAFAFA;
+    }
+
+    .table-image {
+      width: 60px;
+      height: 45px;
+      object-fit: cover;
+      border-radius: 6px;
+    }
+
+    .table-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .action-btn {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: white;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .action-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .action-btn.delete:hover {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1rem;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      background: white;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-title {
+      font-weight: 600;
+      font-size: 1.125rem;
+    }
+
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      border: none;
+      background: #F3F4F6;
+      cursor: pointer;
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      padding: 1.25rem 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Image Upload */
+    .image-upload {
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .image-upload:hover {
+      border-color: var(--gold);
+      background: rgba(201, 169, 98, 0.05);
+    }
+
+    .image-preview {
+      max-width: 200px;
+      max-height: 150px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-top: 1rem;
+    }
+
+    /* Status Badge */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.75rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      border-radius: 20px;
+    }
+
+    .badge-success {
+      background: #D1FAE5;
+      color: #065F46;
+    }
+
+    .badge-warning {
+      background: #FEF3C7;
+      color: #92400E;
+    }
+
+    /* Toast Notification */
+    .toast-container {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .toast {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 1.25rem;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      transform: translateX(100%);
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+
+    .toast.show {
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    .toast.success { border-left: 4px solid var(--success); }
+    .toast.error { border-left: 4px solid var(--danger); }
+
+    /* Loading Spinner */
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Stats Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    .stat-label {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .main-content {
+        margin-left: 0;
+      }
+    }
+
+    /* Tab Navigation */
+    .tab-nav {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+    }
+
+    .tab-btn {
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover, .tab-btn.active {
+      color: var(--primary);
+      background: rgba(45, 74, 62, 0.1);
+    }
+
+    /* Section visibility */
+    .admin-section {
+      display: none;
+    }
+
+    .admin-section.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Login Screen -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-card">
+      <h1 class="login-logo">RECHARGE TRAVELS</h1>
+      <p class="login-subtitle">Admin Panel Login</p>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" class="form-input" id="loginEmail" placeholder="admin@rechargetravels.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" id="loginPassword" placeholder="Enter your password" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+          <span id="loginBtnText">Sign In</span>
+          <div class="spinner" id="loginSpinner" style="display: none;"></div>
+        </button>
+      </form>
+
+      <p style="text-align: center; margin-top: 1.5rem; font-size: 0.8rem; color: var(--text-muted);">
+        First time? <a href="#" id="createAdminLink" style="color: var(--gold);">Create Admin Account</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- Admin Container -->
+  <div class="admin-container" id="adminContainer">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">RECHARGE TRAVELS</div>
+        <p style="font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-top: 0.25rem;">Admin Panel</p>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-item active" data-section="dashboard">
+          <i data-lucide="layout-dashboard"></i>
+          <span>Dashboard</span>
+        </div>
+
+        <div class="nav-section">Content Management</div>
+
+        <div class="nav-item" data-section="hero">
+          <i data-lucide="image"></i>
+          <span>Hero Section</span>
+        </div>
+        <div class="nav-item" data-section="philosophy">
+          <i data-lucide="book-open"></i>
+          <span>Philosophy</span>
+        </div>
+        <div class="nav-item" data-section="retreats">
+          <i data-lucide="tent"></i>
+          <span>Retreats</span>
+        </div>
+        <div class="nav-item" data-section="treatments">
+          <i data-lucide="sparkles"></i>
+          <span>Treatments</span>
+        </div>
+        <div class="nav-item" data-section="testimonials">
+          <i data-lucide="message-square-quote"></i>
+          <span>Testimonials</span>
+        </div>
+        <div class="nav-item" data-section="cta">
+          <i data-lucide="megaphone"></i>
+          <span>CTA Section</span>
+        </div>
+
+        <div class="nav-section">Settings</div>
+
+        <div class="nav-item" data-section="settings">
+          <i data-lucide="settings"></i>
+          <span>Site Settings</span>
+        </div>
+      </nav>
+
+      <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 1rem;">
+        <button class="btn btn-outline" style="width: 100%; color: white; border-color: rgba(255,255,255,0.2);" id="logoutBtn">
+          <i data-lucide="log-out" style="width: 18px; height: 18px;"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Dashboard Section -->
+      <section class="admin-section active" id="section-dashboard">
+        <div class="admin-header">
+          <h1 class="page-title">Dashboard</h1>
+          <div class="header-actions">
+            <a href="ayurveda_wellness_1.html" target="_blank" class="btn btn-outline">
+              <i data-lucide="external-link" style="width: 16px; height: 16px;"></i>
+              View Site
+            </a>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(45, 74, 62, 0.1); color: var(--primary);">
+              <i data-lucide="tent" style="width: 24px; height: 24px;"></i>
+            </div>
+            <div class="stat-value" id="statRetreats">0</div>
+            <div class="stat-label">Total Retreats</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(201, 169, 98, 0.1); color: var(--gold);">
+              <i data-lucide="sparkles" style="width: 24px; height: 24px;"></i>
+            </div>
+            <div class="stat-value" id="statTreatments">0</div>
+            <div class="stat-label">Treatments</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--success);">
+              <i data-lucide="message-square-quote" style="width: 24px; height: 24px;"></i>
+            </div>
+            <div class="stat-value" id="statTestimonials">0</div>
+            <div class="stat-label">Testimonials</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(239, 68, 68, 0.1); color: var(--danger);">
+              <i data-lucide="activity" style="width: 24px; height: 24px;"></i>
+            </div>
+            <div class="stat-value">Active</div>
+            <div class="stat-label">Site Status</div>
+          </div>
+        </div>
+
+        <div class="content-card">
+          <div class="card-header">
+            <div class="card-title">
+              <i data-lucide="activity" style="width: 18px; height: 18px;"></i>
+              Quick Actions
+            </div>
+          </div>
+          <div class="card-body">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+              <button class="btn btn-outline" onclick="showSection('retreats')">
+                <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+                Add Retreat
+              </button>
+              <button class="btn btn-outline" onclick="showSection('treatments')">
+                <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+                Add Treatment
+              </button>
+              <button class="btn btn-outline" onclick="showSection('testimonials')">
+                <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+                Add Testimonial
+              </button>
+              <button class="btn btn-outline" onclick="initializeDefaultData()">
+                <i data-lucide="database" style="width: 16px; height: 16px;"></i>
+                Initialize Data
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Hero Section -->
+      <section class="admin-section" id="section-hero">
+        <div class="admin-header">
+          <h1 class="page-title">Hero Section</h1>
+          <button class="btn btn-gold" onclick="saveHeroContent()">
+            <i data-lucide="save" style="width: 16px; height: 16px;"></i>
+            Save Changes
+          </button>
+        </div>
+
+        <div class="content-card">
+          <div class="card-header">
+            <div class="card-title">Hero Content</div>
+          </div>
+          <div class="card-body">
+            <div class="form-group">
+              <label class="form-label">Page Title</label>
+              <input type="text" class="form-input" id="heroTitle" placeholder="Ayurveda & Wellness">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Subtitle / Tagline</label>
+              <input type="text" class="form-input" id="heroSubtitle" placeholder="Journey Within, Transform Forever">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Label Text (above title)</label>
+              <input type="text" class="form-input" id="heroLabel" placeholder="Recharge Travels Presents">
+            </div>
+            <div class="form-group">
+              <label class="form-label">CTA Button Text</label>
+              <input type="text" class="form-input" id="heroCta" placeholder="Explore Retreats">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Background Image URL</label>
+              <input type="text" class="form-input" id="heroImage" placeholder="https://images.unsplash.com/...">
+              <div style="margin-top: 1rem;">
+                <img id="heroImagePreview" src="" alt="Preview" class="image-preview" style="display: none;">
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Philosophy Section -->
+      <section class="admin-section" id="section-philosophy">
+        <div class="admin-header">
+          <h1 class="page-title">Philosophy Section</h1>
+          <button class="btn btn-gold" onclick="savePhilosophyContent()">
+            <i data-lucide="save" style="width: 16px; height: 16px;"></i>
+            Save Changes
+          </button>
+        </div>
+
+        <div class="content-card">
+          <div class="card-header">
+            <div class="card-title">Philosophy Content</div>
+          </div>
+          <div class="card-body">
+            <div class="form-group">
+              <label class="form-label">Section Label</label>
+              <input type="text" class="form-input" id="philosLabel" placeholder="The Ancient Wisdom">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Section Title</label>
+              <input type="text" class="form-input" id="philosTitle" placeholder="The Art of Healing & Renewal">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Description</label>
+              <textarea class="form-input form-textarea" id="philosDescription" placeholder="Enter the philosophy description..."></textarea>
+            </div>
+
+            <h4 style="margin: 2rem 0 1rem; font-weight: 600;">Pillars</h4>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+              <div>
+                <label class="form-label">Pillar 1</label>
+                <input type="text" class="form-input" id="pillar1" placeholder="Balance">
+              </div>
+              <div>
+                <label class="form-label">Pillar 2</label>
+                <input type="text" class="form-input" id="pillar2" placeholder="Harmony">
+              </div>
+              <div>
+                <label class="form-label">Pillar 3</label>
+                <input type="text" class="form-input" id="pillar3" placeholder="Renewal">
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Retreats Section -->
+      <section class="admin-section" id="section-retreats">
+        <div class="admin-header">
+          <h1 class="page-title">Manage Retreats</h1>
+          <button class="btn btn-gold" onclick="openRetreatModal()">
+            <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+            Add Retreat
+          </button>
+        </div>
+
+        <div class="content-card">
+          <div class="card-body" style="padding: 0;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Image</th>
+                  <th>Title</th>
+                  <th>Category</th>
+                  <th>Duration</th>
+                  <th>Price</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="retreatsTableBody">
+                <tr>
+                  <td colspan="6" style="text-align: center; padding: 3rem;">
+                    <div class="spinner" style="margin: 0 auto;"></div>
+                    <p style="margin-top: 1rem; color: var(--text-muted);">Loading retreats...</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Treatments Section -->
+      <section class="admin-section" id="section-treatments">
+        <div class="admin-header">
+          <h1 class="page-title">Manage Treatments</h1>
+          <button class="btn btn-gold" onclick="openTreatmentModal()">
+            <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+            Add Treatment
+          </button>
+        </div>
+
+        <div class="content-card">
+          <div class="card-body" style="padding: 0;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Icon</th>
+                  <th>Name</th>
+                  <th>Description</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="treatmentsTableBody">
+                <tr>
+                  <td colspan="4" style="text-align: center; padding: 3rem;">
+                    <div class="spinner" style="margin: 0 auto;"></div>
+                    <p style="margin-top: 1rem; color: var(--text-muted);">Loading treatments...</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Testimonials Section -->
+      <section class="admin-section" id="section-testimonials">
+        <div class="admin-header">
+          <h1 class="page-title">Manage Testimonials</h1>
+          <button class="btn btn-gold" onclick="openTestimonialModal()">
+            <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+            Add Testimonial
+          </button>
+        </div>
+
+        <div class="content-card">
+          <div class="card-body" style="padding: 0;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Author</th>
+                  <th>Location</th>
+                  <th>Quote</th>
+                  <th>Rating</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="testimonialsTableBody">
+                <tr>
+                  <td colspan="5" style="text-align: center; padding: 3rem;">
+                    <div class="spinner" style="margin: 0 auto;"></div>
+                    <p style="margin-top: 1rem; color: var(--text-muted);">Loading testimonials...</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- CTA Section -->
+      <section class="admin-section" id="section-cta">
+        <div class="admin-header">
+          <h1 class="page-title">CTA Section</h1>
+          <button class="btn btn-gold" onclick="saveCtaContent()">
+            <i data-lucide="save" style="width: 16px; height: 16px;"></i>
+            Save Changes
+          </button>
+        </div>
+
+        <div class="content-card">
+          <div class="card-header">
+            <div class="card-title">Call-to-Action Content</div>
+          </div>
+          <div class="card-body">
+            <div class="form-group">
+              <label class="form-label">Section Label</label>
+              <input type="text" class="form-input" id="ctaLabel" placeholder="Begin Your Journey">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Title</label>
+              <input type="text" class="form-input" id="ctaTitle" placeholder="Transform Your Life">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Subtitle</label>
+              <textarea class="form-input form-textarea" id="ctaSubtitle" placeholder="Let us curate a personalized wellness journey..."></textarea>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+              <div class="form-group">
+                <label class="form-label">Primary Button Text</label>
+                <input type="text" class="form-input" id="ctaPrimaryBtn" placeholder="Schedule Consultation">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Secondary Button Text</label>
+                <input type="text" class="form-input" id="ctaSecondaryBtn" placeholder="Download Brochure">
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Settings Section -->
+      <section class="admin-section" id="section-settings">
+        <div class="admin-header">
+          <h1 class="page-title">Site Settings</h1>
+          <button class="btn btn-gold" onclick="saveSettings()">
+            <i data-lucide="save" style="width: 16px; height: 16px;"></i>
+            Save Settings
+          </button>
+        </div>
+
+        <div class="content-card">
+          <div class="card-header">
+            <div class="card-title">General Settings</div>
+          </div>
+          <div class="card-body">
+            <div class="form-group">
+              <label class="form-label">Site Name</label>
+              <input type="text" class="form-input" id="siteName" placeholder="Recharge Travels">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Contact Email</label>
+              <input type="email" class="form-input" id="contactEmail" placeholder="info@rechargetravels.com">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Contact Phone</label>
+              <input type="text" class="form-input" id="contactPhone" placeholder="+1 234 567 890">
+            </div>
+          </div>
+        </div>
+
+        <div class="content-card">
+          <div class="card-header">
+            <div class="card-title">Social Media Links</div>
+          </div>
+          <div class="card-body">
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+              <div class="form-group">
+                <label class="form-label">Instagram URL</label>
+                <input type="text" class="form-input" id="socialInstagram" placeholder="https://instagram.com/...">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Facebook URL</label>
+                <input type="text" class="form-input" id="socialFacebook" placeholder="https://facebook.com/...">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Twitter URL</label>
+                <input type="text" class="form-input" id="socialTwitter" placeholder="https://twitter.com/...">
+              </div>
+              <div class="form-group">
+                <label class="form-label">LinkedIn URL</label>
+                <input type="text" class="form-input" id="socialLinkedin" placeholder="https://linkedin.com/...">
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Retreat Modal -->
+  <div class="modal-overlay" id="retreatModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="retreatModalTitle">Add New Retreat</h3>
+        <button class="modal-close" onclick="closeRetreatModal()">
+          <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="retreatId">
+        <div class="form-group">
+          <label class="form-label">Title *</label>
+          <input type="text" class="form-input" id="retreatTitle" placeholder="e.g., Panchakarma Detox">
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label">Category *</label>
+            <select class="form-input" id="retreatCategory">
+              <option value="">Select category</option>
+              <option value="Detox & Purification">Detox & Purification</option>
+              <option value="Mind & Body">Mind & Body</option>
+              <option value="Inner Peace">Inner Peace</option>
+              <option value="Anti-Aging">Anti-Aging</option>
+              <option value="Together">Together</option>
+              <option value="Ultimate Experience">Ultimate Experience</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Duration *</label>
+            <input type="text" class="form-input" id="retreatDuration" placeholder="e.g., 7-14 Days">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description *</label>
+          <textarea class="form-input form-textarea" id="retreatDescription" placeholder="Describe the retreat experience..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Price (USD) *</label>
+          <input type="number" class="form-input" id="retreatPrice" placeholder="2500">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Image URL *</label>
+          <input type="text" class="form-input" id="retreatImage" placeholder="https://images.unsplash.com/...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Display Order</label>
+          <input type="number" class="form-input" id="retreatOrder" placeholder="1" value="1">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeRetreatModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveRetreat()">Save Retreat</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Treatment Modal -->
+  <div class="modal-overlay" id="treatmentModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="treatmentModalTitle">Add New Treatment</h3>
+        <button class="modal-close" onclick="closeTreatmentModal()">
+          <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="treatmentId">
+        <div class="form-group">
+          <label class="form-label">Treatment Name *</label>
+          <input type="text" class="form-input" id="treatmentName" placeholder="e.g., Shirodhara">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Icon Name (Lucide) *</label>
+          <input type="text" class="form-input" id="treatmentIcon" placeholder="e.g., droplets, hand, sparkles">
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">
+            Browse icons at <a href="https://lucide.dev/icons" target="_blank" style="color: var(--gold);">lucide.dev/icons</a>
+          </p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description *</label>
+          <textarea class="form-input form-textarea" id="treatmentDescription" placeholder="Describe the treatment..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Display Order</label>
+          <input type="number" class="form-input" id="treatmentOrder" placeholder="1" value="1">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeTreatmentModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveTreatment()">Save Treatment</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Testimonial Modal -->
+  <div class="modal-overlay" id="testimonialModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="testimonialModalTitle">Add New Testimonial</h3>
+        <button class="modal-close" onclick="closeTestimonialModal()">
+          <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="testimonialId">
+        <div class="form-group">
+          <label class="form-label">Author Name *</label>
+          <input type="text" class="form-input" id="testimonialAuthor" placeholder="e.g., Sarah Mitchell">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Location *</label>
+          <input type="text" class="form-input" id="testimonialLocation" placeholder="e.g., London, United Kingdom">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Quote *</label>
+          <textarea class="form-input form-textarea" id="testimonialQuote" placeholder="Enter the testimonial quote..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Rating (1-5) *</label>
+          <select class="form-input" id="testimonialRating">
+            <option value="5">5 Stars</option>
+            <option value="4">4 Stars</option>
+            <option value="3">3 Stars</option>
+            <option value="2">2 Stars</option>
+            <option value="1">1 Star</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeTestimonialModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveTestimonial()">Save Testimonial</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal" style="max-width: 400px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Confirm Delete</h3>
+        <button class="modal-close" onclick="closeDeleteModal()">
+          <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete this item? This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeDeleteModal()">Cancel</button>
+        <button class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== FIREBASE CONFIGURATION =====
+    const firebaseConfig = {
+      apiKey: "AIzaSyCxFnQfMo3rOWhgm1_yiRIh0Oez246U2N0",
+      authDomain: "recharge-travels-73e76.firebaseapp.com",
+      databaseURL: "https://recharge-travels-73e76-default-rtdb.firebaseio.com",
+      projectId: "recharge-travels-73e76",
+      storageBucket: "recharge-travels-73e76.firebasestorage.app",
+      messagingSenderId: "515581447537",
+      appId: "1:515581447537:web:b4f65bf9c2544c65d6fad0",
+      measurementId: "G-W2MJBDFDG3"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // ===== UI HELPERS =====
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `
+        <i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}" style="width: 20px; height: 20px; color: var(--${type === 'success' ? 'success' : 'danger'});"></i>
+        <span>${message}</span>
+      `;
+      container.appendChild(toast);
+      lucide.createIcons();
+
+      setTimeout(() => toast.classList.add('show'), 10);
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    function showSection(sectionId) {
+      document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+      document.getElementById(`section-${sectionId}`).classList.add('active');
+      document.querySelector(`[data-section="${sectionId}"]`).classList.add('active');
+    }
+
+    // ===== AUTHENTICATION =====
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('adminContainer').classList.add('active');
+        loadAllData();
+      } else {
+        document.getElementById('loginScreen').style.display = 'flex';
+        document.getElementById('adminContainer').classList.remove('active');
+      }
+    });
+
+    // Login Form
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+
+      document.getElementById('loginBtnText').textContent = 'Signing in...';
+      document.getElementById('loginSpinner').style.display = 'block';
+
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+        showToast('Welcome back!');
+      } catch (error) {
+        showToast(error.message, 'error');
+      } finally {
+        document.getElementById('loginBtnText').textContent = 'Sign In';
+        document.getElementById('loginSpinner').style.display = 'none';
+      }
+    });
+
+    // Create Admin Account
+    document.getElementById('createAdminLink').addEventListener('click', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+
+      if (!email || !password) {
+        showToast('Please enter email and password first', 'error');
+        return;
+      }
+
+      if (password.length < 6) {
+        showToast('Password must be at least 6 characters', 'error');
+        return;
+      }
+
+      try {
+        await auth.createUserWithEmailAndPassword(email, password);
+        showToast('Admin account created successfully!');
+      } catch (error) {
+        showToast(error.message, 'error');
+      }
+    });
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      auth.signOut();
+      showToast('Logged out successfully');
+    });
+
+    // Sidebar Navigation
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const section = item.dataset.section;
+        showSection(section);
+      });
+    });
+
+    // ===== LOAD ALL DATA =====
+    async function loadAllData() {
+      await Promise.all([
+        loadHeroContent(),
+        loadPhilosophyContent(),
+        loadRetreats(),
+        loadTreatments(),
+        loadTestimonials(),
+        loadCtaContent(),
+        loadSettings()
+      ]);
+      updateStats();
+    }
+
+    function updateStats() {
+      // Stats are updated when data is loaded
+    }
+
+    // ===== HERO SECTION =====
+    async function loadHeroContent() {
+      try {
+        const doc = await db.collection('siteContent').doc('hero').get();
+        if (doc.exists) {
+          const data = doc.data();
+          document.getElementById('heroTitle').value = data.title || '';
+          document.getElementById('heroSubtitle').value = data.subtitle || '';
+          document.getElementById('heroLabel').value = data.label || '';
+          document.getElementById('heroCta').value = data.ctaText || '';
+          document.getElementById('heroImage').value = data.backgroundImage || '';
+
+          if (data.backgroundImage) {
+            document.getElementById('heroImagePreview').src = data.backgroundImage;
+            document.getElementById('heroImagePreview').style.display = 'block';
+          }
+        }
+      } catch (error) {
+        console.error('Error loading hero:', error);
+      }
+    }
+
+    async function saveHeroContent() {
+      try {
+        await db.collection('siteContent').doc('hero').set({
+          title: document.getElementById('heroTitle').value,
+          subtitle: document.getElementById('heroSubtitle').value,
+          label: document.getElementById('heroLabel').value,
+          ctaText: document.getElementById('heroCta').value,
+          backgroundImage: document.getElementById('heroImage').value,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        showToast('Hero section saved successfully!');
+      } catch (error) {
+        showToast(error.message, 'error');
+      }
+    }
+
+    // Preview image on URL change
+    document.getElementById('heroImage').addEventListener('blur', function() {
+      const preview = document.getElementById('heroImagePreview');
+      if (this.value) {
+        preview.src = this.value;
+        preview.style.display = 'block';
+      } else {
+        preview.style.display = 'none';
+      }
+    });
+
+    // ===== PHILOSOPHY SECTION =====
+    async function loadPhilosophyContent() {
+      try {
+        const doc = await db.collection('siteContent').doc('philosophy').get();
+        if (doc.exists) {
+          const data = doc.data();
+          document.getElementById('philosLabel').value = data.label || '';
+          document.getElementById('philosTitle').value = data.title || '';
+          document.getElementById('philosDescription').value = data.description || '';
+          document.getElementById('pillar1').value = data.pillars?.[0] || '';
+          document.getElementById('pillar2').value = data.pillars?.[1] || '';
+          document.getElementById('pillar3').value = data.pillars?.[2] || '';
+        }
+      } catch (error) {
+        console.error('Error loading philosophy:', error);
+      }
+    }
+
+    async function savePhilosophyContent() {
+      try {
+        await db.collection('siteContent').doc('philosophy').set({
+          label: document.getElementById('philosLabel').value,
+          title: document.getElementById('philosTitle').value,
+          description: document.getElementById('philosDescription').value,
+          pillars: [
+            document.getElementById('pillar1').value,
+            document.getElementById('pillar2').value,
+            document.getElementById('pillar3').value
+          ],
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        showToast('Philosophy section saved successfully!');
+      } catch (error) {
+        showToast(error.message, 'error');
+      }
+    }
+
+    // ===== RETREATS =====
+    async function loadRetreats() {
+      try {
+        const snapshot = await db.collection('retreats').orderBy('order').get();
+        const tbody = document.getElementById('retreatsTableBody');
+
+        if (snapshot.empty) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="6" style="text-align: center; padding: 3rem;">
+                <p style="color: var(--text-muted);">No retreats found. Click "Add Retreat" to create one.</p>
+              </td>
+            </tr>
+          `;
+          document.getElementById('statRetreats').textContent = '0';
+          return;
+        }
+
+        tbody.innerHTML = '';
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          tbody.innerHTML += `
+            <tr>
+              <td><img src="${data.image}" alt="${data.title}" class="table-image"></td>
+              <td><strong>${data.title}</strong></td>
+              <td>${data.category}</td>
+              <td>${data.duration}</td>
+              <td>$${data.price.toLocaleString()}</td>
+              <td>
+                <div class="table-actions">
+                  <button class="action-btn" onclick="editRetreat('${doc.id}')">
+                    <i data-lucide="pencil" style="width: 16px; height: 16px;"></i>
+                  </button>
+                  <button class="action-btn delete" onclick="confirmDelete('retreat', '${doc.id}')">
+                    <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
+        });
+
+        document.getElementById('statRetreats').textContent = snapshot.size;
+        lucide.createIcons();
+      } catch (error) {
+        console.error('Error loading retreats:', error);
+      }
+    }
+
+    function openRetreatModal(id = null) {
+      document.getElementById('retreatModalTitle').textContent = id ? 'Edit Retreat' : 'Add New Retreat';
+      document.getElementById('retreatId').value = id || '';
+
+      if (!id) {
+        document.getElementById('retreatTitle').value = '';
+        document.getElementById('retreatCategory').value = '';
+        document.getElementById('retreatDuration').value = '';
+        document.getElementById('retreatDescription').value = '';
+        document.getElementById('retreatPrice').value = '';
+        document.getElementById('retreatImage').value = '';
+        document.getElementById('retreatOrder').value = '1';
+      }
+
+      document.getElementById('retreatModal').classList.add('active');
+    }
+
+    function closeRetreatModal() {
+      document.getElementById('retreatModal').classList.remove('active');
+    }
+
+    async function editRetreat(id) {
+      try {
+        const doc = await db.collection('retreats').doc(id).get();
+        if (doc.exists) {
+          const data = doc.data();
+          document.getElementById('retreatId').value = id;
+          document.getElementById('retreatTitle').value = data.title;
+          document.getElementById('retreatCategory').value = data.category;
+          document.getElementById('retreatDuration').value = data.duration;
+          document.getElementById('retreatDescription').value = data.description;
+          document.getElementById('retreatPrice').value = data.price;
+          document.getElementById('retreatImage').value = data.image;
+          document.getElementById('retreatOrder').value = data.order || 1;
+
+          openRetreatModal(id);
+        }
+      } catch (error) {
+        showToast(error.message, 'error');
+      }
+    }
+
+    async function saveRetreat() {
+      const id = document.getElementById('retreatId').value;
+      const data = {
+        title: document.getElementById('retreatTitle').value,
+        category: document.getElementById('retreatCategory').value,
+        duration: document.getElementById('retreatDuration').value,
+        description: document.getElementById('retreatDescription').value,
+        price: parseInt(document.getElementById('retreatPrice').value),
+        image: document.getElementById('retreatImage').value,
+        order: parseInt(document.getElementById('retreatOrder').value) || 1,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+
+      if (!data.title || !data.category || !data.price) {
+        showToast('Please fill in all required fields', 'error');
+        return;
+      }
+
+      try {
+        if (id) {
+          await db.collection('retreats').doc(id).update(data);
+          showToast('Retreat updated successfully!');
+        } else {
+          data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+          await db.collection('retreats').add(data);
+          showToast('Retreat added successfully!');
+        }
+        closeRetreatModal();
+        loadRetreats();
+      } catch (error) {
+        showToast(error.message, 'error');
+      }
+    }
+
+    // ===== TREATMENTS =====
+    async function loadTreatments() {
+      try {
+        const snapshot = await db.collection('treatments').orderBy('order').get();
+        const tbody = document.getElementById('treatmentsTableBody');
+
+        if (snapshot.empty) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="4" style="text-align: center; padding: 3rem;">
+                <p style="color: var(--text-muted);">No treatments found. Click "Add Treatment" to create one.</p>
+              </td>
+            </tr>
+          `;
+          document.getElementById('statTreatments').textContent = '0';
+          return;
+        }
+
+        tbody.innerHTML = '';
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          tbody.innerHTML += `
+            <tr>
+              <td><i data-lucide="${data.icon}" style="width: 24px; height: 24px; color: var(--gold);"></i></td>
+              <td><strong>${data.name}</strong></td>
+              <td style="max-width: 300px;">${data.description}</td>
+              <td>
+                <div class="table-actions">
+                  <button class="action-btn" onclick="editTreatment('${doc.id}')">
+                    <i data-lucide="pencil" style="width: 16px; height: 16px;"></i>
+                  </button>
+                  <button class="action-btn delete" onclick="confirmDelete('treatment', '${doc.id}')">
+                    <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
+        });
+
+        document.getElementById('statTreatments').textContent = snapshot.size;
+        lucide.createIcons();
+      } catch (error) {
+        console.error('Error loading treatments:', error);
+      }
+    }
+
+    function openTreatmentModal(id = null) {
+      document.getElementById('treatmentModalTitle').textContent = id ? 'Edit Treatment' : 'Add New Treatment';
+      document.getElementById('treatmentId').value = id || '';
+
+      if (!id) {
+        document.getElementById('treatmentName').value = '';
+        document.getElementById('treatmentIcon').value = '';
+        document.getElementById('treatmentDescription').value = '';
+        document.getElementById('treatmentOrder').value = '1';
+      }
+
+      document.getElementById('treatmentModal').classList.add('active');
+    }
+
+    function closeTreatmentModal() {
+      document.getElementById('treatmentModal').classList.remove('active');
+    }
+
+    async function editTreatment(id) {
+      try {
+        const doc = await db.collection('treatments').doc(id).get();
+        if (doc.exists) {
+          const data = doc.data();
+          document.getElementById('treatmentId').value = id;
+          document.getElementById('treatmentName').value = data.name;
+          document.getElementById('treatmentIcon').value = data.icon;
+          document.getElementById('treatmentDescription').value = data.description;
+          document.getElementById('treatmentOrder').value = data.order || 1;
+
+          openTreatmentModal(id);
+        }
+      } catch (error) {
+        showToast(error.message, 'error');
+      }
+    }
+
+    async function saveTreatment() {
+      const id = document.getElementById('treatmentId').value;
+      const data = {
+        name: document.getElementById('treatmentName').value,
+        icon: document.getElementById('treatmentIcon').value,
+        description: document.getElementById('treatmentDescription').value,
+        order: parseInt(document.getElementById('treatmentOrder').value) || 1,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+
+      if (!data.name || !data.icon || !data.description) {
+        showToast('Please fill in all required fields', 'error');
+        return;
+      }
+
+      try {
+        if (id) {
+          await db.collection('treatments').doc(id).update(data);
+          showToast('Treatment updated successfully!');
+        } else {
+          data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+          await db.collection('treatments').add(data);
+          showToast('Treatment added successfully!');
+        }
+        closeTreatmentModal();
+        loadTreatments();
+      } catch (error) {
+        showToast(error.message, 'error');
+      }
+    }
+
+    // ===== TESTIMONIALS =====
+    async function loadTestimonials() {
+      try {
+        const snapshot = await db.collection('testimonials').get();
+        const tbody = document.getElementById('testimonialsTableBody');
+
+        if (snapshot.empty) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="5" style="text-align: center; padding: 3rem;">
+                <p style="color: var(--text-muted);">No testimonials found. Click "Add Testimonial" to create one.</p>
+              </td>
+            </tr>
+          `;
+          document.getElementById('statTestimonials').textContent = '0';
+          return;
+        }
+
+        tbody.innerHTML = '';
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const stars = '★'.repeat(data.rating) + '☆'.repeat(5 - data.rating);
+          tbody.innerHTML += `
+            <tr>
+              <td><strong>${data.author}</strong></td>
+              <td>${data.location}</td>
+              <td style="max-width: 250px;">"${data.quote.substring(0, 80)}..."</td>
+              <td style="color: var(--gold);">${stars}</td>
+              <td>
+                <div class="table-actions">
+                  <button class="action-btn" onclick="editTestimonial('${doc.id}')">
+                    <i data-lucide="pencil" style="width: 16px; height: 16px;"></i>
+                  </button>
+                  <button class="action-btn delete" onclick="confirmDelete('testimonial', '${doc.id}')">
+                    <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
+        });
+
+        document.getElementById('statTestimonials').textContent = snapshot.size;
+        lucide.createIcons();
+      } catch (error) {
+        console.error('Error loading testimonials:', error);
+      }
+    }
+
+    function openTestimonialModal(id = null) {
+      document.getElementById('testimonialModalTitle').textContent = id ? 'Edit Testimonial' : 'Add New Testimonial';
+      document.getElementById('testimonialId').value = id || '';
+
+      if (!id) {
+        document.getElementById('testimonialAuthor').value = '';
+        document.getElementById('testimonialLocation').value = '';
+        document.getElementById('testimonialQuote').value = '';
+        document.getElementById('testimonialRating').value = '5';
+      }
+
+      document.getElementById('testimonialModal').classList.add('active');
+    }
+
+    function closeTestimonialModal() {
+      document.getElementById('testimonialModal').classList.remove('active');
+    }
+
+    async function editTestimonial(id) {
+      try {
+        const doc = await db.collection('testimonials').doc(id).get();
+        if (doc.exists) {
+          const data = doc.data();
+          document.getElementById('testimonialId').value = id;
+          document.getElementById('testimonialAuthor').value = data.author;
+          document.getElementById('testimonialLocation').value = data.location;
+          document.getElementById('testimonialQuote').value = data.quote;
+          document.getElementById('testimonialRating').value = data.rating;
+
+          openTestimonialModal(id);
+        }
+      } catch (error) {
+        showToast(error.message, 'error');
+      }
+    }
+
+    async function saveTestimonial() {
+      const id = document.getElementById('testimonialId').value;
+      const data = {
+        author: document.getElementById('testimonialAuthor').value,
+        location: document.getElementById('testimonialLocation').value,
+        quote: document.getElementById('testimonialQuote').value,
+        rating: parseInt(document.getElementById('testimonialRating').value),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+
+      if (!data.author || !data.quote) {
+        showToast('Please fill in all required fields', 'error');
+        return;
+      }
+
+      try {
+        if (id) {
+          await db.collection('testimonials').doc(id).update(data);
+          showToast('Testimonial updated successfully!');
+        } else {
+          data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+          await db.collection('testimonials').add(data);
+          showToast('Testimonial added successfully!');
+        }
+        closeTestimonialModal();
+        loadTestimonials();
+      } catch (error) {
+        showToast(error.message, 'error');
+      }
+    }
+
+    // ===== CTA SECTION =====
+    async function loadCtaContent() {
+      try {
+        const doc = await db.collection('siteContent').doc('cta').get();
+        if (doc.exists) {
+          const data = doc.data();
+          document.getElementById('ctaLabel').value = data.label || '';
+          document.getElementById('ctaTitle').value = data.title || '';
+          document.getElementById('ctaSubtitle').value = data.subtitle || '';
+          document.getElementById('ctaPrimaryBtn').value = data.primaryButton || '';
+          document.getElementById('ctaSecondaryBtn').value = data.secondaryButton || '';
+        }
+      } catch (error) {
+        console.error('Error loading CTA:', error);
+      }
+    }
+
+    async function saveCtaContent() {
+      try {
+        await db.collection('siteContent').doc('cta').set({
+          label: document.getElementById('ctaLabel').value,
+          title: document.getElementById('ctaTitle').value,
+          subtitle: document.getElementById('ctaSubtitle').value,
+          primaryButton: document.getElementById('ctaPrimaryBtn').value,
+          secondaryButton: document.getElementById('ctaSecondaryBtn').value,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        showToast('CTA section saved successfully!');
+      } catch (error) {
+        showToast(error.message, 'error');
+      }
+    }
+
+    // ===== SETTINGS =====
+    async function loadSettings() {
+      try {
+        const doc = await db.collection('siteContent').doc('settings').get();
+        if (doc.exists) {
+          const data = doc.data();
+          document.getElementById('siteName').value = data.siteName || '';
+          document.getElementById('contactEmail').value = data.contactEmail || '';
+          document.getElementById('contactPhone').value = data.contactPhone || '';
+          document.getElementById('socialInstagram').value = data.social?.instagram || '';
+          document.getElementById('socialFacebook').value = data.social?.facebook || '';
+          document.getElementById('socialTwitter').value = data.social?.twitter || '';
+          document.getElementById('socialLinkedin').value = data.social?.linkedin || '';
+        }
+      } catch (error) {
+        console.error('Error loading settings:', error);
+      }
+    }
+
+    async function saveSettings() {
+      try {
+        await db.collection('siteContent').doc('settings').set({
+          siteName: document.getElementById('siteName').value,
+          contactEmail: document.getElementById('contactEmail').value,
+          contactPhone: document.getElementById('contactPhone').value,
+          social: {
+            instagram: document.getElementById('socialInstagram').value,
+            facebook: document.getElementById('socialFacebook').value,
+            twitter: document.getElementById('socialTwitter').value,
+            linkedin: document.getElementById('socialLinkedin').value
+          },
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        showToast('Settings saved successfully!');
+      } catch (error) {
+        showToast(error.message, 'error');
+      }
+    }
+
+    // ===== DELETE FUNCTIONALITY =====
+    let deleteTarget = { type: '', id: '' };
+
+    function confirmDelete(type, id) {
+      deleteTarget = { type, id };
+      document.getElementById('deleteModal').classList.add('active');
+    }
+
+    function closeDeleteModal() {
+      document.getElementById('deleteModal').classList.remove('active');
+      deleteTarget = { type: '', id: '' };
+    }
+
+    document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+      const { type, id } = deleteTarget;
+
+      try {
+        let collection = '';
+        if (type === 'retreat') collection = 'retreats';
+        else if (type === 'treatment') collection = 'treatments';
+        else if (type === 'testimonial') collection = 'testimonials';
+
+        await db.collection(collection).doc(id).delete();
+        showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} deleted successfully!`);
+        closeDeleteModal();
+
+        if (type === 'retreat') loadRetreats();
+        else if (type === 'treatment') loadTreatments();
+        else if (type === 'testimonial') loadTestimonials();
+      } catch (error) {
+        showToast(error.message, 'error');
+      }
+    });
+
+    // ===== INITIALIZE DEFAULT DATA =====
+    async function initializeDefaultData() {
+      if (!confirm('This will add default data to your database. Continue?')) return;
+
+      try {
+        // Hero
+        await db.collection('siteContent').doc('hero').set({
+          title: 'Ayurveda & Wellness',
+          subtitle: 'Journey Within, Transform Forever',
+          label: 'Recharge Travels Presents',
+          ctaText: 'Explore Retreats',
+          backgroundImage: 'https://images.unsplash.com/photo-1600334129128-685c5582fd35?w=1920&q=80',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        // Philosophy
+        await db.collection('siteContent').doc('philosophy').set({
+          label: 'The Ancient Wisdom',
+          title: 'The Art of Healing & Renewal',
+          description: 'Rooted in 5,000 years of Indian wisdom, Ayurveda offers a profound path to holistic wellness. Our curated retreats blend ancient healing traditions with luxurious modern comfort, guiding you toward perfect balance of mind, body, and spirit.',
+          pillars: ['Balance', 'Harmony', 'Renewal'],
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        // CTA
+        await db.collection('siteContent').doc('cta').set({
+          label: 'Begin Your Journey',
+          title: 'Transform Your Life',
+          subtitle: 'Let us curate a personalized wellness journey that aligns with your unique needs and aspirations.',
+          primaryButton: 'Schedule Consultation',
+          secondaryButton: 'Download Brochure',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        // Retreats
+        const retreats = [
+          { title: 'Panchakarma Detox', category: 'Detox & Purification', duration: '7-14 Days', price: 2500, description: 'The ultimate Ayurvedic cleanse. Five therapeutic treatments to eliminate toxins and restore your body\'s natural equilibrium.', image: 'https://images.unsplash.com/photo-1600334129128-685c5582fd35?w=600&q=80', order: 1 },
+          { title: 'Yoga Immersion', category: 'Mind & Body', duration: '5-10 Days', price: 1800, description: 'Deepen your practice in serene surroundings. Daily yoga, meditation, and Ayurvedic nutrition for complete transformation.', image: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=600&q=80', order: 2 },
+          { title: 'Meditation Sanctuary', category: 'Inner Peace', duration: '3-7 Days', price: 1200, description: 'Silence the noise within. Guided meditation, breathwork, and mindfulness practices in tranquil natural settings.', image: 'https://images.unsplash.com/photo-1528715471579-d1bcf0ba5e83?w=600&q=80', order: 3 },
+          { title: 'Rasayana Rejuvenation', category: 'Anti-Aging', duration: '10-21 Days', price: 4000, description: 'The royal path to longevity. Ancient rejuvenation therapies that restore vitality and reverse the signs of aging.', image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&q=80', order: 4 },
+          { title: 'Couples Harmony', category: 'Together', duration: '7-14 Days', price: 3500, description: 'Reconnect with your partner through shared wellness experiences. Couples therapies, private yoga, and romantic dining.', image: 'https://images.unsplash.com/photo-1591343395082-e120087004b4?w=600&q=80', order: 5 },
+          { title: 'Signature Holistic', category: 'Ultimate Experience', duration: '14-28 Days', price: 6000, description: 'Our most comprehensive program. Full Ayurvedic assessment, personalized treatments, and lasting lifestyle transformation.', image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=600&q=80', order: 6 }
+        ];
+
+        for (const retreat of retreats) {
+          retreat.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+          await db.collection('retreats').add(retreat);
+        }
+
+        // Treatments
+        const treatments = [
+          { name: 'Shirodhara', icon: 'droplets', description: 'Warm oil gently poured over the forehead to calm the mind and nervous system', order: 1 },
+          { name: 'Abhyanga', icon: 'hand', description: 'Full-body warm oil massage using synchronized strokes for deep relaxation', order: 2 },
+          { name: 'Udvartana', icon: 'sparkles', description: 'Herbal powder massage to exfoliate, detoxify, and tone the skin', order: 3 },
+          { name: 'Nasya', icon: 'wind', description: 'Nasal therapy to clear sinuses and enhance mental clarity', order: 4 },
+          { name: 'Basti', icon: 'flower-2', description: 'Gentle internal cleansing for digestive health and vitality', order: 5 },
+          { name: 'Swedana', icon: 'flame', description: 'Herbal steam therapy to open channels and release toxins', order: 6 }
+        ];
+
+        for (const treatment of treatments) {
+          treatment.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+          await db.collection('treatments').add(treatment);
+        }
+
+        // Testimonial
+        await db.collection('testimonials').add({
+          author: 'Sarah Mitchell',
+          location: 'London, United Kingdom',
+          quote: 'A transformative journey that reconnected me with myself. The attention to detail, the serene environment, and the profound healing I experienced exceeded all expectations.',
+          rating: 5,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        showToast('Default data initialized successfully!');
+        loadAllData();
+      } catch (error) {
+        showToast(error.message, 'error');
+      }
+    }
+
+    // Initialize Lucide Icons
+    lucide.createIcons();
+  </script>
+</body>
+</html>

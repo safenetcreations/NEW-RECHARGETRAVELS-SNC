@@ -1,0 +1,73 @@
+{
+  "slug": "cooking-class-sri-lanka",
+  "name": "Sri Lankan Cooking Classes & Spice Market Tours",
+  "heroImageURL": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fcooking-hero-3840x2160.webp?alt=media",
+  "seo": {
+    "title": "Sri Lankan Cooking Class | Spice Market, Rice & Curry Workshop – Recharge Travels",
+    "description": "Grind coconut sambol on a mirisgala, roast curry leaves and simmer creamy jackfruit curry in a clay pot. Join Recharge Travels for authentic Sri Lankan cooking classes."
+  },
+  "introParagraph": "From crackling mustard seeds to the earthy perfume of roasted curry powder, Sri Lankan cuisine is a feast for all senses. Our hands‑on cooking classes start at the root—literally—wandering bustling spice markets and organic village gardens before you step behind the hearth with an auntie‑chef. Pound pol sambol on a granite mortar, scrape fresh coconut with a kiri hodi, simmer ambul thiyal in a clay pot, then sit down to taste the flavours you created. With Recharge Travels you'll carry home more than recipes; you'll carry the rhythm of island hospitality.",
+  "highlights": [
+    { 
+      "icon": "🥥", 
+      "title": "Market‑to‑Table Tour",     
+      "blurb60": "Hand‑pick cinnamon, cardamom & fresh coconut at a vibrant local bazaar." 
+    },
+    { 
+      "icon": "🍛", 
+      "title": "Rice & Curry Mastery",      
+      "blurb60": "Prepare three classic curries—jackfruit, dhal & fish ambul thiyal—plus pol sambol." 
+    },
+    { 
+      "icon": "🪘", 
+      "title": "Traditional Clay Pot Cook", 
+      "blurb60": "Stir simmering curries over firewood stoves in earthen pots for authentic flavour." 
+    },
+    { 
+      "icon": "📜", 
+      "title": "Take‑Home Recipe e‑Book",   
+      "blurb60": "Get a PDF of every dish plus spice‑substitution tips for your home kitchen." 
+    }
+  ],
+  "routes": [
+    {
+      "routeName": "Galle Heritage Kitchen",
+      "duration": "Half‑day / 4 hrs",
+      "distanceKm": 2,
+      "bestClass": "Restored colonial villa",
+      "mapGPXUrl": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/routes%2Fgalle-heritage-kitchen.gpx?alt=media"
+    },
+    {
+      "routeName": "Kandy Spice‑Garden Workshop",
+      "duration": "5 hrs incl. market tour",
+      "distanceKm": 3,
+      "bestClass": "Outdoor clay‑oven pavilion",
+      "mapGPXUrl": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/routes%2Fkandy-spice-garden.gpx?alt=media"
+    },
+    {
+      "routeName": "Jaffna Crab Curry Class",
+      "duration": "4 hrs / lagoon‑fresh produce",
+      "distanceKm": 1,
+      "bestClass": "Family‑run Tamil kitchen",
+      "mapGPXUrl": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/routes%2Fjaffna-crab-curry.gpx?alt=media"
+    }
+  ],
+  "galleryImages": [
+    { 
+      "url": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fgallery-cook1.webp?alt=media", 
+      "alt": "Sri Lankan chef grinding spices on a stone mirisgala" 
+    },
+    { 
+      "url": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fgallery-cook2.webp?alt=media", 
+      "alt": "Colourful bowls of curries and sambols on banana leaves" 
+    },
+    { 
+      "url": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fgallery-cook3.webp?alt=media", 
+      "alt": "Tourists tasting rice & curry they cooked in clay pots" 
+    }
+  ],
+  "faqTag": "cooking-class-sri-lanka",
+  "ctaHeadline": "Taste Sri Lanka—One Clay Pot at a Time",
+  "ctaSub": "Reserve your farm‑to‑fork cooking experience with Recharge Travels—markets, recipes and grandma‑approved secrets included.",
+  "videoURL": "https://www.youtube.com/embed/SriLankaCookingClass"
+}

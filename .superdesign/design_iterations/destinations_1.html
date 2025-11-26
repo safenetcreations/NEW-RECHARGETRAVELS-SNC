@@ -1,0 +1,658 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Recharge Travels – Destinations</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Poppins:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Tailwind + Flowbite via CDN (for design prototype only) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css"
+    />
+
+    <style>
+      body {
+        font-family: "DM Sans", system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif !important;
+        background: #fff9f1 !important;
+        color: #111827 !important;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif !important;
+        letter-spacing: -0.02em !important;
+      }
+
+      .rt-gradient-pill {
+        background: linear-gradient(135deg, #ff7a35, #facc15) !important;
+      }
+
+      .rt-card {
+        border-radius: 1.25rem !important;
+        box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08) !important;
+        border: 1px solid rgba(148, 163, 184, 0.35) !important;
+        background: #ffffff !important;
+      }
+
+      .rt-card:hover {
+        box-shadow: 0 26px 60px rgba(15, 23, 42, 0.12) !important;
+      }
+
+      .rt-tag {
+        border-radius: 999px !important;
+        border: 1px solid rgba(148, 163, 184, 0.45) !important;
+        background: rgba(248, 250, 252, 0.9) !important;
+      }
+
+      .rt-tag--active {
+        border-color: #f97316 !important;
+        background: rgba(249, 115, 22, 0.08) !important;
+        color: #9a3412 !important;
+      }
+
+      .rt-chip-badge {
+        border-radius: 999px !important;
+        background: rgba(15, 118, 110, 0.08) !important;
+        color: #065f46 !important;
+      }
+
+      .rt-badge-soft {
+        border-radius: 999px !important;
+        background: rgba(15, 23, 42, 0.06) !important;
+      }
+
+      .rt-blur-panel {
+        backdrop-filter: blur(18px) !important;
+        -webkit-backdrop-filter: blur(18px) !important;
+        border-radius: 999px !important;
+        border: 1px solid rgba(148, 163, 184, 0.36) !important;
+        background: rgba(255, 255, 255, 0.88) !important;
+      }
+
+      .rt-section-bg {
+        background: radial-gradient(circle at top left, #ffedd5 0, transparent 45%),
+          radial-gradient(circle at bottom right, #dcfce7 0, transparent 45%),
+          #fff9f1 !important;
+      }
+
+      .rt-pill-outline {
+        border-radius: 999px !important;
+        border: 1px dashed rgba(148, 163, 184, 0.7) !important;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen">
+    <div class="min-h-screen flex flex-col rt-section-bg">
+      <!-- Top nav (visual only for this design) -->
+      <header class="sticky top-0 z-30 backdrop-blur bg-white/70 border-b border-slate-200/70">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 flex items-center justify-between py-4 gap-4">
+          <div class="flex items-center gap-2">
+            <div class="h-9 w-9 rounded-2xl bg-slate-900 flex items-center justify-center text-xs font-semibold tracking-tight text-amber-300">
+              RT
+            </div>
+            <div class="flex flex-col leading-tight">
+              <span class="text-sm font-semibold text-slate-900">Recharge Travels</span>
+              <span class="text-[11px] text-slate-500">Sri Lanka specialists</span>
+            </div>
+          </div>
+          <div class="hidden md:flex items-center gap-6 text-xs font-medium text-slate-600">
+            <button class="flex items-center gap-1 rt-tag px-3.5 py-1.5 text-[11px]">
+              <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+              Curated itineraries
+            </button>
+            <button class="flex items-center gap-1.5 rt-pill-outline px-3.5 py-1.5 text-[11px] text-slate-600">
+              <span class="inline-block h-4 w-4 rounded-full bg-gradient-to-tr from-amber-400 to-orange-500"></span>
+              Tailor‑made journeys
+            </button>
+          </div>
+          <div class="flex items-center gap-2">
+            <button class="hidden sm:inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium rt-tag text-slate-700">
+              Trip planner
+            </button>
+            <button class="inline-flex items-center justify-center gap-1.5 rounded-full rt-gradient-pill px-4 py-2 text-xs font-semibold text-slate-900 shadow-lg shadow-orange-400/40">
+              Plan your Sri Lanka trip
+              <span class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-slate-900/10 text-[10px]">→</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main content -->
+      <main class="flex-1">
+        <section class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pt-8 pb-10 space-y-8">
+          <!-- Hero + search / filters -->
+          <div class="grid gap-8 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1.1fr)] items-start">
+            <div class="space-y-6">
+              <div class="inline-flex items-center gap-2 rounded-full bg-slate-900 text-amber-200 px-3.5 py-1.5 text-[11px] font-medium shadow-md shadow-slate-900/40">
+                <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+                Handpicked destinations across Sri Lanka
+              </div>
+
+              <div class="space-y-3">
+                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-semibold text-slate-900 tracking-tight">
+                  Discover Sri Lanka,
+                  <span class="inline-block bg-gradient-to-r from-orange-500 via-amber-400 to-emerald-500 bg-clip-text text-transparent">
+                    one destination at a time
+                  </span>
+                </h1>
+                <p class="text-sm sm:text-base text-slate-600 max-w-xl leading-relaxed">
+                  From misty tea hills to golden beaches and wildlife-rich national parks, explore
+                  Sri Lanka through curated regions, styles, and travel moods—designed for slow,
+                  meaningful journeys.
+                </p>
+              </div>
+
+              <!-- Search / primary filters -->
+              <div class="rt-card p-4 sm:p-5 flex flex-col gap-4">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div class="flex items-center gap-2 text-xs text-slate-600">
+                    <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-amber-100 text-[11px] text-amber-800">
+                      🔍
+                    </span>
+                    <span>Search by destination, vibe, or region</span>
+                  </div>
+                  <div class="flex items-center gap-2 text-[11px] text-slate-500">
+                    <span class="inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                    Live availability with instant confirmation
+                  </div>
+                </div>
+
+                <div class="grid gap-3 sm:grid-cols-[minmax(0,1.8fr)_minmax(0,1.1fr)]">
+                  <div class="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3.5 py-2.5">
+                    <span class="text-slate-400 text-sm">Search</span>
+                    <input
+                      type="text"
+                      placeholder="Try \"Ella hikes\" or \"South Coast beaches\""
+                      class="flex-1 border-none bg-transparent text-xs sm:text-[13px] text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-0"
+                    />
+                  </div>
+                  <div class="flex gap-2">
+                    <button class="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-2 text-[11px] font-medium text-slate-700">
+                      <span class="text-xs">☀️</span>
+                      Travel month
+                    </button>
+                    <button class="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-2 text-[11px] font-medium text-slate-700">
+                      <span class="text-xs">👨‍👩‍👧</span>
+                      Trip style
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Quick pills -->
+                <div class="flex flex-wrap gap-2 pt-1">
+                  <button class="rt-tag rt-tag--active px-3 py-1 text-[11px] font-medium flex items-center gap-1.5">
+                    <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
+                    All destinations
+                  </button>
+                  <button class="rt-tag px-3 py-1 text-[11px] text-slate-600">Hill country</button>
+                  <button class="rt-tag px-3 py-1 text-[11px] text-slate-600">South coast</button>
+                  <button class="rt-tag px-3 py-1 text-[11px] text-slate-600">Cultural triangle</button>
+                  <button class="rt-tag px-3 py-1 text-[11px] text-slate-600">Wildlife</button>
+                  <button class="rt-tag px-3 py-1 text-[11px] text-slate-600">Family‑friendly</button>
+                </div>
+              </div>
+
+              <!-- Mini stats -->
+              <div class="flex flex-wrap gap-4 text-xs text-slate-600">
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-[13px] text-emerald-800">
+                    ★
+                  </span>
+                  <span>
+                    4.9 / 5 traveller rating
+                    <span class="text-slate-400">· Sri Lanka DMC</span>
+                  </span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-orange-100 text-[13px] text-orange-800">
+                    ⏱
+                  </span>
+                  <span>Average trip length: 10–14 nights</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Highlight / summary panel -->
+            <aside class="space-y-4 lg:space-y-5">
+              <div class="rt-card p-4 sm:p-5 flex flex-col gap-4 relative overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 h-40 w-40 rounded-full bg-gradient-to-tr from-orange-400/10 via-amber-300/10 to-emerald-400/10"></div>
+                <div class="flex items-center justify-between gap-3">
+                  <div>
+                    <p class="text-[11px] font-medium uppercase tracking-[0.16em] text-amber-700">
+                      Curated overview
+                    </p>
+                    <h2 class="mt-1 text-base font-semibold text-slate-900">
+                      18+ handpicked destinations across Sri Lanka
+                    </h2>
+                  </div>
+                  <span class="inline-flex h-8 w-8 items-center justify-center rounded-2xl bg-slate-900 text-[15px] text-amber-200 shadow-md shadow-slate-900/40">
+                    🌏
+                  </span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  Explore tea-covered hills, UNESCO heritage cities, surf‑ready beaches and
+                  wildlife‑rich national parks—each destination paired with stays, experiences and
+                  transfer suggestions.
+                </p>
+                <div class="grid grid-cols-3 gap-3 text-[11px] text-slate-600">
+                  <div class="space-y-1">
+                    <p class="text-[10px] uppercase tracking-[0.16em] text-slate-400">Hill country</p>
+                    <p class="text-sm font-semibold text-slate-900">Ella · Nuwara Eliya</p>
+                  </div>
+                  <div class="space-y-1">
+                    <p class="text-[10px] uppercase tracking-[0.16em] text-slate-400">South & west</p>
+                    <p class="text-sm font-semibold text-slate-900">Galle · Mirissa</p>
+                  </div>
+                  <div class="space-y-1">
+                    <p class="text-[10px] uppercase tracking-[0.16em] text-slate-400">Wildlife</p>
+                    <p class="text-sm font-semibold text-slate-900">Yala · Wilpattu</p>
+                  </div>
+                </div>
+                <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+                  <div class="flex -space-x-2">
+                    <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-[11px] text-white ring-2 ring-amber-50">
+                      T
+                    </span>
+                    <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-amber-400 text-[11px] text-slate-900 ring-2 ring-amber-50">
+                      S
+                    </span>
+                    <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-900 text-[11px] text-amber-200 ring-2 ring-amber-50">
+                      L
+                    </span>
+                  </div>
+                  <button class="rt-blur-panel inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium text-slate-800">
+                    Build route from map
+                    <span class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-slate-900 text-[10px] text-amber-200">
+                      ↗
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </aside>
+          </div>
+
+          <!-- Destinations grid -->
+          <section class="space-y-4 mt-4">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div class="space-y-1">
+                <p class="text-[11px] font-medium uppercase tracking-[0.16em] text-slate-500">
+                  Browse destinations
+                </p>
+                <div class="flex items-center gap-2 text-sm text-slate-700">
+                  <span class="font-semibold text-slate-900">Featured regions & stays</span>
+                  <span class="inline-flex h-1 w-1 rounded-full bg-slate-300"></span>
+                  <span class="text-xs text-slate-500">Tap into a card to view suggested routes</span>
+                </div>
+              </div>
+              <div class="flex items-center gap-2 text-[11px] text-slate-600">
+                <button class="rt-tag px-3 py-1 flex items-center gap-1.5">
+                  <span class="text-xs">⇅</span>
+                  Sort by popularity
+                </button>
+                <button class="rt-tag px-3 py-1 flex items-center gap-1.5">
+                  <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                  Ideal for first‑timers
+                </button>
+              </div>
+            </div>
+
+            <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+              <!-- Ella -->
+              <article class="rt-card overflow-hidden flex flex-col">
+                <div class="relative h-44 sm:h-48 overflow-hidden">
+                  <img
+                    src="https://images.pexels.com/photos/2680952/pexels-photo-2680952.jpeg?auto=compress&cs=tinysrgb&w=1200"
+                    alt="Ella, Sri Lanka – lush tea hills and iconic Nine Arches Bridge"
+                    class="h-full w-full object-cover"
+                  />
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent"></div>
+                  <div class="absolute left-3 right-3 bottom-3 flex items-end justify-between gap-3">
+                    <div>
+                      <p class="text-[11px] font-medium uppercase tracking-[0.16em] text-amber-200">
+                        Hill country
+                      </p>
+                      <h3 class="text-sm sm:text-base font-semibold text-white">Ella</h3>
+                    </div>
+                    <div class="rt-chip-badge px-2.5 py-1 text-[11px] font-medium flex items-center gap-1.5">
+                      <span class="text-[12px]">🥾</span>
+                      Hikes & viewpoints
+                    </div>
+                  </div>
+                </div>
+                <div class="p-4 sm:p-4.5 flex-1 flex flex-col gap-3">
+                  <p class="text-xs text-slate-600 leading-relaxed">
+                    Misty hills, tea plantations and sunrise viewpoints. Base for scenic train rides,
+                    easy hikes and boutique stays tucked into the clouds.
+                  </p>
+                  <div class="flex flex-wrap items-center justify-between gap-3 text-[11px] text-slate-600">
+                    <div class="flex flex-wrap gap-1.5">
+                      <span class="rt-badge-soft px-2 py-1">2–3 nights</span>
+                      <span class="rt-badge-soft px-2 py-1">Great for couples</span>
+                      <span class="rt-badge-soft px-2 py-1">Train journeys</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                      <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-[11px] text-emerald-700">
+                        ★
+                      </span>
+                      <span>4.9</span>
+                    </div>
+                  </div>
+                  <div class="mt-1 flex items-center justify-between gap-3 text-[11px] text-slate-700">
+                    <span>Pairs well with Nuwara Eliya · Haputale</span>
+                    <button class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-amber-700">
+                      View sample route
+                      <span class="text-[12px]">↗</span>
+                    </button>
+                  </div>
+                </div>
+              </article>
+
+              <!-- Galle & South Coast -->
+              <article class="rt-card overflow-hidden flex flex-col">
+                <div class="relative h-44 sm:h-48 overflow-hidden">
+                  <img
+                    src="https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg?auto=compress&cs=tinysrgb&w=1200"
+                    alt="Galle and south coast beaches in Sri Lanka"
+                    class="h-full w-full object-cover"
+                  />
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/15 to-transparent"></div>
+                  <div class="absolute left-3 right-3 bottom-3 flex items-end justify-between gap-3">
+                    <div>
+                      <p class="text-[11px] font-medium uppercase tracking-[0.16em] text-amber-200">
+                        South coast
+                      </p>
+                      <h3 class="text-sm sm:text-base font-semibold text-white">Galle & South Coast</h3>
+                    </div>
+                    <div class="rt-chip-badge px-2.5 py-1 text-[11px] font-medium flex items-center gap-1.5">
+                      <span class="text-[12px]">🌊</span>
+                      Beaches & cafes
+                    </div>
+                  </div>
+                </div>
+                <div class="p-4 sm:p-4.5 flex-1 flex flex-col gap-3">
+                  <p class="text-xs text-slate-600 leading-relaxed">
+                    Cobblestone lanes, lighthouse sunsets and a string of palm‑lined bays. Ideal for
+                    slow beach days, surf sessions and design‑led boutique hotels.
+                  </p>
+                  <div class="flex flex-wrap items-center justify-between gap-3 text-[11px] text-slate-600">
+                    <div class="flex flex-wrap gap-1.5">
+                      <span class="rt-badge-soft px-2 py-1">3–5 nights</span>
+                      <span class="rt-badge-soft px-2 py-1">Surf & snorkel</span>
+                      <span class="rt-badge-soft px-2 py-1">Great for families</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                      <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-[11px] text-emerald-700">
+                        ★
+                      </span>
+                      <span>4.8</span>
+                    </div>
+                  </div>
+                  <div class="mt-1 flex items-center justify-between gap-3 text-[11px] text-slate-700">
+                    <span>Pairs well with Yala · Udawalawe</span>
+                    <button class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-amber-700">
+                      View coastal loop
+                      <span class="text-[12px]">↗</span>
+                    </button>
+                  </div>
+                </div>
+              </article>
+
+              <!-- Sigiriya & Dambulla -->
+              <article class="rt-card overflow-hidden flex flex-col">
+                <div class="relative h-44 sm:h-48 overflow-hidden">
+                  <img
+                    src="https://images.pexels.com/photos/1450353/pexels-photo-1450353.jpeg?auto=compress&cs=tinysrgb&w=1200"
+                    alt="Sigiriya rock fortress in Sri Lanka"
+                    class="h-full w-full object-cover"
+                  />
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent"></div>
+                  <div class="absolute left-3 right-3 bottom-3 flex items-end justify-between gap-3">
+                    <div>
+                      <p class="text-[11px] font-medium uppercase tracking-[0.16em] text-amber-200">
+                        Cultural triangle
+                      </p>
+                      <h3 class="text-sm sm:text-base font-semibold text-white">Sigiriya & Dambulla</h3>
+                    </div>
+                    <div class="rt-chip-badge px-2.5 py-1 text-[11px] font-medium flex items-center gap-1.5">
+                      <span class="text-[12px]">🏛</span>
+                      UNESCO heritage
+                    </div>
+                  </div>
+                </div>
+                <div class="p-4 sm:p-4.5 flex-1 flex flex-col gap-3">
+                  <p class="text-xs text-slate-600 leading-relaxed">
+                    Iconic rock fortress, ancient cave temples and elephant‑dotted plains. A
+                    flexible base to connect Kandy, Trincomalee or Minneriya safaris.
+                  </p>
+                  <div class="flex flex-wrap items-center justify-between gap-3 text-[11px] text-slate-600">
+                    <div class="flex flex-wrap gap-1.5">
+                      <span class="rt-badge-soft px-2 py-1">2–3 nights</span>
+                      <span class="rt-badge-soft px-2 py-1">Archaeology</span>
+                      <span class="rt-badge-soft px-2 py-1">Great with kids</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                      <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-[11px] text-emerald-700">
+                        ★
+                      </span>
+                      <span>4.7</span>
+                    </div>
+                  </div>
+                  <div class="mt-1 flex items-center justify-between gap-3 text-[11px] text-slate-700">
+                    <span>Pairs well with Kandy · Trincomalee</span>
+                    <button class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-amber-700">
+                      Classic highlights route
+                      <span class="text-[12px]">↗</span>
+                    </button>
+                  </div>
+                </div>
+              </article>
+
+              <!-- Nuwara Eliya -->
+              <article class="rt-card overflow-hidden flex flex-col">
+                <div class="relative h-44 sm:h-48 overflow-hidden">
+                  <img
+                    src="https://images.pexels.com/photos/1004816/pexels-photo-1004816.jpeg?auto=compress&cs=tinysrgb&w=1200"
+                    alt="Tea plantations near Nuwara Eliya in Sri Lanka"
+                    class="h-full w-full object-cover"
+                  />
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/45 via-black/15 to-transparent"></div>
+                  <div class="absolute left-3 right-3 bottom-3 flex items-end justify-between gap-3">
+                    <div>
+                      <p class="text-[11px] font-medium uppercase tracking-[0.16em] text-amber-200">
+                        Hill country
+                      </p>
+                      <h3 class="text-sm sm:text-base font-semibold text-white">Nuwara Eliya</h3>
+                    </div>
+                    <div class="rt-chip-badge px-2.5 py-1 text-[11px] font-medium flex items-center gap-1.5">
+                      <span class="text-[12px]">🍃</span>
+                      Tea country
+                    </div>
+                  </div>
+                </div>
+                <div class="p-4 sm:p-4.5 flex-1 flex flex-col gap-3">
+                  <p class="text-xs text-slate-600 leading-relaxed">
+                    Colonial bungalows, crisp air and endless rows of tea. Ideal for slow mornings,
+                    scenic walks and pairing with Ella via train.
+                  </p>
+                  <div class="flex flex-wrap items-center justify-between gap-3 text-[11px] text-slate-600">
+                    <div class="flex flex-wrap gap-1.5">
+                      <span class="rt-badge-soft px-2 py-1">1–2 nights</span>
+                      <span class="rt-badge-soft px-2 py-1">Heritage stays</span>
+                      <span class="rt-badge-soft px-2 py-1">Cool climate</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                      <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-[11px] text-emerald-700">
+                        ★
+                      </span>
+                      <span>4.6</span>
+                    </div>
+                  </div>
+                  <div class="mt-1 flex items-center justify-between gap-3 text-[11px] text-slate-700">
+                    <span>Often combined with Kandy · Ella</span>
+                    <button class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-amber-700">
+                      Tea country loop
+                      <span class="text-[12px]">↗</span>
+                    </button>
+                  </div>
+                </div>
+              </article>
+
+              <!-- Yala & Wildlife belt -->
+              <article class="rt-card overflow-hidden flex flex-col">
+                <div class="relative h-44 sm:h-48 overflow-hidden">
+                  <img
+                    src="https://images.pexels.com/photos/667205/pexels-photo-667205.jpeg?auto=compress&cs=tinysrgb&w=1200"
+                    alt="Safari jeep and wildlife landscape in Yala, Sri Lanka"
+                    class="h-full w-full object-cover"
+                  />
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent"></div>
+                  <div class="absolute left-3 right-3 bottom-3 flex items-end justify-between gap-3">
+                    <div>
+                      <p class="text-[11px] font-medium uppercase tracking-[0.16em] text-amber-200">
+                        Wildlife belt
+                      </p>
+                      <h3 class="text-sm sm:text-base font-semibold text-white">Yala & Surrounds</h3>
+                    </div>
+                    <div class="rt-chip-badge px-2.5 py-1 text-[11px] font-medium flex items-center gap-1.5">
+                      <span class="text-[12px]">🦁</span>
+                      Leopards & safaris
+                    </div>
+                  </div>
+                </div>
+                <div class="p-4 sm:p-4.5 flex-1 flex flex-col gap-3">
+                  <p class="text-xs text-slate-600 leading-relaxed">
+                    Jeep safaris, lakes and dry forest landscapes. Combine Yala with the south coast
+                    or the hill country for a varied, wildlife‑rich route.
+                  </p>
+                  <div class="flex flex-wrap items-center justify-between gap-3 text-[11px] text-slate-600">
+                    <div class="flex flex-wrap gap-1.5">
+                      <span class="rt-badge-soft px-2 py-1">1–2 nights</span>
+                      <span class="rt-badge-soft px-2 py-1">Big‑five style safaris</span>
+                      <span class="rt-badge-soft px-2 py-1">Tented camps</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                      <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-[11px] text-emerald-700">
+                        ★
+                      </span>
+                      <span>4.7</span>
+                    </div>
+                  </div>
+                  <div class="mt-1 flex items-center justify-between gap-3 text-[11px] text-slate-700">
+                    <span>Pairs well with Galle · Udawalawe</span>
+                    <button class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-amber-700">
+                      Wildlife‑focused route
+                      <span class="text-[12px]">↗</span>
+                    </button>
+                  </div>
+                </div>
+              </article>
+
+              <!-- Colombo & West Coast -->
+              <article class="rt-card overflow-hidden flex flex-col">
+                <div class="relative h-44 sm:h-48 overflow-hidden">
+                  <img
+                    src="https://images.pexels.com/photos/1124465/pexels-photo-1124465.jpeg?auto=compress&cs=tinysrgb&w=1200"
+                    alt="Colombo skyline and cityscape in Sri Lanka"
+                    class="h-full w-full object-cover"
+                  />
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/45 via-black/15 to-transparent"></div>
+                  <div class="absolute left-3 right-3 bottom-3 flex items-end justify-between gap-3">
+                    <div>
+                      <p class="text-[11px] font-medium uppercase tracking-[0.16em] text-amber-200">
+                        Arrival & departure</p>
+                      <h3 class="text-sm sm:text-base font-semibold text-white">Colombo & West Coast</h3>
+                    </div>
+                    <div class="rt-chip-badge px-2.5 py-1 text-[11px] font-medium flex items-center gap-1.5">
+                      <span class="text-[12px]">🌇</span>
+                      City & short stays
+                    </div>
+                  </div>
+                </div>
+                <div class="p-4 sm:p-4.5 flex-1 flex flex-col gap-3">
+                  <p class="text-xs text-slate-600 leading-relaxed">
+                    Boutique city hotels, restaurants and quick access to Negombo and west coast
+                    beaches. Ideal for first or last night in Sri Lanka.
+                  </p>
+                  <div class="flex flex-wrap items-center justify-between gap-3 text-[11px] text-slate-600">
+                    <div class="flex flex-wrap gap-1.5">
+                      <span class="rt-badge-soft px-2 py-1">1–2 nights</span>
+                      <span class="rt-badge-soft px-2 py-1">Food & culture</span>
+                      <span class="rt-badge-soft px-2 py-1">Easy access</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                      <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-[11px] text-emerald-700">
+                        ★
+                      </span>
+                      <span>4.5</span>
+                    </div>
+                  </div>
+                  <div class="mt-1 flex items-center justify-between gap-3 text-[11px] text-slate-700">
+                    <span>Often used as trip start or end</span>
+                    <button class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-amber-700">
+                      View stopover ideas
+                      <span class="text-[12px]">↗</span>
+                    </button>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <!-- CTA strip -->
+          <section class="mt-8 mb-3">
+            <div class="rt-card px-4 sm:px-6 py-4 sm:py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div class="space-y-1">
+                <p class="text-[11px] font-medium uppercase tracking-[0.16em] text-amber-700">
+                  Not sure where to start?
+                </p>
+                <p class="text-sm text-slate-700">
+                  Share your dates and travel style—we'll map 2–3 routes that connect these
+                  destinations into one balanced Sri Lanka trip.
+                </p>
+              </div>
+              <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+                <button class="inline-flex items-center justify-center gap-1.5 rt-gradient-pill px-4 py-2 text-xs font-semibold text-slate-900 shadow-md shadow-orange-400/40">
+                  Talk to a Sri Lanka specialist
+                  <span class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-slate-900/10 text-[10px]">→</span>
+                </button>
+                <button class="inline-flex items-center justify-center gap-1.5 rounded-full rt-tag px-3.5 py-2 text-[11px] font-medium text-slate-700">
+                  Download sample itineraries
+                </button>
+              </div>
+            </div>
+          </section>
+        </section>
+      </main>
+
+      <footer class="border-t border-slate-200/70 bg-white/80 backdrop-blur">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+          <p class="text-[11px] text-slate-500">
+            © Recharge Travels · Tailor‑made journeys across Sri Lanka
+          </p>
+          <div class="flex flex-wrap gap-2 text-[11px] text-slate-500">
+            <span class="rt-tag px-2.5 py-1">Destination design concept</span>
+            <span class="rt-tag px-2.5 py-1">UI prototype · not live data</span>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+  </body>
+</html>

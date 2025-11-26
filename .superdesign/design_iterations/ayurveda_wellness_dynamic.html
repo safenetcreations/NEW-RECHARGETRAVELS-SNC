@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ayurveda & Wellness Retreats | Recharge Travels</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+  <!-- Theme CSS -->
+  <link rel="stylesheet" href="ayurveda_wellness_theme.css">
+
+  <style>
+    /* ===== ANIMATIONS ===== */
+    @keyframes heroFadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes scrollPulse {
+      0%, 100% { opacity: 0.4; transform: translateY(0); }
+      50% { opacity: 1; transform: translateY(10px); }
+    }
+
+    @keyframes parallaxFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    @keyframes mandalaRotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes floatGentle {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    @keyframes glowPulse {
+      0%, 100% { box-shadow: 0 0 20px rgba(201, 169, 98, 0.1); }
+      50% { box-shadow: 0 0 40px rgba(201, 169, 98, 0.3); }
+    }
+
+    @keyframes starTwinkle {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+
+    @keyframes lineGrow {
+      from { transform: scaleX(0); }
+      to { transform: scaleX(1); }
+    }
+
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    /* Fade Up Animation */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+    }
+
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Loading Skeleton */
+    .skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 8px;
+    }
+
+    .skeleton-text {
+      height: 1em;
+      margin-bottom: 0.5em;
+    }
+
+    .skeleton-title {
+      height: 2em;
+      width: 60%;
+      margin-bottom: 1em;
+    }
+
+    .skeleton-card {
+      height: 350px;
+    }
+
+    /* ===== COMPONENT STYLES ===== */
+
+    /* Hero */
+    .hero-section {
+      min-height: 100vh;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      transition: background-image 0.5s ease;
+    }
+
+    .hero-bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(26, 48, 40, 0.3) 0%, rgba(26, 48, 40, 0.6) 100%);
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 2rem;
+      animation: heroFadeIn 1.2s ease-out;
+    }
+
+    .hero-title {
+      font-family: 'Playfair Display', serif !important;
+      font-size: clamp(2.5rem, 8vw, 5rem) !important;
+      font-weight: 400 !important;
+      color: #FDFBF7 !important;
+      letter-spacing: 0.15em !important;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    .hero-subtitle {
+      font-family: 'DM Sans', sans-serif !important;
+      font-size: clamp(1rem, 2vw, 1.25rem) !important;
+      color: rgba(253, 251, 247, 0.85) !important;
+      font-weight: 300 !important;
+      letter-spacing: 0.05em;
+      font-style: italic;
+      margin-bottom: 2rem;
+    }
+
+    .hero-ornament {
+      color: #C9A962;
+      font-size: 1.5rem;
+      letter-spacing: 0.5em;
+      margin-bottom: 1.5rem;
+      animation: parallaxFloat 4s ease-in-out infinite;
+    }
+
+    .scroll-indicator {
+      position: absolute;
+      bottom: 3rem;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #C9A962;
+      animation: scrollPulse 2s ease-in-out infinite;
+      cursor: pointer;
+    }
+
+    /* Philosophy Section */
+    .philosophy-section {
+      padding: 8rem 2rem;
+      background: linear-gradient(180deg, #FDFBF7 0%, #F9F6F0 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mandala-decoration {
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      opacity: 0.08;
+      animation: mandalaRotate 60s linear infinite;
+    }
+
+    .mandala-left {
+      left: -150px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .philosophy-title {
+      font-family: 'Playfair Display', serif !important;
+      font-size: clamp(2rem, 5vw, 3rem) !important;
+      color: #2D4A3E !important;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    .gold-line {
+      width: 80px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #C9A962, transparent);
+      margin: 0 auto 2rem;
+      animation: lineGrow 0.8s ease-out forwards;
+      transform-origin: center;
+    }
+
+    .philosophy-text {
+      max-width: 700px;
+      margin: 0 auto;
+      text-align: center;
+      font-size: 1.125rem !important;
+      line-height: 1.9 !important;
+      color: #4A4A4A !important;
+    }
+
+    .philosophy-pillars {
+      display: flex;
+      justify-content: center;
+      gap: 3rem;
+      margin-top: 3rem;
+      flex-wrap: wrap;
+    }
+
+    .pillar {
+      text-align: center;
+    }
+
+    .pillar-icon {
+      width: 60px;
+      height: 60px;
+      border: 1px solid #C9A962;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+      color: #C9A962;
+      transition: all 0.4s ease;
+    }
+
+    .pillar:hover .pillar-icon {
+      background: #C9A962;
+      color: #FDFBF7;
+      transform: scale(1.1);
+    }
+
+    .pillar-title {
+      font-family: 'DM Sans', sans-serif !important;
+      font-size: 0.75rem !important;
+      letter-spacing: 0.2em !important;
+      text-transform: uppercase;
+      color: #2D4A3E !important;
+      font-weight: 500 !important;
+    }
+
+    /* Experience Cards Section */
+    .experiences-section {
+      padding: 6rem 2rem;
+      background: #FDFBF7;
+    }
+
+    .section-label {
+      font-family: 'DM Sans', sans-serif !important;
+      font-size: 0.75rem !important;
+      letter-spacing: 0.3em !important;
+      text-transform: uppercase;
+      color: #C9A962 !important;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-family: 'Playfair Display', serif !important;
+      font-size: clamp(2rem, 5vw, 2.75rem) !important;
+      color: #2D4A3E !important;
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+
+    .experiences-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .experience-card {
+      background: #FFFFFF;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(44, 74, 62, 0.05);
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+
+    .experience-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 16px 48px rgba(44, 74, 62, 0.12);
+    }
+
+    .card-image-wrapper {
+      position: relative;
+      height: 240px;
+      overflow: hidden;
+    }
+
+    .card-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s ease;
+    }
+
+    .experience-card:hover .card-image {
+      transform: scale(1.08);
+    }
+
+    .card-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 50%, rgba(26, 48, 40, 0.8) 100%);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .experience-card:hover .card-overlay {
+      opacity: 1;
+    }
+
+    .card-duration {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: rgba(253, 251, 247, 0.95);
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #2D4A3E;
+      letter-spacing: 0.05em;
+    }
+
+    .card-content {
+      padding: 1.75rem;
+    }
+
+    .card-category {
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #C9A962;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    .card-title {
+      font-family: 'Playfair Display', serif !important;
+      font-size: 1.5rem !important;
+      color: #2D4A3E !important;
+      margin-bottom: 0.75rem;
+      font-weight: 500 !important;
+    }
+
+    .card-description {
+      font-size: 0.95rem !important;
+      color: #6B6B6B !important;
+      line-height: 1.7 !important;
+      margin-bottom: 1.25rem;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 1.25rem;
+      border-top: 1px solid rgba(201, 169, 98, 0.2);
+    }
+
+    .card-price {
+      font-family: 'DM Sans', sans-serif !important;
+    }
+
+    .price-label {
+      font-size: 0.7rem;
+      color: #8B8B8B;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .price-value {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #2D4A3E;
+    }
+
+    .card-cta {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #C9A962;
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: all 0.3s ease;
+    }
+
+    .experience-card:hover .card-cta {
+      color: #2D4A3E;
+      gap: 0.75rem;
+    }
+
+    /* Treatments Carousel */
+    .treatments-section {
+      padding: 6rem 0;
+      background: #2D4A3E;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .treatments-section .section-label {
+      color: #C9A962 !important;
+    }
+
+    .treatments-section .section-title {
+      color: #FDFBF7 !important;
+      margin-bottom: 3rem;
+    }
+
+    .treatments-carousel {
+      display: flex;
+      gap: 1.5rem;
+      padding: 0 2rem;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .treatments-carousel::-webkit-scrollbar {
+      display: none;
+    }
+
+    .treatment-card {
+      flex: 0 0 280px;
+      scroll-snap-align: center;
+      background: rgba(253, 251, 247, 0.05);
+      border: 1px solid rgba(201, 169, 98, 0.2);
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+      transition: all 0.4s ease;
+      animation: floatGentle 3s ease-in-out infinite;
+    }
+
+    .treatment-card:nth-child(2) { animation-delay: 0.5s; }
+    .treatment-card:nth-child(3) { animation-delay: 1s; }
+    .treatment-card:nth-child(4) { animation-delay: 1.5s; }
+    .treatment-card:nth-child(5) { animation-delay: 2s; }
+    .treatment-card:nth-child(6) { animation-delay: 2.5s; }
+
+    .treatment-card:hover {
+      background: rgba(201, 169, 98, 0.1);
+      border-color: #C9A962;
+      transform: translateY(-5px);
+    }
+
+    .treatment-icon {
+      width: 70px;
+      height: 70px;
+      border: 1px solid #C9A962;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.25rem;
+      color: #C9A962;
+    }
+
+    .treatment-name {
+      font-family: 'Playfair Display', serif !important;
+      font-size: 1.25rem !important;
+      color: #FDFBF7 !important;
+      margin-bottom: 0.75rem;
+    }
+
+    .treatment-desc {
+      font-size: 0.9rem !important;
+      color: rgba(253, 251, 247, 0.7) !important;
+      line-height: 1.6 !important;
+    }
+
+    /* Testimonials */
+    .testimonials-section {
+      padding: 8rem 2rem;
+      background: linear-gradient(180deg, #F9F6F0 0%, #FDFBF7 100%);
+    }
+
+    .testimonial-card {
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .quote-mark {
+      font-family: 'Playfair Display', serif;
+      font-size: 6rem;
+      color: #C9A962;
+      line-height: 1;
+      opacity: 0.3;
+    }
+
+    .testimonial-text {
+      font-family: 'Playfair Display', serif !important;
+      font-size: clamp(1.25rem, 3vw, 1.75rem) !important;
+      font-style: italic;
+      color: #2D4A3E !important;
+      line-height: 1.7 !important;
+      margin: -2rem 0 2rem;
+    }
+
+    .testimonial-author {
+      font-family: 'DM Sans', sans-serif !important;
+      font-size: 1rem !important;
+      color: #4A4A4A !important;
+      margin-bottom: 0.5rem;
+    }
+
+    .testimonial-location {
+      font-size: 0.85rem;
+      color: #8B8B8B;
+      margin-bottom: 1rem;
+    }
+
+    .testimonial-stars {
+      display: flex;
+      justify-content: center;
+      gap: 0.25rem;
+      color: #C9A962;
+    }
+
+    .testimonial-stars i {
+      animation: starTwinkle 1.5s ease-in-out infinite;
+    }
+
+    .testimonial-stars i:nth-child(2) { animation-delay: 0.1s; }
+    .testimonial-stars i:nth-child(3) { animation-delay: 0.2s; }
+    .testimonial-stars i:nth-child(4) { animation-delay: 0.3s; }
+    .testimonial-stars i:nth-child(5) { animation-delay: 0.4s; }
+
+    /* CTA Section */
+    .cta-section {
+      padding: 8rem 2rem;
+      background: linear-gradient(135deg, #2D4A3E 0%, #1A3028 100%);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url('https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=1920&q=80') center/cover no-repeat;
+      opacity: 0.1;
+    }
+
+    .cta-content {
+      position: relative;
+      z-index: 10;
+    }
+
+    .cta-title {
+      font-family: 'Playfair Display', serif !important;
+      font-size: clamp(2rem, 5vw, 3rem) !important;
+      color: #FDFBF7 !important;
+      margin-bottom: 1rem;
+    }
+
+    .cta-subtitle {
+      font-size: 1.1rem !important;
+      color: rgba(253, 251, 247, 0.75) !important;
+      max-width: 500px;
+      margin: 0 auto 2.5rem;
+    }
+
+    .cta-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-cta-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 2.5rem;
+      background: #C9A962;
+      color: #1A3028;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.4s ease;
+      animation: glowPulse 3s ease-in-out infinite;
+    }
+
+    .btn-cta-primary:hover {
+      background: #E5D4A1;
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(201, 169, 98, 0.3);
+    }
+
+    .btn-cta-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 2.5rem;
+      background: transparent;
+      color: #FDFBF7;
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      border: 1px solid rgba(253, 251, 247, 0.3);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.4s ease;
+    }
+
+    .btn-cta-secondary:hover {
+      border-color: #C9A962;
+      color: #C9A962;
+    }
+
+    /* Footer */
+    .footer {
+      padding: 4rem 2rem 2rem;
+      background: #1A3028;
+      text-align: center;
+    }
+
+    .footer-logo {
+      font-family: 'Playfair Display', serif !important;
+      font-size: 1.5rem !important;
+      color: #C9A962 !important;
+      letter-spacing: 0.15em;
+      margin-bottom: 1.5rem;
+    }
+
+    .footer-nav {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .footer-link {
+      font-size: 0.85rem;
+      color: rgba(253, 251, 247, 0.6);
+      text-decoration: none;
+      letter-spacing: 0.05em;
+      transition: color 0.3s ease;
+    }
+
+    .footer-link:hover {
+      color: #C9A962;
+    }
+
+    .footer-social {
+      display: flex;
+      justify-content: center;
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .social-icon {
+      width: 40px;
+      height: 40px;
+      border: 1px solid rgba(253, 251, 247, 0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(253, 251, 247, 0.6);
+      transition: all 0.3s ease;
+      text-decoration: none;
+    }
+
+    .social-icon:hover {
+      border-color: #C9A962;
+      color: #C9A962;
+      transform: translateY(-3px);
+    }
+
+    .footer-copyright {
+      font-size: 0.8rem;
+      color: rgba(253, 251, 247, 0.4);
+      padding-top: 2rem;
+      border-top: 1px solid rgba(253, 251, 247, 0.1);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .experiences-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .philosophy-pillars {
+        gap: 2rem;
+      }
+
+      .treatment-card {
+        flex: 0 0 260px;
+      }
+
+      .cta-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-bg" id="heroBg"></div>
+    <div class="hero-content">
+      <div class="hero-ornament">&#10022; &#10022; &#10022;</div>
+      <p class="section-label" style="color: #C9A962;" id="heroLabel">Loading...</p>
+      <h1 class="hero-title" id="heroTitle">Loading...</h1>
+      <p class="hero-subtitle" id="heroSubtitle">Loading...</p>
+      <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+        <button class="btn-cta-primary" style="animation: none;" id="heroCta">
+          <span id="heroCtaText">Explore Retreats</span>
+          <i data-lucide="arrow-right" style="width: 18px; height: 18px;"></i>
+        </button>
+      </div>
+    </div>
+    <div class="scroll-indicator">
+      <i data-lucide="chevrons-down" style="width: 32px; height: 32px;"></i>
+    </div>
+  </section>
+
+  <!-- Philosophy Section -->
+  <section class="philosophy-section">
+    <svg class="mandala-decoration mandala-left" viewBox="0 0 200 200">
+      <circle cx="100" cy="100" r="95" fill="none" stroke="#2D4A3E" stroke-width="0.5"/>
+      <circle cx="100" cy="100" r="75" fill="none" stroke="#2D4A3E" stroke-width="0.5"/>
+      <circle cx="100" cy="100" r="55" fill="none" stroke="#2D4A3E" stroke-width="0.5"/>
+      <circle cx="100" cy="100" r="35" fill="none" stroke="#2D4A3E" stroke-width="0.5"/>
+      <path d="M100,5 L100,195 M5,100 L195,100 M25,25 L175,175 M175,25 L25,175" stroke="#2D4A3E" stroke-width="0.3"/>
+    </svg>
+
+    <div class="fade-up" style="position: relative; z-index: 10;">
+      <p class="section-label" id="philosLabel">Loading...</p>
+      <h2 class="philosophy-title" id="philosTitle">Loading...</h2>
+      <div class="gold-line"></div>
+      <p class="philosophy-text" id="philosDescription">Loading content from database...</p>
+
+      <div class="philosophy-pillars" id="pillarContainer">
+        <!-- Pillars will be loaded dynamically -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Experience Cards Section -->
+  <section class="experiences-section">
+    <p class="section-label">Transformative Journeys</p>
+    <h2 class="section-title">Our Signature Retreats</h2>
+
+    <div class="experiences-grid" id="retreatsGrid">
+      <!-- Loading skeletons -->
+      <div class="skeleton skeleton-card"></div>
+      <div class="skeleton skeleton-card"></div>
+      <div class="skeleton skeleton-card"></div>
+    </div>
+  </section>
+
+  <!-- Treatments Carousel Section -->
+  <section class="treatments-section">
+    <p class="section-label">Healing Therapies</p>
+    <h2 class="section-title">Signature Treatments</h2>
+
+    <div class="treatments-carousel" id="treatmentsCarousel">
+      <!-- Loading skeletons -->
+      <div class="skeleton" style="flex: 0 0 280px; height: 200px; border-radius: 12px;"></div>
+      <div class="skeleton" style="flex: 0 0 280px; height: 200px; border-radius: 12px;"></div>
+      <div class="skeleton" style="flex: 0 0 280px; height: 200px; border-radius: 12px;"></div>
+    </div>
+  </section>
+
+  <!-- Testimonials Section -->
+  <section class="testimonials-section">
+    <div class="testimonial-card fade-up" id="testimonialContainer">
+      <div class="quote-mark">"</div>
+      <p class="testimonial-text" id="testimonialQuote">Loading testimonial...</p>
+      <p class="testimonial-author" id="testimonialAuthor">Loading...</p>
+      <p class="testimonial-location" id="testimonialLocation">Loading...</p>
+      <div class="testimonial-stars" id="testimonialStars">
+        <!-- Stars will be loaded dynamically -->
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="cta-content fade-up">
+      <p class="section-label" style="color: #C9A962;" id="ctaLabel">Begin Your Journey</p>
+      <h2 class="cta-title" id="ctaTitle">Transform Your Life</h2>
+      <p class="cta-subtitle" id="ctaSubtitle">Let us curate a personalized wellness journey...</p>
+      <div class="cta-buttons">
+        <button class="btn-cta-primary" id="ctaPrimaryBtn">
+          <i data-lucide="calendar" style="width: 18px; height: 18px;"></i>
+          <span id="ctaPrimaryText">Schedule Consultation</span>
+        </button>
+        <button class="btn-cta-secondary" id="ctaSecondaryBtn">
+          <i data-lucide="download" style="width: 18px; height: 18px;"></i>
+          <span id="ctaSecondaryText">Download Brochure</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p class="footer-logo" id="footerLogo">RECHARGE TRAVELS</p>
+    <nav class="footer-nav">
+      <a href="#" class="footer-link">About Us</a>
+      <a href="#" class="footer-link">Destinations</a>
+      <a href="#" class="footer-link">Experiences</a>
+      <a href="#" class="footer-link">Contact</a>
+      <a href="#" class="footer-link">Privacy Policy</a>
+    </nav>
+    <div class="footer-social" id="footerSocial">
+      <a href="#" class="social-icon" id="socialInstagram">
+        <i data-lucide="instagram" style="width: 18px; height: 18px;"></i>
+      </a>
+      <a href="#" class="social-icon" id="socialFacebook">
+        <i data-lucide="facebook" style="width: 18px; height: 18px;"></i>
+      </a>
+      <a href="#" class="social-icon" id="socialTwitter">
+        <i data-lucide="twitter" style="width: 18px; height: 18px;"></i>
+      </a>
+      <a href="#" class="social-icon" id="socialLinkedin">
+        <i data-lucide="linkedin" style="width: 18px; height: 18px;"></i>
+      </a>
+    </div>
+    <p class="footer-copyright">
+      &copy; 2024 Recharge Travels. All rights reserved. Crafted with love for wellness seekers.
+    </p>
+  </footer>
+
+  <script>
+    // ===== FIREBASE CONFIGURATION =====
+    const firebaseConfig = {
+      apiKey: "AIzaSyCxFnQfMo3rOWhgm1_yiRIh0Oez246U2N0",
+      authDomain: "recharge-travels-73e76.firebaseapp.com",
+      databaseURL: "https://recharge-travels-73e76-default-rtdb.firebaseio.com",
+      projectId: "recharge-travels-73e76",
+      storageBucket: "recharge-travels-73e76.firebasestorage.app",
+      messagingSenderId: "515581447537",
+      appId: "1:515581447537:web:b4f65bf9c2544c65d6fad0",
+      measurementId: "G-W2MJBDFDG3"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // ===== LOAD ALL CONTENT =====
+    async function loadAllContent() {
+      await Promise.all([
+        loadHeroContent(),
+        loadPhilosophyContent(),
+        loadRetreats(),
+        loadTreatments(),
+        loadTestimonials(),
+        loadCtaContent(),
+        loadSettings()
+      ]);
+
+      // Initialize icons after content loads
+      lucide.createIcons();
+
+      // Initialize scroll animations
+      initScrollAnimations();
+    }
+
+    // ===== HERO SECTION =====
+    async function loadHeroContent() {
+      try {
+        const doc = await db.collection('siteContent').doc('hero').get();
+        if (doc.exists) {
+          const data = doc.data();
+          document.getElementById('heroLabel').textContent = data.label || 'Recharge Travels Presents';
+          document.getElementById('heroTitle').textContent = data.title || 'Ayurveda & Wellness';
+          document.getElementById('heroSubtitle').textContent = `"${data.subtitle || 'Journey Within, Transform Forever'}"`;
+          document.getElementById('heroCtaText').textContent = data.ctaText || 'Explore Retreats';
+
+          if (data.backgroundImage) {
+            document.getElementById('heroBg').style.backgroundImage = `
+              linear-gradient(180deg, rgba(26, 48, 40, 0.3) 0%, rgba(26, 48, 40, 0.6) 100%),
+              url('${data.backgroundImage}')
+            `;
+          }
+        }
+      } catch (error) {
+        console.error('Error loading hero:', error);
+        // Set defaults
+        document.getElementById('heroLabel').textContent = 'Recharge Travels Presents';
+        document.getElementById('heroTitle').textContent = 'Ayurveda & Wellness';
+        document.getElementById('heroSubtitle').textContent = '"Journey Within, Transform Forever"';
+      }
+    }
+
+    // ===== PHILOSOPHY SECTION =====
+    async function loadPhilosophyContent() {
+      try {
+        const doc = await db.collection('siteContent').doc('philosophy').get();
+        if (doc.exists) {
+          const data = doc.data();
+          document.getElementById('philosLabel').textContent = data.label || 'The Ancient Wisdom';
+          document.getElementById('philosTitle').textContent = data.title || 'The Art of Healing & Renewal';
+          document.getElementById('philosDescription').textContent = data.description || '';
+
+          // Load pillars
+          const pillarIcons = ['leaf', 'heart', 'sun'];
+          const pillarContainer = document.getElementById('pillarContainer');
+          pillarContainer.innerHTML = '';
+
+          if (data.pillars && data.pillars.length > 0) {
+            data.pillars.forEach((pillar, index) => {
+              pillarContainer.innerHTML += `
+                <div class="pillar">
+                  <div class="pillar-icon">
+                    <i data-lucide="${pillarIcons[index] || 'circle'}" style="width: 24px; height: 24px;"></i>
+                  </div>
+                  <p class="pillar-title">${pillar}</p>
+                </div>
+              `;
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error loading philosophy:', error);
+      }
+    }
+
+    // ===== RETREATS =====
+    async function loadRetreats() {
+      try {
+        const snapshot = await db.collection('retreats').orderBy('order').get();
+        const grid = document.getElementById('retreatsGrid');
+
+        if (snapshot.empty) {
+          grid.innerHTML = '<p style="text-align: center; color: #888; grid-column: 1/-1;">No retreats available at the moment.</p>';
+          return;
+        }
+
+        grid.innerHTML = '';
+        snapshot.forEach((doc, index) => {
+          const data = doc.data();
+          grid.innerHTML += `
+            <div class="experience-card fade-up" style="animation-delay: ${index * 0.15}s;">
+              <div class="card-image-wrapper">
+                <img src="${data.image}" alt="${data.title}" class="card-image" loading="lazy">
+                <div class="card-overlay"></div>
+                <span class="card-duration">${data.duration}</span>
+              </div>
+              <div class="card-content">
+                <p class="card-category">${data.category}</p>
+                <h3 class="card-title">${data.title}</h3>
+                <p class="card-description">${data.description}</p>
+                <div class="card-footer">
+                  <div class="card-price">
+                    <p class="price-label">Starting from</p>
+                    <p class="price-value">$${data.price.toLocaleString()}</p>
+                  </div>
+                  <span class="card-cta">
+                    Explore
+                    <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
+                  </span>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+      } catch (error) {
+        console.error('Error loading retreats:', error);
+        document.getElementById('retreatsGrid').innerHTML = '<p style="text-align: center; color: #888;">Error loading retreats.</p>';
+      }
+    }
+
+    // ===== TREATMENTS =====
+    async function loadTreatments() {
+      try {
+        const snapshot = await db.collection('treatments').orderBy('order').get();
+        const carousel = document.getElementById('treatmentsCarousel');
+
+        if (snapshot.empty) {
+          carousel.innerHTML = '<p style="text-align: center; color: rgba(255,255,255,0.6);">No treatments available.</p>';
+          return;
+        }
+
+        carousel.innerHTML = '';
+        snapshot.forEach((doc, index) => {
+          const data = doc.data();
+          carousel.innerHTML += `
+            <div class="treatment-card" style="animation-delay: ${index * 0.5}s;">
+              <div class="treatment-icon">
+                <i data-lucide="${data.icon || 'sparkles'}" style="width: 28px; height: 28px;"></i>
+              </div>
+              <h3 class="treatment-name">${data.name}</h3>
+              <p class="treatment-desc">${data.description}</p>
+            </div>
+          `;
+        });
+      } catch (error) {
+        console.error('Error loading treatments:', error);
+      }
+    }
+
+    // ===== TESTIMONIALS =====
+    async function loadTestimonials() {
+      try {
+        const snapshot = await db.collection('testimonials').limit(1).get();
+
+        if (!snapshot.empty) {
+          const data = snapshot.docs[0].data();
+          document.getElementById('testimonialQuote').textContent = data.quote;
+          document.getElementById('testimonialAuthor').textContent = data.author;
+          document.getElementById('testimonialLocation').textContent = data.location;
+
+          // Generate stars
+          const starsContainer = document.getElementById('testimonialStars');
+          starsContainer.innerHTML = '';
+          for (let i = 0; i < 5; i++) {
+            const isFilled = i < data.rating;
+            starsContainer.innerHTML += `
+              <i data-lucide="star" style="width: 18px; height: 18px; ${isFilled ? 'fill: #C9A962;' : ''}"></i>
+            `;
+          }
+        }
+      } catch (error) {
+        console.error('Error loading testimonials:', error);
+      }
+    }
+
+    // ===== CTA SECTION =====
+    async function loadCtaContent() {
+      try {
+        const doc = await db.collection('siteContent').doc('cta').get();
+        if (doc.exists) {
+          const data = doc.data();
+          document.getElementById('ctaLabel').textContent = data.label || 'Begin Your Journey';
+          document.getElementById('ctaTitle').textContent = data.title || 'Transform Your Life';
+          document.getElementById('ctaSubtitle').textContent = data.subtitle || '';
+          document.getElementById('ctaPrimaryText').textContent = data.primaryButton || 'Schedule Consultation';
+          document.getElementById('ctaSecondaryText').textContent = data.secondaryButton || 'Download Brochure';
+        }
+      } catch (error) {
+        console.error('Error loading CTA:', error);
+      }
+    }
+
+    // ===== SETTINGS =====
+    async function loadSettings() {
+      try {
+        const doc = await db.collection('siteContent').doc('settings').get();
+        if (doc.exists) {
+          const data = doc.data();
+
+          if (data.siteName) {
+            document.getElementById('footerLogo').textContent = data.siteName.toUpperCase();
+          }
+
+          // Social links
+          if (data.social) {
+            if (data.social.instagram) document.getElementById('socialInstagram').href = data.social.instagram;
+            if (data.social.facebook) document.getElementById('socialFacebook').href = data.social.facebook;
+            if (data.social.twitter) document.getElementById('socialTwitter').href = data.social.twitter;
+            if (data.social.linkedin) document.getElementById('socialLinkedin').href = data.social.linkedin;
+          }
+        }
+      } catch (error) {
+        console.error('Error loading settings:', error);
+      }
+    }
+
+    // ===== SCROLL ANIMATIONS =====
+    function initScrollAnimations() {
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      }, observerOptions);
+
+      document.querySelectorAll('.fade-up').forEach(el => {
+        observer.observe(el);
+      });
+    }
+
+    // ===== SMOOTH SCROLL =====
+    document.querySelector('.scroll-indicator').addEventListener('click', () => {
+      document.querySelector('.philosophy-section').scrollIntoView({
+        behavior: 'smooth'
+      });
+    });
+
+    // ===== PARALLAX EFFECT =====
+    window.addEventListener('scroll', () => {
+      const scrolled = window.pageYOffset;
+      const heroBg = document.getElementById('heroBg');
+      if (heroBg && scrolled < window.innerHeight) {
+        heroBg.style.transform = `translateY(${scrolled * 0.4}px)`;
+      }
+    });
+
+    // ===== INITIALIZE =====
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      loadAllContent();
+    });
+  </script>
+</body>
+</html>

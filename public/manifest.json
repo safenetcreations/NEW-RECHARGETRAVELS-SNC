@@ -1,0 +1,65 @@
+{
+  "name": "Recharge Travels - Luxury Sri Lanka Tours & Travel Agency",
+  "short_name": "Recharge Travels",
+  "description": "Discover the beauty of Sri Lanka with Recharge Travels. Luxury tours, wildlife safaris, cultural experiences, and personalized travel packages.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFDF8",
+  "theme_color": "#FF6B1A",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["travel", "tourism", "lifestyle"],
+  "lang": "en",
+  "dir": "ltr",
+  "screenshots": [
+    {
+      "src": "https://i.imgur.com/AEnBWJf.jpeg",
+      "sizes": "1280x720",
+      "type": "image/jpeg",
+      "form_factor": "wide"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Book a Tour",
+      "short_name": "Book",
+      "description": "Book your Sri Lanka adventure",
+      "url": "/book-now",
+      "icons": [{ "src": "/logo.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Explore Destinations",
+      "short_name": "Destinations",
+      "description": "Discover Sri Lankan destinations",
+      "url": "/destinations",
+      "icons": [{ "src": "/logo.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "View Tours",
+      "short_name": "Tours",
+      "description": "Browse available tours",
+      "url": "/tours",
+      "icons": [{ "src": "/logo.png", "sizes": "192x192" }]
+    }
+  ]
+}

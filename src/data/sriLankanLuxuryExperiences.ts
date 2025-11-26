@@ -1,0 +1,80 @@
+export const sriLankanLuxuryExperiences = [
+  {
+    id: 1,
+    title: 'Hot Air Balloon Sigiriya',
+    subtitle: 'Soar Above Ancient Wonders',
+    description: 'Float above the legendary Sigiriya Rock Fortress at sunrise, witnessing the ancient kingdom from the skies while enjoying champagne and gourmet breakfast service.',
+    image: 'https://images.unsplash.com/photo-1520483601560-4b97c8547dd2?w=800',
+    icon: 'Crown',
+    gradient: 'from-amber-600 via-orange-600 to-rose-600',
+    features: ['Sunrise flights', 'UNESCO heritage views', 'Champagne breakfast', 'Professional photography'],
+    duration: '3-4 hours',
+    groupSize: 'Up to 8 guests',
+    link: '/experiences/hot-air-balloon-sigiriya'
+  },
+  {
+    id: 2,
+    title: 'Ceylon Tea Trails',
+    subtitle: 'Heritage Bungalow Experience',
+    description: 'Stay in restored colonial tea planter bungalows in Nuwara Eliya, learn tea tasting from master blenders, and walk through verdant hill country estates.',
+    image: 'https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?w=800',
+    icon: 'Gem',
+    gradient: 'from-green-600 via-emerald-600 to-teal-600',
+    features: ['Heritage bungalows', 'Tea tasting sessions', 'Plantation walks', 'Butler service'],
+    duration: '2-3 days',
+    groupSize: 'Intimate groups',
+    link: '/experiences/tea-trails'
+  },
+  {
+    id: 3,
+    title: 'Private Island Getaways',
+    subtitle: 'Secluded Paradise',
+    description: 'Escape to exclusive private islands off Sri Lanka\'s coast, with pristine beaches, luxury villas, personal chefs, and water sports in complete seclusion.',
+    image: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800',
+    icon: 'Star',
+    gradient: 'from-blue-600 via-cyan-600 to-turquoise-600',
+    features: ['Private island', 'Luxury villa', 'Personal chef', 'Water activities'],
+    duration: '2-7 days',
+    groupSize: 'Up to 12 guests',
+    link: '/experiences/island-getaways'
+  },
+  {
+    id: 4,
+    title: 'Luxury Wildlife Safaris',
+    subtitle: 'Leopard & Elephant Encounters',
+    description: 'Private game drives in Yala and Wilpattu with expert naturalists, luxury tented camps, and encounters with Sri Lankan leopards, elephants, and sloth bears.',
+    image: 'https://images.unsplash.com/photo-1534177616072-ef7dc120449d?w=800',
+    icon: 'Award',
+    gradient: 'from-green-700 via-lime-600 to-yellow-600',
+    features: ['Private jeep', 'Expert tracker', 'Luxury tents', 'Dawn safaris'],
+    duration: '1-3 days',
+    groupSize: 'Up to 6 guests',
+    link: '/tours/wildtours'
+  },
+  {
+    id: 5,
+    title: 'Sri Lankan Culinary Journey',
+    subtitle: 'Spice Garden to Table',
+    description: 'Master authentic Sri Lankan cuisine with celebrity chefs, explore organic spice gardens in Matale, and dine in colonial mansions with traditional rice and curry feasts.',
+    image: 'https://images.unsplash.com/photo-1596040033229-a0b7e0c1f99c?w=800',
+    icon: 'Heart',
+    gradient: 'from-red-600 via-orange-500 to-yellow-500',
+    features: ['Celebrity chefs', 'Spice garden tours', 'Colonial dining', 'Recipe book'],
+    duration: '4-6 hours',
+    groupSize: 'Up to 10 guests',
+    link: '/experiences/cooking-class-sri-lanka'
+  },
+  {
+    id: 6,
+    title: 'Blue Whale & Dolphin Watching',
+    subtitle: 'Mirissa Marine Magic',
+    description: 'Encounter majestic blue whales and playful dolphins off Mirissa coast in luxury boats, with marine biologists and gourmet breakfast service at sea.',
+    image: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800',
+    icon: 'Camera',
+    gradient: 'from-indigo-600 via-blue-600 to-cyan-600',
+    features: ['Luxury boat', 'Marine biologist', 'Breakfast at sea', 'Photography guide'],
+    duration: '4-5 hours',
+    groupSize: 'Small groups',
+    link: '/experiences/whale-watching'
+  }
+];

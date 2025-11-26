@@ -1,0 +1,73 @@
+{
+  "slug": "tea-trails",
+  "name": "Sri Lanka Tea Trails",
+  "heroImageURL": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Ftea-hero-3840x2160.webp?alt=media",
+  "seo": {
+    "title": "Sri Lanka Tea Trails | Ceylon Tea Estates & Scenic Walks – Recharge Travels",
+    "description": "Walk emerald‑green plantations, visit 19th‑century tea factories and sip world‑famous Ceylon tea in misty hill country. Plan your perfect Tea‑Trails journey with Recharge Travels."
+  },
+  "introParagraph": "Wake to the aroma of fresh Ceylon tea, hike through velvety carpets of emerald leaves and learn 150 years of plantation lore from local pickers. Sri Lanka's Tea Trails weave between lofty peaks, tumbling waterfalls and colonial bungalows that once housed British planters. This experience pairs gentle adventure with liquid gold in your cup, revealing how a tiny leaf shaped the island's history—and still fuels its high‑country culture today.",
+  "highlights": [
+    { 
+      "icon": "🌿", 
+      "title": "Estate Walks", 
+      "blurb60": "Stroll with an expert guide among century‑old bushes and learn how altitude shapes aroma." 
+    },
+    { 
+      "icon": "🫖", 
+      "title": "Factory & Tasting", 
+      "blurb60": "Tour a working 19th‑century factory, see withering & rolling, then taste white, green and classic BOP." 
+    },
+    { 
+      "icon": "👒", 
+      "title": "Pluck‑Like‑a‑Pro", 
+      "blurb60": "Try your hand at two‑leaf‑and‑a‑bud picking alongside smiling estate workers." 
+    },
+    { 
+      "icon": "🌄", 
+      "title": "Lipton's Seat Hike", 
+      "blurb60": "Sunrise trek to Sir Thomas Lipton's lookout for panoramas across five provinces." 
+    }
+  ],
+  "routes": [
+    { 
+      "routeName": "Kandy → Hatton Heritage Line", 
+      "duration": "1 day / 105 km", 
+      "distanceKm": 105, 
+      "bestClass": "Observation coach", 
+      "mapGPXUrl": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/routes%2Fkandy-hatton.gpx?alt=media" 
+    },
+    { 
+      "routeName": "Nuwara Eliya Tea Loop", 
+      "duration": "½ day / 30 km scenic drive", 
+      "distanceKm": 30, 
+      "bestClass": "Private van", 
+      "mapGPXUrl": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/routes%2Fnuwara-eliya-loop.gpx?alt=media" 
+    },
+    { 
+      "routeName": "Haputale → Lipton's Seat Trail", 
+      "duration": "4 hr hike / 7 km", 
+      "distanceKm": 7, 
+      "bestClass": "On foot", 
+      "mapGPXUrl": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/routes%2Fliptons-seat.gpx?alt=media" 
+    }
+  ],
+  "galleryImages": [
+    { 
+      "url": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fgallery-tea1.webp?alt=media", 
+      "alt": "Woman in vibrant sari plucking Ceylon tea leaves at sunrise" 
+    },
+    { 
+      "url": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fgallery-tea2.webp?alt=media", 
+      "alt": "Old British tea factory with cast‑iron machinery in Sri Lanka" 
+    },
+    { 
+      "url": "https://firebasestorage.googleapis.com/v0/b/recharge-travels-73e76.appspot.com/o/experiences%2Fgallery-tea3.webp?alt=media", 
+      "alt": "Aerial view of terraced plantations and misty mountains near Haputale" 
+    }
+  ],
+  "faqTag": "tea-trails",
+  "ctaHeadline": "Sip the World's Finest Tea Where It's Grown",
+  "ctaSub": "Let Recharge Travels craft your perfect hill‑country escape—private transport, colonial bungalows and insider tastings included.",
+  "videoURL": "https://www.youtube.com/embed/TeaTrailsPromo"
+}
