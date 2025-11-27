@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,28 +31,25 @@ export const ImageUploadSection: React.FC<ImageUploadSectionProps> = ({
   const [dragOver, setDragOver] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (entityType === 'hotel') {
-      fetchImages();
-    }
-  }, [entityType, entityId]);
-
-  const fetchImages = async () => {
+  const fetchImages = useCallback(async () => {
     try {
       if (entityType === 'hotel') {
-        const { data, error } = await supabase
-          .from('hotel_images')
-          .select('*')
-          .eq('hotel_id', entityId)
-          .order('sort_order');
-
-        if (error) throw error;
-        setImages(data || []);
+        const images = await dbService.list('hotel_images', [
+          { field: 'hotel_id', operator: '==', value: entityId }
+        ], 'sort_order');
+        
+        setImages(images as any[]);
       }
     } catch (error) {
       console.error('Error fetching images:', error);
     }
-  };
+  }, [entityType, entityId]);
+
+  useEffect(() => {
+    if (entityType === 'hotel') {
+      fetchImages();
+    }
+  }, [entityType, entityId, fetchImages]);
 
   // Only support hotels for now
   if (entityType !== 'hotel') {
@@ -100,27 +97,20 @@ export const ImageUploadSection: React.FC<ImageUploadSectionProps> = ({
     const publicUrl = url;
 
     // Save to database - only support hotels for now
-    const { error: dbError } = await supabase
-      .from('hotel_images')
-      .insert({
-        hotel_id: entityId,
-        image_url: publicUrl,
-        is_primary: images.length === 0,
-        sort_order: images.length
-      });
-
-    if (dbError) throw dbError;
+    await dbService.create('hotel_images', {
+      hotel_id: entityId,
+      image_url: publicUrl,
+      is_primary: images.length === 0,
+      sort_order: images.length,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    });
   };
 
   const deleteImage = async (imageId: string) => {
     try {
       // Only support hotels for now
-      const { error } = await supabase
-        .from('hotel_images')
-        .delete()
-        .eq('id', imageId);
-
-      if (error) throw error;
+      await dbService.delete('hotel_images', imageId);
 
       fetchImages();
       toast({
@@ -141,18 +131,23 @@ export const ImageUploadSection: React.FC<ImageUploadSectionProps> = ({
     try {
       // Only support hotels for now
       // First, remove primary status from all images
-      await supabase
-        .from('hotel_images')
-        .update({ is_primary: false })
-        .eq('hotel_id', entityId);
+      const allImages = await dbService.list('hotel_images', [
+        { field: 'hotel_id', operator: '==', value: entityId }
+      ]);
+      
+      // Update all images to not be primary
+      for (const image of allImages) {
+        await dbService.update('hotel_images', image.id, { 
+          is_primary: false,
+          updated_at: new Date().toISOString()
+        });
+      }
 
       // Then set the selected image as primary
-      const { error } = await supabase
-        .from('hotel_images')
-        .update({ is_primary: true })
-        .eq('id', imageId);
-
-      if (error) throw error;
+      await dbService.update('hotel_images', imageId, { 
+        is_primary: true,
+        updated_at: new Date().toISOString()
+      });
 
       fetchImages();
       toast({

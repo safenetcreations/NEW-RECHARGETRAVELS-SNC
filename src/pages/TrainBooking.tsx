@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Train, MapPin, Clock, Calendar, Users, ChevronRight, Star, Info, AlertCircle, Camera, Mountain, Waves, Eye } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -7,137 +7,25 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import ComprehensiveSEO from '@/components/seo/ComprehensiveSEO';
 import { useToast } from '@/hooks/use-toast';
+import { trainBookingService, TrainRoute, TrainBookingPageContent } from '@/services/trainBookingService';
 
-// Famous Sri Lankan Train Routes
-const trainRoutes = [
-  {
-    id: 'kandy-ella',
-    name: 'Kandy to Ella',
-    category: 'Hill Country',
-    description: 'The most scenic train journey in the world - traverse through misty mountains, tea plantations, and waterfalls',
-    distance: '120 km',
-    duration: '6-7 hours',
-    highlights: ['Nine Arch Bridge', 'Tea Plantations', 'Mountain Scenery', 'Demodara Loop'],
-    departureStation: 'Kandy',
-    arrivalStation: 'Ella',
-    frequency: 'Daily',
-    bestClass: '2nd Class Observation Car',
-    priceRange: 'LKR 300-1,500',
-    image: 'https://i.imgur.com/cTqS05p.jpeg',
-    rating: 5.0,
-    popularity: 'Most Popular',
-    bestTime: 'Early Morning (6:30 AM departure)',
-    scenicStops: ['Nanu Oya', 'Pattipola', 'Haputale', 'Demodara'],
-    icon: Mountain
-  },
-  {
-    id: 'colombo-kandy',
-    name: 'Colombo to Kandy',
-    category: 'Main Line',
-    description: 'Experience the transition from coastal plains to central highlands',
-    distance: '120 km',
-    duration: '3 hours',
-    highlights: ['Kadugannawa Pass', 'Mountain Views', 'Historical Route', 'Bible Rock'],
-    departureStation: 'Colombo Fort',
-    arrivalStation: 'Kandy',
-    frequency: 'Multiple Daily',
-    bestClass: '1st Class AC',
-    priceRange: 'LKR 200-800',
-    image: 'https://i.imgur.com/AEnBWJf.jpeg',
-    rating: 4.5,
-    popularity: 'Popular',
-    bestTime: 'Morning or Afternoon',
-    scenicStops: ['Rambukkana', 'Kadugannawa', 'Peradeniya'],
-    icon: Train
-  },
-  {
-    id: 'colombo-galle',
-    name: 'Colombo to Galle',
-    category: 'Coastal Line',
-    description: 'Stunning coastal journey along the Indian Ocean with beach views',
-    distance: '115 km',
-    duration: '2.5-3 hours',
-    highlights: ['Ocean Views', 'Beach Towns', 'Colonial Heritage', 'Coastal Villages'],
-    departureStation: 'Colombo Fort',
-    arrivalStation: 'Galle',
-    frequency: 'Multiple Daily',
-    bestClass: '2nd Class',
-    priceRange: 'LKR 180-600',
-    image: 'https://i.imgur.com/QBIw5qw.jpeg',
-    rating: 4.7,
-    popularity: 'Popular',
-    bestTime: 'Sunset Departure',
-    scenicStops: ['Mount Lavinia', 'Bentota', 'Hikkaduwa', 'Unawatuna'],
-    icon: Waves
-  },
-  {
-    id: 'colombo-badulla',
-    name: 'Colombo to Badulla',
-    category: 'Main Line',
-    description: 'The complete upcountry experience from coast to mountains',
-    distance: '292 km',
-    duration: '10-11 hours',
-    highlights: ['Complete Hill Country', 'Longest Journey', 'Tea Country', 'Waterfalls'],
-    departureStation: 'Colombo Fort',
-    arrivalStation: 'Badulla',
-    frequency: 'Daily',
-    bestClass: '2nd Class Observation Car',
-    priceRange: 'LKR 400-2,000',
-    image: 'https://i.imgur.com/xRFe6sI.jpeg',
-    rating: 4.9,
-    popularity: 'Epic Journey',
-    bestTime: 'Early Morning Start',
-    scenicStops: ['Kandy', 'Nuwara Eliya', 'Ella', 'Haputale'],
-    icon: Mountain
-  },
-  {
-    id: 'ella-badulla',
-    name: 'Ella to Badulla',
-    category: 'Hill Country',
-    description: 'Short scenic journey through tea country and mountains',
-    distance: '25 km',
-    duration: '1.5 hours',
-    highlights: ['Tea Estates', 'Demodara Loop', 'Mountain Views', 'Local Experience'],
-    departureStation: 'Ella',
-    arrivalStation: 'Badulla',
-    frequency: 'Multiple Daily',
-    bestClass: '2nd Class',
-    priceRange: 'LKR 100-300',
-    image: 'https://i.imgur.com/l2jvb2Y.jpeg',
-    rating: 4.4,
-    popularity: 'Scenic Short Trip',
-    bestTime: 'Morning',
-    scenicStops: ['Demodara', 'Hali Ela'],
-    icon: Eye
-  },
-  {
-    id: 'nanu-oya-ella',
-    name: 'Nanu Oya to Ella',
-    category: 'Hill Country',
-    description: 'Heart of tea country - the most photographed train journey',
-    distance: '65 km',
-    duration: '3-4 hours',
-    highlights: ['Nine Arch Bridge', 'Highest Point', 'Tea Plantations', 'Best Photos'],
-    departureStation: 'Nanu Oya (Nuwara Eliya)',
-    arrivalStation: 'Ella',
-    frequency: 'Daily',
-    bestClass: '2nd Class Observation Car',
-    priceRange: 'LKR 200-800',
-    image: 'https://i.imgur.com/oGUvzQL.jpeg',
-    rating: 4.9,
-    popularity: 'Instagram Famous',
-    bestTime: 'Morning Light',
-    scenicStops: ['Pattipola', 'Ohiya', 'Haputale'],
-    icon: Camera
-  }
-];
+// Icon mapping
+const iconMap: Record<string, React.ComponentType<any>> = {
+  Mountain, Train, Waves, Eye, Camera, Star, Clock, AlertCircle, Info
+};
 
 const TrainBooking = () => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedRoute, setSelectedRoute] = useState<typeof trainRoutes[0] | null>(null);
+  const [selectedRoute, setSelectedRoute] = useState<TrainRoute | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [showBookingForm, setShowBookingForm] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+
+  // Data states
+  const [routes, setRoutes] = useState<TrainRoute[]>([]);
+  const [pageContent, setPageContent] = useState<TrainBookingPageContent | null>(null);
 
   // Booking form state
   const [bookingData, setBookingData] = useState({
@@ -153,11 +41,31 @@ const TrainBooking = () => {
     specialRequests: ''
   });
 
-  const categories = ['All', 'Hill Country', 'Main Line', 'Coastal Line'];
-  const ticketClasses = ['3rd Class', '2nd Class', '2nd Class Observation Car', '1st Class', '1st Class AC'];
+  const ticketClasses = trainBookingService.getTicketClasses();
+  const categories = trainBookingService.getCategories();
+
+  // Load data from Firebase
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [routesData, contentData] = await Promise.all([
+          trainBookingService.getRoutes(),
+          trainBookingService.getPageContent()
+        ]);
+        setRoutes(routesData);
+        setPageContent(contentData);
+      } catch (error) {
+        console.error('Error loading data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
 
   // Filter routes based on search and category
-  const filteredRoutes = trainRoutes.filter(route => {
+  const filteredRoutes = routes.filter(route => {
     const matchesSearch = route.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          route.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          route.departureStation.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -166,7 +74,7 @@ const TrainBooking = () => {
     return matchesSearch && matchesCategory;
   });
 
-  const handleBookNow = (route: typeof trainRoutes[0]) => {
+  const handleBookNow = (route: TrainRoute) => {
     setSelectedRoute(route);
     setShowBookingForm(true);
     setBookingData(prev => ({
@@ -188,52 +96,96 @@ const TrainBooking = () => {
       return;
     }
 
-    // Here you would send the booking data to your backend
-    const bookingInfo = {
-      route: selectedRoute,
-      ...bookingData,
-      timestamp: new Date().toISOString()
-    };
+    if (!selectedRoute) return;
 
-    console.log('Train Booking Submitted:', bookingInfo);
+    setSubmitting(true);
 
-    toast({
-      title: "Booking Request Received!",
-      description: `We'll confirm your ${selectedRoute?.name} train booking within 24 hours via email/phone.`,
-    });
+    try {
+      // Save booking to Firebase
+      const booking = await trainBookingService.createBooking({
+        route: {
+          id: selectedRoute.id,
+          name: selectedRoute.name,
+          departureStation: selectedRoute.departureStation,
+          arrivalStation: selectedRoute.arrivalStation
+        },
+        customerInfo: {
+          fullName: bookingData.fullName,
+          email: bookingData.email,
+          phone: bookingData.phone,
+          passportNumber: bookingData.passportNumber || undefined
+        },
+        travelDetails: {
+          travelDate: bookingData.travelDate,
+          passengers: parseInt(bookingData.passengers),
+          ticketClass: bookingData.ticketClass,
+          handDelivery: bookingData.handDelivery,
+          hotelAddress: bookingData.hotelAddress || undefined,
+          specialRequests: bookingData.specialRequests || undefined
+        },
+        pricing: {
+          estimatedPrice: selectedRoute.priceRange,
+          deliveryFee: bookingData.handDelivery ? 2000 : 0
+        },
+        status: 'pending'
+      });
 
-    // Reset form
-    setShowBookingForm(false);
-    setBookingData({
-      fullName: '',
-      email: '',
-      phone: '',
-      travelDate: '',
-      passengers: '1',
-      ticketClass: '2nd Class',
-      handDelivery: false,
-      passportNumber: '',
-      hotelAddress: '',
-      specialRequests: ''
-    });
+      toast({
+        title: "Booking Request Submitted!",
+        description: (
+          <div>
+            <p>Reference: <strong>{booking.bookingReference}</strong></p>
+            <p className="mt-1">We'll confirm your {selectedRoute.name} train booking within 24 hours via email/phone.</p>
+          </div>
+        ),
+      });
+
+      // Reset form
+      setShowBookingForm(false);
+      setBookingData({
+        fullName: '',
+        email: '',
+        phone: '',
+        travelDate: '',
+        passengers: '1',
+        ticketClass: '2nd Class',
+        handDelivery: false,
+        passportNumber: '',
+        hotelAddress: '',
+        specialRequests: ''
+      });
+    } catch (error) {
+      console.error('Error submitting booking:', error);
+      toast({
+        title: "Booking Failed",
+        description: "There was an error submitting your booking. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-orange-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-red-600 mx-auto mb-6"></div>
+          <p className="text-xl text-gray-600">Loading train routes...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
       <ComprehensiveSEO
-        title="Sri Lanka Train Booking - Scenic Railway Journeys | Recharge Travels"
-        description="Book famous Sri Lankan train routes - Kandy to Ella, Colombo to Galle coastal line, and more scenic railway journeys. Manual booking service with live updates."
-        keywords={[
+        title={pageContent?.seo.title || "Sri Lanka Train Booking - Scenic Railway Journeys | Recharge Travels"}
+        description={pageContent?.seo.description || "Book famous Sri Lankan train routes - Kandy to Ella, Colombo to Galle coastal line, and more scenic railway journeys."}
+        keywords={pageContent?.seo.keywords || [
           'Sri Lanka train booking',
           'Kandy to Ella train',
-          'Sri Lanka railway',
-          'hill country train',
-          'coastal train Sri Lanka',
-          'Colombo Galle train',
-          'scenic train journey',
-          'tea country train',
-          'Nine Arch Bridge train',
-          'Sri Lanka rail tickets'
+          'Sri Lanka railway'
         ]}
         canonicalUrl="/train-booking"
       />
@@ -242,38 +194,41 @@ const TrainBooking = () => {
 
       {/* Hero Section - Sri Lankan Railway Style */}
       <section className="relative py-20 bg-gradient-to-br from-red-800 via-red-700 to-orange-600 overflow-hidden">
-        <div className="absolute inset-0 bg-[url('https://i.imgur.com/cTqS05p.jpeg')] opacity-20 bg-cover bg-center"></div>
+        <div
+          className="absolute inset-0 opacity-20 bg-cover bg-center"
+          style={{ backgroundImage: `url('${pageContent?.hero.backgroundImage || 'https://i.imgur.com/cTqS05p.jpeg'}')` }}
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-red-900/90 to-transparent"></div>
 
         <div className="container mx-auto px-6 relative z-10">
           <div className="max-w-4xl mx-auto text-center text-white">
             <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-6 py-2 rounded-full mb-6">
               <Train className="w-5 h-5" />
-              <span className="font-semibold">Sri Lanka Railways - Scenic Journeys</span>
+              <span className="font-semibold">{pageContent?.hero.subtitle || 'Sri Lanka Railways - Scenic Journeys'}</span>
             </div>
 
             <h1 className="text-5xl md:text-6xl font-bold mb-6">
-              Book Your Train Journey<br />Through Paradise
+              {pageContent?.hero.title || 'Book Your Train Journey Through Paradise'}
             </h1>
 
             <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-              Experience the world's most scenic train routes through Sri Lanka's breathtaking hill country,
-              coastal lines, and tea plantations. We handle the booking for you!
+              {pageContent?.hero.description || "Experience the world's most scenic train routes through Sri Lanka's breathtaking hill country, coastal lines, and tea plantations. We handle the booking for you!"}
             </p>
 
             <div className="flex flex-wrap justify-center gap-4 text-sm">
-              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg">
-                <Star className="w-4 h-4 text-yellow-300" />
-                <span>Famous Scenic Routes</span>
-              </div>
-              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg">
-                <Clock className="w-4 h-4 text-green-300" />
-                <span>Manual Booking Service</span>
-              </div>
-              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg">
-                <AlertCircle className="w-4 h-4 text-blue-300" />
-                <span>Live Updates</span>
-              </div>
+              {(pageContent?.hero.badges || [
+                { icon: 'Star', text: 'Famous Scenic Routes' },
+                { icon: 'Clock', text: 'Manual Booking Service' },
+                { icon: 'AlertCircle', text: 'Live Updates' }
+              ]).map((badge, idx) => {
+                const BadgeIcon = iconMap[badge.icon] || Star;
+                return (
+                  <div key={idx} className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg">
+                    <BadgeIcon className="w-4 h-4 text-yellow-300" />
+                    <span>{badge.text}</span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -476,15 +431,26 @@ const TrainBooking = () => {
                   variant="outline"
                   onClick={() => setShowBookingForm(false)}
                   className="flex-1"
+                  disabled={submitting}
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   className="flex-1 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700"
+                  disabled={submitting}
                 >
-                  <Train className="w-4 h-4 mr-2" />
-                  Submit Booking Request
+                  {submitting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      <Train className="w-4 h-4 mr-2" />
+                      Submit Booking Request
+                    </>
+                  )}
                 </Button>
               </div>
 
@@ -551,7 +517,7 @@ const TrainBooking = () => {
           <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {filteredRoutes.map((route) => {
-                const IconComponent = route.icon;
+                const IconComponent = iconMap[route.icon] || Train;
                 return (
                   <div
                     key={route.id}
@@ -681,53 +647,69 @@ const TrainBooking = () => {
             <h2 className="text-3xl font-bold text-center mb-12">Important Information</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white p-6 rounded-2xl shadow-lg">
-                <AlertCircle className="w-8 h-8 text-red-600 mb-3" />
-                <h3 className="font-bold text-lg mb-2">Booking Process</h3>
-                <ul className="text-sm text-gray-600 space-y-2">
-                  <li>• Submit booking request online</li>
-                  <li>• We check availability manually</li>
-                  <li>• Confirmation within 24 hours</li>
-                  <li>• Payment details sent via email</li>
-                  <li>• Tickets delivered or ready at station</li>
-                </ul>
-              </div>
-
-              <div className="bg-white p-6 rounded-2xl shadow-lg">
-                <Info className="w-8 h-8 text-blue-600 mb-3" />
-                <h3 className="font-bold text-lg mb-2">Best Booking Tips</h3>
-                <ul className="text-sm text-gray-600 space-y-2">
-                  <li>• Book at least 7-14 days in advance</li>
-                  <li>• Observation cars fill up quickly</li>
-                  <li>• Early morning trains offer best views</li>
-                  <li>• Window seats recommended for photos</li>
-                  <li>• Bring snacks and water</li>
-                </ul>
-              </div>
-
-              <div className="bg-white p-6 rounded-2xl shadow-lg">
-                <Clock className="w-8 h-8 text-green-600 mb-3" />
-                <h3 className="font-bold text-lg mb-2">What to Expect</h3>
-                <ul className="text-sm text-gray-600 space-y-2">
-                  <li>• Trains may run late (be flexible)</li>
-                  <li>• Carriages can be crowded</li>
-                  <li>• Doors stay open for photos</li>
-                  <li>• Basic facilities on board</li>
-                  <li>• Stunning scenery guaranteed</li>
-                </ul>
-              </div>
-
-              <div className="bg-white p-6 rounded-2xl shadow-lg">
-                <Camera className="w-8 h-8 text-purple-600 mb-3" />
-                <h3 className="font-bold text-lg mb-2">Photography Tips</h3>
-                <ul className="text-sm text-gray-600 space-y-2">
-                  <li>• Best shots from open doorways</li>
-                  <li>• Nine Arch Bridge: get off at Demodara</li>
-                  <li>• Morning light ideal for landscapes</li>
-                  <li>• Keep camera secure while hanging out</li>
-                  <li>• Video the entire journey</li>
-                </ul>
-              </div>
+              {(pageContent?.importantInfo || [
+                {
+                  id: '1',
+                  icon: 'AlertCircle',
+                  title: 'Booking Process',
+                  items: [
+                    'Submit booking request online',
+                    'We check availability manually',
+                    'Confirmation within 24 hours',
+                    'Payment details sent via email',
+                    'Tickets delivered or ready at station'
+                  ]
+                },
+                {
+                  id: '2',
+                  icon: 'Info',
+                  title: 'Best Booking Tips',
+                  items: [
+                    'Book at least 7-14 days in advance',
+                    'Observation cars fill up quickly',
+                    'Early morning trains offer best views',
+                    'Window seats recommended for photos',
+                    'Bring snacks and water'
+                  ]
+                },
+                {
+                  id: '3',
+                  icon: 'Clock',
+                  title: 'What to Expect',
+                  items: [
+                    'Trains may run late (be flexible)',
+                    'Carriages can be crowded',
+                    'Doors stay open for photos',
+                    'Basic facilities on board',
+                    'Stunning scenery guaranteed'
+                  ]
+                },
+                {
+                  id: '4',
+                  icon: 'Camera',
+                  title: 'Photography Tips',
+                  items: [
+                    'Best shots from open doorways',
+                    'Nine Arch Bridge: get off at Demodara',
+                    'Morning light ideal for landscapes',
+                    'Keep camera secure while hanging out',
+                    'Video the entire journey'
+                  ]
+                }
+              ]).map((info) => {
+                const InfoIcon = iconMap[info.icon] || Info;
+                return (
+                  <div key={info.id} className="bg-white p-6 rounded-2xl shadow-lg">
+                    <InfoIcon className="w-8 h-8 text-red-600 mb-3" />
+                    <h3 className="font-bold text-lg mb-2">{info.title}</h3>
+                    <ul className="text-sm text-gray-600 space-y-2">
+                      {info.items.map((item, idx) => (
+                        <li key={idx}>• {item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { motion, useInView } from 'framer-motion';
+import { motion, useInView, type Variants, type TargetAndTransition } from 'framer-motion';
 import { useRef } from 'react';
 import {
   Sparkles,
@@ -115,7 +115,7 @@ const EnhancedLuxuryExperiences = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.1 });
 
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -126,7 +126,7 @@ const EnhancedLuxuryExperiences = () => {
     }
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: {
       opacity: 0,
       y: 60,
@@ -137,7 +137,7 @@ const EnhancedLuxuryExperiences = () => {
       y: 0,
       scale: 1,
       transition: {
-        type: 'spring',
+        type: 'spring' as const,
         stiffness: 100,
         damping: 12,
         duration: 0.6
@@ -145,7 +145,7 @@ const EnhancedLuxuryExperiences = () => {
     }
   };
 
-  const floatingAnimation = {
+  const floatingAnimation: TargetAndTransition = {
     y: [0, -10, 0],
     transition: {
       duration: 3,

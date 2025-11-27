@@ -15,6 +15,13 @@ const WildlifeAdmin = lazy(() => import('@/pages/admin/WildlifeAdmin'));
 const AyurvedaWellnessAdmin = lazy(() => import('@/pages/admin/AyurvedaWellnessAdmin'));
 const CreatePost = lazy(() => import('@/pages/admin/CreatePost'));
 const PostsSection = lazy(() => import('@/components/admin/panel/PostsSection'));
+const CulinaryToursManager = lazy(() => import('@/components/cms/CulinaryToursManager'));
+const HillCountryToursManager = lazy(() => import('@/components/cms/HillCountryToursManager'));
+const CulturalToursManager = lazy(() => import('@/components/cms/CulturalToursManager'));
+const PhotographyToursManager = lazy(() => import('@/components/cms/PhotographyToursManager'));
+const BeachToursManager = lazy(() => import('@/components/cms/BeachToursManager'));
+const EcotourismToursManager = lazy(() => import('@/components/cms/EcotourismToursManager'));
+const DestinationContentManager = lazy(() => import('@/components/cms/DestinationContentManager'));
 
 const queryClient = new QueryClient();
 
@@ -51,6 +58,13 @@ function App() {
                 <Route path="/wildlife" element={<WildlifeAdmin />} />
                 <Route path="/cultural" element={<CulturalHeritageAdmin />} />
                 <Route path="/ayurveda" element={<AyurvedaWellnessAdmin />} />
+                <Route path="/culinary" element={<CulinaryToursManager />} />
+                <Route path="/hillcountry" element={<HillCountryToursManager />} />
+                <Route path="/cultural" element={<CulturalToursManager />} />
+                <Route path="/photography" element={<PhotographyToursManager />} />
+                <Route path="/beach" element={<BeachToursManager />} />
+                <Route path="/ecotourism" element={<EcotourismToursManager />} />
+                <Route path="/destinations" element={<DestinationContentManager />} />
                 <Route path="/posts" element={<PostsSection />} />
                 <Route path="/posts/new" element={<CreatePost />} />
               </Routes>

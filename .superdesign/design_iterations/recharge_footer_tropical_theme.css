@@ -1,0 +1,128 @@
+/*
+ * Recharge Travels - Tropical Paradise Theme
+ * Vibrant Greens, Sunset Oranges, Playful Feel
+ * Version: 2.0
+ */
+
+:root {
+  /* ═══════════════════════════════════════════════════════════
+     TROPICAL GREENS - Lush & Vibrant
+     ═══════════════════════════════════════════════════════════ */
+  --green-deep: #0d5c4a;
+  --green-jungle: #1a7a5e;
+  --green-palm: #2ecc71;
+  --green-lime: #7dcea0;
+  --green-mint: #a8e6cf;
+
+  /* ═══════════════════════════════════════════════════════════
+     SUNSET COLORS - Warm & Inviting
+     ═══════════════════════════════════════════════════════════ */
+  --sunset-orange: #ff6b35;
+  --sunset-tangerine: #ff8c42;
+  --sunset-gold: #f9a825;
+  --sunset-coral: #ff7675;
+  --sunset-pink: #fd79a8;
+
+  /* ═══════════════════════════════════════════════════════════
+     OCEAN & SKY - Cool Accents
+     ═══════════════════════════════════════════════════════════ */
+  --ocean-deep: #006994;
+  --ocean-bright: #00b4d8;
+  --ocean-light: #90e0ef;
+  --sky-sunset: linear-gradient(135deg, #ff6b35 0%, #f9a825 50%, #ff8c42 100%);
+
+  /* ═══════════════════════════════════════════════════════════
+     SAND & CREAM - Neutral Bases
+     ═══════════════════════════════════════════════════════════ */
+  --sand-light: #fef9e7;
+  --sand-warm: #fdebd0;
+  --sand-golden: #f5e6d3;
+  --cream-white: #fffef7;
+
+  /* ═══════════════════════════════════════════════════════════
+     TROPICAL NIGHT - Dark Contrast
+     ═══════════════════════════════════════════════════════════ */
+  --night-deep: #0d3b3b;
+  --night-jungle: #1a4a4a;
+  --night-soft: #2d5a5a;
+
+  /* ═══════════════════════════════════════════════════════════
+     PRIMARY BACKGROUNDS
+     ═══════════════════════════════════════════════════════════ */
+  --background-primary: var(--night-deep);
+  --background-secondary: var(--night-jungle);
+  --background-tertiary: var(--night-soft);
+  --background-accent: var(--green-deep);
+
+  /* ═══════════════════════════════════════════════════════════
+     ACCENT COLORS (Primary Actions)
+     ═══════════════════════════════════════════════════════════ */
+  --accent-primary: var(--sunset-orange);
+  --accent-primary-hover: #e55a2b;
+  --accent-secondary: var(--green-palm);
+  --accent-secondary-hover: #27ae60;
+  --accent-glow: rgba(255, 107, 53, 0.4);
+
+  /* ═══════════════════════════════════════════════════════════
+     TEXT COLORS
+     ═══════════════════════════════════════════════════════════ */
+  --text-primary: #ffffff;
+  --text-secondary: #e8f5e9;
+  --text-muted: #a8d5ba;
+  --text-accent: var(--sunset-gold);
+
+  /* ═══════════════════════════════════════════════════════════
+     BUTTON COLORS
+     ═══════════════════════════════════════════════════════════ */
+  --btn-primary-bg: var(--sunset-orange);
+  --btn-primary-hover: #e55a2b;
+  --btn-primary-text: #ffffff;
+  --btn-primary-shadow: 0 4px 20px rgba(255, 107, 53, 0.5);
+
+  /* ═══════════════════════════════════════════════════════════
+     SOCIAL ICONS
+     ═══════════════════════════════════════════════════════════ */
+  --social-bg: rgba(255, 255, 255, 0.1);
+  --social-border: var(--green-lime);
+  --social-icon: var(--text-secondary);
+  --social-hover-bg: var(--sunset-orange);
+  --social-hover-icon: #ffffff;
+
+  /* ═══════════════════════════════════════════════════════════
+     TYPOGRAPHY
+     ═══════════════════════════════════════════════════════════ */
+  --font-primary: 'Outfit', sans-serif;
+  --font-accent: 'Architects Daughter', cursive;
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+
+  /* Font Sizes */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 2rem;
+
+  /* ═══════════════════════════════════════════════════════════
+     SPACING & RADIUS
+     ═══════════════════════════════════════════════════════════ */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 30px;
+  --radius-full: 9999px;
+
+  /* ═══════════════════════════════════════════════════════════
+     SHADOWS
+     ═══════════════════════════════════════════════════════════ */
+  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.15);
+  --shadow-glow-orange: 0 0 30px rgba(255, 107, 53, 0.3);
+  --shadow-glow-green: 0 0 30px rgba(46, 204, 113, 0.3);
+
+  /* ═══════════════════════════════════════════════════════════
+     TRANSITIONS
+     ═══════════════════════════════════════════════════════════ */
+  --transition-bounce: 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}

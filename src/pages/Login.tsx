@@ -45,16 +45,19 @@ const Login = () => {
         toast.success('Logged in successfully!');
         
         // Check if user is admin
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('is_admin')
-          .eq('id', data.user.id)
-          .single();
-        
-        // Redirect based on admin status
-        if (profile?.is_admin) {
-          navigate('/admin-panel');
-        } else {
+        try {
+          const profile = await dbService.get('profiles', data.user.id);
+          const isAdmin = (profile as any)?.is_admin || false;
+          
+          // Redirect based on admin status
+          if (isAdmin) {
+            navigate('/admin-panel');
+          } else {
+            navigate('/');
+          }
+        } catch (error) {
+          console.error('Error checking admin status:', error);
+          // Default to regular user if profile check fails
           navigate('/');
         }
       }

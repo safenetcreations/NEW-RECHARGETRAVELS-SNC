@@ -1,1 +1,1 @@
-404: Not Found
+export * from './navigation/menuData';

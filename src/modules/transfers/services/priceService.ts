@@ -1,5 +1,5 @@
 
-import { dbService, authService, storageService } from '@/lib/firebase-services';
+import { dbService, authService, storageService, functionsService } from '@/lib/firebase-services';
 
 export interface PriceBreakdown {
   distance: number;
@@ -26,15 +26,8 @@ export const priceService = {
   async calculatePrice(request: PriceCalculationRequest): Promise<PriceBreakdown> {
     try {
       console.log('Calculating price with request:', request);
-      
-      const { data, error } = await supabase.functions.invoke('calculate-price', {
-        body: request
-      });
 
-      if (error) {
-        console.error('Price calculation error:', error);
-        throw new Error(error.message || 'Failed to calculate price');
-      }
+      const data = await functionsService.calculatePrice(request);
 
       console.log('Price calculation result:', data);
       return data as PriceBreakdown;

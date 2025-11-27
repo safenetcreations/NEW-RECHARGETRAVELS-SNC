@@ -148,12 +148,11 @@ const EnhancedBookingModal = ({ isOpen, onClose, type, itemTitle, tourData }: En
         }
         
         // Update booking status
-        const { error: updateError } = await supabase
-          .from('bookings')
-          .update({ status: 'confirmed', payment_method: 'wallet' })
-          .eq('id', booking.id)
-          
-        if (updateError) throw updateError
+        await dbService.update('bookings', booking.id, { 
+          status: 'confirmed', 
+          payment_method: 'wallet',
+          updated_at: new Date().toISOString()
+        });
         
         toast.success('Booking confirmed! Payment has been deducted from your wallet.')
       } else {

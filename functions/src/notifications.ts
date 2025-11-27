@@ -1,6 +1,7 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import sgMail from '@sendgrid/mail';
+import Redis from 'ioredis';
 
 const db = admin.firestore();
 
@@ -13,6 +14,19 @@ const FROM_EMAIL = 'noreply@rechargetravels.com';
 const FROM_NAME = 'Recharge Travels';
 const ADMIN_EMAIL = 'nanthan77@gmail.com';
 const REPLY_TO_EMAIL = 'info@rechargetravels.com';
+
+// Redis setup (optional). Configure via: firebase functions:config:set redis.url="redis://:password@host:port"
+const REDIS_URL = functions.config().redis?.url || process.env.REDIS_URL || '';
+let redis: Redis | null = null;
+if (REDIS_URL) {
+  try {
+    redis = new Redis(REDIS_URL);
+    console.log('Redis client initialized for newsletter rate-limiting');
+  } catch (err: any) {
+    console.warn('Failed to initialize Redis client for rate-limiting:', err?.message || err);
+    redis = null;
+  }
+}
 
 // Email templates
 const emailTemplates = {
@@ -974,6 +988,35 @@ export const subscribeNewsletter = functions.https.onCall(async (data, context) 
   }
 
   try {
+    // Optional Redis-based rate limiting: per-email and per-IP counters
+    try {
+      if (redis) {
+        const ipHeader = context.rawRequest && (context.rawRequest.headers['x-forwarded-for'] || (context.rawRequest as any).ip);
+        const ip = ipHeader ? String(ipHeader).split(',')[0].trim() : 'unknown';
+        const emailKey = `newsletter:email:${email.toLowerCase()}`;
+        const ipKey = `newsletter:ip:${ip}`;
+        const RATE_LIMIT_WINDOW = 60; // seconds
+        const MAX_EMAIL_PER_WINDOW = 5; // allow 5 attempts per email per minute
+        const MAX_IP_PER_WINDOW = 100; // allow 100 attempts per IP per minute
+
+        const emailCount = await redis.incr(emailKey);
+        if (emailCount === 1) await redis.expire(emailKey, RATE_LIMIT_WINDOW);
+        if (emailCount > MAX_EMAIL_PER_WINDOW) {
+          throw new functions.https.HttpsError('resource-exhausted', 'Too many subscription attempts for this email. Try again later.');
+        }
+
+        const ipCount = await redis.incr(ipKey);
+        if (ipCount === 1) await redis.expire(ipKey, RATE_LIMIT_WINDOW);
+        if (ipCount > MAX_IP_PER_WINDOW) {
+          throw new functions.https.HttpsError('resource-exhausted', 'Too many requests from this IP. Try again later.');
+        }
+      }
+    } catch (rlErr: any) {
+      // If Redis reports rate limit HttpsError, rethrow. For other Redis errors, log and continue.
+      if (rlErr && rlErr.code === 'resource-exhausted') throw rlErr;
+      console.warn('Redis rate-limit check error (continuing):', rlErr?.message || rlErr);
+    }
+
     // Check if already subscribed
     const existingQuery = await db.collection('newsletter_subscribers')
       .where('email', '==', email.toLowerCase())
@@ -1023,6 +1066,16 @@ export const subscribeNewsletter = functions.https.onCall(async (data, context) 
       blog_notifications: true,
       subscribed_at: admin.firestore.FieldValue.serverTimestamp()
     });
+
+    // After successfully creating, set a cooldown key to discourage immediate retries
+    try {
+      if (redis) {
+        const cooldownKey = `newsletter:cooldown:${email.toLowerCase()}`;
+        await redis.set(cooldownKey, '1', 'EX', 300); // 5 minute cooldown
+      }
+    } catch (coolErr: any) {
+      console.warn('Failed to set cooldown key in Redis:', coolErr?.message || coolErr);
+    }
 
     return { success: true, message: 'Successfully subscribed to newsletter!' };
   } catch (error: any) {

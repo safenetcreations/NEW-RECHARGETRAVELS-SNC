@@ -7,10 +7,15 @@ export interface BlogPost {
   title: string;
   slug: string;
   content: string;
+  body_md?: string;
   excerpt?: string;
   featured_image?: string;
   featuredImage?: string;
-  author: string;
+  author: string | {
+    name: string;
+    avatar?: string;
+    bio?: string;
+  };
   reading_time?: number;
   readingTime?: number;
   status: 'draft' | 'published' | 'scheduled';
@@ -23,12 +28,17 @@ export interface BlogPost {
   category?: {
     id: string;
     name: string;
+    seo_keywords?: string[];
   };
   tags?: string[];
   seo?: {
     metaTitle?: string;
     metaDescription?: string;
     keywords?: string[];
+  };
+  podcast_episode?: {
+    audio_url: string;
+    duration_seconds?: number;
   };
   viewCount?: number;
   aiGenerated?: boolean;

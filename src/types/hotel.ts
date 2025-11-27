@@ -4,7 +4,7 @@ export interface Hotel {
   name: string
   description?: string
   star_rating?: number
-  hotel_type?: 'luxury_resort' | 'cabana' | 'budget' | 'middle_range' | 'boutique'
+  hotel_type?: 'luxury_resort' | 'cabana' | 'budget' | 'middle_range' | 'boutique' | 'villa' | 'apartment' | 'business' | 'guesthouse' | 'eco_lodge'
   style_id?: string
   category_id?: string
   price_range_min?: number

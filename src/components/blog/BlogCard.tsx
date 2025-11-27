@@ -56,7 +56,7 @@ export default function BlogCard({ post, featured = false }: BlogCardProps) {
           <div className="flex items-center gap-4 text-sm text-muted-foreground mt-2">
             <div className="flex items-center gap-1">
               <User className="h-4 w-4" />
-              {post.author}
+              {typeof post.author === 'string' ? post.author : post.author?.name || 'Recharge Travels'}
             </div>
             {post.podcast_episode?.audio_url && (
               <Badge variant="secondary" className="flex items-center gap-1">
@@ -128,7 +128,7 @@ export default function BlogCard({ post, featured = false }: BlogCardProps) {
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-1">
             <User className="h-4 w-4" />
-            {post.author}
+            {typeof post.author === 'string' ? post.author : post.author?.name || 'Recharge Travels'}
           </div>
           {post.podcast_episode?.audio_url && (
             <Badge variant="secondary" className="flex items-center gap-1">

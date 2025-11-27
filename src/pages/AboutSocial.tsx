@@ -74,17 +74,18 @@ const AboutSocial = () => {
           <meta name="description" content="Follow Recharge Travels live across all social media platforms. See our latest posts, updates and travel experiences." />
         </Helmet>
 
-        <div className="min-h-screen bg-gray-50">
-          <SocialFeedHeader updateTime={updateTime} />
+        <div className="bg-gray-50">
           <SocialWelcomeSection />
-          
-          <PlatformTabs 
-            platforms={platforms || []}
-            currentFilter={currentFilter}
-            onFilterPlatform={handleFilterPlatform}
-          />
 
           <div className="max-w-7xl mx-auto p-5">
+            <SocialFeedHeader updateTime={updateTime} />
+
+            <PlatformTabs 
+              platforms={platforms || []}
+              currentFilter={currentFilter}
+              onFilterPlatform={handleFilterPlatform}
+            />
+
             <PublicPostsGrid
               posts={posts || []}
               platforms={platforms || []}

@@ -18,15 +18,16 @@ const TourDetail: React.FC = () => {
     queryFn: async () => {
       if (!id) throw new Error('Tour ID is required');
       
-      const { data, error } = await supabase
-        .from('tours')
-        .select('*')
-        .eq('id', id)
-        .eq('is_active', true)
-        .single();
+      const tours = await dbService.list('tours', [
+        { field: 'id', operator: '==', value: id },
+        { field: 'is_active', operator: '==', value: true }
+      ]);
       
-      if (error) throw error;
-      return data;
+      if (!tours || tours.length === 0) {
+        throw new Error('Tour not found');
+      }
+      
+      return tours[0] as any;
     },
     enabled: !!id
   });

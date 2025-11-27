@@ -23,7 +23,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.storeConversation = exports.getAvailabilityCalendar = exports.searchTours = exports.calculateTourPrice = exports.checkVehicleAvailability = exports.getNewsletterStats = exports.unsubscribeNewsletter = exports.subscribeNewsletter = exports.notifyBlogSubscribers = exports.sendNewsletterWelcome = exports.sendBookingReminders = exports.sendWelcomeEmail = exports.sendBookingNotification = exports.sendBookingConfirmation = exports.sendWhatsAppMessage = exports.sendEmail = void 0;
+exports.exportHotels = exports.bulkDeleteHotels = exports.bulkUpdateHotels = exports.bulkImportHotels = exports.googlePlacesApiHandler = exports.storeConversation = exports.getAvailabilityCalendar = exports.searchTours = exports.calculateTourPrice = exports.checkVehicleAvailability = exports.getNewsletterStats = exports.unsubscribeNewsletter = exports.subscribeNewsletter = exports.notifyBlogSubscribers = exports.sendNewsletterWelcome = exports.sendBookingReminders = exports.sendWelcomeEmail = exports.sendBookingNotification = exports.sendBookingConfirmation = exports.sendWhatsAppMessage = exports.sendEmail = void 0;
 const admin = __importStar(require("firebase-admin"));
 // Initialize Firebase Admin
 admin.initializeApp();
@@ -47,4 +47,13 @@ Object.defineProperty(exports, "calculateTourPrice", { enumerable: true, get: fu
 Object.defineProperty(exports, "searchTours", { enumerable: true, get: function () { return yalu_data_functions_1.searchTours; } });
 Object.defineProperty(exports, "getAvailabilityCalendar", { enumerable: true, get: function () { return yalu_data_functions_1.getAvailabilityCalendar; } });
 Object.defineProperty(exports, "storeConversation", { enumerable: true, get: function () { return yalu_data_functions_1.storeConversation; } });
+// Import Google Places API handler
+var google_places_api_handler_1 = require("./google-places-api-handler");
+Object.defineProperty(exports, "googlePlacesApiHandler", { enumerable: true, get: function () { return google_places_api_handler_1.googlePlacesApiHandler; } });
+// Import bulk operations
+var bulk_operations_1 = require("./bulk-operations");
+Object.defineProperty(exports, "bulkImportHotels", { enumerable: true, get: function () { return bulk_operations_1.bulkImportHotels; } });
+Object.defineProperty(exports, "bulkUpdateHotels", { enumerable: true, get: function () { return bulk_operations_1.bulkUpdateHotels; } });
+Object.defineProperty(exports, "bulkDeleteHotels", { enumerable: true, get: function () { return bulk_operations_1.bulkDeleteHotels; } });
+Object.defineProperty(exports, "exportHotels", { enumerable: true, get: function () { return bulk_operations_1.exportHotels; } });
 //# sourceMappingURL=index.js.map

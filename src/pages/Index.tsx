@@ -8,13 +8,15 @@ import LuxuryHeroSection from "@/components/homepage/LuxuryHeroSection";
 import FeaturedDestinations from "@/components/homepage/FeaturedDestinations";
 import LuxuryExperiences from "@/components/homepage/LuxuryExperiences";
 // import EnhancedLuxuryExperiences from "@/components/homepage/EnhancedLuxuryExperiences";
-import TravelPackages from "@/components/homepage/TravelPackages";
-import TestimonialsSection from "@/components/homepage/TestimonialsSection";
-import AboutSriLanka from "@/components/homepage/AboutSriLanka";
+// import TravelPackages from "@/components/homepage/TravelPackages"; // Removed - Best Value Deals section
+import EcotourismPromo from "@/components/homepage/EcotourismPromo";
+import FeaturedExperiencesStrip from "@/components/homepage/FeaturedExperiencesStrip";
+import WellnessPackagesSection from "@/components/homepage/WellnessPackagesSection";
+import AboutSriLanka from "@/pages/AboutSriLanka";
 import TravelGuide from "@/components/homepage/TravelGuide";
-import WhyChooseUs from "@/components/homepage/WhyChooseUs";
-import BlogSection from "@/components/homepage/BlogSection";
-import NewsletterSection from "@/components/homepage/NewsletterSection";
+// import WhyChooseUs from "@/components/homepage/WhyChooseUs"; // Removed - redundant with footer
+import LuxuryBlogSection from "@/components/homepage/LuxuryBlogSection";
+// import NewsletterSection from "@/components/homepage/NewsletterSection"; // Removed - using Best Value Deals in footer
 import ReviewsSection from "@/components/homepage/ReviewsSection";
 import ComprehensiveSEO from "@/components/seo/ComprehensiveSEO";
 import InteractiveTripBuilder from "@/components/trip-builder/InteractiveTripBuilder";
@@ -103,29 +105,28 @@ const Index = () => {
         {/* Luxury Experiences */}
         <LuxuryExperiences />
 
-        {/* Travel Packages */}
-        <TravelPackages />
+        {/* Wellness Packages Section */}
+        <WellnessPackagesSection />
 
-        {/* Testimonials */}
-        <TestimonialsSection />
+        {/* Ecotourism Promotion Section */}
+        <EcotourismPromo />
 
-        {/* About Sri Lanka */}
-        <AboutSriLanka />
+        {/* Featured Experiences Strip */}
+        <FeaturedExperiencesStrip />
+
+  {/* About Sri Lanka - Enhanced Section */}
+  <AboutSriLanka />
 
         {/* Travel Guide */}
         <TravelGuide />
 
-        {/* Why Choose Us */}
-        <WhyChooseUs />
-
-        {/* Blog Section */}
-        <BlogSection />
+        {/* Luxury Blog Section - Auto-updates from Admin Panel */}
+        <LuxuryBlogSection />
 
         {/* Reviews Section - Above Footer */}
         <ReviewsSection />
 
-        {/* Newsletter */}
-        <NewsletterSection />
+        {/* Newsletter removed - Best Value Deals section is in footer */}
       </div>
 
       <Footer />

@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import TransferBookingForm from '@/modules/transfers/components/TransferBookingForm';
+import GroupTransportBookingForm from '@/components/booking/GroupTransportBookingForm';
 import {
   groupTransportHeroService,
   groupTransportVehiclesService,
@@ -509,7 +509,7 @@ const GroupTransport = () => {
 
                       {/* Form Content */}
                       <div className="p-6">
-                        <TransferBookingForm />
+                        <GroupTransportBookingForm />
                       </div>
                     </motion.div>
                   )}

@@ -369,77 +369,213 @@ const CustomExperience = () => {
       <Header />
 
       <div className="min-h-screen">
-        {/* Cinematic Hero Section */}
-        <section className="relative h-[70vh] min-h-[600px] flex items-center justify-center overflow-hidden">
-          {/* Parallax Background */}
-          <motion.div
-            initial={{ scale: 1.1 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 1.5, ease: 'easeOut' }}
-            className="absolute inset-0"
-          >
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{
-                backgroundImage: `url(${content?.hero.backgroundImage || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1920'})`
-              }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70" />
-          </motion.div>
+        {/* Useful Hero Section - Customer Focused */}
+        <section className="relative bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 py-16 md:py-24">
+          <div className="container mx-auto px-4">
+            <div className="max-w-6xl mx-auto">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                {/* Left Side - Main Content */}
+                <motion.div
+                  initial={{ opacity: 0, x: -50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.8 }}
+                  className="space-y-8"
+                >
+                  <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-800 px-4 py-2 rounded-full text-sm font-medium">
+                    <Sparkles className="w-4 h-4" />
+                    <span>Expert Travel Designers</span>
+                  </div>
 
-          {/* Hero Content */}
-          <div className="relative z-10 container mx-auto px-4 text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.8 }}
-            >
-              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-full px-6 py-3 mb-6 border border-white/20">
-                <Sparkles className="w-5 h-5 text-amber-400" />
-                <span className="text-white font-medium">Bespoke Travel Experiences</span>
+                  <h1 className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight">
+                    Your Dream Sri Lanka
+                    <span className="block text-amber-600">Adventure Awaits</span>
+                  </h1>
+
+                  <p className="text-xl text-gray-600 leading-relaxed">
+                    Tell us your vision, and our expert travel designers will craft a personalized itinerary
+                    that matches your interests, budget, and schedule. From luxury safaris to cultural immersions.
+                  </p>
+
+                  {/* Key Benefits */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center">
+                        <CheckCircle className="w-5 h-5 text-white" />
+                      </div>
+                      <span className="text-gray-700 font-medium">100% Personalized</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center">
+                        <CheckCircle className="w-5 h-5 text-white" />
+                      </div>
+                      <span className="text-gray-700 font-medium">Expert Local Guides</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center">
+                        <CheckCircle className="w-5 h-5 text-white" />
+                      </div>
+                      <span className="text-gray-700 font-medium">Flexible Booking</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center">
+                        <CheckCircle className="w-5 h-5 text-white" />
+                      </div>
+                      <span className="text-gray-700 font-medium">24/7 Support</span>
+                    </div>
+                  </div>
+
+                  {/* CTA Buttons */}
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <Button
+                      onClick={() => {
+                        const formSection = document.getElementById('booking-form');
+                        formSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }}
+                      size="lg"
+                      className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all"
+                    >
+                      <Sparkles className="mr-2 w-5 h-5" />
+                      Start Planning Now
+                    </Button>
+                    <Button
+                      onClick={() => window.open(`https://wa.me/${content?.contact.whatsapp || '94777721999'}`, '_blank')}
+                      variant="outline"
+                      size="lg"
+                      className="border-2 border-amber-500 text-amber-700 hover:bg-amber-50 text-lg px-8 py-6"
+                    >
+                      <MessageSquare className="mr-2 w-5 h-5" />
+                      WhatsApp Chat
+                    </Button>
+                  </div>
+
+                  {/* Trust Indicators */}
+                  <div className="flex items-center gap-6 pt-4">
+                    <div className="flex items-center gap-2">
+                      <div className="flex -space-x-2">
+                        {[1, 2, 3, 4, 5].map((i) => (
+                          <div key={i} className="w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full border-2 border-white flex items-center justify-center text-xs font-bold text-white">
+                            {i}
+                          </div>
+                        ))}
+                      </div>
+                      <div className="text-sm">
+                        <div className="font-semibold text-gray-900">500+ Happy Travelers</div>
+                        <div className="text-gray-600">This Year</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Star className="w-5 h-5 text-amber-500 fill-current" />
+                      <Star className="w-5 h-5 text-amber-500 fill-current" />
+                      <Star className="w-5 h-5 text-amber-500 fill-current" />
+                      <Star className="w-5 h-5 text-amber-500 fill-current" />
+                      <Star className="w-5 h-5 text-amber-500 fill-current" />
+                      <span className="text-sm font-semibold text-gray-900 ml-2">4.9/5 Rating</span>
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* Right Side - Interactive Elements */}
+                <motion.div
+                  initial={{ opacity: 0, x: 50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.8, delay: 0.2 }}
+                  className="space-y-6"
+                >
+                  {/* Quick Contact Card */}
+                  <Card className="border-2 border-amber-200 bg-white shadow-xl">
+                    <CardContent className="p-6">
+                      <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <Phone className="w-5 h-5 text-amber-600" />
+                        Speak to an Expert
+                      </h3>
+                      <p className="text-gray-600 mb-4">
+                        Get personalized recommendations from our travel specialists
+                      </p>
+                      <div className="space-y-3">
+                        <a
+                          href={`tel:${content?.contact.phone || '+94777721999'}`}
+                          className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+                        >
+                          <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                            <Phone className="w-5 h-5 text-white" />
+                          </div>
+                          <div>
+                            <div className="font-semibold text-gray-900">Call Now</div>
+                            <div className="text-sm text-gray-600">{content?.contact.phone || '+94 7777 21 999'}</div>
+                          </div>
+                        </a>
+                        <a
+                          href={`mailto:${content?.contact.email || 'custom@rechargetravels.com'}`}
+                          className="flex items-center gap-3 p-3 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
+                        >
+                          <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                            <Mail className="w-5 h-5 text-white" />
+                          </div>
+                          <div>
+                            <div className="font-semibold text-gray-900">Email Us</div>
+                            <div className="text-sm text-gray-600">{content?.contact.email || 'custom@rechargetravels.com'}</div>
+                          </div>
+                        </a>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Popular Experiences Preview */}
+                  <Card className="border-2 border-purple-200 bg-white shadow-xl">
+                    <CardContent className="p-6">
+                      <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <MapPin className="w-5 h-5 text-purple-600" />
+                        Popular Experiences
+                      </h3>
+                      <div className="space-y-3">
+                        {[
+                          { name: 'Wildlife Safari', duration: '3-5 Days', price: 'From $450' },
+                          { name: 'Cultural Triangle', duration: '4-6 Days', price: 'From $650' },
+                          { name: 'Beach Paradise', duration: '5-7 Days', price: 'From $750' },
+                          { name: 'Tea Country Tour', duration: '3-4 Days', price: 'From $350' }
+                        ].map((experience, index) => (
+                          <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div>
+                              <div className="font-semibold text-gray-900">{experience.name}</div>
+                              <div className="text-sm text-gray-600">{experience.duration}</div>
+                            </div>
+                            <div className="text-right">
+                              <div className="font-bold text-purple-600">{experience.price}</div>
+                              <div className="text-xs text-gray-500">per person</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <Button
+                        variant="outline"
+                        className="w-full mt-4 border-2 border-purple-500 text-purple-700 hover:bg-purple-50"
+                        onClick={() => navigate('/experiences')}
+                      >
+                        View All Experiences
+                        <ArrowRight className="ml-2 w-4 h-4" />
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  {/* Quick Stats */}
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="text-center p-4 bg-white rounded-lg shadow-md border-2 border-gray-100">
+                      <div className="text-2xl font-bold text-amber-600">15+</div>
+                      <div className="text-sm text-gray-600">Years Experience</div>
+                    </div>
+                    <div className="text-center p-4 bg-white rounded-lg shadow-md border-2 border-gray-100">
+                      <div className="text-2xl font-bold text-blue-600">500+</div>
+                      <div className="text-sm text-gray-600">Custom Trips</div>
+                    </div>
+                    <div className="text-center p-4 bg-white rounded-lg shadow-md border-2 border-gray-100">
+                      <div className="text-2xl font-bold text-green-600">98%</div>
+                      <div className="text-sm text-gray-600">Satisfaction</div>
+                    </div>
+                  </div>
+                </motion.div>
               </div>
-
-              <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 drop-shadow-2xl" style={{ textShadow: '0 4px 20px rgba(0,0,0,0.5)' }}>
-                {content?.hero.title || 'Design Your Dream Sri Lankan Adventure'}
-              </h1>
-
-              <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto mb-10 drop-shadow-lg" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
-                {content?.hero.subtitle || 'Let our expert travel designers create a bespoke journey tailored exclusively to your desires, interests, and dreams.'}
-              </p>
-
-              <Button
-                onClick={() => {
-                  const formSection = document.getElementById('booking-form');
-                  formSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }}
-                size="lg"
-                className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white text-lg px-10 py-7 rounded-full shadow-2xl hover:shadow-amber-500/50 transition-all hover:scale-105"
-              >
-                {content?.hero.ctaText || 'Start Planning'}
-                <ArrowRight className="ml-2 w-6 h-6" />
-              </Button>
-            </motion.div>
+            </div>
           </div>
-
-          {/* Scroll Indicator */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1, duration: 1 }}
-            className="absolute bottom-10 left-1/2 transform -translate-x-1/2"
-          >
-            <motion.div
-              animate={{ y: [0, 10, 0] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="w-8 h-12 border-2 border-white/50 rounded-full flex items-start justify-center p-2"
-            >
-              <motion.div
-                animate={{ y: [0, 16, 0] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="w-1.5 h-1.5 bg-white rounded-full"
-              />
-            </motion.div>
-          </motion.div>
         </section>
 
         {/* Features Section */}
@@ -633,11 +769,10 @@ const CustomExperience = () => {
                     <button
                       key={index}
                       onClick={() => setCurrentTestimonial(index)}
-                      className={`w-3 h-3 rounded-full transition-all ${
-                        index === currentTestimonial
+                      className={`w-3 h-3 rounded-full transition-all ${index === currentTestimonial
                           ? 'bg-amber-500 w-8'
                           : 'bg-gray-300 hover:bg-gray-400'
-                      }`}
+                        }`}
                     />
                   ))}
                 </div>

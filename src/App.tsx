@@ -15,7 +15,7 @@ import ScrollToTop from '@/components/ScrollToTop';
 import GoogleAnalytics from '@/components/analytics/GoogleAnalytics';
 
 const Index = lazy(() => import('@/pages/Index'));
-const CulturalTours = lazy(() => import('@/pages/CulturalTours'));
+const CulturalTours = lazy(() => import('@/pages/CulturalToursNew'));
 const WildTours = lazy(() => import('@/pages/WildTours'));
 const NationalParksOverview = lazy(() => import('@/pages/NationalParksOverview'));
 const ParkLandingPage = lazy(() => import('@/components/wildTours/ParkLandingPage'));
@@ -24,15 +24,16 @@ const Blog = lazy(() => import('@/pages/Blog'));
 const BlogPost = lazy(() => import('@/pages/BlogPost'));
 const AboutSriLanka = lazy(() => import('@/pages/AboutSriLanka'));
 const AboutRechargeTravel = lazy(() => import('@/pages/AboutRechargeTravel'));
+const AboutSocial = lazy(() => import('@/pages/AboutSocial'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
-const Photography = lazy(() => import('@/pages/Photography'));
+const Photography = lazy(() => import('@/pages/PhotographyNew'));
 const RamayanaTrail = lazy(() => import('@/pages/RamayanaTrail'));
 const RamayanaTrailTour = lazy(() => import('@/pages/RamayanaTrailTour'));
 const AyurvedaWellnessTour = lazy(() => import('@/pages/AyurvedaWellnessTour'));
-const Ecotourism = lazy(() => import('@/pages/Ecotourism'));
-const BeachTours = lazy(() => import('@/pages/BeachTours'));
-const HillCountry = lazy(() => import('@/pages/HillCountry'));
-const CulinaryTours = lazy(() => import('@/pages/CulinaryTours'));
+const Ecotourism = lazy(() => import('@/pages/EcotourismNew'));
+const BeachTours = lazy(() => import('@/pages/BeachToursNew'));
+const HillCountry = lazy(() => import('@/pages/HillCountryToursNew'));
+const CulinaryTours = lazy(() => import('@/pages/CulinaryToursNew'));
 const Honeymoon = lazy(() => import('@/pages/Honeymoon'));
 const HoneymoonsWeddings = lazy(() => import('@/pages/romance/HoneymoonsWeddings'));
 const WellnessPackages = lazy(() => import('@/pages/WellnessPackages'));
@@ -144,6 +145,7 @@ const Belihuloya = lazy(() => import('@/pages/scenic/BelihuloyaRiver'));
 const RavanaFalls = lazy(() => import('@/pages/scenic/RavanaFalls'));
 const NineArchBridge = lazy(() => import('@/pages/scenic/NineArchBridge'));
 const Hotels = lazy(() => import('@/pages/Hotels'));
+const HotelDetail = lazy(() => import('@/pages/HotelDetail'));
 const ContentUpdater = lazy(() => import('@/pages/ContentUpdater'));
 const BookNow = lazy(() => import('@/pages/BookNow'));
 const DynamicPage = lazy(() => import('@/pages/DynamicPage'));
@@ -189,7 +191,6 @@ function App() {
                 <Route path="/tours/luxury-safari" element={<LuxurySafari />} />
                 <Route path="/tours/honeymoon" element={<Honeymoon />} />
                 <Route path="/romance/honeymoons-weddings" element={withSiteChrome(HoneymoonsWeddings)} />
-                <Route path="/tours/wellness" element={<WellnessPackages />} />
                 <Route path="/tours/luxury" element={<LuxuryTours />} />
                 <Route path="/tours/restaurants" element={withSiteChrome(RestaurantGuide)} />
                 <Route path="/tours/waterfalls" element={withSiteChrome(WaterfallGuide)} />
@@ -247,6 +248,7 @@ function App() {
                 <Route path="/experiences/lagoon-safari" element={<LagoonSafari />} />
                 <Route path="/experiences/cooking-class-sri-lanka" element={<CookingClass />} />
                 <Route path="/experiences/ayurveda" element={<AyurvedaWellness />} />
+                <Route path="/experiences/wellness" element={<WellnessPackages />} />
                 <Route path="/booking/:experienceSlug" element={<ExperienceBooking />} />
 
                 {/* Additional Tours */}
@@ -281,6 +283,7 @@ function App() {
                 <Route path="/blog/:slug" element={withSiteChrome(BlogPost)} />
                 <Route path="/about/sri-lanka" element={withSiteChrome(AboutSriLanka)} />
                 <Route path="/about" element={withSiteChrome(AboutRechargeTravel)} />
+                <Route path="/connect-with-us" element={withSiteChrome(AboutSocial)} />
                 <Route path="/search" element={<SearchResults />} />
                 <Route path="/book-now" element={<BookNow />} />
                 <Route path="/wallet" element={withSiteChrome(WalletTransactions)} />
@@ -296,6 +299,7 @@ function App() {
                 {/* <Route path="/booking-integration" element={<BookingIntegration />} /> */}
                 <Route path="/booking-confirmation" element={withSiteChrome(BookingConfirmation)} />
                 <Route path="/travel-guide" element={withSiteChrome(TravelGuide)} />
+                <Route path="/hotels/:id" element={<HotelDetail />} />
                 <Route path="/hotels" element={<Hotels />} />
                 <Route path="/content-updater" element={<ContentUpdater />} />
                 <Route path="/dynamic/:slug" element={<DynamicPage />} />

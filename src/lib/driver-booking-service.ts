@@ -7,11 +7,11 @@ export async function createDriverBooking(
   vehicleId: string,
   formData: DriverBookingFormData
 ): Promise<DriverBooking> {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('User not authenticated')
+  const user = authService.getCurrentUser();
+  if (!user) throw new Error('User not authenticated');
 
   // Get or create customer record
-  const customer = await getOrCreateCustomer(user.id, user.email || '')
+  const customer = await getOrCreateCustomer(user.uid, user.email || '');
 
   const bookingData = {
     customer_id: customer.id,
@@ -29,76 +29,88 @@ export async function createDriverBooking(
     special_requirements: formData.special_requirements,
     estimated_distance_km: formData.estimated_distance_km,
     customer_notes: formData.customer_notes,
-    booking_status: 'pending' as const
-  }
+    booking_status: 'pending' as const,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  };
 
-  const { data, error } = await supabase
-    .from('driver_bookings')
-    .insert(bookingData)
-    .select('*')
-    .single()
-
-  if (error) throw error
-  return data
+  const result = await dbService.create('driver_bookings', bookingData);
+  return result as DriverBooking;
 }
 
 export async function getOrCreateCustomer(userId: string, email: string): Promise<Customer> {
-  // First check if customer exists
-  const { data: existingCustomer } = await supabase
-    .from('customers')
-    .select('*')
-    .eq('user_id', userId)
-    .single()
+  try {
+    // First check if customer exists
+    const customers = await dbService.list('customers', [
+      { field: 'user_id', operator: '==', value: userId }
+    ]);
 
-  if (existingCustomer) {
-    return existingCustomer
-  }
+    if (customers && customers.length > 0) {
+      return customers[0] as Customer;
+    }
 
-  // Create customer if doesn't exist
-  const { data: newCustomer, error } = await supabase
-    .from('customers')
-    .insert({
+    // Create customer if doesn't exist
+    const newCustomer = await dbService.create('customers', {
       user_id: userId,
       first_name: '',
       last_name: '',
       phone_number: '',
-      preferred_language: 'en'
-    })
-    .select('*')
-    .single()
+      preferred_language: 'en',
+      email: email,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    });
 
-  if (error) throw error
-  return newCustomer
+    return newCustomer as Customer;
+  } catch (error) {
+    console.error('Error in getOrCreateCustomer:', error);
+    throw error;
+  }
 }
 
 export async function getUserBookings(userId: string): Promise<DriverBooking[]> {
-  const { data, error } = await supabase
-    .from('driver_bookings')
-    .select(`
-      *,
-      drivers:driver_id(name, phone, email),
-      vehicles:vehicle_id(make, model, image_urls)
-    `)
-    .eq('customer_id', userId)
-    .order('created_at', { ascending: false })
+  try {
+    // Get bookings for this customer
+    const bookings = await dbService.list('driver_bookings', [
+      { field: 'customer_id', operator: '==', value: userId }
+    ], 'created_at', undefined);
 
-  if (error) throw error
-  return data || []
+    // For each booking, get driver and vehicle details
+    const enrichedBookings = await Promise.all(
+      bookings.map(async (booking: any) => {
+        const [driver, vehicle] = await Promise.all([
+          dbService.get('drivers', booking.driver_id),
+          dbService.get('vehicles', booking.vehicle_id)
+        ]);
+
+        return {
+          ...booking,
+          drivers: driver ? { name: (driver as any).name, phone: (driver as any).phone, email: (driver as any).email } : null,
+          vehicles: vehicle ? { make: (vehicle as any).make, model: (vehicle as any).model, image_urls: (vehicle as any).image_urls } : null
+        };
+      })
+    );
+
+    return enrichedBookings as DriverBooking[];
+  } catch (error) {
+    console.error('Error fetching user bookings:', error);
+    throw error;
+  }
 }
 
 export async function updateBookingStatus(
   bookingId: string, 
   status: DriverBooking['booking_status']
 ): Promise<void> {
-  const { error } = await supabase
-    .from('driver_bookings')
-    .update({ 
+  try {
+    await dbService.update('driver_bookings', bookingId, { 
       booking_status: status,
       updated_at: new Date().toISOString()
-    })
-    .eq('id', bookingId)
-
-  if (error) throw error
+    });
+  } catch (error) {
+    console.error('Error updating booking status:', error);
+    throw error;
+  }
 }
 
 export async function checkDriverAvailability(
@@ -106,13 +118,27 @@ export async function checkDriverAvailability(
   startDate: string,
   endDate: string
 ): Promise<boolean> {
-  const { data, error } = await supabase
-    .from('driver_bookings')
-    .select('id')
-    .eq('driver_id', driverId)
-    .in('booking_status', ['confirmed', 'in_progress'])
-    .or(`pickup_date.lte.${endDate},return_date.gte.${startDate}`)
+  try {
+    // Get all confirmed and in-progress bookings for this driver
+    const bookings = await dbService.list('driver_bookings', [
+      { field: 'driver_id', operator: '==', value: driverId },
+      { field: 'booking_status', operator: 'in', value: ['confirmed', 'in_progress'] }
+    ]);
 
-  if (error) throw error
-  return (data?.length || 0) === 0
+    // Check for date conflicts
+    const hasConflict = bookings.some((booking: any) => {
+      const bookingStart = new Date(booking.pickup_date);
+      const bookingEnd = new Date(booking.return_date);
+      const requestedStart = new Date(startDate);
+      const requestedEnd = new Date(endDate);
+
+      // Check if dates overlap
+      return bookingStart <= requestedEnd && bookingEnd >= requestedStart;
+    });
+
+    return !hasConflict;
+  } catch (error) {
+    console.error('Error checking driver availability:', error);
+    throw error;
+  }
 }

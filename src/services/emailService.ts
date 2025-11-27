@@ -1,7 +1,8 @@
 import { getFunctions, httpsCallable } from 'firebase/functions';
-import { app } from '@/lib/firebase';
+import app, { functions as firebaseFunctions } from '@/lib/firebase';
 
-const functions = getFunctions(app);
+// Reuse initialized Functions instance from our Firebase wrapper when possible
+const functionsInstance = firebaseFunctions ?? getFunctions(app);
 
 // Email template types
 export type EmailTemplateType =
@@ -77,7 +78,7 @@ export const emailService = {
    */
   async sendEmail(params: SendEmailParams): Promise<EmailResponse> {
     try {
-      const sendEmailFunction = httpsCallable<SendEmailParams, EmailResponse>(functions, 'sendEmail');
+      const sendEmailFunction = httpsCallable<SendEmailParams, EmailResponse>(functionsInstance, 'sendEmail');
       const result = await sendEmailFunction(params);
       return result.data;
     } catch (error: any) {

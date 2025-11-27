@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -42,21 +42,17 @@ export const AIRecommendations: React.FC<AIRecommendationsProps> = ({ userPrefer
     }
   }, [userPreferences]);
 
-  const generateRecommendations = async () => {
+  const generateRecommendations = useCallback(async () => {
     setLoading(true);
     try {
       // Fetch available tours and activities
-      const { data: tours } = await supabase
-        .from('tours')
-        .select('*')
-        .eq('is_active', true)
-        .limit(10);
+      const tours = await dbService.list('tours', [
+        { field: 'is_active', operator: '==', value: true }
+      ], undefined, 10);
 
-      const { data: activities } = await supabase
-        .from('activities')
-        .select('*')
-        .eq('is_active', true)
-        .limit(10);
+      const activities = await dbService.list('activities', [
+        { field: 'is_active', operator: '==', value: true }
+      ], undefined, 10);
 
       // Use AI to generate personalized recommendations
       const aiResponse = await getSmartSelection({
@@ -113,7 +109,7 @@ export const AIRecommendations: React.FC<AIRecommendationsProps> = ({ userPrefer
     } finally {
       setLoading(false);
     }
-  };
+  }, [userPreferences]);
 
   if (loading) {
     return (

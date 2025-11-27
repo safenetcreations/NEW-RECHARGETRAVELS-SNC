@@ -23,6 +23,7 @@ import EmailTemplatesSection from '@/components/admin/panel/EmailTemplatesSectio
 import AboutSriLankaAdmin from '@/components/admin/AboutSriLankaAdmin';
 import PageManagementSystem from '@/components/admin/PageManagementSystem';
 import CustomExperienceSection from '@/components/admin/panel/CustomExperienceSection';
+import CustomExperienceSubmissions from '@/components/admin/panel/CustomExperienceSubmissions';
 import TrainJourneysSection from '@/components/admin/panel/TrainJourneysSection';
 import AIContentTools from '@/components/admin/AIContentTools';
 
@@ -55,6 +56,8 @@ const AdminPanel: React.FC = () => {
         return <AboutSriLankaAdmin />;
       case 'custom-experience':
         return <CustomExperienceSection />;
+      case 'custom-experience-submissions':
+        return <CustomExperienceSubmissions />;
       case 'train-journeys':
         return <TrainJourneysSection />;
       case 'page-management':

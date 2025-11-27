@@ -38,6 +38,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeSection, onSectionCha
     { id: 'pages', label: 'Pages', icon: FileText },
     { id: 'about-sri-lanka', label: 'About Sri Lanka', icon: Globe },
     { id: 'custom-experience', label: 'Custom Experience', icon: Sparkles },
+    { id: 'custom-experience-submissions', label: 'Experience Requests', icon: FileText },
     { id: 'train-journeys', label: 'Train Journeys', icon: Train },
     { id: 'posts', label: 'Blog Posts', icon: Edit },
     { id: 'media', label: 'Media Library', icon: Camera },

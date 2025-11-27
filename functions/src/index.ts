@@ -26,3 +26,14 @@ export {
   getAvailabilityCalendar,
   storeConversation
 } from './yalu-data-functions';
+
+// Import Google Places API handler
+export { googlePlacesApiHandler } from './google-places-api-handler';
+
+// Import bulk operations
+export {
+  bulkImportHotels,
+  bulkUpdateHotels,
+  bulkDeleteHotels,
+  exportHotels
+} from './bulk-operations';

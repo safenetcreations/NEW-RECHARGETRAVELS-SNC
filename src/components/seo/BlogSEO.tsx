@@ -19,6 +19,11 @@ const BlogSEO: React.FC<BlogSEOProps> = ({
   url = 'https://recharge-travels.com/blog',
   type = 'website'
 }) => {
+  const getAuthorName = (author: BlogPost['author'] | undefined) => {
+    if (!author) return 'Recharge Travels';
+    if (typeof author === 'string') return author;
+    return author.name || 'Recharge Travels';
+  };
   // Use post data if available
   const seoTitle = post?.title
     ? `${post.title} | Recharge Travels Blog`
@@ -39,7 +44,7 @@ const BlogSEO: React.FC<BlogSEOProps> = ({
     image: post.featured_image || '',
     author: {
       '@type': 'Person',
-      name: post.author
+      name: getAuthorName(post.author)
     },
     publisher: {
       '@type': 'Organization',
@@ -128,7 +133,7 @@ const BlogSEO: React.FC<BlogSEOProps> = ({
         <>
           <meta property="article:published_time" content={post.published_at || post.created_at} />
           <meta property="article:modified_time" content={post.updated_at || post.created_at} />
-          <meta property="article:author" content={post.author} />
+          <meta property="article:author" content={getAuthorName(post.author)} />
           {post.category && (
             <meta property="article:section" content={post.category.name} />
           )}

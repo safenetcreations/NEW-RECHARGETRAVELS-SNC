@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -52,20 +52,13 @@ export const TourContentManager = () => {
     { value: 'luxury', label: 'Luxury' }
   ];
 
-  useEffect(() => {
-    fetchTours();
-  }, []);
-
-  const fetchTours = async () => {
+  const fetchTours = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from('tour_packages')
-        .select('*')
-        .eq('is_active', true)
-        .order('name');
-
-      if (error) throw error;
-      setTours(data || []);
+      const tours = await dbService.list('tour_packages', [
+        { field: 'is_active', operator: '==', value: true }
+      ], 'name');
+      
+      setTours(tours as Tour[]);
     } catch (error) {
       console.error('Error fetching tours:', error);
       toast({
@@ -76,7 +69,11 @@ export const TourContentManager = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchTours();
+  }, [fetchTours]);
 
   const handleSave = async () => {
     try {
@@ -91,25 +88,14 @@ export const TourContentManager = () => {
       };
 
       if (isCreating) {
-        const { data, error } = await supabase
-          .from('tour_packages')
-          .insert([tourData])
-          .select()
-          .single();
-
-        if (error) throw error;
+        await dbService.create('tour_packages', tourData);
 
         toast({
           title: "Success",
           description: "Tour created successfully"
         });
       } else if (selectedTour) {
-        const { error } = await supabase
-          .from('tour_packages')
-          .update(tourData)
-          .eq('id', selectedTour.id);
-
-        if (error) throw error;
+        await dbService.update('tour_packages', selectedTour.id, tourData);
 
         toast({
           title: "Success",

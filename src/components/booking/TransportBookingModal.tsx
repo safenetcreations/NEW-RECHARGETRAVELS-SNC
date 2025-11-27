@@ -31,7 +31,6 @@ interface BookingDetails {
   vehicle?: Vehicle;
   price?: number;
   // For other booking types
-  type?: string;
   from?: string;
   to?: string;
   driver?: string;
@@ -128,18 +127,22 @@ const TransportBookingModal = ({
       // Create booking in Firebase
       await createTransportBooking({
         type: bookingType,
-        ...bookingDetails,
+        firstName: customerData.firstName,
+        lastName: customerData.lastName,
+        email: customerData.email,
+        phone: `${customerData.countryCode}${customerData.phone}`,
+        pickupAddress: customerData.pickupAddress,
+        specialRequests: customerData.specialRequests,
+        price: bookingDetails.price || 0,
+        transferType: bookingDetails.transferType,
+        airport: bookingDetails.airportName || bookingDetails.airport,
+        location: bookingDetails.location,
+        date: bookingDetails.date,
+        time: bookingDetails.time,
+        passengers: bookingDetails.passengers,
+        luggage: bookingDetails.luggage,
         vehicleId: bookingDetails.vehicle?.id,
         vehicleName: bookingDetails.vehicle?.name,
-        customer: {
-          firstName: customerData.firstName,
-          lastName: customerData.lastName,
-          email: customerData.email,
-          phone: `${customerData.countryCode}${customerData.phone}`,
-          pickupAddress: customerData.pickupAddress,
-          specialRequests: customerData.specialRequests,
-        },
-        totalPrice: bookingDetails.price || 0,
       });
 
       // Call the completion handler

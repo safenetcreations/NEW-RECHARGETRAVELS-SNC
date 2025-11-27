@@ -106,7 +106,7 @@ const WellnessPackages = () => {
         <title>Wellness Retreats Sri Lanka - Ayurveda, Spa & Mindfulness Journeys | Recharge Travels</title>
         <meta name="description" content="Transform your wellbeing with authentic Sri Lankan wellness experiences. Ayurvedic healing, luxury spa treatments, and mindfulness retreats in serene natural settings." />
         <meta name="keywords" content="Sri Lanka wellness retreats, Ayurveda treatments, luxury spa packages, mindfulness meditation, detox programs, spiritual healing" />
-        <link rel="canonical" href={`${window.location.origin}/tours/wellness`} />
+        <link rel="canonical" href={`${window.location.origin}/experiences/wellness`} />
       </Helmet>
       
       <Header />

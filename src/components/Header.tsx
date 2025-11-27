@@ -82,6 +82,14 @@ const navigationItems: NavigationItem[] = [
     iconBg: "bg-blue-600/90"
   },
   {
+    name: "Hotels",
+    href: "/hotels",
+    description: "Luxury accommodations and boutique hotel bookings.",
+    icon: Home,
+    gradient: "from-orange-500/20 via-orange-500/5 to-transparent",
+    iconBg: "bg-orange-500/90"
+  },
+  {
     name: "Experiences",
     href: "/experiences/train-journeys",
     description: "Wellness, gastronomy, and once-in-a-lifetime encounters.",
@@ -153,7 +161,7 @@ const experienceHighlights: SecondaryLink[] = [
   },
   {
     label: "Signature Wellness Retreats",
-    href: "/tours/wellness",
+    href: "/experiences/wellness",
     description: "Ayurvedic masters, ocean sanctuaries, bespoke rituals."
   },
   {

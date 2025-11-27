@@ -24,6 +24,11 @@ export const aboutItems = [
     title: "Contact Us",
     href: "/book-now",
     description: "Get in touch with our travel concierge team"
+  },
+  {
+    title: "Connect With Us",
+    href: "/connect-with-us",
+    description: "Watch our live social wall and follow all Recharge social channels"
   }
 ]
 

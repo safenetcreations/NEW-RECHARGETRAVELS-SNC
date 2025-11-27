@@ -23,7 +23,7 @@ const generateBookingId = (): string => {
 };
 
 export interface TransportBookingData {
-  type: 'airport-transfer' | 'personal-driver' | 'tour' | 'trail-service';
+  type: 'airport-transfer' | 'personal-driver' | 'tour' | 'trail';
   // Common fields
   firstName: string;
   lastName: string;
@@ -33,7 +33,7 @@ export interface TransportBookingData {
   specialRequests?: string;
   price: number;
   // Airport transfer specific
-  transferType?: 'from-airport' | 'to-airport';
+  transferType?: 'fromAirport' | 'toAirport';
   airport?: string;
   location?: string;
   flightNumber?: string;

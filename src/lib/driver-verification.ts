@@ -2,19 +2,21 @@
 import { dbService, authService, storageService } from '@/lib/firebase-services'
 
 export async function getDriversByVerificationStatus(status?: string) {
-  let query = supabase
-    .from('drivers')
-    .select('*')
-    .eq('is_active', true)
+  try {
+    const filters: Array<{ field: string; operator: string; value: any }> = [
+      { field: 'is_active', operator: '==', value: true }
+    ];
 
-  if (status) {
-    query = query.eq('overall_verification_status', status)
+    if (status) {
+      filters.push({ field: 'overall_verification_status', operator: '==', value: status });
+    }
+
+    const drivers = await dbService.list('drivers', filters, 'created_at', undefined);
+    return drivers || [];
+  } catch (error) {
+    console.error('Error fetching drivers:', error);
+    throw error;
   }
-
-  const { data, error } = await query.order('created_at', { ascending: false })
-  
-  if (error) throw error
-  return data || []
 }
 
 export async function updateDriverVerification(
@@ -23,29 +25,28 @@ export async function updateDriverVerification(
   adminId: string,
   adminComments?: string
 ) {
-  // Update driver record
-  const { error: driverError } = await supabase
-    .from('drivers')
-    .update({
+  try {
+    // Update driver record
+    await dbService.update('drivers', driverId, {
       ...updates,
       updated_at: new Date().toISOString()
-    })
-    .eq('id', driverId)
+    });
 
-  if (driverError) throw driverError
-
-  // Create audit record for each verification update
-  for (const [field, value] of Object.entries(updates)) {
-    if (field.includes('verification_status')) {
-      await supabase
-        .from('admin_verifications')
-        .insert({
+    // Create audit record for each verification update
+    for (const [field, value] of Object.entries(updates)) {
+      if (field.includes('verification_status')) {
+        await dbService.create('admin_verifications', {
           admin_id: adminId,
           driver_id: driverId,
           verification_type: field,
           new_status: value,
-          admin_comments: adminComments
-        })
+          admin_comments: adminComments,
+          created_at: new Date().toISOString()
+        });
+      }
     }
+  } catch (error) {
+    console.error('Error updating driver verification:', error);
+    throw error;
   }
 }

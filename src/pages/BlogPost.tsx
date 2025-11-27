@@ -102,7 +102,10 @@ export default function BlogPost() {
         <meta property="og:title" content={post.title} />
         <meta property="og:description" content={post.excerpt || ''} />
         {post.featured_image && <meta property="og:image" content={post.featured_image} />}
-        <meta property="article:author" content={post.author} />
+        <meta
+          property="article:author"
+          content={typeof post.author === 'string' ? post.author : post.author?.name || 'Recharge Travels'}
+        />
         <meta property="article:published_time" content={post.published_at || post.created_at} />
         {post.category && (
           <meta property="article:section" content={post.category.name} />
@@ -152,7 +155,9 @@ export default function BlogPost() {
               <div className="flex items-center justify-between flex-wrap gap-4">
                 <div className="flex items-center gap-1 text-muted-foreground">
                   <User className="h-4 w-4" />
-                  <span>By {post.author}</span>
+                  <span>
+                    By {typeof post.author === 'string' ? post.author : post.author?.name || 'Recharge Travels'}
+                  </span>
                 </div>
                 
                 <Button

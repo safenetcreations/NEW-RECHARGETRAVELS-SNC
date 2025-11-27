@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Now - Recharge Travels</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0d9488;
+            --primary-dark: #0f766e;
+            --primary-light: #14b8a6;
+            --accent: #f59e0b;
+            --accent-light: #fbbf24;
+            --background: #f8fafc;
+            --foreground: #0f172a;
+            --card: #ffffff;
+            --muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            background-color: var(--background);
+            color: var(--foreground);
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Playfair Display', serif !important;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            position: relative;
+            height: 50vh;
+            min-height: 400px;
+            overflow: hidden;
+        }
+
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            background: url('https://images.unsplash.com/photo-1586611292717-f828b167408c?w=1920&q=80') center/cover no-repeat;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(0,0,0,0.3));
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            padding: 2rem;
+            animation: fadeInUp 800ms ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Tab Navigation */
+        .tab-navigation {
+            display: flex;
+            gap: 0.5rem;
+            background: white;
+            padding: 0.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin-top: 2rem;
+        }
+
+        .tab-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            color: var(--muted);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 200ms ease;
+        }
+
+        .tab-btn:hover {
+            background: rgba(13, 148, 136, 0.1);
+            color: var(--primary);
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1400px;
+            margin: -80px auto 0;
+            padding: 0 1.5rem 4rem;
+            position: relative;
+            z-index: 20;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 2rem;
+        }
+
+        @media (max-width: 1024px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Booking Card */
+        .booking-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            animation: slideUp 500ms ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .booking-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 1.5rem 2rem;
+        }
+
+        .booking-form {
+            padding: 2rem;
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+        }
+
+        .form-section h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--foreground);
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        @media (max-width: 640px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        @media (max-width: 640px) {
+            .form-group.full-width {
+                grid-column: span 1;
+            }
+        }
+
+        .form-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--foreground);
+        }
+
+        .form-input {
+            padding: 0.875rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 200ms ease;
+            outline: none;
+        }
+
+        .form-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: #94a3b8;
+        }
+
+        .form-select {
+            padding: 0.875rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 1rem;
+            background: white;
+            cursor: pointer;
+            outline: none;
+            transition: all 200ms ease;
+        }
+
+        .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+        }
+
+        .form-textarea {
+            padding: 0.875rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 120px;
+            outline: none;
+            transition: all 200ms ease;
+        }
+
+        .form-textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.125rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            transition: all 200ms ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(13, 148, 136, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .sidebar-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: all 200ms ease;
+            animation: slideInRight 600ms ease-out;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .sidebar-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        }
+
+        .sidebar-card h4 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .contact-item:last-child {
+            border-bottom: none;
+        }
+
+        .contact-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(13, 148, 136, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+
+        .contact-info h5 {
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .contact-info p {
+            color: var(--muted);
+            font-size: 0.875rem;
+        }
+
+        .trust-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 0;
+        }
+
+        .trust-icon {
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            border-radius: 50%;
+        }
+
+        .tip-card {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(251, 191, 36, 0.1));
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .tip-card p {
+            color: #92400e;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        /* Popular Packages Section */
+        .packages-section {
+            margin-top: 4rem;
+        }
+
+        .packages-section h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .packages-subtitle {
+            text-align: center;
+            color: var(--muted);
+            margin-bottom: 2rem;
+        }
+
+        .packages-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .packages-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .packages-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .package-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: all 250ms ease;
+        }
+
+        .package-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        }
+
+        .package-image {
+            position: relative;
+            height: 200px;
+            overflow: hidden;
+        }
+
+        .package-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 400ms ease;
+        }
+
+        .package-card:hover .package-image img {
+            transform: scale(1.1);
+        }
+
+        .package-badge {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: var(--accent);
+            color: white;
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .package-content {
+            padding: 1.5rem;
+        }
+
+        .package-content h4 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+        }
+
+        .package-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--muted);
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .package-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .package-price {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+        }
+
+        .price-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .price-unit {
+            font-size: 0.875rem;
+            color: var(--muted);
+        }
+
+        .package-btn {
+            padding: 0.5rem 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 200ms ease;
+        }
+
+        .package-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Assurance Bar */
+        .assurance-bar {
+            background: white;
+            padding: 2rem;
+            margin-top: 4rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .assurance-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+        }
+
+        @media (max-width: 1024px) {
+            .assurance-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .assurance-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .assurance-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .assurance-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(13, 148, 136, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+
+        .assurance-text h5 {
+            font-weight: 600;
+            font-size: 0.9375rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .assurance-text p {
+            color: var(--muted);
+            font-size: 0.8125rem;
+        }
+
+        /* Header */
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            opacity: 0.9;
+            transition: opacity 200ms;
+        }
+
+        .nav-links a:hover {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">Recharge Travels</div>
+        <nav class="nav-links">
+            <a href="#">Home</a>
+            <a href="#">Tours</a>
+            <a href="#">Services</a>
+            <a href="#">About</a>
+            <a href="#">Contact</a>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-bg"></div>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1 style="font-size: 3rem; font-weight: 700; margin-bottom: 1rem;">Book Your Dream Journey</h1>
+            <p style="font-size: 1.25rem; opacity: 0.9; max-width: 600px;">Experience Sri Lanka with our premium travel services. From airport transfers to custom tours.</p>
+
+            <!-- Tab Navigation -->
+            <div class="tab-navigation">
+                <button class="tab-btn active">
+                    <i data-lucide="car" style="width: 18px; height: 18px;"></i>
+                    Transfers
+                </button>
+                <button class="tab-btn">
+                    <i data-lucide="compass" style="width: 18px; height: 18px;"></i>
+                    Tours
+                </button>
+                <button class="tab-btn">
+                    <i data-lucide="users" style="width: 18px; height: 18px;"></i>
+                    Groups
+                </button>
+                <button class="tab-btn">
+                    <i data-lucide="train" style="width: 18px; height: 18px;"></i>
+                    Train
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="content-grid">
+            <!-- Booking Form -->
+            <div class="booking-card">
+                <div class="booking-header">
+                    <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 0.25rem;">Tour Booking Request</h2>
+                    <p style="opacity: 0.9;">Fill out the form below and we'll get back to you within 24 hours</p>
+                </div>
+
+                <form class="booking-form">
+                    <!-- Personal Information -->
+                    <div class="form-section">
+                        <h3>Personal Information</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Full Name *</label>
+                                <input type="text" class="form-input" placeholder="John Doe" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Email *</label>
+                                <input type="email" class="form-input" placeholder="john@example.com" required>
+                            </div>
+                            <div class="form-group full-width">
+                                <label class="form-label">Phone Number *</label>
+                                <input type="tel" class="form-input" placeholder="+1 234 567 8900" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tour Details -->
+                    <div class="form-section">
+                        <h3>Tour Details</h3>
+                        <div class="form-grid">
+                            <div class="form-group full-width">
+                                <label class="form-label">Tour Type *</label>
+                                <select class="form-select" required>
+                                    <option value="">Select a tour type</option>
+                                    <option value="wildlife">Wildlife Safari</option>
+                                    <option value="cultural">Cultural Heritage Tour</option>
+                                    <option value="beach">Beach Holiday</option>
+                                    <option value="adventure">Adventure Tour</option>
+                                    <option value="honeymoon">Honeymoon Package</option>
+                                    <option value="hill">Hill Country Tour</option>
+                                    <option value="photography">Photography Tour</option>
+                                    <option value="custom">Custom Itinerary</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Start Date *</label>
+                                <input type="date" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">End Date *</label>
+                                <input type="date" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Number of Adults</label>
+                                <select class="form-select">
+                                    <option value="1">1 Adult</option>
+                                    <option value="2" selected>2 Adults</option>
+                                    <option value="3">3 Adults</option>
+                                    <option value="4">4 Adults</option>
+                                    <option value="5">5 Adults</option>
+                                    <option value="6">6+ Adults</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Number of Children</label>
+                                <select class="form-select">
+                                    <option value="0" selected>0 Children</option>
+                                    <option value="1">1 Child</option>
+                                    <option value="2">2 Children</option>
+                                    <option value="3">3 Children</option>
+                                    <option value="4">4+ Children</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Information -->
+                    <div class="form-section">
+                        <h3>Additional Information</h3>
+                        <div class="form-group">
+                            <label class="form-label">Special Requests or Questions</label>
+                            <textarea class="form-textarea" placeholder="Tell us about any special requirements, interests, or questions you have..."></textarea>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        <i data-lucide="send" style="width: 20px; height: 20px;"></i>
+                        Send Booking Request
+                    </button>
+                </form>
+            </div>
+
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <!-- Contact Card -->
+                <div class="sidebar-card">
+                    <h4>Need Help?</h4>
+                    <p style="color: var(--muted); font-size: 0.875rem; margin-bottom: 1rem;">Our travel experts are here to assist you</p>
+
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i data-lucide="phone" style="width: 20px; height: 20px;"></i>
+                        </div>
+                        <div class="contact-info">
+                            <h5>Call Us</h5>
+                            <p>+94 777 721 999</p>
+                            <p style="font-size: 0.75rem;">Available 8 AM - 8 PM</p>
+                        </div>
+                    </div>
+
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i data-lucide="mail" style="width: 20px; height: 20px;"></i>
+                        </div>
+                        <div class="contact-info">
+                            <h5>Email Us</h5>
+                            <p>info@rechargetravels.com</p>
+                            <p style="font-size: 0.75rem;">Response within 24 hours</p>
+                        </div>
+                    </div>
+
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i data-lucide="message-circle" style="width: 20px; height: 20px;"></i>
+                        </div>
+                        <div class="contact-info">
+                            <h5>WhatsApp</h5>
+                            <p>+94 777 721 999</p>
+                            <p style="font-size: 0.75rem;">Quick responses</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Why Book With Us -->
+                <div class="sidebar-card">
+                    <h4>Why Book With Us?</h4>
+                    <div class="trust-item">
+                        <div class="trust-icon"></div>
+                        <span style="font-size: 0.875rem;">Licensed tour operator since 2014</span>
+                    </div>
+                    <div class="trust-item">
+                        <div class="trust-icon"></div>
+                        <span style="font-size: 0.875rem;">Best price guarantee</span>
+                    </div>
+                    <div class="trust-item">
+                        <div class="trust-icon"></div>
+                        <span style="font-size: 0.875rem;">Expert local guides</span>
+                    </div>
+                    <div class="trust-item">
+                        <div class="trust-icon"></div>
+                        <span style="font-size: 0.875rem;">24/7 customer support</span>
+                    </div>
+                    <div class="trust-item">
+                        <div class="trust-icon"></div>
+                        <span style="font-size: 0.875rem;">Flexible cancellation</span>
+                    </div>
+                </div>
+
+                <!-- Quick Tip -->
+                <div class="sidebar-card tip-card">
+                    <p><strong>Quick Tip:</strong> Book at least 2 weeks in advance for better availability and rates. Peak season (December-March) fills up quickly!</p>
+                </div>
+            </aside>
+        </div>
+
+        <!-- Popular Packages -->
+        <section class="packages-section">
+            <h2>Popular Packages</h2>
+            <p class="packages-subtitle">Choose from our most-loved travel experiences</p>
+
+            <div class="packages-grid">
+                <div class="package-card">
+                    <div class="package-image">
+                        <img src="https://images.unsplash.com/photo-1590502160462-58b41354f588?w=600&q=80" alt="Wildlife Safari">
+                        <span class="package-badge">Most Popular</span>
+                    </div>
+                    <div class="package-content">
+                        <h4>Wildlife Safari Adventure</h4>
+                        <div class="package-meta">
+                            <span><i data-lucide="calendar" style="width: 14px; height: 14px;"></i> 5 Days</span>
+                            <span><i data-lucide="users" style="width: 14px; height: 14px;"></i> 2-6 Pax</span>
+                        </div>
+                        <div class="package-price">
+                            <div>
+                                <span class="price-value">$899</span>
+                                <span class="price-unit">/person</span>
+                            </div>
+                            <button class="package-btn">Book Now</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="package-card">
+                    <div class="package-image">
+                        <img src="https://images.unsplash.com/photo-1588598198321-4c8c6d733293?w=600&q=80" alt="Cultural Tour">
+                        <span class="package-badge">Best Value</span>
+                    </div>
+                    <div class="package-content">
+                        <h4>Cultural Heritage Tour</h4>
+                        <div class="package-meta">
+                            <span><i data-lucide="calendar" style="width: 14px; height: 14px;"></i> 7 Days</span>
+                            <span><i data-lucide="users" style="width: 14px; height: 14px;"></i> 2-8 Pax</span>
+                        </div>
+                        <div class="package-price">
+                            <div>
+                                <span class="price-value">$1,199</span>
+                                <span class="price-unit">/person</span>
+                            </div>
+                            <button class="package-btn">Book Now</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="package-card">
+                    <div class="package-image">
+                        <img src="https://images.unsplash.com/photo-1586375300773-8384e3e4916f?w=600&q=80" alt="Beach Holiday">
+                        <span class="package-badge">Romantic</span>
+                    </div>
+                    <div class="package-content">
+                        <h4>Beach Paradise Escape</h4>
+                        <div class="package-meta">
+                            <span><i data-lucide="calendar" style="width: 14px; height: 14px;"></i> 4 Days</span>
+                            <span><i data-lucide="users" style="width: 14px; height: 14px;"></i> 2 Pax</span>
+                        </div>
+                        <div class="package-price">
+                            <div>
+                                <span class="price-value">$699</span>
+                                <span class="price-unit">/person</span>
+                            </div>
+                            <button class="package-btn">Book Now</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Assurance Bar -->
+        <section class="assurance-bar">
+            <div class="assurance-grid">
+                <div class="assurance-item">
+                    <div class="assurance-icon">
+                        <i data-lucide="shield-check" style="width: 24px; height: 24px;"></i>
+                    </div>
+                    <div class="assurance-text">
+                        <h5>Safe & Secure</h5>
+                        <p>100% secure payments</p>
+                    </div>
+                </div>
+
+                <div class="assurance-item">
+                    <div class="assurance-icon">
+                        <i data-lucide="badge-check" style="width: 24px; height: 24px;"></i>
+                    </div>
+                    <div class="assurance-text">
+                        <h5>SLTDA Licensed</h5>
+                        <p>Government certified</p>
+                    </div>
+                </div>
+
+                <div class="assurance-item">
+                    <div class="assurance-icon">
+                        <i data-lucide="star" style="width: 24px; height: 24px;"></i>
+                    </div>
+                    <div class="assurance-text">
+                        <h5>4.9/5 Rating</h5>
+                        <p>1000+ happy travelers</p>
+                    </div>
+                </div>
+
+                <div class="assurance-item">
+                    <div class="assurance-icon">
+                        <i data-lucide="headphones" style="width: 24px; height: 24px;"></i>
+                    </div>
+                    <div class="assurance-text">
+                        <h5>24/7 Support</h5>
+                        <p>Always here to help</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Tab navigation functionality
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

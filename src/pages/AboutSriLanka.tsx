@@ -1,35 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useAboutSriLankaContent } from '@/hooks/useAboutSriLankaContent';
+import { getAboutSriLankaHeroSlides, AboutSriLankaHeroSlide, DEFAULT_ABOUT_SLIDES } from '@/services/aboutSriLankaHeroService';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Globe, Users, Leaf, Award, MapPin, Camera, 
+import Header from '@/components/Header';
+// import Footer from '@/components/Footer';
+import {
+  Globe, Users, Leaf, Award, MapPin, Camera,
   Play, X, ChevronLeft, ChevronRight, Star,
   Calendar, Clock, Palmtree, Mountain, Waves,
-  Sunrise, UtensilsCrossed, Heart, Quote
+  Sunrise, UtensilsCrossed, Heart, Quote,
+  Thermometer, CloudRain, Sun, Plane, Car, Train,
+  Phone, Shield, CreditCard, Wifi, Languages,
+  Utensils, Coffee, Beer, Sparkles, ChevronDown,
+  ThumbsUp
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Link } from 'react-router-dom';
 
 /**
- * ABOUT SRI LANKA PAGE - LUXURY EDITION
- * 
- * This page showcases Sri Lanka's beauty, culture, and experiences
- * with a modern, luxury travel website design.
- * 
+ * ABOUT SRI LANKA PAGE - ENHANCED LUXURY EDITION
+ *
  * Features:
- * - Full-screen hero with parallax effect
- * - Statistics section with animated counters
- * - Highlights grid with hover effects
- * - Featured destinations with image galleries
- * - Video tour section
- * - Photo gallery with lightbox
- * - Testimonials carousel
- * - Cultural & natural information
- * - Call-to-action sections
- * 
- * All content is editable from the admin panel
+ * - Full-screen hero with auto-sliding images (admin manageable)
+ * - Comprehensive tourist information
+ * - Best time to visit section
+ * - Getting around guide
+ * - Essential travel tips
+ * - Food & cuisine section
+ * - Safety information
  */
 
 const AboutSriLanka: React.FC = () => {
@@ -37,6 +38,69 @@ const AboutSriLanka: React.FC = () => {
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
   const [selectedGalleryImage, setSelectedGalleryImage] = useState<number | null>(null);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
+
+  // Hero slider state
+  const [heroSlides, setHeroSlides] = useState<AboutSriLankaHeroSlide[]>(DEFAULT_ABOUT_SLIDES);
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  const [heroLoading, setHeroLoading] = useState(true);
+
+  // Load hero slides
+  useEffect(() => {
+    const loadHeroSlides = async () => {
+      try {
+        const slides = await getAboutSriLankaHeroSlides();
+        if (slides && slides.length > 0) {
+          setHeroSlides(slides);
+        }
+      } catch (error) {
+        console.error('Failed to load hero slides:', error);
+      } finally {
+        setHeroLoading(false);
+      }
+    };
+    loadHeroSlides();
+  }, []);
+
+  // Auto-advance slides every 6 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlideIndex((prev) => (prev + 1) % heroSlides.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [heroSlides.length]);
+
+  // Extract content data with memoization - MUST be before any early returns
+  const contentAny = content as any;
+  const testimonials = useMemo(() => contentAny.testimonials ?? [], [contentAny.testimonials]);
+
+  // Auto-rotate testimonials every 5 seconds - MUST be before any early returns
+  useEffect(() => {
+    if (!testimonials || testimonials.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setCurrentTestimonial((prev) => {
+        const next = (prev + 1) % testimonials.length;
+        return next;
+      });
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [testimonials]);
+
+  const currentSlide = heroSlides[currentSlideIndex];
+
+  // Navigation functions
+  const nextSlide = () => {
+    setCurrentSlideIndex((prev) => (prev + 1) % heroSlides.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlideIndex((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
+  };
+
+  const scrollToContent = () => {
+    document.getElementById('explore')?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   if (loading) {
     return (
@@ -49,19 +113,6 @@ const AboutSriLanka: React.FC = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-orange-50">
-        <div className="text-center max-w-md mx-auto px-4">
-          <div className="text-red-600 text-6xl mb-4">⚠️</div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Something went wrong</h2>
-          <p className="text-red-600 mb-4">Error loading content: {error}</p>
-          <Button onClick={() => window.location.reload()}>Reload Page</Button>
-        </div>
-      </div>
-    );
-  }
-
   const stats = [
     { icon: Globe, ...(content.stats?.area ?? {}) },
     { icon: Users, ...(content.stats?.population ?? {}) },
@@ -69,12 +120,9 @@ const AboutSriLanka: React.FC = () => {
     { icon: Award, ...(content.stats?.unesco ?? {}) }
   ];
 
-  const contentAny = content as any;
-
   const destinations = contentAny.destinations ?? [];
   const experiences = contentAny.experiences ?? [];
   const gallery = contentAny.gallery ?? [];
-  const testimonials = contentAny.testimonials ?? [];
   const videoTours = contentAny.videoTours ?? [];
 
   // Navigation functions for gallery
@@ -90,99 +138,254 @@ const AboutSriLanka: React.FC = () => {
     }
   };
 
-  // Navigation for testimonials
   const nextTestimonial = () => {
-    setCurrentTestimonial((currentTestimonial + 1) % testimonials.length);
+    setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
   };
 
   const prevTestimonial = () => {
-    setCurrentTestimonial((currentTestimonial - 1 + testimonials.length) % testimonials.length);
+    setCurrentTestimonial((prev) => (prev - 1 + testimonials.length) % testimonials.length);
   };
+
+  // Best time to visit data
+  const seasons = [
+    {
+      name: "December - March",
+      title: "Best for West & South Coast",
+      icon: Sun,
+      description: "Perfect beach weather, ideal for surfing in Hikkaduwa, whale watching in Mirissa",
+      temp: "28-32°C",
+      color: "from-orange-500 to-yellow-500"
+    },
+    {
+      name: "May - September",
+      title: "Best for East Coast",
+      icon: Waves,
+      description: "Great for Arugam Bay surfing, Trincomalee beaches, and Pasikuda snorkeling",
+      temp: "27-30°C",
+      color: "from-blue-500 to-cyan-500"
+    },
+    {
+      name: "January - April",
+      title: "Best for Hill Country",
+      icon: Mountain,
+      description: "Dry season for Ella, Nuwara Eliya, and tea plantation visits",
+      temp: "15-25°C",
+      color: "from-green-500 to-emerald-500"
+    },
+    {
+      name: "February - July",
+      title: "Best for Wildlife",
+      icon: Palmtree,
+      description: "Peak season for Yala leopards, Udawalawe elephants, and bird watching",
+      temp: "26-32°C",
+      color: "from-amber-500 to-orange-500"
+    }
+  ];
+
+  // Getting around data
+  const transportOptions = [
+    {
+      icon: Car,
+      title: "Private Driver/Car",
+      description: "Most comfortable way to explore. Air-conditioned vehicles with English-speaking drivers who double as guides.",
+      tip: "Book through Recharge Travels for vetted, professional drivers",
+      recommended: true
+    },
+    {
+      icon: Train,
+      title: "Scenic Railways",
+      description: "One of the world's most beautiful train journeys. Kandy to Ella route is unmissable with stunning mountain views.",
+      tip: "Book first class tickets in advance, especially for weekend travel"
+    },
+    {
+      icon: Plane,
+      title: "Domestic Flights",
+      description: "Cinnamon Air and SriLankan Airlines offer seaplane and helicopter transfers to save time.",
+      tip: "Perfect for reaching remote areas like Sigiriya or Trincomalee quickly"
+    }
+  ];
+
+  // Essential tips
+  const essentialTips = [
+    {
+      icon: Languages,
+      title: "Language",
+      info: "Sinhala & Tamil are official languages. English is widely spoken in tourist areas."
+    },
+    {
+      icon: CreditCard,
+      title: "Currency",
+      info: "Sri Lankan Rupee (LKR). ATMs available everywhere. Credit cards accepted at hotels."
+    },
+    {
+      icon: Phone,
+      title: "SIM Cards",
+      info: "Dialog, Mobitel, and Airtel offer tourist SIMs at the airport. About $5-10 for data."
+    },
+    {
+      icon: Shield,
+      title: "Safety",
+      info: "Very safe for tourists. Use common sense, respect temples, and dress modestly at religious sites."
+    },
+    {
+      icon: Wifi,
+      title: "Connectivity",
+      info: "4G coverage is excellent across the island. Most hotels and cafes have free WiFi."
+    },
+    {
+      icon: Thermometer,
+      title: "Climate",
+      info: "Tropical climate year-round. Pack light clothes, but bring layers for hill country."
+    }
+  ];
+
+  // Food & Cuisine
+  const cuisineHighlights = [
+    {
+      icon: Utensils,
+      title: "Rice & Curry",
+      description: "The national dish - rice served with multiple curries, sambols, and papadum"
+    },
+    {
+      icon: Coffee,
+      title: "Ceylon Tea",
+      description: "World-famous tea from the hill country. Visit a plantation for fresh brew"
+    },
+    {
+      icon: UtensilsCrossed,
+      title: "Hoppers",
+      description: "Bowl-shaped pancakes - egg hoppers for breakfast are a must-try"
+    },
+    {
+      icon: Sparkles,
+      title: "Kottu Roti",
+      description: "Chopped flatbread stir-fried with vegetables, egg, and your choice of meat"
+    }
+  ];
 
   return (
     <>
-      {/* SEO Meta Tags */}
       <Helmet>
         <title>{content.seoTitle}</title>
         <meta name="description" content={content.seoDescription} />
         <meta name="keywords" content={content.seoKeywords} />
         <meta property="og:title" content={content.seoTitle} />
         <meta property="og:description" content={content.seoDescription} />
-        <meta property="og:image" content={content.heroImage} />
+        <meta property="og:image" content={currentSlide?.image || content.heroImage} />
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={content.seoTitle} />
-        <meta name="twitter:description" content={content.seoDescription} />
-        <meta name="twitter:image" content={content.heroImage} />
         <link rel="canonical" href="https://recharge-travels.com/about/sri-lanka" />
       </Helmet>
 
+      <Header />
+
       <div className="bg-white">
-        {/* Hero Section - Full Screen with Parallax */}
+        {/* Hero Section - Full Screen with Auto-Sliding Images */}
         <section className="relative h-screen flex items-center justify-center overflow-hidden">
-          <motion.div 
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style={{ backgroundImage: `url(${content.heroImage})` }}
-            initial={{ scale: 1.1 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 1.5 }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70"></div>
-          </motion.div>
-          
-          <div className="relative z-10 text-center text-white max-w-5xl mx-auto px-4">
+          {/* Background Image with Slide Transition */}
+          <AnimatePresence mode="wait">
             <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, delay: 0.3 }}
+              key={currentSlideIndex}
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+              style={{ backgroundImage: `url(${currentSlide?.image})` }}
+              initial={{ opacity: 0, scale: 1.1 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.5 }}
             >
-              <Badge className="mb-6 bg-white/20 backdrop-blur-sm text-white border-white/30 px-6 py-2 text-sm font-semibold">
-                Discover Paradise
-              </Badge>
-              <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 font-playfair leading-tight">
-                {content.heroTitle}
-              </h1>
-              <p className="text-xl md:text-3xl mb-10 opacity-95 font-light tracking-wide">
-                {content.heroSubtitle}
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button 
-                  size="lg" 
-                  className="bg-white text-blue-600 hover:bg-blue-50 px-8 py-6 text-lg font-semibold rounded-full shadow-xl"
-                  onClick={() => document.getElementById('explore')?.scrollIntoView({ behavior: 'smooth' })}
-                >
-                  Explore Now
-                </Button>
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className="border-2 border-white text-white hover:bg-white/10 px-8 py-6 text-lg font-semibold rounded-full backdrop-blur-sm"
-                  onClick={() => document.getElementById('video-tours')?.scrollIntoView({ behavior: 'smooth' })}
-                >
-                  <Play className="w-5 h-5 mr-2" />
-                  Watch Video
-                </Button>
-              </div>
+              <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70"></div>
             </motion.div>
+          </AnimatePresence>
+
+          {/* Content */}
+          <div className="relative z-10 text-center text-white max-w-5xl mx-auto px-4">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentSlideIndex}
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -50 }}
+                transition={{ duration: 0.8 }}
+              >
+                <Badge className="mb-6 bg-white/20 backdrop-blur-sm text-white border-white/30 px-6 py-2 text-sm font-semibold">
+                  {currentSlide?.badge || "Discover Paradise"}
+                </Badge>
+                <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 font-playfair leading-tight">
+                  {currentSlide?.title}
+                </h1>
+                <p className="text-xl md:text-3xl mb-10 opacity-95 font-light tracking-wide">
+                  {currentSlide?.subtitle}
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Button
+                    size="lg"
+                    className="bg-white text-blue-600 hover:bg-blue-50 px-8 py-6 text-lg font-semibold rounded-full shadow-xl"
+                    onClick={scrollToContent}
+                  >
+                    Explore Now
+                  </Button>
+                  <Link to="/tours">
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="border-2 border-white text-white hover:bg-white/10 px-8 py-6 text-lg font-semibold rounded-full backdrop-blur-sm"
+                    >
+                      <Play className="w-5 h-5 mr-2" />
+                      Plan Your Trip
+                    </Button>
+                  </Link>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Slide Navigation Arrows */}
+          <button
+            onClick={prevSlide}
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-3 bg-white/10 backdrop-blur-sm rounded-full hover:bg-white/20 transition-all"
+          >
+            <ChevronLeft className="w-8 h-8 text-white" />
+          </button>
+          <button
+            onClick={nextSlide}
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-3 bg-white/10 backdrop-blur-sm rounded-full hover:bg-white/20 transition-all"
+          >
+            <ChevronRight className="w-8 h-8 text-white" />
+          </button>
+
+          {/* Slide Indicators */}
+          <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+            {heroSlides.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentSlideIndex(index)}
+                className={`w-3 h-3 rounded-full transition-all ${
+                  index === currentSlideIndex
+                    ? 'bg-white w-8'
+                    : 'bg-white/40 hover:bg-white/60'
+                }`}
+              />
+            ))}
           </div>
 
           {/* Scroll Indicator */}
           <motion.div
-            className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
+            className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 cursor-pointer"
             animate={{ y: [0, 10, 0] }}
             transition={{ repeat: Infinity, duration: 1.5 }}
+            onClick={scrollToContent}
           >
-            <div className="w-8 h-12 border-2 border-white/50 rounded-full flex justify-center pt-2">
-              <div className="w-1 h-3 bg-white/70 rounded-full"></div>
+            <div className="flex flex-col items-center text-white/80">
+              <span className="text-sm mb-2">Scroll to explore</span>
+              <ChevronDown className="w-6 h-6" />
             </div>
           </motion.div>
         </section>
 
-        {/* Main Content Section */}
+        {/* Main Introduction Section */}
         <section id="explore" className="py-24 bg-gradient-to-br from-blue-50 via-white to-teal-50">
           <div className="container mx-auto px-4 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-              {/* Content */}
               <motion.div
                 initial={{ opacity: 0, x: -50 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -191,7 +394,7 @@ const AboutSriLanka: React.FC = () => {
               >
                 <Badge className="mb-4 bg-blue-100 text-blue-700 px-4 py-1">About Sri Lanka</Badge>
                 <h2 className="text-4xl md:text-6xl font-bold text-gray-900 mt-4 mb-6 font-playfair">
-                  {content.heroTitle}
+                  The Pearl of the Indian Ocean
                 </h2>
                 <p className="text-xl text-gray-700 mb-6 leading-relaxed">
                   {content.mainDescription}
@@ -199,22 +402,26 @@ const AboutSriLanka: React.FC = () => {
                 <p className="text-xl text-gray-700 mb-8 leading-relaxed">
                   {content.secondaryDescription}
                 </p>
-                <div className="flex gap-4">
-                  <Button 
-                    size="lg" 
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-8 rounded-full"
-                  >
-                    <MapPin className="w-5 h-5 mr-2" />
-                    View Destinations
-                  </Button>
-                  <Button 
-                    size="lg" 
-                    variant="outline"
-                    className="border-2 border-blue-600 text-blue-600 hover:bg-blue-50 px-8 rounded-full"
-                  >
-                    <Calendar className="w-5 h-5 mr-2" />
-                    Plan Your Trip
-                  </Button>
+                <div className="flex gap-4 flex-wrap">
+                  <Link to="/destinations">
+                    <Button
+                      size="lg"
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-8 rounded-full"
+                    >
+                      <MapPin className="w-5 h-5 mr-2" />
+                      View Destinations
+                    </Button>
+                  </Link>
+                  <Link to="/book-now">
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="border-2 border-blue-600 text-blue-600 hover:bg-blue-50 px-8 rounded-full"
+                    >
+                      <Calendar className="w-5 h-5 mr-2" />
+                      Plan Your Trip
+                    </Button>
+                  </Link>
                 </div>
               </motion.div>
 
@@ -252,6 +459,227 @@ const AboutSriLanka: React.FC = () => {
           </div>
         </section>
 
+        {/* Best Time to Visit Section */}
+        <section className="py-24 bg-white">
+          <div className="container mx-auto px-4 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="text-center mb-16"
+            >
+              <Badge className="mb-4 bg-amber-100 text-amber-700 px-4 py-1">
+                <Calendar className="w-3 h-3 mr-1 inline" />
+                Travel Planning
+              </Badge>
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 font-playfair">
+                Best Time to Visit
+              </h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Sri Lanka enjoys two monsoon seasons, meaning there's always a perfect destination regardless of when you visit
+              </p>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {seasons.map((season, index) => {
+                const IconComponent = season.icon;
+                return (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: index * 0.1 }}
+                    whileHover={{ scale: 1.05, y: -5 }}
+                    className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 hover:shadow-2xl transition-all"
+                  >
+                    <div className={`h-2 bg-gradient-to-r ${season.color}`}></div>
+                    <div className="p-6">
+                      <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${season.color} flex items-center justify-center mb-4`}>
+                        <IconComponent className="w-7 h-7 text-white" />
+                      </div>
+                      <div className="text-sm font-bold text-gray-500 mb-1">{season.name}</div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-2">{season.title}</h3>
+                      <p className="text-sm text-gray-600 mb-4">{season.description}</p>
+                      <div className="flex items-center text-sm">
+                        <Thermometer className="w-4 h-4 mr-2 text-gray-400" />
+                        <span className="font-semibold text-gray-700">{season.temp}</span>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* Getting Around Section */}
+        <section className="py-24 bg-gradient-to-br from-slate-900 to-slate-800 text-white">
+          <div className="container mx-auto px-4 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="text-center mb-16"
+            >
+              <Badge className="mb-4 bg-white/10 backdrop-blur-sm text-white border-white/20 px-4 py-1">
+                <Car className="w-3 h-3 mr-1 inline" />
+                Transportation
+              </Badge>
+              <h2 className="text-4xl md:text-5xl font-bold mb-4 font-playfair">
+                Getting Around Sri Lanka
+              </h2>
+              <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+                Choose your preferred way to explore the island, from luxurious private transfers to scenic train journeys
+              </p>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {transportOptions.map((option, index) => {
+                const IconComponent = option.icon;
+                return (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: index * 0.1 }}
+                    className={`relative bg-white/5 backdrop-blur-sm rounded-2xl p-8 border ${option.recommended ? 'border-emerald-500' : 'border-white/10'} hover:bg-white/10 transition-all`}
+                  >
+                    {option.recommended && (
+                      <Badge className="absolute -top-3 right-4 bg-emerald-500 text-white">
+                        Recommended
+                      </Badge>
+                    )}
+                    <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mb-6">
+                      <IconComponent className="w-8 h-8 text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold mb-3">{option.title}</h3>
+                    <p className="text-gray-300 mb-4">{option.description}</p>
+                    <div className="bg-white/10 rounded-lg p-3">
+                      <p className="text-sm text-emerald-400">
+                        <Star className="w-4 h-4 inline mr-1" />
+                        {option.tip}
+                      </p>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              className="text-center mt-12"
+            >
+              <Link to="/book-now">
+                <Button size="lg" className="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-6 text-lg rounded-full">
+                  Book Private Transfer
+                </Button>
+              </Link>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Essential Travel Tips */}
+        <section className="py-24 bg-white">
+          <div className="container mx-auto px-4 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="text-center mb-16"
+            >
+              <Badge className="mb-4 bg-purple-100 text-purple-700 px-4 py-1">
+                <Shield className="w-3 h-3 mr-1 inline" />
+                Travel Tips
+              </Badge>
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 font-playfair">
+                Essential Information
+              </h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Everything you need to know before traveling to Sri Lanka
+              </p>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {essentialTips.map((tip, index) => {
+                const IconComponent = tip.icon;
+                return (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: index * 0.05 }}
+                    className="flex items-start gap-4 p-6 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all"
+                  >
+                    <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center shrink-0">
+                      <IconComponent className="w-6 h-6 text-purple-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-gray-900 mb-1">{tip.title}</h3>
+                      <p className="text-sm text-gray-600">{tip.info}</p>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* Food & Cuisine Section */}
+        <section className="py-24 bg-gradient-to-br from-orange-50 to-yellow-50">
+          <div className="container mx-auto px-4 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="text-center mb-16"
+            >
+              <Badge className="mb-4 bg-orange-100 text-orange-700 px-4 py-1">
+                <Utensils className="w-3 h-3 mr-1 inline" />
+                Culinary Journey
+              </Badge>
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 font-playfair">
+                Sri Lankan Cuisine
+              </h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                A vibrant fusion of spices, flavors, and culinary traditions you must experience
+              </p>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {cuisineHighlights.map((item, index) => {
+                const IconComponent = item.icon;
+                return (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: index * 0.1 }}
+                    whileHover={{ scale: 1.05 }}
+                    className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all text-center"
+                  >
+                    <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <IconComponent className="w-8 h-8 text-white" />
+                    </div>
+                    <h3 className="font-bold text-gray-900 mb-2">{item.title}</h3>
+                    <p className="text-sm text-gray-600">{item.description}</p>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
         {/* Highlights Section */}
         <section className="py-24 bg-white">
           <div className="container mx-auto px-4 lg:px-8">
@@ -262,7 +690,7 @@ const AboutSriLanka: React.FC = () => {
               transition={{ duration: 0.8 }}
               className="text-center mb-16"
             >
-              <Badge className="mb-4 bg-orange-100 text-orange-700 px-4 py-1">What to Experience</Badge>
+              <Badge className="mb-4 bg-teal-100 text-teal-700 px-4 py-1">What to Experience</Badge>
               <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 font-playfair">
                 What Makes Sri Lanka Special
               </h2>
@@ -280,9 +708,9 @@ const AboutSriLanka: React.FC = () => {
                   viewport={{ once: true }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                   whileHover={{ scale: 1.05, y: -5 }}
-                  className="bg-gradient-to-br from-orange-50 via-yellow-50 to-orange-50 p-8 rounded-2xl border border-orange-100 hover:shadow-2xl transition-all cursor-pointer"
+                  className="bg-gradient-to-br from-teal-50 via-cyan-50 to-teal-50 p-8 rounded-2xl border border-teal-100 hover:shadow-2xl transition-all cursor-pointer"
                 >
-                  <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full flex items-center justify-center mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-full flex items-center justify-center mb-4">
                     <Star className="w-6 h-6 text-white" />
                   </div>
                   <div className="text-lg font-bold text-gray-900 mb-2">{highlight}</div>
@@ -292,425 +720,357 @@ const AboutSriLanka: React.FC = () => {
           </div>
         </section>
 
-        {/* Featured Destinations Section */}
-        {destinations.length > 0 && (
-          <section className="py-24 bg-gradient-to-br from-gray-50 to-blue-50">
-            <div className="container mx-auto px-4 lg:px-8">
+        {/* Enhanced Testimonials Section */}
+        {testimonials && testimonials.length > 0 && testimonials[currentTestimonial] && (
+          <section className="py-24 bg-gradient-to-br from-slate-900 via-gray-900 to-slate-900 text-white relative overflow-hidden">
+            {/* Animated Background */}
+            <div className="absolute inset-0 opacity-10">
               <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8 }}
-                className="text-center mb-16"
-              >
-                <Badge className="mb-4 bg-blue-100 text-blue-700 px-4 py-1">Top Destinations</Badge>
-                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 font-playfair">
-                  Must-Visit Places
-                </h2>
-                <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                  Explore the most iconic and breathtaking destinations across the island
-                </p>
-              </motion.div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {destinations.map((destination: any, index: number) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6, delay: index * 0.1 }}
-                    whileHover={{ y: -10 }}
-                    className="group cursor-pointer"
-                  >
-                    <Card className="overflow-hidden border-0 shadow-xl hover:shadow-2xl transition-all duration-500">
-                      <div className="relative h-80 overflow-hidden">
-                        <img
-                          src={destination.image}
-                          alt={destination.name}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-                        <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                          <h3 className="text-2xl font-bold mb-2">{destination.name}</h3>
-                          <p className="text-sm opacity-90 line-clamp-2">{destination.description}</p>
-                        </div>
-                        <Badge className="absolute top-4 right-4 bg-white/20 backdrop-blur-sm text-white border-white/30">
-                          <MapPin className="w-3 h-3 mr-1" />
-                          {destination.region || 'Sri Lanka'}
-                        </Badge>
-                      </div>
-                    </Card>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* Video Tours Section */}
-        {videoTours.length > 0 && (
-          <section id="video-tours" className="py-24 bg-gray-900 text-white relative overflow-hidden">
-            {/* Background Pattern */}
-            <div className="absolute inset-0 opacity-5">
-              <div className="absolute inset-0" style={{ 
-                backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
-                backgroundSize: '40px 40px'
-              }}></div>
+                className="absolute top-20 left-10 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl"
+                animate={{
+                  x: [0, 50, 0],
+                  y: [0, 30, 0],
+                  scale: [1, 1.1, 1],
+                }}
+                transition={{
+                  duration: 20,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
+              <motion.div
+                className="absolute bottom-20 right-10 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl"
+                animate={{
+                  x: [0, -40, 0],
+                  y: [0, -50, 0],
+                  scale: [1, 1.2, 1],
+                }}
+                transition={{
+                  duration: 25,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
+              <motion.div
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-teal-500/15 rounded-full blur-3xl"
+                animate={{
+                  scale: [1, 1.3, 1],
+                  opacity: [0.3, 0.6, 0.3],
+                }}
+                transition={{
+                  duration: 15,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
             </div>
 
             <div className="container mx-auto px-4 lg:px-8 relative z-10">
+              {/* Section Header */}
               <motion.div
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.8 }}
                 className="text-center mb-16"
               >
-                <Badge className="mb-4 bg-white/10 backdrop-blur-sm text-white border-white/20 px-4 py-1">
-                  Virtual Experience
-                </Badge>
-                <h2 className="text-4xl md:text-5xl font-bold mb-4 font-playfair">
-                  Explore Sri Lanka in Video
-                </h2>
-                <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-                  Take a virtual journey through Sri Lanka's most stunning landscapes
-                </p>
-              </motion.div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {videoTours.map((video: any, index: number) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6, delay: index * 0.1 }}
-                    whileHover={{ scale: 1.05 }}
-                    className="relative group cursor-pointer"
-                    onClick={() => setSelectedVideo(video.url)}
-                  >
-                    <div className="relative h-64 rounded-2xl overflow-hidden">
-                      <img
-                        src={video.thumbnail}
-                        alt={video.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                      />
-                      <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors"></div>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                          <Play className="w-8 h-8 text-white ml-1" />
-                        </div>
-                      </div>
-                      <div className="absolute bottom-0 left-0 right-0 p-6">
-                        <h3 className="text-lg font-bold text-white">{video.title}</h3>
-                        <p className="text-sm text-gray-200 opacity-90">{video.duration || '2:30'}</p>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-
-            {/* Video Modal */}
-            <AnimatePresence>
-              {selectedVideo && (
                 <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4"
-                  onClick={() => setSelectedVideo(null)}
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  whileInView={{ scale: 1, opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.2, type: "spring", bounce: 0.5 }}
+                  className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500/20 to-purple-500/20 px-6 py-3 rounded-full mb-6 border border-white/20 backdrop-blur-sm"
                 >
-                  <motion.div
-                    initial={{ scale: 0.8 }}
-                    animate={{ scale: 1 }}
-                    exit={{ scale: 0.8 }}
-                    className="relative w-full max-w-6xl aspect-video"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute -top-12 right-0 text-white hover:bg-white/10"
-                      onClick={() => setSelectedVideo(null)}
-                    >
-                      <X className="w-6 h-6" />
-                    </Button>
-                    <iframe
-                      src={selectedVideo}
-                      className="w-full h-full rounded-xl"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    ></iframe>
-                  </motion.div>
+                  <Heart className="w-5 h-5 text-red-400 animate-pulse" />
+                  <span className="text-white font-semibold tracking-wide">TRAVELER STORIES</span>
+                  <Heart className="w-5 h-5 text-red-400 animate-pulse" />
                 </motion.div>
-              )}
-            </AnimatePresence>
-          </section>
-        )}
 
-        {/* Photo Gallery Section */}
-        {gallery.length > 0 && (
-          <section className="py-24 bg-white">
-            <div className="container mx-auto px-4 lg:px-8">
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8 }}
-                className="text-center mb-16"
-              >
-                <Badge className="mb-4 bg-purple-100 text-purple-700 px-4 py-1">
-                  <Camera className="w-3 h-3 mr-1 inline" />
-                  Photo Gallery
-                </Badge>
-                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 font-playfair">
-                  Stunning Visuals
-                </h2>
-                <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                  A visual journey through Sri Lanka's most photogenic locations
-                </p>
-              </motion.div>
-
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {gallery.map((image: any, index: number) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6, delay: index * 0.05 }}
-                    whileHover={{ scale: 1.05, zIndex: 10 }}
-                    className="relative h-64 rounded-xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl transition-all"
-                    onClick={() => setSelectedGalleryImage(index)}
-                  >
-                    <img
-                      src={image.url}
-                      alt={image.caption || `Sri Lanka Gallery ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 hover:opacity-100 transition-opacity">
-                      <div className="absolute bottom-0 left-0 right-0 p-4">
-                        <p className="text-white text-sm font-medium">{image.caption}</p>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-
-            {/* Gallery Lightbox */}
-            <AnimatePresence>
-              {selectedGalleryImage !== null && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4"
-                  onClick={() => setSelectedGalleryImage(null)}
+                <motion.h2
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.3, duration: 0.8 }}
+                  className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 font-playfair leading-tight"
                 >
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute top-4 right-4 text-white hover:bg-white/10 z-10"
-                    onClick={() => setSelectedGalleryImage(null)}
-                  >
-                    <X className="w-6 h-6" />
-                  </Button>
-                  
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute left-4 text-white hover:bg-white/10 z-10"
-                    onClick={(e) => { e.stopPropagation(); prevGalleryImage(); }}
-                  >
-                    <ChevronLeft className="w-8 h-8" />
-                  </Button>
-                  
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-4 text-white hover:bg-white/10 z-10"
-                    onClick={(e) => { e.stopPropagation(); nextGalleryImage(); }}
-                  >
-                    <ChevronRight className="w-8 h-8" />
-                  </Button>
+                  What Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Travelers</span> Say
+                </motion.h2>
 
-                  <motion.div
-                    initial={{ scale: 0.8 }}
-                    animate={{ scale: 1 }}
-                    exit={{ scale: 0.8 }}
-                    className="relative max-w-6xl w-full"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <img
-                      src={gallery[selectedGalleryImage].url}
-                      alt={gallery[selectedGalleryImage].caption}
-                      className="w-full h-auto max-h-[80vh] object-contain rounded-lg"
-                    />
-                    {gallery[selectedGalleryImage].caption && (
-                      <div className="mt-4 text-center">
-                        <p className="text-white text-lg">{gallery[selectedGalleryImage].caption}</p>
-                        <p className="text-gray-400 text-sm mt-1">
-                          {selectedGalleryImage + 1} / {gallery.length}
-                        </p>
-                      </div>
-                    )}
-                  </motion.div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </section>
-        )}
-
-        {/* Cultural & Natural Info Section */}
-        <section className="py-24 bg-gradient-to-br from-teal-50 to-blue-50">
-          <div className="container mx-auto px-4 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-              <motion.div
-                initial={{ opacity: 0, x: -50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8 }}
-                className="relative"
-              >
-                <div className="absolute -top-8 -left-8 w-24 h-24 bg-gradient-to-br from-orange-400 to-red-500 rounded-full opacity-20 blur-2xl"></div>
-                <Card className="p-8 shadow-2xl border-0 relative z-10">
-                  <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center mb-6">
-                    <Palmtree className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className="text-3xl font-bold text-gray-900 mb-6">Cultural Heritage</h3>
-                  <p className="text-lg text-gray-700 leading-relaxed mb-6">
-                    {content.culturalInfo}
-                  </p>
-                  <Button className="bg-orange-600 hover:bg-orange-700 text-white rounded-full">
-                    Learn More
-                  </Button>
-                </Card>
+                <motion.p
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.4, duration: 0.8 }}
+                  className="text-xl md:text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed"
+                >
+                  Authentic experiences from real travelers who discovered the magic of Sri Lanka with us
+                </motion.p>
               </motion.div>
 
-              <motion.div
-                initial={{ opacity: 0, x: 50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-                className="relative"
-              >
-                <div className="absolute -top-8 -right-8 w-24 h-24 bg-gradient-to-br from-green-400 to-teal-500 rounded-full opacity-20 blur-2xl"></div>
-                <Card className="p-8 shadow-2xl border-0 relative z-10">
-                  <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-teal-500 rounded-2xl flex items-center justify-center mb-6">
-                    <Mountain className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className="text-3xl font-bold text-gray-900 mb-6">Natural Wonders</h3>
-                  <p className="text-lg text-gray-700 leading-relaxed mb-6">
-                    {content.naturalInfo}
-                  </p>
-                  <Button className="bg-green-600 hover:bg-green-700 text-white rounded-full">
-                    Explore Nature
-                  </Button>
-                </Card>
-              </motion.div>
-            </div>
-          </div>
-        </section>
-
-        {/* Testimonials Section */}
-        {testimonials.length > 0 && (
-          <section className="py-24 bg-gray-900 text-white relative overflow-hidden">
-            {/* Background Pattern */}
-            <div className="absolute inset-0 opacity-5">
-              <div className="absolute inset-0" style={{ 
-                backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
-                backgroundSize: '40px 40px'
-              }}></div>
-            </div>
-
-            <div className="container mx-auto px-4 lg:px-8 relative z-10">
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8 }}
-                className="text-center mb-16"
-              >
-                <Badge className="mb-4 bg-white/10 backdrop-blur-sm text-white border-white/20 px-4 py-1">
-                  <Heart className="w-3 h-3 mr-1 inline" />
-                  Testimonials
-                </Badge>
-                <h2 className="text-4xl md:text-5xl font-bold mb-4 font-playfair">
-                  What Our Travelers Say
-                </h2>
-                <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-                  Real experiences from real travelers who explored Sri Lanka with us
-                </p>
-              </motion.div>
-
-              <div className="max-w-4xl mx-auto relative">
+              {/* Main Testimonial Display */}
+              <div className="max-w-6xl mx-auto">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={currentTestimonial}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.5 }}
-                    className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-12 text-center"
+                    initial={{ opacity: 0, scale: 0.95, y: 50 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: -50 }}
+                    transition={{
+                      duration: 0.6,
+                      ease: "easeInOut",
+                      type: "spring",
+                      bounce: 0.3
+                    }}
+                    className="relative"
                   >
-                    <Quote className="w-12 h-12 text-blue-400 mx-auto mb-6" />
-                    <p className="text-2xl text-white mb-8 italic leading-relaxed">
-                      "{testimonials[currentTestimonial].text}"
-                    </p>
-                    <div className="flex items-center justify-center gap-4 mb-4">
-                      {testimonials[currentTestimonial].avatar && (
-                        <img
-                          src={testimonials[currentTestimonial].avatar}
-                          alt={testimonials[currentTestimonial].name}
-                          className="w-16 h-16 rounded-full border-2 border-white/30"
-                        />
-                      )}
-                      <div className="text-left">
-                        <div className="font-bold text-lg">{testimonials[currentTestimonial].name}</div>
-                        <div className="text-gray-300">{testimonials[currentTestimonial].location}</div>
+                    {/* Large Quote Icon */}
+                    <motion.div
+                      initial={{ rotate: -180, scale: 0 }}
+                      animate={{ rotate: 0, scale: 1 }}
+                      transition={{ delay: 0.3, type: "spring", bounce: 0.6 }}
+                      className="absolute -top-8 -left-8 z-10"
+                    >
+                      <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-2xl">
+                        <Quote className="w-10 h-10 text-white" />
                       </div>
-                    </div>
-                    <div className="flex justify-center gap-1">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                      ))}
+                    </motion.div>
+
+                    {/* Testimonial Card */}
+                    <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 md:p-12 lg:p-16 border border-white/20 shadow-2xl relative overflow-hidden">
+                      {/* Decorative Elements */}
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-blue-500/20 to-transparent rounded-full blur-2xl" />
+                      <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-500/20 to-transparent rounded-full blur-2xl" />
+
+                      <div className="grid lg:grid-cols-[1fr,300px] gap-8 lg:gap-12 items-center relative z-10">
+                        {/* Content */}
+                        <div className="text-center lg:text-left">
+                          {/* Stars */}
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: 0.5, type: "spring", bounce: 0.5 }}
+                            className="flex justify-center lg:justify-start gap-2 mb-8"
+                          >
+                            {[...Array(5)].map((_, i) => (
+                              <motion.div
+                                key={i}
+                                initial={{ scale: 0, rotate: -180 }}
+                                animate={{ scale: 1, rotate: 0 }}
+                                transition={{
+                                  delay: 0.5 + i * 0.1,
+                                  type: "spring",
+                                  bounce: 0.6
+                                }}
+                                className="relative"
+                              >
+                                <Star className="w-8 h-8 fill-yellow-400 text-yellow-400 drop-shadow-lg" />
+                                <motion.div
+                                  className="absolute inset-0 fill-yellow-400 text-yellow-400"
+                                  animate={{
+                                    scale: [1, 1.2, 1],
+                                    opacity: [0.7, 1, 0.7]
+                                  }}
+                                  transition={{
+                                    duration: 2,
+                                    repeat: Infinity,
+                                    delay: i * 0.2
+                                  }}
+                                />
+                              </motion.div>
+                            ))}
+                          </motion.div>
+
+                          {/* Quote Text */}
+                          <motion.p
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.6, duration: 0.8 }}
+                            className="text-2xl md:text-3xl lg:text-4xl text-white leading-relaxed mb-8 font-light italic"
+                          >
+                            "{testimonials[currentTestimonial].text}"
+                          </motion.p>
+
+                          {/* Author Info */}
+                          <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.7, duration: 0.8 }}
+                            className="flex items-center justify-center lg:justify-start gap-6"
+                          >
+                            <div className="relative">
+                              {testimonials[currentTestimonial].avatar ? (
+                                <motion.img
+                                  initial={{ scale: 0, rotate: -180 }}
+                                  animate={{ scale: 1, rotate: 0 }}
+                                  transition={{ delay: 0.8, type: "spring", bounce: 0.5 }}
+                                  src={testimonials[currentTestimonial].avatar}
+                                  alt={testimonials[currentTestimonial].name}
+                                  className="w-20 h-20 rounded-full object-cover ring-4 ring-white/30 shadow-xl"
+                                />
+                              ) : (
+                                <motion.div
+                                  initial={{ scale: 0, rotate: -180 }}
+                                  animate={{ scale: 1, rotate: 0 }}
+                                  transition={{ delay: 0.8, type: "spring", bounce: 0.5 }}
+                                  className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center ring-4 ring-white/30 shadow-xl"
+                                >
+                                  <span className="text-2xl font-bold text-white">
+                                    {testimonials[currentTestimonial].name.charAt(0)}
+                                  </span>
+                                </motion.div>
+                              )}
+                              <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ delay: 1, type: "spring", bounce: 0.6 }}
+                                className="absolute -bottom-1 -right-1 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center border-4 border-slate-900"
+                              >
+                                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                              </motion.div>
+                            </div>
+                            <div>
+                              <motion.h4
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.9, duration: 0.6 }}
+                                className="text-2xl font-bold text-white mb-1"
+                              >
+                                {testimonials[currentTestimonial].name}
+                              </motion.h4>
+                              <motion.div
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 1, duration: 0.6 }}
+                                className="flex items-center gap-2 text-gray-300"
+                              >
+                                <MapPin className="w-4 h-4" />
+                                <span className="text-lg">{testimonials[currentTestimonial].location}</span>
+                              </motion.div>
+                            </div>
+                          </motion.div>
+                        </div>
+
+                        {/* Trip Info Card */}
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.8, rotateY: 90 }}
+                          animate={{ opacity: 1, scale: 1, rotateY: 0 }}
+                          transition={{ delay: 0.8, duration: 0.8, type: "spring", bounce: 0.4 }}
+                          className="bg-gradient-to-br from-blue-600/20 to-purple-600/20 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hidden lg:block"
+                        >
+                          <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 1, duration: 0.6 }}
+                            className="text-center mb-6"
+                          >
+                            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                              <Award className="w-8 h-8 text-white" />
+                            </div>
+                            <h5 className="text-xl font-bold text-white">Verified Trip</h5>
+                          </motion.div>
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 1.2, duration: 0.6 }}
+                            className="space-y-4"
+                          >
+                            <div className="flex items-center gap-3 bg-white/10 rounded-lg p-3">
+                              <Calendar className="w-5 h-5 text-blue-400" />
+                              <span className="text-white font-medium">Recent Trip</span>
+                            </div>
+                            <div className="flex items-center gap-3 bg-white/10 rounded-lg p-3">
+                              <ThumbsUp className="w-5 h-5 text-green-400" />
+                              <span className="text-white font-medium">Highly Recommended</span>
+                            </div>
+                          </motion.div>
+                        </motion.div>
+                      </div>
                     </div>
                   </motion.div>
                 </AnimatePresence>
 
-                {/* Navigation */}
-                <div className="flex justify-center gap-4 mt-8">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="rounded-full border-white/20 text-white hover:bg-white/10"
-                    onClick={prevTestimonial}
+                {/* Navigation Controls */}
+                <motion.div
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.5, duration: 0.8 }}
+                  className="flex items-center justify-center gap-6 mt-12"
+                >
+                  {/* Previous Button */}
+                  <motion.div
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
                   >
-                    <ChevronLeft className="w-5 h-5" />
-                  </Button>
-                  <div className="flex items-center gap-2">
-                    {testimonials.map((_: any, index: number) => (
-                      <button
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={prevTestimonial}
+                      className="w-14 h-14 rounded-full bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 hover:border-white/50 shadow-xl transition-all duration-300"
+                    >
+                      <ChevronLeft className="w-6 h-6" />
+                    </Button>
+                  </motion.div>
+
+                  {/* Progress Indicators */}
+                  <div className="flex items-center gap-3">
+                    {testimonials.map((_, index) => (
+                      <motion.button
                         key={index}
                         onClick={() => setCurrentTestimonial(index)}
-                        className={`w-2 h-2 rounded-full transition-all ${
-                          index === currentTestimonial ? 'bg-white w-8' : 'bg-white/30'
+                        className={`relative transition-all duration-500 ${
+                          index === currentTestimonial
+                            ? 'w-12 h-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full'
+                            : 'w-3 h-3 bg-white/30 rounded-full hover:bg-white/50'
                         }`}
-                      />
+                        whileHover={{ scale: 1.2 }}
+                        whileTap={{ scale: 0.9 }}
+                      >
+                        {index === currentTestimonial && (
+                          <motion.div
+                            className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"
+                            layoutId="activeIndicator"
+                            transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                          />
+                        )}
+                      </motion.button>
                     ))}
                   </div>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="rounded-full border-white/20 text-white hover:bg-white/10"
-                    onClick={nextTestimonial}
+
+                  {/* Next Button */}
+                  <motion.div
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
                   >
-                    <ChevronRight className="w-5 h-5" />
-                  </Button>
-                </div>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={nextTestimonial}
+                      className="w-14 h-14 rounded-full bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 hover:border-white/50 shadow-xl transition-all duration-300"
+                    >
+                      <ChevronRight className="w-6 h-6" />
+                    </Button>
+                  </motion.div>
+                </motion.div>
+
+                {/* Auto-play Indicator */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 1.5, duration: 0.6 }}
+                  className="flex justify-center mt-8"
+                >
+                  <div className="flex items-center gap-2 text-gray-400 text-sm">
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                      className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full"
+                    />
+                    <span>Auto-rotating every 5 seconds</span>
+                  </div>
+                </motion.div>
               </div>
             </div>
           </section>
@@ -718,7 +1078,6 @@ const AboutSriLanka: React.FC = () => {
 
         {/* Call to Action Section */}
         <section className="py-24 bg-gradient-to-r from-blue-600 via-teal-600 to-blue-600 text-white relative overflow-hidden">
-          {/* Animated Background Elements */}
           <motion.div
             className="absolute inset-0 opacity-20"
             animate={{
@@ -749,24 +1108,25 @@ const AboutSriLanka: React.FC = () => {
                 Start planning your unforgettable journey to the Pearl of the Indian Ocean
               </p>
               <div className="flex flex-col sm:flex-row gap-6 justify-center">
-                <a 
-                  href="https://wa.me/94777721999?text=Hello%20Recharge%20Travels,%20I'm%20interested%20in%20Sri%20Lanka%20tours" 
+                <a
+                  href="https://wa.me/94777721999?text=Hello%20Recharge%20Travels,%20I'm%20interested%20in%20Sri%20Lanka%20tours"
                   className="inline-flex items-center justify-center px-10 py-5 bg-green-600 hover:bg-green-700 rounded-full font-semibold text-lg transition-all hover:scale-105 shadow-2xl"
                 >
-                  📱 WhatsApp +94 77 77 21 999
+                  WhatsApp +94 77 77 21 999
                 </a>
-                <a 
-                  href="/tours" 
+                <Link
+                  to="/tours"
                   className="inline-flex items-center justify-center px-10 py-5 bg-white text-blue-600 hover:bg-gray-100 rounded-full font-semibold text-lg transition-all hover:scale-105 shadow-2xl"
                 >
                   <MapPin className="w-5 h-5 mr-2" />
                   Explore Tours
-                </a>
+                </Link>
               </div>
             </motion.div>
           </div>
         </section>
       </div>
+
     </>
   );
 };

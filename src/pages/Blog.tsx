@@ -38,11 +38,22 @@ export default function Blog() {
   const filteredPosts = useMemo(() => {
     if (!posts) return [];
 
-    let filtered = posts.filter(post =>
-      post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.excerpt?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.author.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const search = searchQuery.toLowerCase();
+
+    const getAuthorName = (author: (typeof posts)[number]['author']) => {
+      if (!author) return '';
+      if (typeof author === 'string') return author;
+      return author.name || '';
+    };
+
+    let filtered = posts.filter(post => {
+      const titleMatch = post.title.toLowerCase().includes(search);
+      const excerptMatch = post.excerpt?.toLowerCase().includes(search) ?? false;
+      const authorName = getAuthorName(post.author).toLowerCase();
+      const authorMatch = authorName.includes(search);
+
+      return titleMatch || excerptMatch || authorMatch;
+    });
 
     // Sort posts
     switch (sortBy) {

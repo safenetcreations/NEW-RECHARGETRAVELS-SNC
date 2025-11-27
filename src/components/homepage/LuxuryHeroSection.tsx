@@ -9,7 +9,12 @@ import GroupTransportBookingForm from '@/components/booking/GroupTransportBookin
 import TrainBookingForm from '@/components/booking/TrainBookingForm';
 import { getHeroSlides, HeroSlide, DEFAULT_SLIDES } from '@/services/heroService';
 
-const LuxuryHeroSection = () => {
+interface LuxuryHeroSectionProps {
+  hoveredRegion?: { name: string; description: string } | null;
+  onLocationsChange?: (locations: { pickup: string; dropoff: string }) => void;
+}
+
+const LuxuryHeroSection = ({ hoveredRegion, onLocationsChange }: LuxuryHeroSectionProps) => {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [currentSlide, setCurrentSlide] = useState<HeroSlide>(DEFAULT_SLIDES[0]);
   const [loading, setLoading] = useState(true);
@@ -192,26 +197,35 @@ const LuxuryHeroSection = () => {
 
           {/* Quick Access Buttons */}
           {!isBookingOpen && (
-            <div className="flex flex-wrap justify-center gap-4 mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
+            <div className="flex flex-wrap justify-center gap-6 mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
               <Link to="/tours/luxury">
-                <Button variant="outline" className="bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/20 hover:text-white transition-all duration-300 rounded-full px-6 py-6 text-lg group">
-                  <Crown className="w-5 h-5 mr-2 text-yellow-400 group-hover:scale-110 transition-transform" />
-                  Elite Concierge
-                </Button>
+                <button className="luxury-secondary-btn group relative overflow-hidden rounded-full bg-gradient-to-r from-purple-500/10 to-pink-500/10 backdrop-blur-md border border-purple-400/30 px-8 py-6 text-white transition-all duration-500 ease-out hover:border-purple-400/60 hover:bg-gradient-to-r hover:from-purple-500/20 hover:to-pink-500/20 hover:shadow-lg hover:shadow-purple-500/20 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-purple-400/50 focus:ring-offset-2 focus:ring-offset-transparent">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out"></div>
+                  <div className="relative flex items-center gap-3">
+                    <Crown className="w-5 h-5 text-purple-300 group-hover:text-yellow-300 transition-colors duration-300" />
+                    <span className="font-semibold text-lg">Elite Concierge</span>
+                  </div>
+                </button>
               </Link>
 
               <Link to="/hotels">
-                <Button variant="outline" className="bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/20 hover:text-white transition-all duration-300 rounded-full px-6 py-6 text-lg group">
-                  <Building2 className="w-5 h-5 mr-2 text-blue-400 group-hover:scale-110 transition-transform" />
-                  Luxury Hotels
-                </Button>
+                <button className="luxury-secondary-btn group relative overflow-hidden rounded-full bg-gradient-to-r from-blue-500/10 to-cyan-500/10 backdrop-blur-md border border-blue-400/30 px-8 py-6 text-white transition-all duration-500 ease-out hover:border-blue-400/60 hover:bg-gradient-to-r hover:from-blue-500/20 hover:to-cyan-500/20 hover:shadow-lg hover:shadow-blue-500/20 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:ring-offset-2 focus:ring-offset-transparent">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out"></div>
+                  <div className="relative flex items-center gap-3">
+                    <Building2 className="w-5 h-5 text-blue-300 group-hover:text-cyan-300 transition-colors duration-300" />
+                    <span className="font-semibold text-lg">Luxury Hotels</span>
+                  </div>
+                </button>
               </Link>
 
               <Link to="/book-now">
-                <Button className="bg-gradient-to-r from-orange-500 to-rose-600 text-white hover:from-orange-600 hover:to-rose-700 transition-all duration-300 rounded-full px-8 py-6 text-lg shadow-lg hover:shadow-xl hover:scale-105 border-0 group">
-                  <CalendarCheck className="w-5 h-5 mr-2 group-hover:animate-pulse" />
-                  Book Now
-                </Button>
+                <button className="luxury-secondary-btn group relative overflow-hidden rounded-full bg-gradient-to-r from-orange-500/10 to-red-500/10 backdrop-blur-md border border-orange-400/30 px-8 py-6 text-white transition-all duration-500 ease-out hover:border-orange-400/60 hover:bg-gradient-to-r hover:from-orange-500/20 hover:to-red-500/20 hover:shadow-lg hover:shadow-orange-500/20 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-orange-400/50 focus:ring-offset-2 focus:ring-offset-transparent">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out"></div>
+                  <div className="relative flex items-center gap-3">
+                    <CalendarCheck className="w-5 h-5 text-orange-300 group-hover:text-yellow-300 transition-colors duration-300" />
+                    <span className="font-semibold text-lg">Book Now</span>
+                  </div>
+                </button>
               </Link>
             </div>
           )}
@@ -219,14 +233,39 @@ const LuxuryHeroSection = () => {
           {/* Booking Widget Toggle */}
           <div style={{ position: 'relative', zIndex: 50 }}>
             {!isBookingOpen ? (
-              <Button
+              <button
                 onClick={() => setIsBookingOpen(true)}
-                size="lg"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-6 text-xl rounded-full shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+                className="luxury-primary-btn group relative overflow-hidden rounded-full bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-600 px-12 py-8 text-white font-bold text-2xl transition-all duration-700 ease-out hover:shadow-2xl hover:shadow-emerald-500/30 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-emerald-400/30 focus:ring-offset-4 focus:ring-offset-transparent transform-gpu"
+                style={{
+                  background: 'linear-gradient(135deg, #059669 0%, #0d9488 50%, #0891b2 100%)',
+                  boxShadow: '0 4px 20px rgba(5, 150, 105, 0.3), 0 2px 10px rgba(5, 150, 105, 0.2)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow = '0 8px 40px rgba(5, 150, 105, 0.4), 0 4px 20px rgba(5, 150, 105, 0.3)';
+                  e.currentTarget.style.transform = 'scale(1.05) translateY(-2px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = '0 4px 20px rgba(5, 150, 105, 0.3), 0 2px 10px rgba(5, 150, 105, 0.2)';
+                  e.currentTarget.style.transform = 'scale(1) translateY(0)';
+                }}
               >
-                <Car className="w-6 h-6 mr-2" />
-                Book Your Journey
-              </Button>
+                {/* Magnetic ripple effect */}
+                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-white/0 via-white/10 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+                {/* Subtle shimmer */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-out"></div>
+
+                {/* Premium glow ring */}
+                <div className="absolute inset-0 rounded-full border-2 border-white/20 group-hover:border-white/40 transition-colors duration-500"></div>
+
+                <div className="relative flex items-center gap-4">
+                  <Car className="w-7 h-7 text-white/90 group-hover:text-white transition-colors duration-300" />
+                  <span className="relative z-10">Book Your Journey</span>
+                </div>
+
+                {/* Floating accent */}
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse"></div>
+              </button>
             ) : (
               <div className="w-full max-w-4xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
                 <div className="bg-blue-600 p-4 flex justify-between items-center">
@@ -317,9 +356,49 @@ const LuxuryHeroSection = () => {
 
       <style>{`
         @keyframes bounce {
-          0%, 20%, 50%, 80%, 100% { transform: translateY(0) translateX(-50%); }
-          40% { transform: translateY(-10px) translateX(-50%); }
-          60% { transform: translateY(-5px) translateX(-50%); }
+          0%, 20%, 50%, 80%, 100% {
+            transform: translateY(0) translateX(-50%);
+          }
+          40% {
+            transform: translateY(-10px) translateX(-50%);
+          }
+          60% {
+            transform: translateY(-5px) translateX(-50%);
+          }
+        }
+
+        /* Material Design easing curves for premium feel */
+        .luxury-primary-btn {
+          transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .luxury-secondary-btn {
+          transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        /* Subtle hover effects for secondary buttons */
+        .luxury-secondary-btn:hover {
+          transform: translateY(-1px);
+        }
+
+        /* Respect user preferences for reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+          .luxury-primary-btn,
+          .luxury-secondary-btn {
+            transition: none;
+          }
+
+          .luxury-primary-btn:hover,
+          .luxury-secondary-btn:hover {
+            transform: none;
+          }
+        }
+
+        /* Focus states for accessibility */
+        .luxury-primary-btn:focus-visible,
+        .luxury-secondary-btn:focus-visible {
+          outline: 2px solid rgba(255, 255, 255, 0.8);
+          outline-offset: 2px;
         }
       `}</style>
     </div>

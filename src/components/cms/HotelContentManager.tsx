@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -59,23 +59,23 @@ export const HotelContentManager = () => {
     'Conference Rooms', 'Laundry Service', 'Concierge', 'Breakfast'
   ];
 
-  useEffect(() => {
-    fetchHotels();
-  }, []);
-
-  const fetchHotels = async () => {
+  const fetchHotels = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from('hotels')
-        .select(`
-          *,
-          images:hotel_images(*)
-        `)
-        .eq('country', 'Sri Lanka')
-        .order('name');
-
-      if (error) throw error;
-      setHotels(data || []);
+      const hotels = await dbService.list('hotels', [
+        { field: 'country', operator: '==', value: 'Sri Lanka' }
+      ], 'name');
+      
+      // For each hotel, get the associated images
+      const hotelsWithImages = await Promise.all(
+        hotels.map(async (hotel: any) => {
+          const images = await dbService.list('hotel_images', [
+            { field: 'hotel_id', operator: '==', value: hotel.id }
+          ]);
+          return { ...hotel, images };
+        })
+      );
+      
+      setHotels(hotelsWithImages as Hotel[]);
     } catch (error) {
       console.error('Error fetching hotels:', error);
       toast({
@@ -86,7 +86,11 @@ export const HotelContentManager = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchHotels();
+  }, [fetchHotels]);
 
   const handleSave = async () => {
     try {
@@ -97,25 +101,14 @@ export const HotelContentManager = () => {
       };
 
       if (isCreating) {
-        const { data, error } = await supabase
-          .from('hotels')
-          .insert([hotelData])
-          .select()
-          .single();
-
-        if (error) throw error;
+        await dbService.create('hotels', hotelData);
 
         toast({
           title: "Success",
           description: "Hotel created successfully"
         });
       } else if (selectedHotel) {
-        const { error } = await supabase
-          .from('hotels')
-          .update(hotelData)
-          .eq('id', selectedHotel.id);
-
-        if (error) throw error;
+        await dbService.update('hotels', selectedHotel.id, hotelData);
 
         toast({
           title: "Success",

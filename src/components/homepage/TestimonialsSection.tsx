@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Star, Quote, ChevronLeft, ChevronRight, MapPin, Calendar, Heart, Users, Award, ThumbsUp } from 'lucide-react';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { testimonialsService, homepageStatsService } from '@/services/cmsService';
 import type { Testimonial, HomepageStat } from '@/types/cms';
@@ -13,7 +13,7 @@ const TestimonialsSection = () => {
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
   // Default fallback testimonials
-  const defaultTestimonials: Testimonial[] = [
+  const defaultTestimonials = useMemo(() => [
     {
       id: '1',
       name: "Sarah Johnson",
@@ -89,15 +89,15 @@ const TestimonialsSection = () => {
       createdAt: null as any,
       updatedAt: null as any,
     }
-  ];
+  ], []);
 
   // Default fallback stats
-  const defaultStats: HomepageStat[] = [
+  const defaultStats = useMemo(() => [
     { id: '1', label: 'Happy Travelers', value: '2,847', icon: '✈️', order: 0, isActive: true, createdAt: null as any, updatedAt: null as any },
     { id: '2', label: 'Average Rating', value: '4.9', icon: '⭐', order: 1, isActive: true, createdAt: null as any, updatedAt: null as any },
     { id: '3', label: 'Would Recommend', value: '98', icon: '👍', order: 2, isActive: true, createdAt: null as any, updatedAt: null as any },
     { id: '4', label: 'Years Experience', value: '15', icon: '🏆', order: 3, isActive: true, createdAt: null as any, updatedAt: null as any },
-  ];
+  ], []);
 
   // Load testimonials and stats from Firestore CMS
   useEffect(() => {
@@ -123,7 +123,7 @@ const TestimonialsSection = () => {
       }
     };
     loadData();
-  }, []);
+  }, [defaultStats, defaultTestimonials]);
 
   // Auto-rotate testimonials
   useEffect(() => {
@@ -171,7 +171,7 @@ const TestimonialsSection = () => {
 
   if (loading) {
     return (
-      <section className="py-24 bg-gradient-to-br from-orange-50 via-white to-blue-50">
+      <section className="py-8 bg-gradient-to-br from-orange-50 via-white to-blue-50">
         <div className="container mx-auto px-4 text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-orange-500 border-t-transparent mx-auto" />
         </div>
@@ -182,7 +182,7 @@ const TestimonialsSection = () => {
   const currentTestimonial = testimonials[activeIndex];
 
   return (
-    <section className="relative py-24 overflow-hidden">
+    <section className="relative py-6 overflow-hidden">
       {/* Animated Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-orange-50 via-white to-blue-50" />
 
@@ -211,7 +211,7 @@ const TestimonialsSection = () => {
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="text-center mb-4"
         >
           <motion.div
             initial={{ scale: 0 }}
@@ -235,7 +235,7 @@ const TestimonialsSection = () => {
         </motion.div>
 
         {/* Main Testimonial Card */}
-        <div className="max-w-5xl mx-auto mb-16">
+        <div className="max-w-5xl mx-auto mb-8">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeIndex}
@@ -426,7 +426,7 @@ const TestimonialsSection = () => {
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          className="mt-16 flex flex-wrap justify-center gap-4"
+          className="mt-8 flex flex-wrap justify-center gap-4"
         >
           {testimonials.slice(0, 5).map((t, idx) => (
             <motion.button

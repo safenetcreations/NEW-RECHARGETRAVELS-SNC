@@ -12,7 +12,7 @@ const AboutSriLanka = () => {
   ];
 
   return (
-    <section className="py-20 bg-gradient-to-br from-blue-50 to-teal-50">
+    <section className="py-12 bg-gradient-to-br from-blue-50 to-teal-50">
       <div className="container mx-auto px-4 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Content */}
