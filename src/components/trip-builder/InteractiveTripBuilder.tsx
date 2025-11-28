@@ -1275,8 +1275,25 @@ const InteractiveTripBuilder: React.FC = () => {
                         </Card>
 
                         {/* Map - Larger Size */}
-                        <Card className="shadow-xl border-0 overflow-hidden h-[500px]">
-                            <TripMap destinations={selectedDestinations} />
+                        <Card className="shadow-xl border-0 overflow-hidden h-[500px] flex flex-col">
+                            <div className="flex-1">
+                                <TripMap destinations={selectedDestinations} />
+                            </div>
+                            <div className="border-t border-gray-100 bg-white/80 px-4 py-2 flex items-center justify-between text-xs text-gray-500">
+                                <span className="flex items-center gap-1">
+                                    <span className="font-semibold text-teal-700">Recharge Travels</span>
+                                    <span className="hidden sm:inline">• Custom Sri Lanka route preview</span>
+                                </span>
+                                <span className="flex items-center gap-2">
+                                    <span className="hidden sm:inline">Sri Lanka</span>
+                                    <img
+                                        src="/logo-v2.png"
+                                        alt="Recharge Travels logo"
+                                        className="h-6 w-auto object-contain"
+                                        loading="lazy"
+                                    />
+                                </span>
+                            </div>
                         </Card>
                     </div>
                 </div>

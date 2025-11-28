@@ -13,6 +13,7 @@ const TripMap: React.FC<TripMapProps> = ({ destinations }) => {
     const [map, setMap] = useState<google.maps.Map | null>(null);
     const [directionsRenderer, setDirectionsRenderer] = useState<google.maps.DirectionsRenderer | null>(null);
     const [markers, setMarkers] = useState<google.maps.Marker[]>([]);
+    const [mapsReady, setMapsReady] = useState(false);
 
     // Leaflet State
     const [L, setL] = useState<any>(null);
@@ -39,36 +40,38 @@ const TripMap: React.FC<TripMapProps> = ({ destinations }) => {
 
     // Google Maps Effect
     useEffect(() => {
-        if (mapRef.current && !map && window.google && apiKey) {
-            // ... existing Google Maps initialization ...
-            const newMap = new window.google.maps.Map(mapRef.current, {
-                center: { lat: 7.8731, lng: 80.7718 },
-                zoom: 7,
-                mapTypeControl: false,
-                streetViewControl: false,
-                fullscreenControl: false,
-                styles: [
-                    {
-                        featureType: "poi",
-                        elementType: "labels",
-                        stylers: [{ visibility: "off" }]
-                    }
-                ]
-            });
-            setMap(newMap);
+        if (!mapsReady || map || !mapRef.current || !apiKey) return;
 
-            const renderer = new window.google.maps.DirectionsRenderer({
-                map: newMap,
-                suppressMarkers: true,
-                polylineOptions: {
-                    strokeColor: "#2563EB",
-                    strokeWeight: 5,
-                    strokeOpacity: 0.8
+        const g = (window as any).google;
+        if (!g || !g.maps) return;
+
+        const newMap = new g.maps.Map(mapRef.current, {
+            center: { lat: 7.8731, lng: 80.7718 },
+            zoom: 7,
+            mapTypeControl: false,
+            streetViewControl: false,
+            fullscreenControl: false,
+            styles: [
+                {
+                    featureType: "poi",
+                    elementType: "labels",
+                    stylers: [{ visibility: "off" }]
                 }
-            });
-            setDirectionsRenderer(renderer);
-        }
-    }, [mapRef.current, window.google, apiKey]);
+            ]
+        });
+        setMap(newMap);
+
+        const renderer = new g.maps.DirectionsRenderer({
+            map: newMap,
+            suppressMarkers: true,
+            polylineOptions: {
+                strokeColor: "#2563EB",
+                strokeWeight: 5,
+                strokeOpacity: 0.8
+            }
+        });
+        setDirectionsRenderer(renderer);
+    }, [mapsReady, map, apiKey]);
 
     // Update Google Maps Markers/Route
     useEffect(() => {
@@ -185,7 +188,7 @@ const TripMap: React.FC<TripMapProps> = ({ destinations }) => {
 
     // Render Google Maps if API key exists
     return (
-        <GoogleMapsLoader apiKey={apiKey}>
+        <GoogleMapsLoader apiKey={apiKey} onLoad={() => setMapsReady(true)}>
             <div ref={mapRef} className="w-full h-full min-h-[400px] bg-gray-100" />
         </GoogleMapsLoader>
     );

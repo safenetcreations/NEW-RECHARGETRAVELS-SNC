@@ -155,50 +155,55 @@ const FeaturedDestinations = () => {
   }, [totalPages]);
 
   return (
-    <section className="relative py-20 bg-gradient-to-b from-emerald-50 via-sky-50 to-amber-50 overflow-hidden">
-      <div className="pointer-events-none absolute inset-0">
-        {/* Top hill-country strip (e.g. Ella/Sigiriya) */}
+    <section id="featured-destinations" className="relative py-20 overflow-hidden">
+      {/* Full Background with Sri Lanka Cities/Landscape */}
+      <div className="absolute inset-0">
+        {/* Background Image - Sri Lanka Panorama */}
         <div
-          className="absolute inset-x-0 top-0 h-64 bg-cover bg-center opacity-30"
+          className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage:
-              "url('https://images.unsplash.com/photo-1566296314736-6eaac1ca0cb9?w=1600&auto=format&fit=crop&q=80')",
+              "url('https://images.unsplash.com/photo-1588598198321-9735fd52045b?w=1920&auto=format&fit=crop&q=80')",
           }}
         />
-        {/* Bottom beach/ocean strip (e.g. Mirissa/Galle) */}
-        <div
-          className="absolute inset-x-0 bottom-0 h-64 bg-cover bg-center opacity-30"
-          style={{
-            backgroundImage:
-              "url('https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=1600&auto=format&fit=crop&q=80')",
-          }}
-        />
-        {/* Soft wash so text stays readable over photos */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white/85 via-emerald-50/80 to-sky-50/85" />
+        {/* Dark overlay for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-900/95 via-slate-900/85 to-slate-900/95" />
+        {/* Decorative gradient accents */}
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-900/30 via-transparent to-teal-900/30" />
       </div>
 
       <div className="relative container mx-auto px-4 lg:px-8">
-        {/* Section Header */}
+        {/* Section Header - Outside Card */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <div className="inline-flex items-center gap-2 bg-white/80 px-6 py-3 rounded-full mb-6 border border-emerald-200 shadow-sm">
-            <Compass className="w-5 h-5 text-emerald-600" />
-            <span className="text-emerald-700 font-semibold tracking-wide uppercase">Discover Paradise</span>
-            <Sparkles className="w-5 h-5 text-amber-500" />
+          <div className="inline-flex items-center gap-2 bg-emerald-500 px-6 py-3 rounded-full mb-6">
+            <Compass className="w-5 h-5 text-white" />
+            <span className="text-white font-bold tracking-wide uppercase text-sm">Discover Paradise</span>
+            <Sparkles className="w-5 h-5 text-yellow-300" />
           </div>
 
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 mb-6">
-            Explore Sri Lanka{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 via-teal-500 to-amber-500">
-              Featured Destinations
-            </span>
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-black mb-6">
+            <span
+              className="text-yellow-400 brightness-125"
+              style={{
+                textShadow: '0 0 20px rgba(250,204,21,0.8), 0 0 40px rgba(250,204,21,0.6), 0 4px 8px rgba(0,0,0,0.8)',
+                WebkitTextStroke: '1px rgba(255,255,255,0.3)'
+              }}
+            >Explore Sri Lanka</span><br />
+            <span
+              className="text-orange-400 brightness-125"
+              style={{
+                textShadow: '0 0 20px rgba(251,146,60,0.8), 0 0 40px rgba(251,146,60,0.6), 0 4px 8px rgba(0,0,0,0.8)',
+                WebkitTextStroke: '1px rgba(255,255,255,0.3)'
+              }}
+            >Featured Destinations</span>
           </h2>
 
-          <p className="text-lg md:text-xl text-slate-600 max-w-3xl mx-auto">
+          <p className="text-lg md:text-xl text-white max-w-3xl mx-auto font-medium drop-shadow-lg">
             From misty tea hills to sunlit beaches and ancient cities, step into the landscapes that make Sri Lanka feel alive.
           </p>
         </motion.div>
@@ -351,20 +356,30 @@ const FeaturedDestinations = () => {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-8 border-t border-emerald-100 text-slate-900">
-          {[ 
-            { value: '25+', label: 'Destinations' },
-            { value: '8', label: 'UNESCO Sites' },
-            { value: '1,340km', label: 'Coastline' },
-            { value: '4.9★', label: 'Average Rating' }
-          ].map((stat, idx) => (
-            <div key={idx} className="text-center">
-              <div className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-1">
-                {stat.value}
-              </div>
-              <div className="text-sm md:text-base text-slate-700 font-semibold tracking-wide">{stat.label}</div>
-            </div>
-          ))}
+        <div className="bg-slate-900 rounded-3xl p-6 md:p-8 border border-white/10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+            {[
+              { value: '25+', label: 'Destinations', icon: '🗺️' },
+              { value: '8', label: 'UNESCO Sites', icon: '🏛️' },
+              { value: '1,340km', label: 'Coastline', icon: '🏖️' },
+              { value: '4.9★', label: 'Average Rating', icon: '⭐' }
+            ].map((stat, idx) => (
+              <motion.div
+                key={idx}
+                className="text-center"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.1 }}
+              >
+                <div className="text-3xl mb-2">{stat.icon}</div>
+                <div className="text-3xl md:text-4xl font-extrabold text-white mb-1">
+                  {stat.value}
+                </div>
+                <div className="text-sm md:text-base text-gray-300 font-semibold tracking-wide">{stat.label}</div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

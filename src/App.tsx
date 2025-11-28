@@ -185,6 +185,11 @@ const VehicleChat = lazy(() => import('@/pages/vehicle-rental/VehicleChat'));
 const NotificationCenter = lazy(() => import('@/pages/vehicle-rental/NotificationCenter'));
 const VehicleNotificationPreferences = lazy(() => import('@/pages/vehicle-rental/VehicleNotificationPreferences'));
 
+// Phase 4: Reviews & Rating System
+const VehicleReviewSubmit = lazy(() => import('@/pages/vehicle-rental/VehicleReviewSubmit'));
+const OwnerReviewResponses = lazy(() => import('@/pages/vehicle-rental/OwnerReviewResponses'));
+const AdminReviewManagement = lazy(() => import('@/pages/admin/AdminReviewManagement'));
+
 // Vehicle Rental Admin Pages
 const VehicleApproval = lazy(() => import('@/pages/admin/vehicle-rental/VehicleApproval'));
 const OwnerApproval = lazy(() => import('@/pages/admin/vehicle-rental/OwnerApproval'));
@@ -350,6 +355,10 @@ function App() {
                 <Route path="/vehicle-rental/notifications" element={<NotificationCenter />} />
                 <Route path="/vehicle-rental/notification-preferences" element={<VehicleNotificationPreferences />} />
 
+                {/* Phase 4: Reviews & Rating System */}
+                <Route path="/vehicle-rental/review/:bookingId" element={<VehicleReviewSubmit />} />
+                <Route path="/vehicle-rental/owner/reviews" element={<OwnerReviewResponses />} />
+
                 {/* Vendor Platform */}
                 <Route path="/vendor/register" element={withSiteChrome(VendorRegistration)} />
                 <Route path="/vendor/dashboard" element={<VendorDashboard />} />
@@ -375,6 +384,7 @@ function App() {
                 <Route path="/admin/custom-trips" element={<CustomTripRequestsAdmin />} />
                 <Route path="/admin/vehicle-rental/vehicles" element={<VehicleApproval />} />
                 <Route path="/admin/vehicle-rental/owners" element={<OwnerApproval />} />
+                <Route path="/admin/vehicle-rental/reviews" element={<AdminReviewManagement />} />
                 {/* Admin panel is now at: https://recharge-travels-admin.web.app */}
                 <Route path="/admin" element={<AdminRedirect />} />
                 <Route path="/admin-panel" element={<AdminRedirect />} />

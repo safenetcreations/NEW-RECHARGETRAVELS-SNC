@@ -837,6 +837,311 @@ const emailTemplates = {
       </html>
     `,
     text: `Trip Reminder! Your adventure to ${data.destination} is ${data.daysUntil} days away!`
+  }),
+
+  // ==========================================
+  // VENDOR PLATFORM EMAIL TEMPLATES
+  // ==========================================
+
+  vendorApplicationSubmitted: (data: any) => ({
+    subject: '🎉 Application Received - Recharge Travels Vendor Partner',
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+          <div style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); padding: 30px; text-align: center;">
+            <img src="https://recharge-travels-73e76.web.app/logo-v2.png" alt="Recharge Travels" style="height: 50px; margin-bottom: 10px;">
+            <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Welcome to Our Partner Program!</h1>
+            <p style="color: #fed7aa; margin: 10px 0 0;">Recharge Travels Vendor Partnership</p>
+          </div>
+
+          <div style="padding: 40px 30px;">
+            <h2 style="color: #333; margin-top: 0;">Hello ${data.vendorName}! 👋</h2>
+            <p style="color: #666; font-size: 16px; line-height: 1.6;">
+              Thank you for applying to become a Recharge Travels Vendor Partner! We're excited to have you interested in joining our platform.
+            </p>
+
+            <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 25px; margin: 25px 0; border-left: 4px solid #f97316;">
+              <h3 style="color: #92400e; margin-top: 0; font-size: 18px;">📋 Application Details</h3>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; color: #78350f;">Business Name:</td>
+                  <td style="padding: 8px 0; color: #92400e; font-weight: bold; text-align: right;">${data.businessName || 'Not specified'}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #78350f;">Service Category:</td>
+                  <td style="padding: 8px 0; color: #92400e; text-align: right;">${data.category || 'Not specified'}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #78350f;">Application ID:</td>
+                  <td style="padding: 8px 0; color: #92400e; text-align: right;">${data.vendorId || 'N/A'}</td>
+                </tr>
+              </table>
+            </div>
+
+            <div style="background-color: #f0fdf4; border-radius: 8px; padding: 20px; margin: 20px 0;">
+              <h4 style="color: #166534; margin-top: 0;">✅ What happens next?</h4>
+              <ul style="color: #15803d; padding-left: 20px; line-height: 2;">
+                <li>Our team will review your application within 24-48 hours</li>
+                <li>We may contact you for additional information if needed</li>
+                <li>You'll receive an email once your application is approved</li>
+                <li>After approval, you can start listing your services!</li>
+              </ul>
+            </div>
+
+            <div style="background-color: #eff6ff; border-radius: 8px; padding: 20px; margin: 20px 0;">
+              <h4 style="color: #1e40af; margin-top: 0;">📚 While you wait...</h4>
+              <ul style="color: #1d4ed8; padding-left: 20px; line-height: 2;">
+                <li>Prepare high-quality photos of your services</li>
+                <li>Think about your pricing strategy</li>
+                <li>Review our <a href="https://recharge-travels-73e76.web.app/vendor-guidelines" style="color: #f97316;">Vendor Guidelines</a></li>
+              </ul>
+            </div>
+
+            <p style="color: #666; font-size: 16px; line-height: 1.6;">
+              If you have any questions, our vendor support team is here to help!
+            </p>
+          </div>
+
+          <div style="background-color: #f8f9fa; padding: 25px 30px; text-align: center;">
+            <p style="color: #666; margin: 0 0 10px; font-size: 14px;">Vendor Support:</p>
+            <p style="color: #333; margin: 0;">
+              📧 <a href="mailto:info@rechargetravels.com" style="color: #f97316; text-decoration: none;">info@rechargetravels.com</a>
+            </p>
+            <p style="color: #333; margin: 10px 0 0;">
+              <a href="https://wa.me/94777721999" style="color: #25D366; text-decoration: none;">
+                📱 WhatsApp: +94 77 772 1999
+              </a>
+            </p>
+          </div>
+
+          <div style="background-color: #333; padding: 20px 30px; text-align: center;">
+            <p style="color: #999; margin: 0; font-size: 12px;">
+              © ${new Date().getFullYear()} Recharge Travels. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+    text: `Welcome to Recharge Travels Partner Program!\n\nHello ${data.vendorName},\n\nThank you for applying to become a Vendor Partner!\n\nBusiness: ${data.businessName || 'Not specified'}\nCategory: ${data.category || 'Not specified'}\n\nWe'll review your application within 24-48 hours.\n\nVendor Support: info@rechargetravels.com | WhatsApp: +94 77 772 1999`
+  }),
+
+  vendorApplicationApproved: (data: any) => ({
+    subject: '🎉 Congratulations! Your Vendor Application is Approved',
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+          <div style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); padding: 30px; text-align: center;">
+            <img src="https://recharge-travels-73e76.web.app/logo-v2.png" alt="Recharge Travels" style="height: 50px; margin-bottom: 10px;">
+            <h1 style="color: #ffffff; margin: 0; font-size: 28px;">🎉 You're Approved!</h1>
+            <p style="color: #bbf7d0; margin: 10px 0 0;">Welcome to the Recharge Travels Family</p>
+          </div>
+
+          <div style="padding: 40px 30px;">
+            <h2 style="color: #333; margin-top: 0;">Congratulations ${data.vendorName}! 🚀</h2>
+            <p style="color: #666; font-size: 16px; line-height: 1.6;">
+              Great news! Your vendor application has been <strong style="color: #16a34a;">approved</strong> and you are now an official Recharge Travels Partner.
+            </p>
+
+            <div style="background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); border-radius: 12px; padding: 25px; margin: 25px 0; border-left: 4px solid #22c55e;">
+              <h3 style="color: #166534; margin-top: 0; font-size: 18px;">✅ Account Status</h3>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; color: #166534;">Status:</td>
+                  <td style="padding: 8px 0; color: #15803d; font-weight: bold; text-align: right;">APPROVED ✓</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #166534;">Business:</td>
+                  <td style="padding: 8px 0; color: #15803d; text-align: right;">${data.businessName || data.vendorName}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #166534;">Category:</td>
+                  <td style="padding: 8px 0; color: #15803d; text-align: right;">${data.category || 'Vendor Partner'}</td>
+                </tr>
+              </table>
+            </div>
+
+            <div style="background-color: #eff6ff; border-radius: 8px; padding: 20px; margin: 20px 0;">
+              <h4 style="color: #1e40af; margin-top: 0;">🚀 Getting Started</h4>
+              <ul style="color: #1d4ed8; padding-left: 20px; line-height: 2;">
+                <li>Log in to your <a href="https://recharge-travels-73e76.web.app/vendor/dashboard" style="color: #f97316;">Vendor Dashboard</a></li>
+                <li>Complete your business profile</li>
+                <li>Add your first service listing</li>
+                <li>Set your availability and pricing</li>
+                <li>Start receiving bookings!</li>
+              </ul>
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="https://recharge-travels-73e76.web.app/vendor/dashboard"
+                 style="display: inline-block; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: #ffffff;
+                        text-decoration: none; padding: 15px 35px; border-radius: 30px; font-weight: bold; font-size: 16px;">
+                Go to Vendor Dashboard
+              </a>
+            </div>
+          </div>
+
+          <div style="background-color: #333; padding: 20px 30px; text-align: center;">
+            <p style="color: #999; margin: 0; font-size: 12px;">
+              © ${new Date().getFullYear()} Recharge Travels. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+    text: `Congratulations ${data.vendorName}!\n\nYour vendor application has been APPROVED!\n\nBusiness: ${data.businessName || data.vendorName}\nCategory: ${data.category || 'Vendor Partner'}\n\nLog in to your dashboard to start receiving bookings:\nhttps://recharge-travels-73e76.web.app/vendor/dashboard`
+  }),
+
+  vendorApplicationRejected: (data: any) => ({
+    subject: 'Update on Your Vendor Application - Recharge Travels',
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+          <div style="background: linear-gradient(135deg, #64748b 0%, #475569 100%); padding: 30px; text-align: center;">
+            <img src="https://recharge-travels-73e76.web.app/logo-v2.png" alt="Recharge Travels" style="height: 50px; margin-bottom: 10px;">
+            <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Application Update</h1>
+            <p style="color: #cbd5e1; margin: 10px 0 0;">Recharge Travels Vendor Partner Program</p>
+          </div>
+
+          <div style="padding: 40px 30px;">
+            <h2 style="color: #333; margin-top: 0;">Hello ${data.vendorName},</h2>
+            <p style="color: #666; font-size: 16px; line-height: 1.6;">
+              Thank you for your interest in becoming a Recharge Travels Vendor Partner. After reviewing your application, we regret to inform you that we are unable to approve it at this time.
+            </p>
+
+            <div style="background-color: #fef2f2; border-radius: 12px; padding: 25px; margin: 25px 0; border-left: 4px solid #ef4444;">
+              <h3 style="color: #991b1b; margin-top: 0; font-size: 18px;">📋 Reason</h3>
+              <p style="color: #b91c1c; margin: 0;">${data.rejectionReason || 'Your application did not meet our current requirements. Please ensure all information and documents are complete and accurate.'}</p>
+            </div>
+
+            <div style="background-color: #fefce8; border-radius: 8px; padding: 20px; margin: 20px 0;">
+              <h4 style="color: #854d0e; margin-top: 0;">📝 How to Reapply</h4>
+              <ul style="color: #a16207; padding-left: 20px; line-height: 2;">
+                <li>Review the feedback provided above</li>
+                <li>Ensure all documents are clear and valid</li>
+                <li>Update your business information</li>
+                <li>Submit a new application</li>
+              </ul>
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="https://recharge-travels-73e76.web.app/vendor/register"
+                 style="display: inline-block; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: #ffffff;
+                        text-decoration: none; padding: 15px 35px; border-radius: 30px; font-weight: bold; font-size: 16px;">
+                Apply Again
+              </a>
+            </div>
+
+            <p style="color: #666; font-size: 16px; line-height: 1.6;">
+              If you believe this decision was made in error or need clarification, please contact our vendor support team.
+            </p>
+          </div>
+
+          <div style="background-color: #f8f9fa; padding: 25px 30px; text-align: center;">
+            <p style="color: #666; margin: 0 0 10px; font-size: 14px;">Vendor Support:</p>
+            <p style="color: #333; margin: 0;">
+              📧 <a href="mailto:info@rechargetravels.com" style="color: #f97316; text-decoration: none;">info@rechargetravels.com</a>
+            </p>
+            <p style="color: #333; margin: 10px 0 0;">
+              <a href="https://wa.me/94777721999" style="color: #25D366; text-decoration: none;">
+                📱 WhatsApp: +94 77 772 1999
+              </a>
+            </p>
+          </div>
+
+          <div style="background-color: #333; padding: 20px 30px; text-align: center;">
+            <p style="color: #999; margin: 0; font-size: 12px;">
+              © ${new Date().getFullYear()} Recharge Travels. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+    text: `Hello ${data.vendorName},\n\nWe regret to inform you that your vendor application could not be approved.\n\nReason: ${data.rejectionReason || 'Application did not meet requirements.'}\n\nYou may update your information and reapply at:\nhttps://recharge-travels-73e76.web.app/vendor/register\n\nContact: info@rechargetravels.com | WhatsApp: +94 77 772 1999`
+  }),
+
+  vendorNewBooking: (data: any) => ({
+    subject: `🎉 New Booking Alert - ${data.serviceName}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+          <div style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); padding: 30px; text-align: center;">
+            <h1 style="color: #ffffff; margin: 0; font-size: 28px;">🎉 New Booking!</h1>
+          </div>
+
+          <div style="padding: 40px 30px;">
+            <h2 style="color: #333; margin-top: 0;">Great news ${data.vendorName}!</h2>
+            <p style="color: #666; font-size: 16px; line-height: 1.6;">
+              You have received a new booking for <strong>${data.serviceName}</strong>
+            </p>
+
+            <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 25px; margin: 25px 0; border-left: 4px solid #f97316;">
+              <h3 style="color: #92400e; margin-top: 0; font-size: 18px;">📋 Booking Details</h3>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; color: #78350f;">Customer:</td>
+                  <td style="padding: 8px 0; color: #92400e; font-weight: bold; text-align: right;">${data.customerName}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #78350f;">Date:</td>
+                  <td style="padding: 8px 0; color: #92400e; text-align: right;">${data.bookingDate}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #78350f;">Guests:</td>
+                  <td style="padding: 8px 0; color: #92400e; text-align: right;">${data.guestCount || 1}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #78350f;">Amount:</td>
+                  <td style="padding: 8px 0; color: #92400e; font-weight: bold; text-align: right;">${data.amount} ${data.currency || 'USD'}</td>
+                </tr>
+              </table>
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="https://recharge-travels-73e76.web.app/vendor/dashboard"
+                 style="display: inline-block; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: #ffffff;
+                        text-decoration: none; padding: 15px 35px; border-radius: 30px; font-weight: bold; font-size: 16px;">
+                View Booking
+              </a>
+            </div>
+          </div>
+
+          <div style="background-color: #333; padding: 20px 30px; text-align: center;">
+            <p style="color: #999; margin: 0; font-size: 12px;">
+              © ${new Date().getFullYear()} Recharge Travels. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+    text: `New Booking Alert!\n\nHello ${data.vendorName},\n\nYou have a new booking for ${data.serviceName}!\n\nCustomer: ${data.customerName}\nDate: ${data.bookingDate}\nGuests: ${data.guestCount || 1}\nAmount: ${data.amount} ${data.currency || 'USD'}\n\nView in dashboard: https://recharge-travels-73e76.web.app/vendor/dashboard`
   })
 };
 
