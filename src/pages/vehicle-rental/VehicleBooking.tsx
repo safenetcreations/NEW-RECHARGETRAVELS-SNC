@@ -19,8 +19,31 @@ import {
   AlertCircle,
   Info,
   FileText,
-  Star
+  Star,
+  Plane,
+  Building,
+  Home,
+  Navigation,
+  Baby,
+  Wifi,
+  Fuel,
+  Sparkles,
+  Users,
+  Crown,
+  Zap,
+  CheckCircle2,
+  BadgeCheck,
+  Globe
 } from 'lucide-react';
+import { 
+  INSURANCE_PACKAGES, 
+  DELIVERY_OPTIONS, 
+  ADDITIONAL_SERVICES,
+  InsurancePackage,
+  DeliveryType,
+  AdditionalService,
+  DEFAULT_COMMISSION
+} from '@/types/vehicleRental';
 
 // Mock vehicle for booking
 const mockVehicle = {
@@ -52,9 +75,10 @@ const mockVehicle = {
 
 const steps = [
   { id: 1, title: 'Details', icon: Calendar },
-  { id: 2, title: 'Personal Info', icon: User },
-  { id: 3, title: 'Payment', icon: CreditCard },
-  { id: 4, title: 'Confirmation', icon: Check },
+  { id: 2, title: 'Protection & Add-ons', icon: Shield },
+  { id: 3, title: 'Personal Info', icon: User },
+  { id: 4, title: 'Payment', icon: CreditCard },
+  { id: 5, title: 'Confirmation', icon: Check },
 ];
 
 const VehicleBooking = () => {
@@ -80,18 +104,24 @@ const VehicleBooking = () => {
     endTime: '18:00',
     withDriver: withDriverParam,
     rentalPeriod: periodParam as 'hourly' | 'daily' | 'weekly' | 'monthly',
-    pickupOption: 'self' as 'self' | 'delivery',
+    deliveryType: 'self_pickup' as DeliveryType,
     deliveryAddress: '',
     
-    // Step 2: Personal Info
+    // Step 2: Protection & Add-ons
+    insurancePackage: 'silver' as InsurancePackage, // Default to silver (recommended)
+    selectedServices: [] as AdditionalService[],
+    
+    // Step 3: Personal Info
     fullName: '',
     email: '',
     phone: '',
-    nicNumber: '',
+    passportNumber: '',
+    passportCountry: '',
     licenseNumber: '',
+    licenseCountry: '',
     emergencyContact: '',
     
-    // Step 3: Payment
+    // Step 4: Payment
     paymentMethod: 'card' as 'card' | 'bank' | 'cash',
     cardNumber: '',
     cardExpiry: '',
@@ -114,21 +144,85 @@ const VehicleBooking = () => {
     return diff > 0 ? diff : 1;
   };
 
-  // Calculate total price
+  // Get selected insurance package
+  const getSelectedInsurance = () => {
+    return INSURANCE_PACKAGES.find(p => p.id === formData.insurancePackage);
+  };
+
+  // Get selected delivery option
+  const getSelectedDelivery = () => {
+    return DELIVERY_OPTIONS.find(d => d.id === formData.deliveryType);
+  };
+
+  // Calculate additional services cost
+  const calculateServicesCost = () => {
+    const days = calculateDays();
+    return formData.selectedServices.reduce((total, serviceId) => {
+      const service = ADDITIONAL_SERVICES.find(s => s.id === serviceId);
+      if (service) {
+        return total + (service.oneTime ? service.pricePerDay : service.pricePerDay * days);
+      }
+      return total;
+    }, 0);
+  };
+
+  // Calculate total price with all add-ons
   const calculateTotal = () => {
     const days = calculateDays();
     const baseRate = formData.withDriver ? vehicle.pricing.withDriverDailyRate : vehicle.pricing.dailyRate;
     const rentalCost = baseRate * days;
-    const deliveryFee = formData.pickupOption === 'delivery' ? vehicle.pricing.deliveryFee : 0;
-    const serviceFee = Math.round(rentalCost * 0.05); // 5% service fee
+    
+    // Insurance
+    const insurance = getSelectedInsurance();
+    const insuranceCost = insurance ? insurance.pricePerDay * days : 0;
+    
+    // Delivery
+    const delivery = getSelectedDelivery();
+    const deliveryFee = delivery ? delivery.price : 0;
+    
+    // Additional services
+    const servicesCost = calculateServicesCost();
+    
+    // Service fee (10% of rental)
+    const serviceFee = Math.round(rentalCost * 0.10);
+    
+    // Calculate platform revenue breakdown
+    const rentalCommission = Math.round(rentalCost * (DEFAULT_COMMISSION.dailyCommission / 100));
+    const insuranceCommission = insurance ? Math.round(insuranceCost * (insurance.commission / 100)) : 0;
+    const servicesCommission = formData.selectedServices.reduce((total, serviceId) => {
+      const service = ADDITIONAL_SERVICES.find(s => s.id === serviceId);
+      if (service) {
+        const cost = service.oneTime ? service.pricePerDay : service.pricePerDay * days;
+        return total + Math.round(cost * (service.commission / 100));
+      }
+      return total;
+    }, 0);
+    
+    const subtotal = rentalCost + insuranceCost + deliveryFee + servicesCost + serviceFee;
     
     return {
+      days,
       rentalCost,
+      insuranceCost,
       deliveryFee,
+      servicesCost,
       serviceFee,
       securityDeposit: vehicle.pricing.securityDeposit,
-      total: rentalCost + deliveryFee + serviceFee,
-      grandTotal: rentalCost + deliveryFee + serviceFee + vehicle.pricing.securityDeposit
+      subtotal,
+      grandTotal: subtotal + vehicle.pricing.securityDeposit,
+      
+      // Revenue breakdown (for transparency)
+      platformRevenue: {
+        rentalCommission,
+        serviceFeeEarned: serviceFee,
+        insuranceCommission,
+        deliveryFeeEarned: deliveryFee, // 100% delivery fee
+        servicesCommission,
+        total: rentalCommission + serviceFee + insuranceCommission + deliveryFee + servicesCommission
+      },
+      
+      // Owner payout
+      ownerPayout: rentalCost - rentalCommission + (insuranceCost - insuranceCommission)
     };
   };
 
@@ -136,11 +230,15 @@ const VehicleBooking = () => {
 
   const canProceed = () => {
     switch (currentStep) {
-      case 1:
-        return formData.startDate && formData.endDate && (formData.pickupOption !== 'delivery' || formData.deliveryAddress);
+      case 1: {
+        const needsDeliveryAddress = formData.deliveryType !== 'self_pickup';
+        return formData.startDate && formData.endDate && (!needsDeliveryAddress || formData.deliveryAddress);
+      }
       case 2:
-        return formData.fullName && formData.email && formData.phone && formData.nicNumber && formData.licenseNumber;
+        return true; // Insurance and add-ons are optional (but insurance defaults to silver)
       case 3:
+        return formData.fullName && formData.email && formData.phone && formData.passportNumber && formData.licenseNumber;
+      case 4:
         if (!formData.agreeTerms) return false;
         if (formData.paymentMethod === 'card') {
           return formData.cardNumber && formData.cardExpiry && formData.cardCvv;
@@ -157,7 +255,7 @@ const VehicleBooking = () => {
     await new Promise(resolve => setTimeout(resolve, 2000));
     setIsProcessing(false);
     setBookingComplete(true);
-    setCurrentStep(4);
+    setCurrentStep(5);
   };
 
   // Booking Confirmation Screen
@@ -303,7 +401,7 @@ const VehicleBooking = () => {
                 {currentStep === 1 && (
                   <div>
                     <h2 className="text-xl font-bold text-gray-900 mb-2">Booking Details</h2>
-                    <p className="text-gray-600 mb-6">Select your rental dates and options</p>
+                    <p className="text-gray-600 mb-6">Select your rental dates and delivery options</p>
 
                     <div className="space-y-6">
                       {/* Dates */}
@@ -373,44 +471,77 @@ const VehicleBooking = () => {
                         </div>
                       </div>
 
-                      {/* Pickup Option */}
+                      {/* Enhanced Delivery Options */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Pickup Option</label>
-                        <div className="grid grid-cols-2 gap-3">
-                          <button
-                            onClick={() => updateFormData('pickupOption', 'self')}
-                            className={`p-4 rounded-xl border-2 transition-all ${
-                              formData.pickupOption === 'self' ? 'border-amber-500 bg-amber-50' : 'border-gray-200'
-                            }`}
-                          >
-                            <div className="font-medium text-gray-900">Self Pickup</div>
-                            <div className="text-sm text-gray-500">Free</div>
-                          </button>
-                          <button
-                            onClick={() => updateFormData('pickupOption', 'delivery')}
-                            className={`p-4 rounded-xl border-2 transition-all ${
-                              formData.pickupOption === 'delivery' ? 'border-amber-500 bg-amber-50' : 'border-gray-200'
-                            }`}
-                          >
-                            <div className="font-medium text-gray-900">Home Delivery</div>
-                            <div className="text-sm text-gray-500">${vehicle.pricing.deliveryFee}</div>
-                          </button>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <div className="flex items-center gap-2">
+                            <MapPin className="w-4 h-4" />
+                            <span>Delivery Option</span>
+                          </div>
+                        </label>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                          {DELIVERY_OPTIONS.map((option) => {
+                            const icons: Record<string, any> = {
+                              self_pickup: MapPin,
+                              airport: Plane,
+                              hotel: Building,
+                              city: Home,
+                              custom: Navigation
+                            };
+                            const Icon = icons[option.id] || MapPin;
+                            
+                            return (
+                              <button
+                                key={option.id}
+                                onClick={() => updateFormData('deliveryType', option.id)}
+                                className={`p-4 rounded-xl border-2 transition-all text-left ${
+                                  formData.deliveryType === option.id 
+                                    ? 'border-amber-500 bg-amber-50' 
+                                    : 'border-gray-200 hover:border-gray-300'
+                                }`}
+                              >
+                                <Icon className={`w-5 h-5 mb-2 ${formData.deliveryType === option.id ? 'text-amber-600' : 'text-gray-400'}`} />
+                                <div className="font-medium text-gray-900 text-sm">{option.name}</div>
+                                <div className="text-xs text-gray-500">
+                                  {option.price === 0 ? 'Free' : `$${option.price}`}
+                                </div>
+                                {option.estimatedTime && (
+                                  <div className="text-xs text-gray-400 mt-1">{option.estimatedTime}</div>
+                                )}
+                              </button>
+                            );
+                          })}
                         </div>
 
-                        {formData.pickupOption === 'delivery' && (
+                        {/* Delivery Address Field */}
+                        {formData.deliveryType !== 'self_pickup' && (
                           <div className="mt-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Delivery Address *</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              {formData.deliveryType === 'airport' && 'Flight Number & Arrival Time *'}
+                              {formData.deliveryType === 'hotel' && 'Hotel Name & Address *'}
+                              {formData.deliveryType === 'city' && 'Full Delivery Address *'}
+                              {formData.deliveryType === 'custom' && 'Custom Location Details *'}
+                            </label>
                             <input
                               type="text"
                               value={formData.deliveryAddress}
                               onChange={(e) => updateFormData('deliveryAddress', e.target.value)}
-                              placeholder="Enter your full address"
+                              placeholder={
+                                formData.deliveryType === 'airport' ? 'e.g., UL 504 arriving at 14:30' :
+                                formData.deliveryType === 'hotel' ? 'e.g., Cinnamon Grand Colombo, Colombo 03' :
+                                'Enter your full address'
+                              }
                               className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-400/50 focus:border-amber-400"
                             />
+                            <p className="text-xs text-gray-500 mt-1">
+                              {formData.deliveryType === 'airport' && 'We\'ll meet you at the arrivals hall with your vehicle'}
+                              {formData.deliveryType === 'hotel' && 'Driver will meet you at hotel lobby/reception'}
+                            </p>
                           </div>
                         )}
 
-                        {formData.pickupOption === 'self' && (
+                        {/* Self Pickup Location */}
+                        {formData.deliveryType === 'self_pickup' && (
                           <div className="mt-4 p-4 bg-gray-50 rounded-xl">
                             <div className="flex items-start gap-3">
                               <MapPin className="w-5 h-5 text-gray-500 flex-shrink-0 mt-0.5" />
@@ -426,11 +557,203 @@ const VehicleBooking = () => {
                   </div>
                 )}
 
-                {/* Step 2: Personal Info */}
+                {/* Step 2: Protection & Add-ons */}
                 {currentStep === 2 && (
                   <div>
+                    <h2 className="text-xl font-bold text-gray-900 mb-2">Protection & Add-ons</h2>
+                    <p className="text-gray-600 mb-6">Choose your insurance coverage and optional services</p>
+
+                    <div className="space-y-8">
+                      {/* Insurance Packages */}
+                      <div>
+                        <div className="flex items-center gap-2 mb-4">
+                          <Shield className="w-5 h-5 text-amber-600" />
+                          <h3 className="font-semibold text-gray-900">Insurance Protection</h3>
+                        </div>
+                        
+                        <div className="space-y-3">
+                          {/* No Insurance Option */}
+                          <button
+                            onClick={() => updateFormData('insurancePackage', 'none')}
+                            className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
+                              formData.insurancePackage === 'none' 
+                                ? 'border-amber-500 bg-amber-50' 
+                                : 'border-gray-200 hover:border-gray-300'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <div className="font-medium text-gray-900">No Additional Protection</div>
+                                <div className="text-sm text-gray-500">Rely on your own travel insurance</div>
+                              </div>
+                              <div className="text-right">
+                                <div className="font-bold text-gray-900">$0</div>
+                              </div>
+                            </div>
+                          </button>
+
+                          {/* Insurance Packages */}
+                          {INSURANCE_PACKAGES.map((pkg) => {
+                            const icons: Record<string, any> = {
+                              basic: Shield,
+                              silver: BadgeCheck,
+                              gold: Crown
+                            };
+                            const Icon = icons[pkg.id] || Shield;
+                            const colors: Record<string, string> = {
+                              basic: 'text-gray-500',
+                              silver: 'text-blue-500',
+                              gold: 'text-amber-500'
+                            };
+                            
+                            return (
+                              <button
+                                key={pkg.id}
+                                onClick={() => updateFormData('insurancePackage', pkg.id)}
+                                className={`w-full p-4 rounded-xl border-2 transition-all text-left relative ${
+                                  formData.insurancePackage === pkg.id 
+                                    ? 'border-amber-500 bg-amber-50' 
+                                    : 'border-gray-200 hover:border-gray-300'
+                                }`}
+                              >
+                                {pkg.recommended && (
+                                  <div className="absolute -top-2 right-4 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">
+                                    Recommended
+                                  </div>
+                                )}
+                                <div className="flex items-start gap-4">
+                                  <Icon className={`w-6 h-6 ${colors[pkg.id]} flex-shrink-0`} />
+                                  <div className="flex-1">
+                                    <div className="flex items-center justify-between">
+                                      <div className="font-medium text-gray-900">{pkg.name}</div>
+                                      <div className="text-right">
+                                        <div className="font-bold text-amber-600">${pkg.pricePerDay}/day</div>
+                                        <div className="text-xs text-gray-500">${pkg.pricePerDay * calculateDays()} total</div>
+                                      </div>
+                                    </div>
+                                    <div className="text-sm text-gray-500 mt-1">Deductible: ${pkg.deductible}</div>
+                                    <div className="flex flex-wrap gap-2 mt-2">
+                                      {pkg.coverage.map((item, idx) => (
+                                        <span key={idx} className="inline-flex items-center gap-1 text-xs bg-gray-100 px-2 py-1 rounded">
+                                          <CheckCircle2 className="w-3 h-3 text-green-500" />
+                                          {item}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Additional Services */}
+                      <div>
+                        <div className="flex items-center gap-2 mb-4">
+                          <Zap className="w-5 h-5 text-amber-600" />
+                          <h3 className="font-semibold text-gray-900">Additional Services</h3>
+                        </div>
+                        
+                        <div className="grid sm:grid-cols-2 gap-3">
+                          {ADDITIONAL_SERVICES.map((service) => {
+                            const icons: Record<string, any> = {
+                              gps: Navigation,
+                              child_seat: Baby,
+                              wifi_hotspot: Wifi,
+                              fuel_delivery: Fuel,
+                              vehicle_wash: Sparkles,
+                              extra_driver: Users
+                            };
+                            const Icon = icons[service.id] || Zap;
+                            const isSelected = formData.selectedServices.includes(service.id);
+                            
+                            return (
+                              <button
+                                key={service.id}
+                                onClick={() => {
+                                  if (isSelected) {
+                                    updateFormData('selectedServices', formData.selectedServices.filter(s => s !== service.id));
+                                  } else {
+                                    updateFormData('selectedServices', [...formData.selectedServices, service.id]);
+                                  }
+                                }}
+                                className={`p-4 rounded-xl border-2 transition-all text-left ${
+                                  isSelected 
+                                    ? 'border-amber-500 bg-amber-50' 
+                                    : 'border-gray-200 hover:border-gray-300'
+                                }`}
+                              >
+                                <div className="flex items-start gap-3">
+                                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                                    isSelected ? 'bg-amber-500 text-white' : 'bg-gray-100 text-gray-500'
+                                  }`}>
+                                    <Icon className="w-5 h-5" />
+                                  </div>
+                                  <div className="flex-1">
+                                    <div className="flex items-center justify-between">
+                                      <div className="font-medium text-gray-900">{service.name}</div>
+                                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                                        isSelected ? 'bg-amber-500 border-amber-500' : 'border-gray-300'
+                                      }`}>
+                                        {isSelected && <Check className="w-3 h-3 text-white" />}
+                                      </div>
+                                    </div>
+                                    <div className="text-xs text-gray-500 mt-0.5">{service.description}</div>
+                                    <div className="font-medium text-amber-600 text-sm mt-1">
+                                      ${service.pricePerDay}{service.oneTime ? '' : '/day'}
+                                      {!service.oneTime && calculateDays() > 1 && (
+                                        <span className="text-gray-400 font-normal"> (${service.pricePerDay * calculateDays()} total)</span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Services Summary */}
+                      {(formData.insurancePackage !== 'none' || formData.selectedServices.length > 0) && (
+                        <div className="bg-gray-50 rounded-xl p-4">
+                          <h4 className="font-medium text-gray-900 mb-2">Selected Add-ons Summary</h4>
+                          <div className="space-y-1 text-sm">
+                            {formData.insurancePackage !== 'none' && (
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">
+                                  {INSURANCE_PACKAGES.find(p => p.id === formData.insurancePackage)?.name} ({calculateDays()} days)
+                                </span>
+                                <span className="font-medium">${pricing.insuranceCost}</span>
+                              </div>
+                            )}
+                            {formData.selectedServices.map(serviceId => {
+                              const service = ADDITIONAL_SERVICES.find(s => s.id === serviceId);
+                              if (!service) return null;
+                              const cost = service.oneTime ? service.pricePerDay : service.pricePerDay * calculateDays();
+                              return (
+                                <div key={serviceId} className="flex justify-between">
+                                  <span className="text-gray-600">{service.name}</span>
+                                  <span className="font-medium">${cost}</span>
+                                </div>
+                              );
+                            })}
+                            <div className="flex justify-between pt-2 mt-2 border-t border-gray-200 font-medium">
+                              <span>Add-ons Total</span>
+                              <span className="text-amber-600">${pricing.insuranceCost + pricing.servicesCost}</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 3: Personal Info (International Tourists) */}
+                {currentStep === 3 && (
+                  <div>
                     <h2 className="text-xl font-bold text-gray-900 mb-2">Personal Information</h2>
-                    <p className="text-gray-600 mb-6">Enter your details for the rental agreement</p>
+                    <p className="text-gray-600 mb-6">Enter your details for the rental agreement (International ID required)</p>
 
                     <div className="space-y-4">
                       <div>
@@ -439,7 +762,7 @@ const VehicleBooking = () => {
                           type="text"
                           value={formData.fullName}
                           onChange={(e) => updateFormData('fullName', e.target.value)}
-                          placeholder="As shown on NIC/Passport"
+                          placeholder="As shown on Passport"
                           className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-400/50 focus:border-amber-400"
                         />
                       </div>
@@ -456,37 +779,74 @@ const VehicleBooking = () => {
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number (WhatsApp) *</label>
                           <input
                             type="tel"
                             value={formData.phone}
                             onChange={(e) => updateFormData('phone', e.target.value)}
-                            placeholder="+94 77 123 4567"
+                            placeholder="+1 234 567 8900"
                             className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-400/50 focus:border-amber-400"
                           />
                         </div>
                       </div>
 
-                      <div className="grid sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">NIC Number *</label>
-                          <input
-                            type="text"
-                            value={formData.nicNumber}
-                            onChange={(e) => updateFormData('nicNumber', e.target.value)}
-                            placeholder="123456789V or 199012345678"
-                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-400/50 focus:border-amber-400"
-                          />
+                      {/* Passport Information */}
+                      <div className="bg-blue-50 rounded-xl p-4">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Globe className="w-5 h-5 text-blue-600" />
+                          <span className="font-medium text-blue-900">Passport Information</span>
                         </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Driving License Number *</label>
-                          <input
-                            type="text"
-                            value={formData.licenseNumber}
-                            onChange={(e) => updateFormData('licenseNumber', e.target.value)}
-                            placeholder="B1234567"
-                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-400/50 focus:border-amber-400"
-                          />
+                        <div className="grid sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Passport Number *</label>
+                            <input
+                              type="text"
+                              value={formData.passportNumber}
+                              onChange={(e) => updateFormData('passportNumber', e.target.value)}
+                              placeholder="e.g., AB1234567"
+                              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-400/50 focus:border-amber-400 bg-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Passport Country *</label>
+                            <input
+                              type="text"
+                              value={formData.passportCountry}
+                              onChange={(e) => updateFormData('passportCountry', e.target.value)}
+                              placeholder="e.g., United States"
+                              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-400/50 focus:border-amber-400 bg-white"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Driving License */}
+                      <div className="bg-green-50 rounded-xl p-4">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Car className="w-5 h-5 text-green-600" />
+                          <span className="font-medium text-green-900">Driving License (Required for Self-Drive)</span>
+                        </div>
+                        <div className="grid sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">License Number *</label>
+                            <input
+                              type="text"
+                              value={formData.licenseNumber}
+                              onChange={(e) => updateFormData('licenseNumber', e.target.value)}
+                              placeholder="Your driving license number"
+                              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-400/50 focus:border-amber-400 bg-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">License Country</label>
+                            <input
+                              type="text"
+                              value={formData.licenseCountry}
+                              onChange={(e) => updateFormData('licenseCountry', e.target.value)}
+                              placeholder="Country of issue"
+                              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-400/50 focus:border-amber-400 bg-white"
+                            />
+                          </div>
                         </div>
                       </div>
 
@@ -502,20 +862,24 @@ const VehicleBooking = () => {
                       </div>
                     </div>
 
-                    <div className="mt-6 p-4 bg-blue-50 rounded-xl">
+                    <div className="mt-6 p-4 bg-amber-50 rounded-xl">
                       <div className="flex gap-3">
-                        <FileText className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                        <div className="text-sm text-blue-800">
-                          <p className="font-medium mb-1">Required Documents</p>
-                          <p>Please bring your original NIC/Passport and Driving License for verification at pickup.</p>
+                        <FileText className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                        <div className="text-sm text-amber-800">
+                          <p className="font-medium mb-1">Required Documents at Pickup</p>
+                          <ul className="list-disc list-inside space-y-1">
+                            <li>Original Passport</li>
+                            <li>Valid Driving License (from your country)</li>
+                            <li>International Driving Permit (recommended)</li>
+                          </ul>
                         </div>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* Step 3: Payment */}
-                {currentStep === 3 && (
+                {/* Step 4: Payment */}
+                {currentStep === 4 && (
                   <div>
                     <h2 className="text-xl font-bold text-gray-900 mb-2">Payment</h2>
                     <p className="text-gray-600 mb-6">Select your payment method</p>
@@ -648,7 +1012,7 @@ const VehicleBooking = () => {
                     Previous
                   </button>
 
-                  {currentStep < 3 ? (
+                  {currentStep < 4 ? (
                     <button
                       onClick={() => setCurrentStep(prev => prev + 1)}
                       disabled={!canProceed()}
@@ -727,30 +1091,65 @@ const VehicleBooking = () => {
                     <User className="w-4 h-4 text-gray-400" />
                     <span>{formData.withDriver ? 'With Driver' : 'Self Drive'}</span>
                   </div>
+                  {formData.deliveryType !== 'self_pickup' && (
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-gray-400" />
+                      <span>{DELIVERY_OPTIONS.find(d => d.id === formData.deliveryType)?.name}</span>
+                    </div>
+                  )}
+                  {formData.insurancePackage !== 'none' && (
+                    <div className="flex items-center gap-2">
+                      <Shield className="w-4 h-4 text-gray-400" />
+                      <span>{INSURANCE_PACKAGES.find(p => p.id === formData.insurancePackage)?.name}</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Pricing */}
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-600">
-                      Rental ({calculateDays()} day{calculateDays() > 1 ? 's' : ''})
+                      Rental ({pricing.days} day{pricing.days > 1 ? 's' : ''})
                     </span>
                     <span>${pricing.rentalCost}</span>
                   </div>
+                  
+                  {pricing.insuranceCost > 0 && (
+                    <div className="flex justify-between text-gray-600">
+                      <span>Protection Plan</span>
+                      <span>${pricing.insuranceCost}</span>
+                    </div>
+                  )}
+                  
                   {pricing.deliveryFee > 0 && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Delivery Fee</span>
+                    <div className="flex justify-between text-gray-600">
+                      <span>Delivery</span>
                       <span>${pricing.deliveryFee}</span>
                     </div>
                   )}
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Service Fee</span>
+                  
+                  {pricing.servicesCost > 0 && (
+                    <div className="flex justify-between text-gray-600">
+                      <span>Add-on Services</span>
+                      <span>${pricing.servicesCost}</span>
+                    </div>
+                  )}
+                  
+                  <div className="flex justify-between text-gray-600">
+                    <span>Service Fee (10%)</span>
                     <span>${pricing.serviceFee}</span>
                   </div>
+                  
+                  <div className="flex justify-between pt-2 mt-2 border-t border-gray-100">
+                    <span className="text-gray-900 font-medium">Subtotal</span>
+                    <span className="font-medium">${pricing.subtotal}</span>
+                  </div>
+                  
                   <div className="flex justify-between text-gray-600">
                     <span>Security Deposit</span>
                     <span>${pricing.securityDeposit}</span>
                   </div>
+                  
                   <div className="flex justify-between pt-3 mt-3 border-t border-gray-200 font-bold text-base">
                     <span>Total</span>
                     <span className="text-amber-600">${pricing.grandTotal}</span>
@@ -760,6 +1159,17 @@ const VehicleBooking = () => {
                 <p className="text-xs text-gray-500 mt-4">
                   Security deposit is refundable upon return of vehicle in good condition.
                 </p>
+                
+                {/* Payment Timeline Info */}
+                <div className="mt-4 p-3 bg-green-50 rounded-lg">
+                  <div className="flex items-center gap-2 text-green-800 text-xs">
+                    <Info className="w-4 h-4" />
+                    <span className="font-medium">Owner Payout Schedule</span>
+                  </div>
+                  <div className="text-xs text-green-700 mt-1">
+                    50% within 6 hours of pickup, 50% after 72 hours
+                  </div>
+                </div>
               </div>
             </div>
           </div>

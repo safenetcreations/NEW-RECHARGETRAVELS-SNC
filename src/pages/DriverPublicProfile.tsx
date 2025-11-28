@@ -44,6 +44,9 @@ const DriverPublicProfile: React.FC = () => {
       <Helmet>
         <title>{title}</title>
         <meta name="description" content={desc} />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={desc} />
+        <meta property="og:type" content="profile" />
       </Helmet>
 
       <div className="max-w-5xl mx-auto px-4 py-10 space-y-6">

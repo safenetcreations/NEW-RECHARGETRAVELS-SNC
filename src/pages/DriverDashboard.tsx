@@ -38,6 +38,9 @@ interface BookingStats {
   totalEarnings: number
 }
 
+const getTripAmount = (b: DriverBookingWithId) =>
+  b.final_price ?? b.quoted_price ?? 0
+
 const DriverDashboard: React.FC = () => {
   const [driver, setDriver] = useState<Driver | null>(null)
   const [docs, setDocs] = useState<any[]>([])
@@ -81,7 +84,7 @@ const DriverDashboard: React.FC = () => {
       if (allBookings.length > 0) {
         const completed = allBookings.filter((b) => b.booking_status === 'completed')
         const totalEarnings = completed.reduce(
-          (sum, b) => sum + (b.final_price ?? b.quoted_price ?? 0),
+          (sum, b) => sum + getTripAmount(b),
           0
         )
         setStats({
@@ -129,7 +132,7 @@ const DriverDashboard: React.FC = () => {
 
         const completed = updated.filter((b) => b.booking_status === 'completed')
         const totalEarnings = completed.reduce(
-          (sum, b) => sum + (b.final_price ?? b.quoted_price ?? 0),
+          (sum, b) => sum + getTripAmount(b),
           0
         )
         setStats({
@@ -267,11 +270,23 @@ const DriverDashboard: React.FC = () => {
               <div className="flex items-center justify-between">
                 <span>Total earnings</span>
                 <span className="font-semibold">
-                  {stats.totalEarnings > 0 ? `LKR ${stats.totalEarnings.toFixed(0)}` : '—'}
+                  {stats.totalEarnings > 0 ? `LKR ${stats.totalEarnings.toFixed(0)}` : '–'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>Upcoming earnings (next {upcomingTrips.length} trips)</span>
+                <span className="font-semibold">
+                  {upcomingTrips.length > 0
+                    ? `LKR ${upcomingTrips
+                        .reduce((sum, b) => sum + getTripAmount(b), 0)
+                        .toFixed(0)}`
+                    : '–'}
                 </span>
               </div>
             </div>
           </div>
+
+// ...
 
           <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm space-y-2">
             <h3 className="text-lg font-semibold text-gray-900 mb-2 flex items-center gap-2">
@@ -332,11 +347,28 @@ const DriverDashboard: React.FC = () => {
                       {trip.dropoff_location ? ` → ${trip.dropoff_location}` : ''}
                     </span>
                   </div>
+                  <div className="flex items-center justify-between text-xs text-gray-600 mt-1">
+                    <span>
+                      {trip.service_type === 'guided_tour'
+                        ? 'Guided tour'
+                        : trip.service_type === 'custom_package'
+                        ? 'Custom package'
+                        : 'Transport only'}
+                      {' '}
+                      {trip.passenger_count} pax
+                    </span>
+                    {getTripAmount(trip) > 0 && (
+                      <span className="font-semibold text-orange-600">
+                        Est. earnings LKR {getTripAmount(trip).toFixed(0)}
+                      </span>
+                    )}
+                  </div>
                   <div className="flex flex-wrap gap-1 mt-1">
                     {trip.booking_status === 'pending' && (
                       <>
                         <Button
-                          size="xs"
+                          size="sm"
+                          className="h-7 px-2 text-xs"
                           onClick={() => handleBookingAction(trip.id, 'confirmed')}
                           disabled={updatingBookingId === trip.id}
                         >
@@ -344,7 +376,8 @@ const DriverDashboard: React.FC = () => {
                           Accept
                         </Button>
                         <Button
-                          size="xs"
+                          size="sm"
+                          className="h-7 px-2 text-xs"
                           variant="outline"
                           onClick={() => handleBookingAction(trip.id, 'cancelled')}
                           disabled={updatingBookingId === trip.id}
@@ -357,7 +390,8 @@ const DriverDashboard: React.FC = () => {
                     {trip.booking_status === 'confirmed' && (
                       <>
                         <Button
-                          size="xs"
+                          size="sm"
+                          className="h-7 px-2 text-xs"
                           onClick={() => handleBookingAction(trip.id, 'in_progress')}
                           disabled={updatingBookingId === trip.id}
                         >
@@ -365,7 +399,8 @@ const DriverDashboard: React.FC = () => {
                           In progress
                         </Button>
                         <Button
-                          size="xs"
+                          size="sm"
+                          className="h-7 px-2 text-xs"
                           variant="outline"
                           onClick={() => handleBookingAction(trip.id, 'cancelled')}
                           disabled={updatingBookingId === trip.id}
@@ -377,7 +412,8 @@ const DriverDashboard: React.FC = () => {
                     )}
                     {trip.booking_status === 'in_progress' && (
                       <Button
-                        size="xs"
+                        size="sm"
+                        className="h-7 px-2 text-xs"
                         onClick={() => handleBookingAction(trip.id, 'completed')}
                         disabled={updatingBookingId === trip.id}
                       >

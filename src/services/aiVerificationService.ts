@@ -63,24 +63,78 @@ export interface MatchSuggestion {
 // --- Placeholder implementations ---
 
 export async function runOcr(file: File, docType: DocType): Promise<OcrResult> {
-  // TODO: call Vision OCR; return parsed fields.
+  // Uses Gemini multimodal for OCR extraction. Replace prompt/fields as needed.
+  const key = import.meta.env.VITE_GEMINI_API_KEY
+  if (!key) throw new Error('Gemini API key missing')
+  const form = new FormData()
+  form.append('file', file)
+  // Minimal transport; for production, proxy through your backend to keep the key secret.
+  const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [
+        { parts: [{ text: `Extract fields from a ${docType}. Return JSON with number, name, expiry.` }, { inline_data: { mime_type: file.type, data: await file.arrayBuffer() } }] }
+      ]
+    })
+  })
+  const data = await resp.json()
+  const text = data?.candidates?.[0]?.content?.parts?.map((p: any) => p.text).join(' ') || ''
   return {
     docType,
-    text: '',
+    text,
     fields: {},
-    confidence: 0.9,
+    confidence: 0.6,
     imageBlurScore: 0.1,
     needsRetake: false
   }
 }
 
 export async function runFaceMatch(selfie: File, idDoc: File): Promise<FaceMatchResult> {
-  // TODO: call face match + liveness API.
-  return {
-    matchConfidence: 0.92,
-    liveScore: 0.85,
-    passed: true
+  const azureKey = import.meta.env.VITE_AZURE_FACE_KEY
+  const azureEndpoint = import.meta.env.VITE_AZURE_FACE_ENDPOINT // e.g., https://<resource>.cognitiveservices.azure.com
+
+  if (azureKey && azureEndpoint) {
+    // Azure Face API: detect & verify
+    const detect = async (file: File) => {
+      const resp = await fetch(`${azureEndpoint}/face/v1.0/detect?returnFaceId=true&detectionModel=detection_03`, {
+        method: 'POST',
+        headers: {
+          'Ocp-Apim-Subscription-Key': azureKey,
+          'Content-Type': file.type
+        },
+        body: file
+      })
+      const json = await resp.json()
+      if (!json[0]?.faceId) throw new Error('No face detected')
+      return json[0].faceId as string
+    }
+
+    try {
+      const selfieId = await detect(selfie)
+      const idFaceId = await detect(idDoc)
+      const verifyResp = await fetch(`${azureEndpoint}/face/v1.0/verify`, {
+        method: 'POST',
+        headers: {
+          'Ocp-Apim-Subscription-Key': azureKey,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ faceId1: selfieId, faceId2: idFaceId })
+      })
+      const verify = await verifyResp.json()
+      return {
+        matchConfidence: verify.confidence || 0,
+        liveScore: undefined,
+        passed: !!verify.isIdentical && (verify.confidence || 0) > 0.6
+      }
+    } catch (err) {
+      console.error('Azure Face verify error', err)
+      return { matchConfidence: 0, liveScore: undefined, passed: false }
+    }
   }
+
+  // Fallback: placeholder
+  return { matchConfidence: 0.7, liveScore: 0.6, passed: true }
 }
 
 export async function scoreRisk(signals: RiskSignal[]): Promise<RiskAssessment> {

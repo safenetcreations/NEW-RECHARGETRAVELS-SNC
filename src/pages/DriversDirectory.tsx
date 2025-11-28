@@ -11,6 +11,13 @@ import { Star } from 'lucide-react'
 
 const defaultCardImg = '/logo-v2.png'
 
+const TAG_FILTERS = [
+  { id: 'sltda', label: 'SLTDA approved' },
+  { id: 'own_vehicle', label: 'Own vehicle' },
+  { id: 'guide', label: 'Guide / chauffeur' },
+  { id: 'experienced_5_plus', label: '5+ years experience' }
+] as const
+
 const DriversDirectory: React.FC = () => {
   const [drivers, setDrivers] = useState<Driver[]>([])
   const [search, setSearch] = useState('')
@@ -20,6 +27,7 @@ const DriversDirectory: React.FC = () => {
   const [vehicleType, setVehicleType] = useState<string | undefined>()
   const [maxRate, setMaxRate] = useState<number | undefined>()
   const [date, setDate] = useState<string>('')
+  const [tags, setTags] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
@@ -43,9 +51,19 @@ const DriversDirectory: React.FC = () => {
       if (maxRate && d.daily_rate && d.daily_rate > maxRate) return false
       // Soft filter: hide inactive when a date is picked
       if (date && d.current_status === 'inactive') return false
+      if (tags.length > 0) {
+        if (tags.includes('sltda') && !d.is_sltda_approved) return false
+        if (tags.includes('own_vehicle') && d.vehicle_preference !== 'own_vehicle') return false
+        if (tags.includes('guide') && !((d as any).is_guide || (d as any).is_chauffeur)) return false
+        if (
+          tags.includes('experienced_5_plus') &&
+          (!d.years_experience || d.years_experience < 5)
+        )
+          return false
+      }
       return true
     })
-  }, [drivers, search, language, vehicleType, maxRate, date])
+  }, [drivers, search, language, vehicleType, maxRate, date, tags])
 
   return (
     <div className="bg-gradient-to-br from-orange-50 via-white to-cyan-50 min-h-screen">
@@ -53,6 +71,14 @@ const DriversDirectory: React.FC = () => {
         <title>Find Verified Drivers & Guides | Recharge Travels</title>
         <meta
           name="description"
+          content="Browse verified SLTDA drivers, chauffeur guides, and freelance chauffeurs. Filter by experience, rating, languages, and vehicle type."
+        />
+        <meta
+          property="og:title"
+          content="Find Verified Drivers & Guides | Recharge Travels"
+        />
+        <meta
+          property="og:description"
           content="Browse verified SLTDA drivers, chauffeur guides, and freelance chauffeurs. Filter by experience, rating, languages, and vehicle type."
         />
       </Helmet>
@@ -135,6 +161,32 @@ const DriversDirectory: React.FC = () => {
             onChange={(e) => setDate(e.target.value)}
             placeholder="Date"
           />
+          <div className="md:col-span-4 flex flex-wrap items-center gap-2">
+            <span className="text-sm font-medium text-gray-700">Tags</span>
+            {TAG_FILTERS.map((tag) => {
+              const active = tags.includes(tag.id)
+              return (
+                <button
+                  key={tag.id}
+                  type="button"
+                  onClick={() =>
+                    setTags((prev) =>
+                      prev.includes(tag.id)
+                        ? prev.filter((t) => t !== tag.id)
+                        : [...prev, tag.id]
+                    )
+                  }
+                  className={`px-3 py-1 rounded-full border text-xs transition ${
+                    active
+                      ? 'bg-orange-100 border-orange-300 text-orange-800'
+                      : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+                  }`}
+                >
+                  {tag.label}
+                </button>
+              )
+            })}
+          </div>
         </div>
 
         {loading && <p className="text-center text-gray-600">Loading drivers…</p>}
@@ -159,7 +211,10 @@ const DriversDirectory: React.FC = () => {
                   <h3 className="text-xl font-semibold text-gray-900">{d.full_name || 'Verified Driver'}</h3>
                   <div className="flex items-center gap-1 text-orange-500">
                     <Star size={16} fill="currentColor" />
-                    <span className="text-sm font-semibold">{d.average_rating?.toFixed(1) || '5.0'}</span>
+                    <span className="text-sm font-semibold">
+                      {d.average_rating?.toFixed(1) || '5.0'}
+                    </span>
+                    <span className="text-xs text-gray-500 ml-1">({d.total_reviews || 0})</span>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2 text-xs">
@@ -168,6 +223,11 @@ const DriversDirectory: React.FC = () => {
                   {d.years_experience && <Badge variant="secondary">{d.years_experience}+ yrs</Badge>}
                   {d.daily_rate && <Badge variant="outline">LKR {d.daily_rate}/day</Badge>}
                   {(d as any).vehicle_type && <Badge variant="outline">{(d as any).vehicle_type}</Badge>}
+                  {d.current_status && (
+                    <Badge variant="outline" className="uppercase">
+                      {d.current_status.replace(/_/g, ' ')}
+                    </Badge>
+                  )}
                 </div>
                 <p className="text-sm text-gray-600 line-clamp-2">{d.biography || 'Trusted, verified driver for tours and transfers.'}</p>
                 <div className="text-xs text-gray-500">

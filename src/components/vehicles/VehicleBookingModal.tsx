@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -12,6 +11,7 @@ import { createVehicleBooking, checkVehicleAvailability } from '@/lib/vehicle-se
 import { useAuth } from '@/hooks/useAuth'
 import type { Vehicle, BookingFormData } from '@/types/vehicle'
 import { toast } from 'sonner'
+import { useCurrency } from '@/components/booking/CurrencySelector'
 
 interface VehicleBookingModalProps {
   vehicle: Vehicle
@@ -21,6 +21,7 @@ interface VehicleBookingModalProps {
 
 const VehicleBookingModal = ({ vehicle, isOpen, onClose }: VehicleBookingModalProps) => {
   const { user } = useAuth()
+  const { currency, setCurrency, formatPrice, currencies } = useCurrency()
   const [loading, setLoading] = useState(false)
   const [selectedDriver, setSelectedDriver] = useState<string>('')
   const [formData, setFormData] = useState<BookingFormData>({
@@ -87,13 +88,25 @@ const VehicleBookingModal = ({ vehicle, isOpen, onClose }: VehicleBookingModalPr
       return
     }
 
-    if (!formData.pickupLocation) {
+    const start = new Date(formData.startDate)
+    const end = new Date(formData.endDate)
+    if (end < start) {
+      toast.error('End date cannot be before start date')
+      return
+    }
+
+    if (!formData.pickupLocation.trim()) {
       toast.error('Please enter pickup location')
       return
     }
 
     if (!formData.userName || !formData.userEmail) {
       toast.error('Please provide contact information')
+      return
+    }
+
+    if (!formData.estimatedKm || formData.estimatedKm < 0) {
+      toast.error('Please provide an estimated distance in KM (can be approximate)')
       return
     }
 
@@ -244,10 +257,14 @@ const VehicleBookingModal = ({ vehicle, isOpen, onClose }: VehicleBookingModalPr
                     type="number"
                     min="0"
                     value={formData.estimatedKm}
-                    onChange={(e) => handleInputChange('estimatedKm', parseInt(e.target.value))}
+                    onChange={(e) => {
+                      const value = e.target.value
+                      const parsed = value === '' ? 0 : parseInt(value, 10)
+                      handleInputChange('estimatedKm', Number.isNaN(parsed) ? 0 : parsed)
+                    }}
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    Used for calculating extra distance charges
+                    Used for calculating extra distance charges (an approximate value is fine)
                   </p>
                 </div>
 
@@ -280,7 +297,9 @@ const VehicleBookingModal = ({ vehicle, isOpen, onClose }: VehicleBookingModalPr
                     <Checkbox
                       id="airportPickup"
                       checked={formData.needsAirportPickup}
-                      onCheckedChange={(checked) => handleInputChange('needsAirportPickup', checked)}
+                      onCheckedChange={(checked) =>
+                        handleInputChange('needsAirportPickup', checked === true)
+                      }
                     />
                     <Label htmlFor="airportPickup">Airport pickup required</Label>
                   </div>
@@ -290,7 +309,9 @@ const VehicleBookingModal = ({ vehicle, isOpen, onClose }: VehicleBookingModalPr
                       <Checkbox
                         id="childSeat"
                         checked={formData.needsChildSeat}
-                        onCheckedChange={(checked) => handleInputChange('needsChildSeat', checked)}
+                        onCheckedChange={(checked) =>
+                          handleInputChange('needsChildSeat', checked === true)
+                        }
                       />
                       <Label htmlFor="childSeat">Child seat required</Label>
                     </div>
@@ -350,30 +371,75 @@ const VehicleBookingModal = ({ vehicle, isOpen, onClose }: VehicleBookingModalPr
 
                 {/* Pricing Breakdown */}
                 <div className="border rounded-lg p-4 bg-gray-50">
-                  <h4 className="font-semibold mb-3 flex items-center gap-2">
-                    <DollarSign className="h-4 w-4" />
-                    Pricing Breakdown
-                  </h4>
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-semibold flex items-center gap-2">
+                      <DollarSign className="h-4 w-4" />
+                      Pricing Breakdown
+                    </h4>
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <span>Currency</span>
+                      <Select
+                        value={currency.code}
+                        onValueChange={(code) => {
+                          const next = currencies.find((c) => c.code === code)
+                          if (next) setCurrency(next)
+                        }}
+                      >
+                        <SelectTrigger className="h-7 w-[120px] text-xs">
+                          <SelectValue placeholder={currency.code} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {currencies.map((c) => (
+                            <SelectItem key={c.code} value={c.code}>
+                              {c.symbol} {c.code}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
                   
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span>Daily rate × {pricingBreakdown.totalDays} days:</span>
-                      <span>${pricingBreakdown.dailyTotal.toFixed(2)}</span>
+                      <span className="text-right">
+                        <span className="font-medium block">
+                          {formatPrice(pricingBreakdown.dailyTotal, 'USD')}
+                        </span>
+                        <span className="block text-[11px] text-gray-500">
+                          $ {pricingBreakdown.dailyTotal.toFixed(2)} USD
+                        </span>
+                      </span>
                     </div>
                     
                     <div className="flex justify-between">
                       <span>Extra distance ({formData.estimatedKm} km):</span>
-                      <span>${pricingBreakdown.extraKmTotal.toFixed(2)}</span>
+                      <span className="text-right">
+                        <span className="font-medium block">
+                          {formatPrice(pricingBreakdown.extraKmTotal, 'USD')}
+                        </span>
+                        <span className="block text-[11px] text-gray-500">
+                          $ {pricingBreakdown.extraKmTotal.toFixed(2)} USD
+                        </span>
+                      </span>
                     </div>
                     
-                    <div className="border-t pt-2 flex justify-between font-semibold text-lg">
-                      <span>Total:</span>
-                      <span className="text-wild-orange">${pricingBreakdown.grandTotal.toFixed(2)}</span>
+                    <div className="border-t pt-2 flex justify-between items-end font-semibold text-lg">
+                      <span className="text-gray-900">Total estimate:</span>
+                      <span className="text-right">
+                        <span className="text-wild-orange block">
+                          {formatPrice(pricingBreakdown.grandTotal, 'USD')}
+                        </span>
+                        <span className="block text-xs text-gray-500">
+                          Base amount: ${pricingBreakdown.grandTotal.toFixed(2)} USD
+                        </span>
+                      </span>
                     </div>
                   </div>
                   
                   <p className="text-xs text-gray-500 mt-2">
-                    * Final price may vary based on actual distance traveled
+                    * Estimate includes vehicle and driver. Final price may vary with actual distance, season,
+                    entrance fees, and any long-stay discounts we apply when confirming your booking.
                   </p>
                 </div>
 

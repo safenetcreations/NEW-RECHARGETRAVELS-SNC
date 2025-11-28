@@ -381,12 +381,39 @@ const CATEGORIES = [
     { id: 'nature', label: 'Nature', icon: <TreePine className="w-4 h-4" />, color: 'bg-teal-100 text-teal-700' },
 ];
 
-// Hotel Star Rating Options
 const HOTEL_RATINGS = [
     { stars: 2, label: '2 Star', description: 'Budget Friendly', priceMultiplier: 1.0 },
     { stars: 3, label: '3 Star', description: 'Comfortable Stay', priceMultiplier: 1.3 },
     { stars: 4, label: '4 Star', description: 'Premium Comfort', priceMultiplier: 1.8 },
-    { stars: 5, label: '5 Star', description: 'Luxury Experience', priceMultiplier: 2.5 },
+    { stars: 5, label: '5 Star', description: '5 Star Deluxe', priceMultiplier: 2.5 },
+];
+
+interface TripPreset {
+    id: string;
+    label: string;
+    description: string;
+    stops: string[];
+}
+
+const TRIP_PRESETS: TripPreset[] = [
+    {
+        id: 'classic_7_day',
+        label: '7-Day Classic Highlights',
+        description: 'Colombo → Sigiriya → Kandy → Ella → Mirissa',
+        stops: ['colombo', 'sigiriya', 'kandy', 'ella', 'mirissa'],
+    },
+    {
+        id: 'tea_hills_and_safari',
+        label: 'Tea Hills & Safari',
+        description: 'Colombo → Kandy → Nuwara Eliya → Ella → Yala → Mirissa',
+        stops: ['colombo', 'kandy', 'nuwara-eliya', 'ella', 'yala', 'mirissa'],
+    },
+    {
+        id: 'east_coast_escape',
+        label: 'East Coast Escape',
+        description: 'Sigiriya → Trincomalee → Arugam Bay → Ella',
+        stops: ['sigiriya', 'trincomalee', 'arugam-bay', 'ella'],
+    },
 ];
 
 const InteractiveTripBuilder: React.FC = () => {
@@ -399,6 +426,9 @@ const InteractiveTripBuilder: React.FC = () => {
     const [isQuoteOpen, setIsQuoteOpen] = useState(false);
     const [quoteForm, setQuoteForm] = useState({ name: '', email: '', phone: '', message: '', travelers: '2', dates: '' });
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const [isSavingPlan, setIsSavingPlan] = useState(false);
+    const [savedPlanId, setSavedPlanId] = useState<string | null>(null);
 
     // New state for search and hotel rating
     const [searchQuery, setSearchQuery] = useState('');
@@ -491,6 +521,33 @@ const InteractiveTripBuilder: React.FC = () => {
         toast({ title: `Added ${dest.name}!`, description: "Click to select activities." });
     };
 
+    const applyPreset = (presetId: string) => {
+        const preset = TRIP_PRESETS.find((p) => p.id === presetId);
+        if (!preset) return;
+
+        const destinations = preset.stops
+            .map((id) => ALL_DESTINATIONS.find((d) => d.id === id))
+            .filter((d): d is Omit<Destination, 'selectedAttractions'> => Boolean(d));
+
+        if (destinations.length === 0) {
+            toast({
+                title: 'Preset not available',
+                description: 'Please pick places manually.',
+                variant: 'destructive',
+            });
+            return;
+        }
+
+        setSelectedDestinations(destinations.map((d) => ({ ...d, selectedAttractions: [] })));
+        setExpandedDest(null);
+        setCurrentStep(2);
+        setSavedPlanId(null);
+        toast({
+            title: preset.label,
+            description: 'We pre-filled a popular route. You can tweak places and activities.',
+        });
+    };
+
     const removeDestination = (id: string) => {
         setSelectedDestinations(selectedDestinations.filter(d => d.id !== id));
     };
@@ -562,6 +619,57 @@ const InteractiveTripBuilder: React.FC = () => {
             toast({ title: "Error", description: "Please try again.", variant: "destructive" });
         } finally {
             setIsSubmitting(false);
+        }
+    };
+
+    const handleSavePlan = async () => {
+        if (selectedDestinations.length === 0) {
+            toast({
+                title: 'No trip yet',
+                description: 'Add at least one destination before saving your plan.',
+                variant: 'destructive',
+            });
+            return;
+        }
+
+        setIsSavingPlan(true);
+        try {
+            const itinerary = selectedDestinations.map((dest, index) => ({
+                order: index + 1,
+                id: dest.id,
+                name: dest.name,
+                selectedAttractions: dest.selectedAttractions,
+            }));
+
+            const docRef = await addDoc(collection(db, 'trip_plans'), {
+                summary: selectedDestinations.map((d) => d.name).join(' → '),
+                hotelRating: selectedHotelRating,
+                stats,
+                itinerary,
+                destinations: selectedDestinations.map((d) => ({
+                    id: d.id,
+                    name: d.name,
+                    lat: d.lat,
+                    lng: d.lng,
+                    image: d.image,
+                    category: d.category,
+                    icon: d.icon,
+                    selectedAttractions: d.selectedAttractions,
+                })),
+                createdAt: Timestamp.now(),
+                source: 'website-trip-builder',
+            });
+
+            setSavedPlanId(docRef.id);
+            toast({
+                title: 'Trip plan saved',
+                description: `Your plan ID is ${docRef.id}. You can share this ID with our team.`,
+            });
+        } catch (error) {
+            console.error(error);
+            toast({ title: 'Error saving trip', description: 'Please try again.', variant: 'destructive' });
+        } finally {
+            setIsSavingPlan(false);
         }
     };
 
@@ -651,6 +759,30 @@ const InteractiveTripBuilder: React.FC = () => {
                                             Found {filteredDestinations.length} place{filteredDestinations.length !== 1 ? 's' : ''} matching "{searchQuery}"
                                         </p>
                                     )}
+                                </div>
+
+                                {/* Quick Suggested Trips */}
+                                <div className="mb-6">
+                                    <p className="text-sm font-medium text-gray-700 mb-2">
+                                        Or start with a suggested route:
+                                    </p>
+                                    <div className="flex gap-3 overflow-x-auto pb-1">
+                                        {TRIP_PRESETS.map((preset) => (
+                                            <button
+                                                key={preset.id}
+                                                type="button"
+                                                onClick={() => applyPreset(preset.id)}
+                                                className="flex-shrink-0 px-4 py-3 rounded-xl bg-white border border-teal-100 shadow-sm hover:border-teal-300 hover:shadow-md transition-all text-left"
+                                            >
+                                                <div className="text-xs uppercase tracking-wide text-teal-600 mb-1">
+                                                    {preset.label}
+                                                </div>
+                                                <div className="text-xs text-gray-600">
+                                                    {preset.description}
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
 
                                 {/* Hotel Star Rating Selector */}
@@ -1072,36 +1204,61 @@ const InteractiveTripBuilder: React.FC = () => {
                                     </div>
                                 )}
 
-                                {/* Stats Summary */}
+                                {/* Stats Summary & Save Plan */}
                                 {selectedDestinations.length > 0 && (
-                                    <div className="mt-4 pt-4 border-t border-gray-200 space-y-2">
-                                        <div className="flex justify-between text-sm">
-                                            <span className="text-gray-600">Distance</span>
-                                            <span className="font-medium">{stats.totalDistance} km</span>
-                                        </div>
-                                        <div className="flex justify-between text-sm">
-                                            <span className="text-gray-600">Duration</span>
-                                            <span className="font-medium">{formatTime(stats.totalTime)}</span>
-                                        </div>
-                                        {stats.suggestedNights > 0 && (
+                                    <>
+                                        <div className="mt-4 pt-4 border-t border-gray-200 space-y-2">
                                             <div className="flex justify-between text-sm">
-                                                <span className="text-gray-600">Suggested Nights</span>
-                                                <span className="font-medium">{stats.suggestedNights}</span>
+                                                <span className="text-gray-600">Distance</span>
+                                                <span className="font-medium">{stats.totalDistance} km</span>
                                             </div>
-                                        )}
-                                        <div className="flex justify-between text-sm items-center">
-                                            <span className="text-gray-600">Hotel</span>
-                                            <div className="flex items-center gap-1">
-                                                {[...Array(selectedHotelRating)].map((_, i) => (
-                                                    <Star key={i} className="w-3 h-3 text-amber-500 fill-amber-500" />
-                                                ))}
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-gray-600">Duration</span>
+                                                <span className="font-medium">{formatTime(stats.totalTime)}</span>
                                             </div>
+                                            {stats.suggestedNights > 0 && (
+                                                <div className="flex justify-between text-sm">
+                                                    <span className="text-gray-600">Suggested Nights</span>
+                                                    <span className="font-medium">{stats.suggestedNights}</span>
+                                                </div>
+                                            )}
+                                            <div className="flex justify-between text-sm items-center">
+                                                <span className="text-gray-600">Hotel</span>
+                                                <div className="flex items-center gap-1">
+                                                    {[...Array(selectedHotelRating)].map((_, i) => (
+                                                        <Star key={i} className="w-3 h-3 text-amber-500 fill-amber-500" />
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <div className="flex justify-between text-lg pt-2 border-t mt-2">
+                                                <span className="font-semibold text-gray-900">Est. Price</span>
+                                                <span className="font-bold text-teal-600">${stats.estimatedPrice}</span>
+                                            </div>
+                                            {stats.attractionCost > 0 && (
+                                                <div className="text-[11px] text-gray-500 mt-1">
+                                                    Approx. ${Math.max(stats.estimatedPrice - stats.attractionCost, 0)} for
+                                                    transport & stays + ${stats.attractionCost} for activities.
+                                                </div>
+                                            )}
                                         </div>
-                                        <div className="flex justify-between text-lg pt-2 border-t mt-2">
-                                            <span className="font-semibold text-gray-900">Est. Price</span>
-                                            <span className="font-bold text-teal-600">${stats.estimatedPrice}</span>
+
+                                        <div className="mt-4 flex flex-col gap-2">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={handleSavePlan}
+                                                disabled={isSavingPlan}
+                                            >
+                                                {isSavingPlan ? 'Saving trip...' : 'Save this trip plan'}
+                                            </Button>
+                                            {savedPlanId && (
+                                                <p className="text-[11px] text-gray-500 break-all">
+                                                    Saved as plan ID: {savedPlanId}. Share this ID with our team when
+                                                    you're ready to book.
+                                                </p>
+                                            )}
                                         </div>
-                                    </div>
+                                    </>
                                 )}
 
                                 {/* Next Step Button */}
