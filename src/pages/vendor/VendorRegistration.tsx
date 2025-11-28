@@ -419,12 +419,16 @@ Book with confidence - we're committed to providing unforgettable experiences in
                         {/* Welcome Hero */}
                         <div className="text-center py-8">
                             <motion.div
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
+                                initial={{ scale: 0, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
                                 transition={{ type: "spring", duration: 0.6 }}
-                                className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg"
+                                className="mx-auto mb-6"
                             >
-                                <Sparkles className="w-12 h-12 text-white" />
+                                <img
+                                    src="/logo-v2.png"
+                                    alt="Recharge Travels"
+                                    className="h-20 w-auto mx-auto"
+                                />
                             </motion.div>
                             <h2 className="text-3xl font-bold text-gray-900 mb-4">
                                 Become a Recharge Travels Partner
@@ -1376,14 +1380,14 @@ Book with confidence - we're committed to providing unforgettable experiences in
             </Helmet>
 
             {/* Header */}
-            <header className="bg-white border-b sticky top-0 z-50">
-                <div className="container mx-auto px-4 py-4">
+            <header className="bg-white border-b sticky top-0 z-50 shadow-sm">
+                <div className="container mx-auto px-4 py-3">
                     <div className="flex items-center justify-between">
-                        <a href="/" className="flex items-center gap-3">
-                            <img src="/logo-v2.png" alt="Recharge Travels" className="h-10 w-auto" />
-                            <div className="hidden sm:block">
-                                <h1 className="font-bold text-gray-900">Recharge Travels</h1>
-                                <p className="text-xs text-gray-500">Vendor Partner Program</p>
+                        <a href="/" className="flex items-center gap-2">
+                            <img src="/logo-v2.png" alt="Recharge Travels" className="h-8 w-auto" />
+                            <div className="hidden sm:flex flex-col">
+                                <span className="text-sm font-semibold text-gray-900 leading-tight">Vendor Partner</span>
+                                <span className="text-xs text-orange-600 leading-tight">Registration</span>
                             </div>
                         </a>
                         <div className="flex items-center gap-4">

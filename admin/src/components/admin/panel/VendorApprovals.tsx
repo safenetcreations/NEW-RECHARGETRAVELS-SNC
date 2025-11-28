@@ -51,14 +51,16 @@ const VendorApprovals = () => {
         }
     };
 
-    const handleStatusUpdate = async (vendorId: string, newStatus: 'active' | 'rejected') => {
+    const handleStatusUpdate = async (vendorId: string, newStatus: 'approved' | 'rejected') => {
         try {
             await updateDoc(doc(db, 'vendors', vendorId), {
                 status: newStatus,
+                isVerified: newStatus === 'approved',
+                verificationDate: new Date(),
                 updatedAt: new Date()
             });
 
-            toast.success(`Vendor ${newStatus === 'active' ? 'approved' : 'rejected'} successfully`);
+            toast.success(`Vendor ${newStatus === 'approved' ? 'approved' : 'rejected'} successfully`);
             fetchVendors(); // Refresh list
         } catch (error) {
             console.error("Error updating vendor status:", error);
@@ -138,7 +140,7 @@ const VendorApprovals = () => {
                                     <Button variant="destructive" onClick={() => handleStatusUpdate(vendor.id, 'rejected')}>
                                         <X className="w-4 h-4 mr-2" /> Reject
                                     </Button>
-                                    <Button className="bg-green-600 hover:bg-green-700" onClick={() => handleStatusUpdate(vendor.id, 'active')}>
+                                    <Button className="bg-green-600 hover:bg-green-700" onClick={() => handleStatusUpdate(vendor.id, 'approved')}>
                                         <Check className="w-4 h-4 mr-2" /> Approve
                                     </Button>
                                 </div>

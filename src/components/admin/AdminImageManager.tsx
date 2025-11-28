@@ -19,6 +19,7 @@ interface HeroImage {
 interface SiteImages {
   logo: string;
   favicon: string;
+  tripBuilderItineraryImage?: string;
 }
 
 interface TouristLocationImage {
@@ -36,7 +37,7 @@ interface TouristLocationImage {
 
 const AdminImageManager: React.FC = () => {
   const [heroImages, setHeroImages] = useState<HeroImage[]>([]);
-  const [siteImages, setSiteImages] = useState<SiteImages>({ logo: '', favicon: '' });
+  const [siteImages, setSiteImages] = useState<SiteImages>({ logo: '', favicon: '', tripBuilderItineraryImage: '' });
   const [touristImages, setTouristImages] = useState<TouristLocationImage[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('hero');
@@ -108,7 +109,8 @@ const AdminImageManager: React.FC = () => {
       } else {
         setSiteImages({
           logo: '/logo-v2.png',
-          favicon: '/logo-v2.png'
+          favicon: '/logo-v2.png',
+          tripBuilderItineraryImage: ''
         });
       }
 
@@ -314,7 +316,7 @@ const AdminImageManager: React.FC = () => {
                 </Button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <Card className="p-4">
                   <h4 className="font-semibold mb-4 flex items-center gap-2">
                     <Globe className="w-4 h-4" />
@@ -366,6 +368,35 @@ const AdminImageManager: React.FC = () => {
                           className="h-8 w-8"
                           onError={(e) => {
                             e.currentTarget.src = 'https://via.placeholder.com/32x32?text=X';
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </Card>
+
+                <Card className="p-4">
+                  <h4 className="font-semibold mb-4 flex items-center gap-2">
+                    <MapPin className="w-4 h-4" />
+                    Trip Builder Default Itinerary
+                  </h4>
+                  <div className="space-y-4">
+                    <div>
+                      <Label>Itinerary Image URL</Label>
+                      <Input
+                        value={siteImages.tripBuilderItineraryImage || ''}
+                        onChange={(e) => setSiteImages({ ...siteImages, tripBuilderItineraryImage: e.target.value })}
+                        placeholder="https://example.com/7-day-itinerary-mobile.png"
+                      />
+                    </div>
+                    {siteImages.tripBuilderItineraryImage && (
+                      <div className="bg-gray-100 p-4 rounded flex justify-center">
+                        <img
+                          src={siteImages.tripBuilderItineraryImage}
+                          alt="Trip Builder Itinerary Preview"
+                          className="h-40 w-auto object-contain"
+                          onError={(e) => {
+                            e.currentTarget.src = 'https://via.placeholder.com/240x400?text=Itinerary+Image';
                           }}
                         />
                       </div>

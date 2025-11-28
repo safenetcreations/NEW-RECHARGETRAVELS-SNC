@@ -173,7 +173,7 @@ const FeaturedDestinations = () => {
       </div>
 
       <div className="relative container mx-auto px-4 lg:px-8">
-        {/* Section Header - Outside Card */}
+        {/* Section Header - No Card Background */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -187,23 +187,11 @@ const FeaturedDestinations = () => {
           </div>
 
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-black mb-6">
-            <span
-              className="text-yellow-400 brightness-125"
-              style={{
-                textShadow: '0 0 20px rgba(250,204,21,0.8), 0 0 40px rgba(250,204,21,0.6), 0 4px 8px rgba(0,0,0,0.8)',
-                WebkitTextStroke: '1px rgba(255,255,255,0.3)'
-              }}
-            >Explore Sri Lanka</span><br />
-            <span
-              className="text-orange-400 brightness-125"
-              style={{
-                textShadow: '0 0 20px rgba(251,146,60,0.8), 0 0 40px rgba(251,146,60,0.6), 0 4px 8px rgba(0,0,0,0.8)',
-                WebkitTextStroke: '1px rgba(255,255,255,0.3)'
-              }}
-            >Featured Destinations</span>
+            <span className="block text-white mb-2 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Explore Sri Lanka</span>
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] pb-2">Featured Destinations</span>
           </h2>
 
-          <p className="text-lg md:text-xl text-white max-w-3xl mx-auto font-medium drop-shadow-lg">
+          <p className="text-lg md:text-xl text-white max-w-3xl mx-auto font-medium" style={{ textShadow: '1px 1px 4px #000' }}>
             From misty tea hills to sunlit beaches and ancient cities, step into the landscapes that make Sri Lanka feel alive.
           </p>
         </motion.div>
@@ -320,11 +308,10 @@ const FeaturedDestinations = () => {
                   type="button"
                   key={idx}
                   onClick={() => setCurrentPage(idx)}
-                  className={`h-3 rounded-full transition-all duration-300 ${
-                    currentPage === idx
+                  className={`h-3 rounded-full transition-all duration-300 ${currentPage === idx
                       ? 'w-10 bg-orange-400'
                       : 'w-3 bg-white/30 hover:bg-white/50'
-                  }`}
+                    }`}
                   aria-label={`Go to page ${idx + 1}`}
                 />
               ))}

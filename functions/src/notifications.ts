@@ -51,9 +51,10 @@ const emailTemplates = {
       <body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
         <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
           <!-- Header -->
-          <div style="background: linear-gradient(135deg, #0066cc 0%, #004d99 100%); padding: 30px; text-align: center;">
-            <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Recharge Travels</h1>
-            <p style="color: #e6f0ff; margin: 10px 0 0;">Your Sri Lanka Adventure Awaits!</p>
+          <div style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); padding: 30px; text-align: center;">
+            <img src="https://www.rechargetravels.com/logo-v2.png" alt="Recharge Travels" style="height: 50px; margin-bottom: 10px;">
+            <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Booking Confirmed!</h1>
+            <p style="color: #fed7aa; margin: 10px 0 0;">Your Sri Lanka Adventure Awaits!</p>
           </div>
 
           <!-- Content -->
@@ -67,7 +68,7 @@ const emailTemplates = {
             </p>
 
             <!-- Booking Details Card -->
-            <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 12px; padding: 25px; margin: 25px 0; border-left: 4px solid #0066cc;">
+            <div style="background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%); border-radius: 12px; padding: 25px; margin: 25px 0; border-left: 4px solid #f97316;">
               <h3 style="color: #333; margin-top: 0; font-size: 18px;">📋 Booking Details</h3>
               <table style="width: 100%; border-collapse: collapse;">
                 <tr>
@@ -88,7 +89,7 @@ const emailTemplates = {
                 </tr>
                 <tr style="border-top: 1px solid #dee2e6;">
                   <td style="padding: 12px 0 0; color: #333; font-weight: bold;">Total Amount:</td>
-                  <td style="padding: 12px 0 0; color: #0066cc; font-weight: bold; font-size: 20px; text-align: right;">${data.currency} ${data.totalAmount}</td>
+                  <td style="padding: 12px 0 0; color: #f97316; font-weight: bold; font-size: 20px; text-align: right;">${data.currency} ${data.totalAmount}</td>
                 </tr>
               </table>
             </div>
@@ -105,8 +106,8 @@ const emailTemplates = {
 
             <!-- CTA Button -->
             <div style="text-align: center; margin: 30px 0;">
-              <a href="https://recharge-travels-73e76.web.app/booking-confirmation?id=${data.confirmationNumber}"
-                 style="display: inline-block; background: linear-gradient(135deg, #0066cc 0%, #004d99 100%); color: #ffffff;
+              <a href="https://www.rechargetravels.com/booking-confirmation?id=${data.confirmationNumber}"
+                 style="display: inline-block; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: #ffffff;
                         text-decoration: none; padding: 15px 35px; border-radius: 30px; font-weight: bold; font-size: 16px;">
                 View Booking Details
               </a>
@@ -114,12 +115,13 @@ const emailTemplates = {
           </div>
 
           <!-- Contact Info -->
-          <div style="background-color: #f8f9fa; padding: 25px 30px; text-align: center;">
+          <div style="background-color: #fff7ed; padding: 25px 30px; text-align: center;">
             <p style="color: #666; margin: 0 0 10px; font-size: 14px;">Need help? Contact us:</p>
             <p style="color: #333; margin: 0;">
-              📧 <a href="mailto:info@rechargetravels.com" style="color: #0066cc; text-decoration: none;">info@rechargetravels.com</a>
-              &nbsp;|&nbsp;
-              📞 <a href="tel:+94777123456" style="color: #0066cc; text-decoration: none;">+94 777 123 456</a>
+              📧 <a href="mailto:info@rechargetravels.com" style="color: #f97316; text-decoration: none;">info@rechargetravels.com</a>
+            </p>
+            <p style="color: #333; margin: 10px 0 0;">
+              <a href="https://wa.me/94777721999" style="color: #25D366; text-decoration: none;">📱 WhatsApp: +94 77 772 1999</a>
             </p>
           </div>
 
@@ -127,7 +129,7 @@ const emailTemplates = {
           <div style="background-color: #333; padding: 20px 30px; text-align: center;">
             <p style="color: #999; margin: 0; font-size: 12px;">
               © ${new Date().getFullYear()} Recharge Travels. All rights reserved.<br>
-              Sri Lanka | <a href="https://recharge-travels-73e76.web.app" style="color: #0066cc; text-decoration: none;">www.rechargetravels.com</a>
+              Sri Lanka | <a href="https://www.rechargetravels.com" style="color: #f97316; text-decoration: none;">www.rechargetravels.com</a>
             </p>
           </div>
         </div>
@@ -167,13 +169,14 @@ const emailTemplates = {
       <body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
         <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
           <!-- Header -->
-          <div style="background: linear-gradient(135deg, #0066cc 0%, #004d99 100%); padding: 30px; text-align: center;">
-            <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Recharge Travels</h1>
+          <div style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); padding: 30px; text-align: center;">
+            <img src="https://www.rechargetravels.com/logo-v2.png" alt="Recharge Travels" style="height: 50px; margin-bottom: 10px;">
+            <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Thank You for Contacting Us!</h1>
           </div>
 
           <!-- Content -->
           <div style="padding: 40px 30px;">
-            <h2 style="color: #333; margin-top: 0;">Thank You for Contacting Us! 📬</h2>
+            <h2 style="color: #333; margin-top: 0;">We've Received Your Message 📬</h2>
             <p style="color: #666; font-size: 16px; line-height: 1.6;">
               Dear ${data.customerName},
             </p>
@@ -182,7 +185,7 @@ const emailTemplates = {
             </p>
 
             <!-- Inquiry Summary -->
-            <div style="background-color: #f8f9fa; border-radius: 12px; padding: 25px; margin: 25px 0; border-left: 4px solid #0066cc;">
+            <div style="background-color: #fff7ed; border-radius: 12px; padding: 25px; margin: 25px 0; border-left: 4px solid #f97316;">
               <h3 style="color: #333; margin-top: 0; font-size: 18px;">Your Inquiry:</h3>
               <p style="color: #666; margin: 0; white-space: pre-wrap;">${data.message}</p>
             </div>
@@ -193,18 +196,27 @@ const emailTemplates = {
 
             <!-- CTA Button -->
             <div style="text-align: center; margin: 30px 0;">
-              <a href="https://recharge-travels-73e76.web.app/tours"
-                 style="display: inline-block; background: linear-gradient(135deg, #0066cc 0%, #004d99 100%); color: #ffffff;
+              <a href="https://www.rechargetravels.com/tours"
+                 style="display: inline-block; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: #ffffff;
                         text-decoration: none; padding: 15px 35px; border-radius: 30px; font-weight: bold; font-size: 16px;">
                 Explore Our Tours
               </a>
             </div>
           </div>
 
+          <!-- Contact Info -->
+          <div style="background-color: #fff7ed; padding: 25px 30px; text-align: center;">
+            <p style="color: #666; margin: 0 0 10px; font-size: 14px;">Need immediate help?</p>
+            <p style="color: #333; margin: 0;">
+              <a href="https://wa.me/94777721999" style="color: #25D366; text-decoration: none;">📱 WhatsApp: +94 77 772 1999</a>
+            </p>
+          </div>
+
           <!-- Footer -->
           <div style="background-color: #333; padding: 20px 30px; text-align: center;">
             <p style="color: #999; margin: 0; font-size: 12px;">
-              © ${new Date().getFullYear()} Recharge Travels. All rights reserved.
+              © ${new Date().getFullYear()} Recharge Travels. All rights reserved.<br>
+              <a href="https://www.rechargetravels.com" style="color: #f97316; text-decoration: none;">www.rechargetravels.com</a>
             </p>
           </div>
         </div>
@@ -238,9 +250,10 @@ const emailTemplates = {
       <body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
         <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
           <!-- Header -->
-          <div style="background: linear-gradient(135deg, #0066cc 0%, #004d99 100%); padding: 30px; text-align: center;">
+          <div style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); padding: 30px; text-align: center;">
+            <img src="https://www.rechargetravels.com/logo-v2.png" alt="Recharge Travels" style="height: 50px; margin-bottom: 10px;">
             <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Welcome to Recharge Travels!</h1>
-            <p style="color: #e6f0ff; margin: 10px 0 0;">Your Gateway to Sri Lanka</p>
+            <p style="color: #fed7aa; margin: 10px 0 0;">Your Gateway to Sri Lanka</p>
           </div>
 
           <!-- Content -->
@@ -263,18 +276,30 @@ const emailTemplates = {
 
             <!-- CTA Button -->
             <div style="text-align: center; margin: 30px 0;">
-              <a href="https://recharge-travels-73e76.web.app"
-                 style="display: inline-block; background: linear-gradient(135deg, #0066cc 0%, #004d99 100%); color: #ffffff;
+              <a href="https://www.rechargetravels.com"
+                 style="display: inline-block; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: #ffffff;
                         text-decoration: none; padding: 15px 35px; border-radius: 30px; font-weight: bold; font-size: 16px;">
                 Start Exploring
               </a>
             </div>
           </div>
 
+          <!-- Contact Info -->
+          <div style="background-color: #fff7ed; padding: 25px 30px; text-align: center;">
+            <p style="color: #666; margin: 0 0 10px; font-size: 14px;">Questions? We're here to help!</p>
+            <p style="color: #333; margin: 0;">
+              📧 <a href="mailto:info@rechargetravels.com" style="color: #f97316; text-decoration: none;">info@rechargetravels.com</a>
+            </p>
+            <p style="color: #333; margin: 10px 0 0;">
+              <a href="https://wa.me/94777721999" style="color: #25D366; text-decoration: none;">📱 WhatsApp: +94 77 772 1999</a>
+            </p>
+          </div>
+
           <!-- Footer -->
           <div style="background-color: #333; padding: 20px 30px; text-align: center;">
             <p style="color: #999; margin: 0; font-size: 12px;">
-              © ${new Date().getFullYear()} Recharge Travels. All rights reserved.
+              © ${new Date().getFullYear()} Recharge Travels. All rights reserved.<br>
+              <a href="https://www.rechargetravels.com" style="color: #f97316; text-decoration: none;">www.rechargetravels.com</a>
             </p>
           </div>
         </div>
@@ -311,14 +336,15 @@ const emailTemplates = {
       </head>
       <body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: Arial, sans-serif;">
         <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
-          <div style="background-color: #0066cc; padding: 20px; text-align: center;">
-            <h1 style="color: #ffffff; margin: 0;">Admin Alert</h1>
+          <div style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); padding: 20px; text-align: center;">
+            <img src="https://www.rechargetravels.com/logo-v2.png" alt="Recharge Travels" style="height: 40px; margin-bottom: 10px;">
+            <h1 style="color: #ffffff; margin: 0;">Admin Alert 🔔</h1>
           </div>
 
           <div style="padding: 30px;">
             <h2 style="color: #333;">New ${data.type} Received</h2>
 
-            <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <div style="background-color: #fff7ed; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f97316;">
               <h3 style="color: #333; margin-top: 0;">Customer Details</h3>
               <p><strong>Name:</strong> ${data.customerName}</p>
               <p><strong>Email:</strong> ${data.customerEmail}</p>
@@ -332,11 +358,15 @@ const emailTemplates = {
 
             <div style="text-align: center; margin-top: 30px;">
               <a href="${data.adminUrl}"
-                 style="display: inline-block; background-color: #0066cc; color: #ffffff;
-                        text-decoration: none; padding: 12px 30px; border-radius: 5px; font-weight: bold;">
+                 style="display: inline-block; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: #ffffff;
+                        text-decoration: none; padding: 12px 30px; border-radius: 30px; font-weight: bold;">
                 View in Admin Panel
               </a>
             </div>
+          </div>
+
+          <div style="background-color: #333; padding: 15px; text-align: center;">
+            <p style="color: #999; margin: 0; font-size: 12px;">© ${new Date().getFullYear()} Recharge Travels Admin</p>
           </div>
         </div>
       </body>
@@ -357,9 +387,10 @@ const emailTemplates = {
       <body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
         <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
           <!-- Header with tropical image -->
-          <div style="background: linear-gradient(135deg, #0066cc 0%, #004d99 100%); padding: 40px 30px; text-align: center;">
+          <div style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); padding: 40px 30px; text-align: center;">
+            <img src="https://www.rechargetravels.com/logo-v2.png" alt="Recharge Travels" style="height: 50px; margin-bottom: 15px;">
             <h1 style="color: #ffffff; margin: 0; font-size: 32px;">Welcome to Our Travel Family! 🌴</h1>
-            <p style="color: #e6f0ff; margin: 15px 0 0; font-size: 18px;">Your Sri Lanka Adventure Starts Here</p>
+            <p style="color: #fed7aa; margin: 15px 0 0; font-size: 18px;">Your Sri Lanka Adventure Starts Here</p>
           </div>
 
           <!-- Content -->
@@ -395,8 +426,8 @@ const emailTemplates = {
 
             <!-- CTA -->
             <div style="text-align: center; margin: 35px 0;">
-              <a href="https://recharge-travels-73e76.web.app/tours"
-                 style="display: inline-block; background: linear-gradient(135deg, #0066cc 0%, #004d99 100%); color: #ffffff;
+              <a href="https://www.rechargetravels.com/tours"
+                 style="display: inline-block; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: #ffffff;
                         text-decoration: none; padding: 16px 40px; border-radius: 30px; font-weight: bold; font-size: 16px;">
                 Explore Our Tours
               </a>
@@ -412,13 +443,15 @@ const emailTemplates = {
           </div>
 
           <!-- Social Links -->
-          <div style="background-color: #f8f9fa; padding: 25px 30px; text-align: center;">
+          <div style="background-color: #fff7ed; padding: 25px 30px; text-align: center;">
             <p style="color: #666; margin: 0 0 15px; font-size: 14px;">Follow us for daily inspiration:</p>
             <div style="margin-bottom: 15px;">
-              <a href="#" style="display: inline-block; margin: 0 10px; color: #0066cc; text-decoration: none;">Facebook</a>
-              <a href="#" style="display: inline-block; margin: 0 10px; color: #0066cc; text-decoration: none;">Instagram</a>
-              <a href="#" style="display: inline-block; margin: 0 10px; color: #0066cc; text-decoration: none;">Twitter</a>
+              <a href="https://facebook.com/rechargetravels" style="display: inline-block; margin: 0 10px; color: #f97316; text-decoration: none;">Facebook</a>
+              <a href="https://instagram.com/rechargetravels" style="display: inline-block; margin: 0 10px; color: #f97316; text-decoration: none;">Instagram</a>
             </div>
+            <p style="color: #333; margin: 10px 0 0;">
+              <a href="https://wa.me/94777721999" style="color: #25D366; text-decoration: none;">📱 WhatsApp: +94 77 772 1999</a>
+            </p>
           </div>
 
           <!-- Footer -->
@@ -428,7 +461,7 @@ const emailTemplates = {
             </p>
             <p style="color: #999; margin: 0; font-size: 11px;">
               You received this email because you subscribed to our newsletter.<br>
-              <a href="https://recharge-travels-73e76.web.app/unsubscribe?email=${data.email}" style="color: #0066cc;">Unsubscribe</a>
+              <a href="https://www.rechargetravels.com/unsubscribe?email=${data.email}" style="color: #f97316;">Unsubscribe</a>
             </p>
           </div>
         </div>

@@ -190,6 +190,12 @@ const VehicleReviewSubmit = lazy(() => import('@/pages/vehicle-rental/VehicleRev
 const OwnerReviewResponses = lazy(() => import('@/pages/vehicle-rental/OwnerReviewResponses'));
 const AdminReviewManagement = lazy(() => import('@/pages/admin/AdminReviewManagement'));
 
+// Phase 5: Analytics & Reporting Dashboard
+const OwnerAnalytics = lazy(() => import('@/pages/vehicle-rental/OwnerAnalytics'));
+const VehiclePerformance = lazy(() => import('@/pages/vehicle-rental/VehiclePerformance'));
+const EarningsReports = lazy(() => import('@/pages/vehicle-rental/EarningsReports'));
+const BookingAnalytics = lazy(() => import('@/pages/vehicle-rental/BookingAnalytics'));
+
 // Vehicle Rental Admin Pages
 const VehicleApproval = lazy(() => import('@/pages/admin/vehicle-rental/VehicleApproval'));
 const OwnerApproval = lazy(() => import('@/pages/admin/vehicle-rental/OwnerApproval'));
@@ -358,6 +364,12 @@ function App() {
                 {/* Phase 4: Reviews & Rating System */}
                 <Route path="/vehicle-rental/review/:bookingId" element={<VehicleReviewSubmit />} />
                 <Route path="/vehicle-rental/owner/reviews" element={<OwnerReviewResponses />} />
+
+                {/* Phase 5: Analytics & Reporting Dashboard */}
+                <Route path="/vehicle-rental/owner-analytics" element={<OwnerAnalytics />} />
+                <Route path="/vehicle-rental/vehicle-performance/:vehicleId" element={<VehiclePerformance />} />
+                <Route path="/vehicle-rental/earnings-reports" element={<EarningsReports />} />
+                <Route path="/vehicle-rental/booking-analytics" element={<BookingAnalytics />} />
 
                 {/* Vendor Platform */}
                 <Route path="/vendor/register" element={withSiteChrome(VendorRegistration)} />

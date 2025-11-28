@@ -209,5 +209,16 @@
       "src/pages/TripAdvisorTours.tsx",
       "src/components/homepage/TripAdvisorHighlights.tsx"
     ]
+  },
+  {
+    "timestamp": "2025-11-28T10:15:00Z",
+    "summary": "Provided a Firestore seeding script for TripAdvisor tours.",
+    "details": [
+      "Added scripts/seedTripAdvisorTours.ts to upsert Recharge TripAdvisor tours into the tours_tripadvisor collection using env or default Firebase config.",
+      "Script writes title, pricing, ratings, links, operator profile URL, and timestamps so the TripAdvisor page/home highlights can pull from Firestore."
+    ],
+    "files": [
+      "scripts/seedTripAdvisorTours.ts"
+    ]
   }
 ]

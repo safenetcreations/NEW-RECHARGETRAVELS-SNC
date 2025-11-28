@@ -117,7 +117,6 @@ const AdminPanel: React.FC = () => {
         case 'vendor-approvals':
           return <VendorApprovals />;
         case 'bookings':
-        case 'bookings':
           return <BookingsManagement />;
         case 'reviews':
           return <ReviewsSection />;
