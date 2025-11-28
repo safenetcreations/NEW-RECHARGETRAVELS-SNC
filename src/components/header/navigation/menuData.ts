@@ -11,6 +11,11 @@ export const aboutItems = [
     description: "Discover the pearl of the Indian Ocean with its rich history and culture"
   },
   {
+    title: "Vehicle Rental",
+    href: "/vehicle-rental",
+    description: "Rent verified cars, SUVs, and vans with or without drivers across Sri Lanka"
+  },
+  {
     title: "Travel Blog",
     href: "/blog",
     description: "Expert guides, tips, and stories about Sri Lankan destinations"
@@ -29,6 +34,21 @@ export const aboutItems = [
     title: "Connect With Us",
     href: "/connect-with-us",
     description: "Watch our live social wall and follow all Recharge social channels"
+  },
+  {
+    title: "FAQs",
+    href: "/faq",
+    description: "Frequently asked questions about our services and Sri Lanka travel"
+  },
+  {
+    title: "Find Drivers",
+    href: "/drivers",
+    description: "Browse verified drivers and guides by rating, language, and tier"
+  },
+  {
+    title: "Join With Us (Drivers)",
+    href: "/join-with-us",
+    description: "Onboard as a verified driver/guide with live capture and admin approval"
   }
 ]
 
@@ -45,7 +65,7 @@ export const exoticPackageItems = [
   },
   {
     title: "Wellness Packages",
-    href: "/tours/wellness",
+    href: "/experiences/wellness",
     description: "Rejuvenate your mind, body, and soul with our wellness retreats"
   },
   {
@@ -161,53 +181,143 @@ export const familyActivityItems = [
   }
 ]
 
-export const toursItems = [
-  {
-    title: "Wildlife Safaris",
-    href: "/tours/wildtours",
-    description: "Encounter leopards, elephants, and exotic birds in their natural habitat"
+// Tours organized by category
+export const toursByCategory = {
+  adventure: {
+    title: "Adventure & Wildlife",
+    tours: [
+      {
+        title: "Wildlife Safaris",
+        href: "/tours/wildtours",
+        description: "Encounter leopards, elephants, and exotic birds"
+      },
+      {
+        title: "National Parks",
+        href: "/tours/wildtours#national-parks",
+        description: "Protected wilderness and biodiversity hotspots"
+      },
+      {
+        title: "Whale Watching",
+        href: "/experiences/whale-watching",
+        description: "Blue whales and dolphins off Mirissa coast"
+      },
+      {
+        title: "Water Sports",
+        href: "/experiences/hikkaduwa-water-sports",
+        description: "Diving, surfing, and snorkeling adventures"
+      }
+    ]
   },
-  {
-    title: "National Parks",
-    href: "/tours/wildtours#national-parks",
-    description: "Explore protected wilderness areas and biodiversity hotspots"
+  cultural: {
+    title: "Cultural & Heritage",
+    tours: [
+      {
+        title: "Cultural Tours",
+        href: "/tours/cultural",
+        description: "Ancient temples and rich traditions"
+      },
+      {
+        title: "Ramayana Trail",
+        href: "/tours/ramayana-trail",
+        description: "Sacred pilgrimage through mythological sites"
+      },
+      {
+        title: "Pilgrimage Tours",
+        href: "/experiences/pilgrimage-tours",
+        description: "Spiritual journeys to sacred sites"
+      },
+      {
+        title: "Cooking Classes",
+        href: "/experiences/cooking-class-sri-lanka",
+        description: "Learn authentic Sri Lankan cuisine"
+      }
+    ]
   },
-  {
-    title: "Photography Tours",
-    href: "/tours/photography",
-    description: "Capture Sri Lanka's beauty from temples to wildlife with expert guides"
+  nature: {
+    title: "Nature & Scenic",
+    tours: [
+      {
+        title: "Hill Country Tours",
+        href: "/tours/hill-country",
+        description: "Tea plantations and cool highlands"
+      },
+      {
+        title: "Beach Tours",
+        href: "/tours/beach-tours",
+        description: "Pristine beaches and coastal wonders"
+      },
+      {
+        title: "Eco-Tourism",
+        href: "/tours/ecotourism",
+        description: "Sustainable travel and conservation"
+      },
+      {
+        title: "Tea Trails",
+        href: "/experiences/tea-trails",
+        description: "Ceylon tea estate experiences"
+      }
+    ]
   },
-  {
-    title: "Ramayana Trail",
-    href: "/tours/ramayana-trail",
-    description: "Sacred pilgrimage following Sita's footsteps through mythological sites"
+  specialty: {
+    title: "Special Interest",
+    tours: [
+      {
+        title: "Photography Tours",
+        href: "/tours/photography",
+        description: "Capture Sri Lanka's beauty with experts"
+      },
+      {
+        title: "Culinary Tours",
+        href: "/tours/culinary",
+        description: "Authentic flavors and spices"
+      },
+      {
+        title: "Train Journeys",
+        href: "/experiences/train-journeys",
+        description: "Scenic railway adventures"
+      },
+      {
+        title: "Hot Air Balloon",
+        href: "/experiences/hot-air-balloon-sigiriya",
+        description: "Sunrise flights over Sigiriya"
+      }
+    ]
   },
-  {
-    title: "Eco-Tourism",
-    href: "/tours/ecotourism",
-    description: "Sustainable travel experiences supporting conservation and communities"
-  },
-  {
-    title: "Beach Tours",
-    href: "/tours/beach-tours",
-    description: "Explore pristine beaches and coastal wonders of Sri Lanka"
-  },
-  {
-    title: "Cultural Tours",
-    href: "/tours/cultural",
-    description: "Immerse yourself in Sri Lanka's rich heritage and ancient traditions"
-  },
-  {
-    title: "Hill Country Tours",
-    href: "/tours/hill-country",
-    description: "Experience the cool climate and tea plantations of the highlands"
-  },
-  {
-    title: "Culinary Tours",
-    href: "/tours/culinary",
-    description: "Savor the authentic flavors and spices of Sri Lankan cuisine"
+  luxury: {
+    title: "Luxury & Wellness",
+    tours: [
+      {
+        title: "Luxury Tours",
+        href: "/tours/luxury",
+        description: "Premium travel experiences"
+      },
+      {
+        title: "Ayurveda Wellness",
+        href: "/experiences/ayurveda",
+        description: "Traditional healing and spa retreats"
+      },
+      {
+        title: "Honeymoon Tours",
+        href: "/tours/honeymoon",
+        description: "Romantic escapes for couples"
+      },
+      {
+        title: "Private Tours",
+        href: "/transport/private-tours",
+        description: "Customized exclusive experiences"
+      }
+    ]
   }
-]
+};
+
+// Flat list for backward compatibility
+export const toursItems = [
+  ...toursByCategory.adventure.tours,
+  ...toursByCategory.cultural.tours,
+  ...toursByCategory.nature.tours,
+  ...toursByCategory.specialty.tours,
+  ...toursByCategory.luxury.tours
+];
 
 export const blogItems = [
   {
@@ -235,158 +345,208 @@ export const wildToursItems = [
   },
 ]
 
-export const destinationItems = [
-  {
-    title: "Colombo",
-    href: "/destinations/colombo",
-    description: "The vibrant capital city blending modern life with colonial charm"
+// Destinations organized by region
+export const destinationsByRegion = {
+  northern: {
+    title: "Northern Sri Lanka",
+    destinations: [
+      {
+        title: "Jaffna",
+        href: "/destinations/jaffna",
+        description: "Cultural heart of Tamil heritage with unique traditions"
+      },
+      {
+        title: "Delft Island",
+        href: "/destinations/delft-island",
+        description: "Remote island paradise with wild ponies and Dutch ruins"
+      },
+      {
+        title: "Mullaitivu",
+        href: "/destinations/mullaitivu",
+        description: "Pristine beaches and authentic Tamil fishing villages"
+      },
+      {
+        title: "Mannar",
+        href: "/destinations/mannar",
+        description: "Unique baobab trees and bird sanctuaries"
+      },
+      {
+        title: "Vavuniya",
+        href: "/destinations/vavuniya",
+        description: "Northern gateway rich in Tamil culture"
+      }
+    ]
   },
-  {
-    title: "Kandy",
-    href: "/destinations/kandy",
-    description: "The cultural capital home to the sacred Temple of the Tooth"
+  central: {
+    title: "Central & Hill Country",
+    destinations: [
+      {
+        title: "Kandy",
+        href: "/destinations/kandy",
+        description: "Sacred Temple of the Tooth and cultural capital"
+      },
+      {
+        title: "Nuwara Eliya",
+        href: "/destinations/nuwaraeliya",
+        description: "Little England with tea estates and cool climate"
+      },
+      {
+        title: "Ella",
+        href: "/destinations/ella",
+        description: "Scenic hill station with breathtaking views"
+      },
+      {
+        title: "Hatton",
+        href: "/destinations/hatton",
+        description: "Gateway to Adam's Peak and tea estates"
+      },
+      {
+        title: "Adam's Peak",
+        href: "/destinations/adams-peak",
+        description: "Sacred mountain with breathtaking sunrise"
+      },
+      {
+        title: "Badulla",
+        href: "/destinations/badulla",
+        description: "Hill country temples and waterfalls"
+      },
+      {
+        title: "Sigiriya",
+        href: "/destinations/sigiriya",
+        description: "Ancient rock fortress UNESCO World Heritage"
+      },
+      {
+        title: "Dambulla",
+        href: "/destinations/dambulla",
+        description: "Ancient cave temples and Golden Buddha"
+      },
+      {
+        title: "Polonnaruwa",
+        href: "/destinations/polonnaruwa",
+        description: "Ancient ruins and Buddhist monuments"
+      },
+      {
+        title: "Anuradhapura",
+        href: "/destinations/anuradhapura",
+        description: "Sacred city with Sri Maha Bodhi tree"
+      },
+      {
+        title: "Kurunegala",
+        href: "/destinations/kurunegala",
+        description: "Elephant Rock and Cultural Triangle access"
+      },
+      {
+        title: "Ratnapura",
+        href: "/destinations/ratnapura",
+        description: "City of gems and rainforest adventures"
+      }
+    ]
   },
-  {
-    title: "Galle",
-    href: "/destinations/galle",
-    description: "Historic fort city with Dutch colonial architecture by the sea"
+  southern: {
+    title: "Southern Sri Lanka",
+    destinations: [
+      {
+        title: "Galle",
+        href: "/destinations/galle",
+        description: "Historic Dutch fort by the sea"
+      },
+      {
+        title: "Mirissa",
+        href: "/destinations/mirissa",
+        description: "Whale watching and golden beaches"
+      },
+      {
+        title: "Weligama",
+        href: "/destinations/weligama",
+        description: "Surf bay with stilt fishermen"
+      },
+      {
+        title: "Hikkaduwa",
+        href: "/destinations/hikkaduwa",
+        description: "Coral reefs and vibrant nightlife"
+      },
+      {
+        title: "Bentota",
+        href: "/destinations/bentota",
+        description: "Luxury beach resort with water sports"
+      },
+      {
+        title: "Tangalle",
+        href: "/destinations/tangalle",
+        description: "Luxury retreats and turtle nesting"
+      },
+      {
+        title: "Matara",
+        href: "/destinations/matara",
+        description: "Dutch fortifications and beaches"
+      },
+      {
+        title: "Hambantota",
+        href: "/destinations/hambantota",
+        description: "Beaches and safari access points"
+      }
+    ]
   },
-  {
-    title: "Sigiriya",
-    href: "/destinations/sigiriya",
-    description: "Ancient rock fortress and UNESCO World Heritage Site"
+  eastern: {
+    title: "Eastern Sri Lanka",
+    destinations: [
+      {
+        title: "Trincomalee",
+        href: "/destinations/trincomalee",
+        description: "Pristine beaches and natural harbor"
+      },
+      {
+        title: "Arugam Bay",
+        href: "/destinations/arugam-bay",
+        description: "World-class surfing destination"
+      },
+      {
+        title: "Batticaloa",
+        href: "/destinations/batticaloa",
+        description: "Singing fish lagoon and tranquil beaches"
+      }
+    ]
   },
-  {
-    title: "Ella",
-    href: "/destinations/ella",
-    description: "Scenic hill station with breathtaking views and hiking trails"
-  },
-  {
-    title: "Nuwara Eliya",
-    href: "/destinations/nuwaraeliya",
-    description: "Sri Lanka's Little England with tea estates and cool climate"
-  },
-  {
-    title: "Jaffna",
-    href: "/destinations/jaffna",
-    description: "Cultural heart of Tamil heritage with unique traditions"
-  },
-  {
-    title: "Trincomalee",
-    href: "/destinations/trincomalee",
-    description: "Pristine beaches and natural harbor on the east coast"
-  },
-  {
-    title: "Arugam Bay",
-    href: "/destinations/arugam-bay",
-    description: "World-class surfing destination with laid-back vibes"
-  },
-  {
-    title: "Mirissa",
-    href: "/destinations/mirissa",
-    description: "Whale watching paradise with golden beaches"
-  },
-  {
-    title: "Weligama",
-    href: "/destinations/weligama",
-    description: "Beginner-friendly surf bay with stilt fishermen"
-  },
-  {
-    title: "Bentota",
-    href: "/destinations/bentota",
-    description: "Luxury beach resort with water sports and river safaris"
-  },
-  {
-    title: "Dambulla",
-    href: "/destinations/dambulla",
-    description: "Ancient cave temples with Buddhist art and Golden Buddha"
-  },
-  {
-    title: "Hikkaduwa",
-    href: "/destinations/hikkaduwa",
-    description: "Coral reefs, beach parties, and vibrant nightlife"
-  },
-  {
-    title: "Mannar",
-    href: "/destinations/mannar",
-    description: "Remote island district with unique baobab trees and bird sanctuaries"
-  },
-  {
-    title: "Polonnaruwa",
-    href: "/destinations/polonnaruwa",
-    description: "Ancient city with well-preserved ruins and Buddhist monuments"
-  },
-  {
-    title: "Anuradhapura",
-    href: "/destinations/anuradhapura",
-    description: "Sacred city with ancient stupas and the Sri Maha Bodhi tree"
-  },
-  {
-    title: "Kalpitiya",
-    href: "/destinations/kalpitiya",
-    description: "Kitesurfing paradise with dolphin watching and pristine lagoons"
-  },
-  {
-    title: "Adam's Peak",
-    href: "/destinations/adams-peak",
-    description: "Sacred mountain pilgrimage site with breathtaking sunrise views"
-  },
-  {
-    title: "Wadduwa",
-    href: "/destinations/wadduwa",
-    description: "Tranquil beach town perfect for relaxation and Ayurvedic retreats"
-  },
-  {
-    title: "Matara",
-    href: "/destinations/matara",
-    description: "Southern city blending Dutch fortifications with beaches and culture"
-  },
-  {
-    title: "Tangalle",
-    href: "/destinations/tangalle",
-    description: "Hidden beachside escape with luxury retreats and turtle nesting sites"
-  },
-  {
-    title: "Negombo",
-    href: "/destinations/negombo",
-    description: "Beach gateway near the airport with canals and seafood markets"
-  },
-  {
-    title: "Badulla",
-    href: "/destinations/badulla",
-    description: "Hill country heritage with ancient temples and waterfalls"
-  },
-  {
-    title: "Ratnapura",
-    href: "/destinations/ratnapura",
-    description: "City of gems featuring waterfalls and rainforest adventures"
-  },
-  {
-    title: "Puttalam",
-    href: "/destinations/puttalam",
-    description: "Coastal lagoons perfect for birdwatching and eco-tourism"
-  },
-  {
-    title: "Hambantota",
-    href: "/destinations/hambantota",
-    description: "Emerging port city with beaches and safari access points"
-  },
-  {
-    title: "Vavuniya",
-    href: "/destinations/vavuniya",
-    description: "Northern gateway rich in Tamil culture and local markets"
-  },
-  {
-    title: "Kurunegala",
-    href: "/destinations/kurunegala",
-    description: "Central hub with Elephant Rock and Cultural Triangle access"
-  },
-  {
-    title: "Batticaloa",
-    href: "/destinations/batticaloa",
-    description: "Peaceful east coast with singing fish lagoon and tranquil beaches"
+  western: {
+    title: "Western Sri Lanka",
+    destinations: [
+      {
+        title: "Colombo",
+        href: "/destinations/colombo",
+        description: "Vibrant capital with modern and colonial charm"
+      },
+      {
+        title: "Negombo",
+        href: "/destinations/negombo",
+        description: "Beach gateway near airport with canals"
+      },
+      {
+        title: "Wadduwa",
+        href: "/destinations/wadduwa",
+        description: "Tranquil beach town for Ayurvedic retreats"
+      },
+      {
+        title: "Kalpitiya",
+        href: "/destinations/kalpitiya",
+        description: "Kitesurfing and dolphin watching"
+      },
+      {
+        title: "Puttalam",
+        href: "/destinations/puttalam",
+        description: "Lagoons for birdwatching and eco-tourism"
+      }
+    ]
   }
-]
+};
+
+// Flat list for backward compatibility
+export const destinationItems = [
+  ...destinationsByRegion.northern.destinations,
+  ...destinationsByRegion.central.destinations,
+  ...destinationsByRegion.southern.destinations,
+  ...destinationsByRegion.eastern.destinations,
+  ...destinationsByRegion.western.destinations
+];
 
 export const scenicItems = [
   {
@@ -464,75 +624,114 @@ export const transportItems = [
   }
 ]
 
-export const experienceItems = [
-  {
-    title: "Luxury Experiences",
-    href: "/experiences",
-    description: "Curated luxury journeys designed for discerning travelers"
+// Experiences organized by category
+export const experiencesByCategory = {
+  adventure: {
+    title: "Adventure & Water Sports",
+    experiences: [
+      {
+        title: "Water Sports Hikkaduwa",
+        href: "/experiences/hikkaduwa-water-sports",
+        description: "Surf, snorkel, and ride the waves"
+      },
+      {
+        title: "Kite Surfing Kalpitiya",
+        href: "/experiences/kalpitiya-kitesurfing",
+        description: "Master the wind in Sri Lanka's kite capital"
+      },
+      {
+        title: "Hot Air Ballooning",
+        href: "/experiences/hot-air-balloon-sigiriya",
+        description: "Soar over Sigiriya at sunrise"
+      },
+      {
+        title: "Jungle Camping",
+        href: "/experiences/jungle-camping",
+        description: "Sleep under stars in the wilderness"
+      }
+    ]
   },
-  {
-    title: "Custom Experience",
-    href: "/custom-experience",
-    description: "Create your dream journey tailored to your desires"
+  wildlife: {
+    title: "Wildlife & Nature",
+    experiences: [
+      {
+        title: "Whale Watching",
+        href: "/experiences/whale-watching",
+        description: "Meet blue whales and dolphins"
+      },
+      {
+        title: "Lagoon Safaris",
+        href: "/experiences/lagoon-safari",
+        description: "Paddle through Bentota's mangroves"
+      },
+      {
+        title: "Sea Cucumber Farm",
+        href: "/experiences/sea-cucumber-farming",
+        description: "Explore marine aquaculture in Jaffna"
+      },
+      {
+        title: "Island Escapes",
+        href: "/experiences/island-getaways",
+        description: "Discover hidden islands of the north"
+      }
+    ]
   },
-  {
-    title: "Scenic Train Rides",
-    href: "/experiences/train-journeys",
-    description: "Ride the rails through tea plantations and misty mountains"
+  heritage: {
+    title: "Heritage & Culture",
+    experiences: [
+      {
+        title: "Scenic Train Rides",
+        href: "/experiences/train-journeys",
+        description: "Ride through tea plantations and mountains"
+      },
+      {
+        title: "Tea Trail Towns",
+        href: "/experiences/tea-trails",
+        description: "Explore Ceylon tea heritage"
+      },
+      {
+        title: "Pilgrimage Tours",
+        href: "/experiences/pilgrimage-tours",
+        description: "Visit sacred sites across all faiths"
+      },
+      {
+        title: "Cooking Classes",
+        href: "/experiences/cooking-class-sri-lanka",
+        description: "Learn authentic Sri Lankan recipes"
+      }
+    ]
   },
-  {
-    title: "Tea Trail Towns",
-    href: "/experiences/tea-trails",
-    description: "Explore Ceylon tea heritage in cool hill estates"
-  },
-  {
-    title: "Whale Watching",
-    href: "/experiences/whale-watching",
-    description: "Meet blue whales and dolphins along the coast"
-  },
-  {
-    title: "Pilgrimage Tours",
-    href: "/experiences/pilgrimage-tours",
-    description: "Visit sacred sites across all faiths and traditions"
-  },
-  {
-    title: "Island Escapes",
-    href: "/experiences/island-getaways",
-    description: "Discover hidden islands of the north and east"
-  },
-  {
-    title: "Water Sports Hikkaduwa",
-    href: "/experiences/hikkaduwa-water-sports",
-    description: "Surf, snorkel, and ride the waves of Hikkaduwa"
-  },
-  {
-    title: "Hot Air Ballooning",
-    href: "/experiences/hot-air-balloon-sigiriya",
-    description: "Soar over Sigiriya's landscapes at sunrise"
-  },
-  {
-    title: "Kite Surfing Kalpitiya",
-    href: "/experiences/kalpitiya-kitesurfing",
-    description: "Master the wind in Sri Lanka's kite capital"
-  },
-  {
-    title: "Jungle Camping",
-    href: "/experiences/jungle-camping",
-    description: "Sleep under stars in Wilpattu's wilderness"
-  },
-  {
-    title: "Lagoon Safaris",
-    href: "/experiences/lagoon-safari",
-    description: "Paddle through mangroves in Bentota's backwaters"
-  },
-  {
-    title: "Cooking Classes",
-    href: "/experiences/cooking-class-sri-lanka",
-    description: "Learn authentic Sri Lankan recipes hands-on"
-  },
-  {
-    title: "Sea Cucumber Farm",
-    href: "/experiences/sea-cucumber-farming",
-    description: "Explore marine aquaculture in Jaffna"
+  luxury: {
+    title: "Luxury & Custom",
+    experiences: [
+      {
+        title: "Luxury Experiences",
+        href: "/experiences",
+        description: "Curated luxury journeys for travelers"
+      },
+      {
+        title: "Custom Experience",
+        href: "/custom-experience",
+        description: "Create your dream journey"
+      },
+      {
+        title: "Ayurveda Wellness",
+        href: "/experiences/ayurveda",
+        description: "Traditional healing and spa retreats"
+      },
+      {
+        title: "Private Charters",
+        href: "/experiences",
+        description: "Exclusive yacht and helicopter tours"
+      }
+    ]
   }
-]
+};
+
+// Flat list for backward compatibility
+export const experienceItems = [
+  ...experiencesByCategory.adventure.experiences,
+  ...experiencesByCategory.wildlife.experiences,
+  ...experiencesByCategory.heritage.experiences,
+  ...experiencesByCategory.luxury.experiences
+];

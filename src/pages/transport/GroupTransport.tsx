@@ -385,15 +385,12 @@ const GroupTransport = () => {
                       <span>{trustIndicators.support}</span>
                     </div>
                   </motion.div>
+
+                  {/* End Hero Text */}
                 </motion.div>
 
-                {/* Group Booking Widget */}
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.4 }}
-                  className="relative"
-                >
+                {/* Group Booking Widget - static (no entry animation to avoid flash) */}
+                <div className="relative">
                   {!isBookingExpanded ? (
                     /* Compact Booking Widget */
                     <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-8 max-w-5xl mx-auto">
@@ -513,7 +510,7 @@ const GroupTransport = () => {
                       </div>
                     </motion.div>
                   )}
-                </motion.div>
+                </div>
 
                 {/* Feature Highlights */}
                 <motion.div

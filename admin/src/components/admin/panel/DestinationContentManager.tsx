@@ -235,7 +235,6 @@ const DestinationContentManager: React.FC = () => {
       await setDoc(ref, {
         ...payload,
         updatedAt: serverTimestamp(),
-        createdAt: content.id ? content['createdAt'] : serverTimestamp(),
       }, { merge: true });
       toast.success('Destination content saved');
     } catch (error) {

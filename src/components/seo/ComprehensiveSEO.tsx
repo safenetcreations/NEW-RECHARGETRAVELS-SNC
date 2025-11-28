@@ -30,7 +30,9 @@ const ComprehensiveSEO: React.FC<SEOProps> = ({
   noFollow = false
 }) => {
   const { language } = useLanguage();
-  const baseUrl = 'https://www.rechargetravels.com';
+  const baseUrl = typeof window !== 'undefined'
+    ? window.location.origin
+    : 'https://recharge-travels-73e76.web.app';
   const fullCanonicalUrl = canonicalUrl ? `${baseUrl}${canonicalUrl}` : baseUrl;
 
   // Default keywords for Sri Lanka travel
@@ -69,7 +71,7 @@ const ComprehensiveSEO: React.FC<SEOProps> = ({
     "name": "Recharge Travels & Tours Ltd",
     "description": "Your trusted partner for unforgettable Sri Lanka adventures",
     "url": baseUrl,
-    "logo": `${baseUrl}/logo.png`,
+    "logo": `${baseUrl}/logo-v2.png`,
     "image": ogImage,
     "address": {
       "@type": "PostalAddress",
@@ -114,6 +116,14 @@ const ComprehensiveSEO: React.FC<SEOProps> = ({
       <meta name="keywords" content={allKeywords} />
       <meta name="author" content="Recharge Travels & Tours Ltd" />
       <meta name="robots" content={`${noIndex ? 'noindex' : 'index'}, ${noFollow ? 'nofollow' : 'follow'}`} />
+      <meta
+        name="googlebot"
+        content={`${noIndex ? 'noindex' : 'index'}, ${noFollow ? 'nofollow' : 'follow'}, max-snippet:-1, max-image-preview:large, max-video-preview:-1`}
+      />
+      <meta
+        name="bingbot"
+        content={`${noIndex ? 'noindex' : 'index'}, ${noFollow ? 'nofollow' : 'follow'}, max-snippet:-1, max-image-preview:large, max-video-preview:-1`}
+      />
 
       {/* Canonical URL */}
       <link rel="canonical" href={fullCanonicalUrl} />
@@ -213,7 +223,7 @@ const ComprehensiveSEO: React.FC<SEOProps> = ({
           "@type": "Organization",
           "name": "Recharge Travels & Tours Ltd",
           "url": baseUrl,
-          "logo": `${baseUrl}/logo.png`,
+          "logo": `${baseUrl}/logo-v2.png`,
           "contactPoint": {
             "@type": "ContactPoint",
             "telephone": "+94-11-234-5678",

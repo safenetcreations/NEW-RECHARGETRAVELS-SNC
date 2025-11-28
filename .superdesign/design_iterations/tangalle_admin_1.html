@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tangalle Destination Control | Recharge Travels</title>
+
+  <link rel="stylesheet" href="./tangalle_theme_1.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Outfit', 'Inter', 'sans-serif'],
+            display: ['Space Grotesk', 'Outfit', 'sans-serif']
+          }
+        }
+      }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/flowbite@2.0.0/dist/flowbite.min.js" defer></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+</head>
+
+<body class="tangalle-shell">
+  <div class="relative">
+    <!-- NAV -->
+    <header class="sticky top-4 z-40 px-4">
+      <nav class="nav-glass flex flex-wrap items-center justify-between px-6 py-3">
+        <div class="flex items-center gap-3">
+          <div class="h-11 w-11 rounded-2xl bg-gradient-to-br from-[#ffb199] to-[#ff725e] flex items-center justify-center shadow-lg">
+            <span class="font-display text-xl text-white">RT</span>
+          </div>
+          <div>
+            <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Destinations</p>
+            <h1 class="font-display text-lg text-slate-900">Tangalle Control</h1>
+          </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 md:gap-3 text-sm">
+          <button class="tab-chip active">Overview</button>
+          <button class="tab-chip">Experiences</button>
+          <button class="tab-chip">Itineraries</button>
+          <button class="tab-chip">Travel Info</button>
+          <button class="tab-chip">Admin</button>
+        </div>
+        <div class="flex items-center gap-3">
+          <button class="admin-toggle flex items-center gap-2 text-sm">
+            <span class="relative flex h-2 w-5">
+              <span class="absolute inline-flex h-2 w-2 rounded-full bg-[#ff725e] shadow" style="animation: pulse 2s infinite;"></span>
+              <span class="absolute left-3 inline-flex h-2 w-2 rounded-full bg-[#33a1864d]"></span>
+            </span>
+            Live Edit
+          </button>
+          <div class="h-11 w-11 rounded-full bg-white shadow flex items-center justify-center text-slate-600">
+            <span class="font-semibold">AN</span>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <!-- HERO -->
+    <section class="px-4 pt-10 pb-8">
+      <div class="mx-auto grid max-w-6xl gap-10 rounded-[34px] bg-white/70 p-8 shadow-[0_35px_80px_rgba(27,36,30,0.18)] lg:grid-cols-[1.15fr_0.85fr]">
+        <div class="space-y-6">
+          <div class="flex gap-3">
+            <span class="badge-soft">Verified beach escape</span>
+            <span class="badge-soft bg-[#fcefe7] text-[#ff725e]">Turtle haven</span>
+          </div>
+          <div>
+            <p class="text-sm uppercase tracking-[0.4em] text-slate-500">Recharge Travels</p>
+            <h2 class="hero-title mt-2 font-display">Tangalle · Hidden Coastlines & Warm Lagoons</h2>
+            <p class="hero-subtitle mt-4 max-w-xl">
+              Blend mindful beach downtime with turtle conservation, spice gardens, and curated dining at Sri Lanka’s southern fringe.
+            </p>
+          </div>
+          <div class="flex flex-wrap gap-3 text-sm text-slate-600">
+            <div class="stats-pill">
+              <p class="text-2xl font-semibold text-slate-900">4.9</p>
+              <p class="text-xs uppercase tracking-widest text-slate-500">Traveler rating</p>
+            </div>
+            <div class="stats-pill">
+              <p class="text-2xl font-semibold text-slate-900">18°-30°C</p>
+              <p class="text-xs uppercase tracking-widest text-slate-500">Weather today</p>
+            </div>
+            <div class="stats-pill">
+              <p class="text-2xl font-semibold text-slate-900">78%</p>
+              <p class="text-xs uppercase tracking-widest text-slate-500">Occupancy</p>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-3">
+            <button class="cta-primary">Plan Tangalle Experience</button>
+            <button class="cta-secondary">Preview Live Page</button>
+            <button class="edit-pill">Edit Hero Copy</button>
+          </div>
+          <div class="flex flex-wrap gap-4 text-sm text-slate-600">
+            <div>
+              <p class="font-semibold text-slate-900">Sync State</p>
+              <p>Connected to Firebase · Last saved 2m ago</p>
+            </div>
+            <div>
+              <p class="font-semibold text-slate-900">Admin link</p>
+              <p>/destinations/tangalle</p>
+            </div>
+          </div>
+        </div>
+        <div class="relative rounded-[26px] overflow-hidden shadow-[0_30px_60px_rgba(14,25,20,0.4)]">
+          <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=80"
+            alt="Tangalle coast" class="h-full w-full object-cover" />
+          <div class="absolute inset-0 bg-gradient-to-t from-[#0a1513e6] via-transparent to-transparent"></div>
+          <div class="absolute bottom-6 left-6 right-6 grid gap-4 text-white">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-xs uppercase tracking-[0.3em] text-white/60">Live occupancy</p>
+                <p class="text-2xl font-semibold">Moderate (62%)</p>
+              </div>
+              <button class="edit-pill text-white border-white/40 bg-white/10">Edit Stats</button>
+            </div>
+            <div class="glass-overlay flex items-center justify-between px-4 py-3 text-slate-900">
+              <div>
+                <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Turtle activity</p>
+                <p class="font-semibold">Sunset hatching · Rekawa beach</p>
+              </div>
+              <div class="text-right">
+                <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Sea condition</p>
+                <p class="font-semibold">Slight swell · 22° water</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- INSIGHT ROW -->
+    <section class="px-4 pb-10">
+      <div class="mx-auto grid max-w-6xl gap-4 md:grid-cols-4">
+        <article class="insight-card">
+          <header class="flex items-center justify-between">
+            <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Tide</p>
+            <button class="mini-chip">Edit</button>
+          </header>
+          <p class="mt-4 text-3xl font-semibold text-slate-900">1.1m</p>
+          <p class="text-sm text-slate-600">Next low tide 16:42</p>
+          <div class="mt-5 h-16 w-full rounded-2xl bg-mint-200/60"></div>
+        </article>
+        <article class="insight-card">
+          <header class="flex items-center justify-between">
+            <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Weather</p>
+            <button class="mini-chip">Sync</button>
+          </header>
+          <p class="mt-4 text-3xl font-semibold text-slate-900 flex items-center gap-2">28°C <span class="text-base font-normal text-slate-600">Sunny</span></p>
+          <p class="text-sm text-slate-600">Feels like 30°C · UV index 8</p>
+          <div class="mt-5 text-xs uppercase tracking-[0.4em] text-slate-500">Dec - Apr best window</div>
+        </article>
+        <article class="insight-card">
+          <header class="flex items-center justify-between">
+            <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Avg. cost / day</p>
+            <button class="mini-chip bg-[#ffe8dc] text-[#ff725e]">Update</button>
+          </header>
+          <p class="mt-4 text-3xl font-semibold text-slate-900">$186</p>
+          <p class="text-sm text-slate-600">Based on 82 active bookings</p>
+          <div class="mt-5 flex items-center gap-2 text-xs text-success-400">
+            <span class="h-2 w-2 rounded-full bg-success-400"></span> +6% vs last week
+          </div>
+        </article>
+        <article class="insight-card">
+          <header class="flex items-center justify-between">
+            <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Crowd level</p>
+            <button class="mini-chip bg-[#fcefe7] text-[#ff725e]">Auto</button>
+          </header>
+          <p class="mt-4 text-3xl font-semibold text-slate-900">Relaxed</p>
+          <p class="text-sm text-slate-600">Best for remote workers · noise 2/5</p>
+          <div class="mt-5 flex gap-1">
+            <span class="h-2 w-8 rounded-full bg-[#33a186]"></span>
+            <span class="h-2 w-8 rounded-full bg-[#ffb199]"></span>
+            <span class="h-2 w-8 rounded-full bg-[#ffe8dc]"></span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- TAB HUB -->
+    <section class="px-4 pb-12">
+      <div class="mx-auto max-w-6xl rounded-[30px] bg-white/80 p-6 shadow-[0_35px_70px_rgba(20,28,24,0.14)]">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/60 pb-4">
+          <div class="flex flex-wrap gap-3 text-sm text-slate-600">
+            <button class="tab-chip active" data-tab="highlights">Highlights <span class="ml-2 rounded-full bg-white/30 px-2 py-0.5 text-xs text-white">12</span></button>
+            <button class="tab-chip" data-tab="planner">Day Planner</button>
+            <button class="tab-chip" data-tab="info">Practical Info</button>
+            <button class="tab-chip" data-tab="gallery">Gallery</button>
+            <button class="tab-chip" data-tab="map">Map</button>
+          </div>
+          <button class="edit-pill">Manage Tabs</button>
+        </div>
+
+        <div class="grid gap-6 pt-6 md:grid-cols-2" id="tab-highlights">
+          <article class="experience-card">
+            <div class="grid gap-5 p-6 md:grid-cols-[0.4fr_0.6fr]">
+              <div class="overflow-hidden rounded-2xl">
+                <img src="https://images.unsplash.com/photo-1455659817273-f96807779a8e?auto=format&fit=crop&w=600&q=80"
+                  alt="Sunset lagoon" class="h-48 w-full object-cover transition-transform duration-500 hover:scale-105" />
+              </div>
+              <div class="space-y-4">
+                <div class="flex items-center gap-2">
+                  <span class="mini-chip">Sunset lagoon</span>
+                  <span class="mini-chip bg-[#fcefe7] text-[#ff725e]">Featured</span>
+                </div>
+                <h3 class="text-xl font-semibold text-slate-900">Golden hour paddle</h3>
+                <p class="text-sm text-slate-600">Kayak across silent mangrove canals, guided by local naturalists.</p>
+                <div class="flex items-center gap-3 text-sm">
+                  <button class="cta-secondary px-4 py-2 text-xs font-semibold">Edit Card</button>
+                  <button class="mini-chip bg-[#e6f3ef] text-[#26625a]">Pin to hero</button>
+                </div>
+              </div>
+            </div>
+          </article>
+          <article class="experience-card">
+            <div class="grid gap-5 p-6 md:grid-cols-[0.4fr_0.6fr]">
+              <div class="overflow-hidden rounded-2xl">
+                <img src="https://images.unsplash.com/photo-1470246973918-29a93221c455?auto=format&fit=crop&w=600&q=80"
+                  alt="Turtle watching" class="h-48 w-full object-cover transition-transform duration-500 hover:scale-105" />
+              </div>
+              <div class="space-y-4">
+                <div class="flex items-center gap-2">
+                  <span class="mini-chip">Rekawa beach</span>
+                  <span class="mini-chip bg-[#d7f0e4] text-[#26625a]">Eco</span>
+                </div>
+                <h3 class="text-xl font-semibold text-slate-900">Turtle Guardian Nights</h3>
+                <p class="text-sm text-slate-600">Track nesting turtles with conservationists. Limited 16 guests per night.</p>
+                <div class="flex items-center gap-3 text-sm">
+                  <button class="cta-secondary px-4 py-2 text-xs font-semibold">Edit Card</button>
+                  <button class="mini-chip bg-[#ffe8dc] text-[#ff725e]">Sync inventory</button>
+                </div>
+              </div>
+            </div>
+          </article>
+          <article class="experience-card md:col-span-2">
+            <div class="grid gap-6 p-6 md:grid-cols-3">
+              <div class="rounded-2xl border border-white/70 bg-white/70 p-4">
+                <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Local tips</p>
+                <p class="mt-2 text-lg font-semibold text-slate-900">Best brunch spots</p>
+                <ul class="mt-4 space-y-2 text-sm text-slate-600">
+                  <li>• Palm Root Cafe (slow coffee)</li>
+                  <li>• MoonRiver for pescatarians</li>
+                  <li>• W15 high-tide brunch</li>
+                </ul>
+                <button class="mini-chip mt-4 bg-[#e6f3ef] text-[#26625a]">Edit list</button>
+              </div>
+              <div class="rounded-2xl border border-white/70 bg-white/70 p-4">
+                <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Audio byte</p>
+                <div class="mt-4 flex items-center gap-3 rounded-2xl bg-slate-900/90 p-4 text-white">
+                  <button class="h-10 w-10 rounded-full border border-white/30 flex items-center justify-center">▶</button>
+                  <div>
+                    <p class="text-sm font-semibold">Chef Senal · New menu drop</p>
+                    <p class="text-xs text-white/70">Admin note · 1:12</p>
+                  </div>
+                </div>
+                <button class="mini-chip mt-4 bg-[#ffe8dc] text-[#ff725e]">Replace audio</button>
+              </div>
+              <div class="rounded-2xl border border-white/70 bg-white/70 p-4">
+                <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Live alerts</p>
+                <div class="mt-4 space-y-3 text-sm">
+                  <div class="flex items-start gap-3">
+                    <span class="h-2 w-2 rounded-full bg-[#ff725e] mt-1"></span>
+                    <div>
+                      <p class="font-semibold text-slate-900">Road closure</p>
+                      <p class="text-slate-600">Tangalle - Dickwella coastal road · 2pm-5pm</p>
+                    </div>
+                  </div>
+                  <div class="flex items-start gap-3">
+                    <span class="h-2 w-2 rounded-full bg-[#33a186] mt-1"></span>
+                    <div>
+                      <p class="font-semibold text-slate-900">New sunrise yoga slots</p>
+                      <p class="text-slate-600">Beach House, 6am daily</p>
+                    </div>
+                  </div>
+                </div>
+                <button class="mini-chip mt-4 bg-[#e6f3ef] text-[#26625a]">Add alert</button>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXPERIENCE GRID -->
+    <section class="px-4 pb-12">
+      <div class="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+        <div class="space-y-6">
+          <header class="flex items-center justify-between">
+            <div>
+              <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Experience blocks</p>
+              <h3 class="text-2xl font-semibold text-slate-900">Feature storyline</h3>
+            </div>
+            <button class="edit-pill">Reorder Grid</button>
+          </header>
+          <div class="grid gap-6 md:grid-cols-2">
+            <article class="experience-card">
+              <div class="relative">
+                <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=600&q=80"
+                  alt="Wellness tide house" class="h-48 w-full rounded-t-[28px] object-cover" />
+                <span class="absolute top-4 right-4 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-[#26625a]">Low carbon</span>
+              </div>
+              <div class="space-y-3 p-6">
+                <h4 class="text-xl font-semibold text-slate-900">Wellness tide house</h4>
+                <p class="text-sm text-slate-600">Private thermal pools, ocean-facing daybeds & treatment pods.</p>
+                <div class="flex items-center justify-between text-sm">
+                  <p class="font-semibold text-slate-900">$280 pp</p>
+                  <button class="mini-chip bg-[#ffe8dc] text-[#ff725e]">Toggle visibility</button>
+                </div>
+              </div>
+            </article>
+            <article class="experience-card">
+              <div class="relative">
+                <img src="https://images.unsplash.com/photo-1440557653082-e8e186733eeb?auto=format&fit=crop&w=600&q=80"
+                  alt="Cinnamon trail" class="h-48 w-full rounded-t-[28px] object-cover" />
+                <span class="absolute top-4 right-4 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-[#ff725e]">New drop</span>
+              </div>
+              <div class="space-y-3 p-6">
+                <h4 class="text-xl font-semibold text-slate-900">Cinnamon trail + dining</h4>
+                <p class="text-sm text-slate-600">Cycle across spice estates, finish with chef-led tasting menu.</p>
+                <div class="flex items-center justify-between text-sm">
+                  <p class="font-semibold text-slate-900">$140 pp</p>
+                  <button class="mini-chip bg-[#d7f0e4] text-[#26625a]">Auto-sync</button>
+                </div>
+              </div>
+            </article>
+            <article class="experience-card md:col-span-2">
+              <div class="grid gap-6 p-6 md:grid-cols-2">
+                <div class="rounded-[24px] bg-slate-900/90 p-6 text-white">
+                  <p class="text-xs uppercase tracking-[0.4em] text-white/60">Local storytellers</p>
+                  <p class="mt-3 text-2xl font-semibold">Nisansala Jayasinghe</p>
+                  <p class="mt-2 text-sm text-white/70">Heritage host & turtle guardian · 22 community stays managed</p>
+                  <button class="cta-primary mt-4 bg-white text-slate-900 px-5 py-2">Send brief</button>
+                </div>
+                <div class="rounded-[24px] border border-white/60 bg-white/70 p-6">
+                  <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Action buttons</p>
+                  <div class="mt-4 space-y-3">
+                    <button class="glass-overlay flex w-full items-center justify-between px-4 py-3 text-sm font-semibold text-slate-900">
+                      Update Firebase block
+                      <span class="text-xs text-slate-500">Syncs 5 cards</span>
+                    </button>
+                    <button class="glass-overlay flex w-full items-center justify-between px-4 py-3 text-sm font-semibold text-slate-900">
+                      Test live page
+                      <span class="text-xs text-slate-500">Staging /prod</span>
+                    </button>
+                    <button class="glass-overlay flex w-full items-center justify-between px-4 py-3 text-sm font-semibold text-slate-900">
+                      Export JSON
+                      <span class="text-xs text-slate-500">Download</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+        <aside class="rounded-[30px] bg-white/80 p-6 shadow-[0_28px_70px_rgba(17,24,21,0.15)]">
+          <header class="flex items-center justify-between">
+            <div>
+              <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Local tips stack</p>
+              <h3 class="text-xl font-semibold text-slate-900">Travel choreo</h3>
+            </div>
+            <button class="edit-pill">Edit Tips</button>
+          </header>
+          <div class="mt-6 space-y-4">
+            <article class="rounded-[22px] border border-white/70 bg-white/70 p-4">
+              <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Arrival</p>
+              <p class="text-lg font-semibold text-slate-900">Use Matara express train</p>
+              <p class="text-sm text-slate-600">35 min coastal ride + curated driver pickup.</p>
+              <button class="mini-chip mt-3 bg-[#e6f3ef] text-[#26625a]">Auto-update</button>
+            </article>
+            <article class="rounded-[22px] border border-white/70 bg-white/70 p-4">
+              <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Food radar</p>
+              <p class="text-lg font-semibold text-slate-900">Chef-hosted villa dining</p>
+              <p class="text-sm text-slate-600">72h pre-order for curated seafood tables.</p>
+              <div class="mt-3 flex items-center gap-2 text-xs text-slate-500">
+                <span class="status-badge success">Verified</span>
+                <span>Updated 4h ago</span>
+              </div>
+            </article>
+            <article class="rounded-[22px] border border-white/70 bg-white/70 p-4">
+              <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Movement</p>
+              <p class="text-lg font-semibold text-slate-900">Silent tuk network</p>
+              <p class="text-sm text-slate-600">EV tuk circuits for lagoon hopping.</p>
+              <button class="mini-chip mt-3 bg-[#ffe8dc] text-[#ff725e]">Add vendor</button>
+            </article>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- LOGISTICS & TIMELINE -->
+    <section class="px-4 pb-12">
+      <div class="mx-auto grid max-w-6xl gap-6 md:grid-cols-[0.9fr_1.1fr]">
+        <div class="rounded-[28px] bg-white/80 p-6 shadow-[0_22px_60px_rgba(16,22,20,0.15)]">
+          <header class="flex items-center justify-between">
+            <div>
+              <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Travel logistics</p>
+              <h3 class="text-xl font-semibold text-slate-900">How to get here</h3>
+            </div>
+            <button class="edit-pill">Edit</button>
+          </header>
+          <ul class="mt-6 space-y-4">
+            <li class="flex items-start gap-3 rounded-[20px] border border-white/70 bg-white/70 p-4">
+              <span class="text-sm font-semibold text-[#26625a]">Step 01</span>
+              <div>
+                <p class="font-semibold text-slate-900">Private transfer (2h from Matara)</p>
+                <p class="text-sm text-slate-600">Showcases rice paddy belts & cinnamon fields.</p>
+              </div>
+            </li>
+            <li class="flex items-start gap-3 rounded-[20px] border border-white/70 bg-white/70 p-4">
+              <span class="text-sm font-semibold text-[#26625a]">Step 02</span>
+              <div>
+                <p class="font-semibold text-slate-900">Hydro seaplane (Koggala lagoon)</p>
+                <p class="text-sm text-slate-600">Connects Colombo to Tangalle jetty in 45 minutes.</p>
+              </div>
+            </li>
+            <li class="flex items-start gap-3 rounded-[20px] border border-white/70 bg-white/70 p-4">
+              <span class="text-sm font-semibold text-[#26625a]">Step 03</span>
+              <div>
+                <p class="font-semibold text-slate-900">Immersive welcome lounge</p>
+                <p class="text-sm text-slate-600">Includes sip station, local SIM desk, and admin-only notes.</p>
+              </div>
+            </li>
+          </ul>
+          <div class="mt-6 rounded-[20px] bg-slate-900/90 p-4 text-white">
+            <p class="text-xs uppercase tracking-[0.4em] text-white/60">Admin notes</p>
+            <p class="mt-1 text-sm">Transport API connected · verify drivers weekly.</p>
+          </div>
+        </div>
+        <div class="rounded-[28px] bg-white/80 p-6 shadow-[0_22px_60px_rgba(16,22,20,0.15)]">
+          <header class="flex items-center justify-between">
+            <div>
+              <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Itinerary timeline</p>
+              <h3 class="text-xl font-semibold text-slate-900">Day 1 - 3 flow</h3>
+            </div>
+            <button class="edit-pill">Sync with CMS</button>
+          </header>
+          <div class="mt-6 space-y-6">
+            <article class="timeline-entry">
+              <div class="flex items-center gap-3">
+                <span class="status-badge success">Day 1</span>
+                <p class="text-sm text-slate-500">Embrace beach & lagoon</p>
+              </div>
+              <h4 class="mt-3 text-lg font-semibold text-slate-900">Silent Beach arrival · private sundowners</h4>
+              <p class="text-sm text-slate-600">Guided reef swim + curated seafood table.</p>
+              <button class="mini-chip mt-3 bg-[#d7f0e4] text-[#26625a]">Push to site</button>
+            </article>
+            <article class="timeline-entry">
+              <div class="flex items-center gap-3">
+                <span class="status-badge warning">Day 2</span>
+                <p class="text-sm text-slate-500">Culture & conservation</p>
+              </div>
+              <h4 class="mt-3 text-lg font-semibold text-slate-900">Mulkirigala rock temple + turtle patrol</h4>
+              <p class="text-sm text-slate-600">Sunrise meditation, spice route lunch, late-night hatching watch.</p>
+              <button class="mini-chip mt-3 bg-[#ffe8dc] text-[#ff725e]">Needs copy</button>
+            </article>
+            <article class="timeline-entry">
+              <div class="flex items-center gap-3">
+                <span class="status-badge success">Day 3</span>
+                <p class="text-sm text-slate-500">Slow departure</p>
+              </div>
+              <h4 class="mt-3 text-lg font-semibold text-slate-900">Lagoon brunch + concept store tour</h4>
+              <p class="text-sm text-slate-600">Sustainable retail, spa add-ons, departure lounge perks.</p>
+              <button class="mini-chip mt-3 bg-[#d7f0e4] text-[#26625a]">Publish</button>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- GALLERY & MEDIA -->
+    <section class="px-4 pb-12">
+      <div class="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+        <div class="rounded-[28px] bg-white/80 p-6 shadow-[0_22px_60px_rgba(16,22,20,0.15)]">
+          <header class="flex items-center justify-between">
+            <div>
+              <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Story slider</p>
+              <h3 class="text-xl font-semibold text-slate-900">Media highlight</h3>
+            </div>
+            <button class="edit-pill">Upload</button>
+          </header>
+          <div class="mt-6 space-y-4">
+            <div class="rounded-[24px] bg-slate-900/90 p-5 text-white">
+              <div class="flex items-center justify-between">
+                <p class="text-sm text-white/70">Video</p>
+                <span class="mini-chip bg-white/20 text-white">2:34</span>
+              </div>
+              <h4 class="mt-3 text-lg font-semibold">Tidehouse ritual walkthrough</h4>
+              <p class="text-sm text-white/70">Shot Nov 2025 · includes admin overlay prompts.</p>
+              <div class="mt-5 flex gap-3 text-sm">
+                <button class="cta-primary bg-white text-slate-900 px-4 py-2">Play</button>
+                <button class="cta-secondary px-4 py-2 text-white border-white/50">Replace</button>
+              </div>
+            </div>
+            <div class="rounded-[24px] border border-white/60 bg-white/70 p-5">
+              <div class="flex items-center justify-between">
+                <p class="text-sm font-semibold text-slate-900">Story chapters</p>
+                <button class="mini-chip bg-[#ffe8dc] text-[#ff725e]">Edit order</button>
+              </div>
+              <ul class="mt-4 space-y-2 text-sm text-slate-600">
+                <li>01 · Secret coves & natural pools</li>
+                <li>02 · Turtles & twilight rituals</li>
+                <li>03 · Wellness tidehouse</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="gallery-grid">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Gallery grid</p>
+              <h3 class="text-xl font-semibold text-slate-900">Media sync</h3>
+            </div>
+            <button class="edit-pill">Add Image</button>
+          </div>
+          <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div class="relative h-40 overflow-hidden rounded-2xl">
+              <img src="https://images.unsplash.com/photo-1526481280695-3c46973e2d99?auto=format&fit=crop&w=500&q=80"
+                alt="Beach" class="h-full w-full object-cover" />
+              <button class="mini-chip absolute bottom-3 right-3 bg-white/80 text-[#26625a]">Hero</button>
+            </div>
+            <div class="relative h-40 overflow-hidden rounded-2xl">
+              <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=500&q=80"
+                alt="Lagoon" class="h-full w-full object-cover" />
+              <button class="mini-chip absolute bottom-3 right-3 bg-white/80 text-[#ff725e]">Edit</button>
+            </div>
+            <div class="relative h-40 overflow-hidden rounded-2xl">
+              <img src="https://images.unsplash.com/photo-1482192597420-4817fdd7e8b0?auto=format&fit=crop&w=500&q=80"
+                alt="Temple" class="h-full w-full object-cover" />
+            </div>
+            <div class="relative h-40 overflow-hidden rounded-2xl">
+              <img src="https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=500&q=80"
+                alt="Cuisine" class="h-full w-full object-cover" />
+              <button class="mini-chip absolute bottom-3 right-3 bg-white/80 text-[#26625a]">Menu</button>
+            </div>
+            <div class="relative h-40 overflow-hidden rounded-2xl">
+              <img src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=500&q=80"
+                alt="Yoga" class="h-full w-full object-cover" />
+            </div>
+            <div class="relative h-40 overflow-hidden rounded-2xl flex items-center justify-center border border-dashed border-[#26625a]/30 text-sm text-slate-500">
+              + Upload media
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TESTIMONIALS + STATS -->
+    <section class="px-4 pb-12">
+      <div class="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+        <div class="rounded-[28px] bg-white/80 p-6 shadow-[0_22px_60px_rgba(16,22,20,0.15)]">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Testimonials</p>
+              <h3 class="text-xl font-semibold text-slate-900">Voice loops</h3>
+            </div>
+            <button class="edit-pill">Manage</button>
+          </div>
+          <div class="mt-6 grid gap-4 md:grid-cols-2">
+            <article class="review-card p-5">
+              <div class="flex items-center gap-3">
+                <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Reviewer" class="h-10 w-10 rounded-full object-cover" />
+                <div>
+                  <p class="font-semibold text-slate-900">Alexis</p>
+                  <p class="text-xs text-slate-500">Singapore · Remote work stay</p>
+                </div>
+              </div>
+              <p class="mt-4 text-sm text-slate-600">“Admin team updated sunrise alerts live—our shoot captured the exact color palette promised.”</p>
+              <div class="mt-4 flex items-center justify-between text-xs text-slate-500">
+                <span>4.9 rating</span>
+                <button class="mini-chip bg-[#e6f3ef] text-[#26625a]">Pin</button>
+              </div>
+            </article>
+            <article class="review-card p-5">
+              <div class="flex items-center gap-3">
+                <img src="https://randomuser.me/api/portraits/men/25.jpg" alt="Reviewer" class="h-10 w-10 rounded-full object-cover" />
+                <div>
+                  <p class="font-semibold text-slate-900">Mateo</p>
+                  <p class="text-xs text-slate-500">Mexico · Conscious travel</p>
+                </div>
+              </div>
+              <p class="mt-4 text-sm text-slate-600">“Every block is accurate. The admin drawer let the team edit restaurants during our stay.”</p>
+              <div class="mt-4 flex items-center justify-between text-xs text-slate-500">
+                <span>5.0 rating</span>
+                <button class="mini-chip bg-[#ffe8dc] text-[#ff725e]">Edit copy</button>
+              </div>
+            </article>
+          </div>
+        </div>
+        <div class="rounded-[28px] bg-white/80 p-6 shadow-[0_22px_60px_rgba(16,22,20,0.15)]">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Snapshot stats</p>
+              <h3 class="text-xl font-semibold text-slate-900">Quality metrics</h3>
+            </div>
+            <button class="edit-pill">Sync data</button>
+          </div>
+          <div class="mt-6 grid gap-4 md:grid-cols-2">
+            <article class="rounded-[24px] border border-white/60 bg-white/70 p-4">
+              <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Response SLA</p>
+              <p class="mt-3 text-3xl font-semibold text-slate-900">22m</p>
+              <p class="text-xs text-slate-500">Avg. time to push live updates</p>
+            </article>
+            <article class="rounded-[24px] border border-white/60 bg-white/70 p-4">
+              <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Content accuracy</p>
+              <p class="mt-3 text-3xl font-semibold text-slate-900">99.2%</p>
+              <p class="text-xs text-slate-500">Based on traveler feedback</p>
+            </article>
+          </div>
+          <div class="mt-4 rounded-[22px] border border-dashed border-[#26625a]/30 p-4 text-center text-sm text-slate-500">
+            Integrate Firestore doc: <span class="font-semibold text-slate-900">destinations/tangalle</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA PANEL -->
+    <section class="px-4 pb-16">
+      <div class="mx-auto max-w-6xl">
+        <article class="cta-panel grid gap-8 rounded-[38px] p-10 lg:grid-cols-[1.2fr_0.8fr]">
+          <div>
+            <p class="text-xs uppercase tracking-[0.4em] text-white/70">Plan your stay</p>
+            <h3 class="mt-3 text-3xl font-semibold">Ready to push Tangalle live?</h3>
+            <p class="mt-4 text-white/80">Lock experience cards, sync Firebase content, and trigger QA scripts before publishing.</p>
+            <div class="mt-6 flex flex-wrap gap-4">
+              <button class="bg-white text-slate-900 px-6 py-3 rounded-full font-semibold">Publish updates</button>
+              <button class="border border-white/40 px-6 py-3 rounded-full text-white font-semibold">Schedule QA</button>
+            </div>
+            <div class="mt-6 flex flex-wrap gap-4 text-sm text-white/80">
+              <span class="status-badge success bg-white/15 text-white border-white/25">Tests passed</span>
+              <span>Last QA: 27 Nov · 15:42</span>
+            </div>
+          </div>
+          <div class="rounded-[28px] bg-white/12 p-6">
+            <p class="text-xs uppercase tracking-[0.3em] text-white/70">Admin quick form</p>
+            <div class="mt-4 grid gap-4">
+              <div>
+                <label class="text-sm text-white/80">Preferred launch window</label>
+                <select class="mt-2 w-full rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-white">
+                  <option class="text-slate-900">Dec 1 · Dawn</option>
+                  <option class="text-slate-900">Dec 2 · Sunset</option>
+                  <option class="text-slate-900">Custom</option>
+                </select>
+              </div>
+              <div>
+                <label class="text-sm text-white/80">Assign QA owner</label>
+                <input class="mt-2 w-full rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-white" placeholder="Add admin email" />
+              </div>
+              <div>
+                <label class="text-sm text-white/80">Notes</label>
+                <textarea class="mt-2 w-full rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-white" rows="3" placeholder="Add context for team"></textarea>
+              </div>
+            </div>
+            <button class="mt-6 w-full rounded-full bg-white/90 px-4 py-3 font-semibold text-slate-900">Send briefing</button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="px-4 pb-10">
+      <div class="mx-auto flex max-w-6xl flex-col gap-3 rounded-[30px] bg-white/70 px-6 py-4 text-sm text-slate-600 shadow-[0_14px_40px_rgba(12,18,16,0.12)] md:flex-row md:items-center md:justify-between">
+        <p>© 2025 Recharge Travels · Tangalle Destination Command</p>
+        <div class="flex flex-wrap gap-3 text-xs uppercase tracking-[0.3em]">
+          <span>Firebase</span>
+          <span>Flowbite</span>
+          <span>Live QA</span>
+        </div>
+      </div>
+    </footer>
+
+    <!-- ADMIN DRAWER -->
+    <aside class="admin-drawer fixed inset-y-0 right-0 z-50 hidden w-full max-w-md flex-col p-6 text-sm lg:flex" id="adminDrawer">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-xs uppercase tracking-[0.4em] text-white/60">Admin drawer</p>
+          <h3 class="mt-1 text-2xl font-semibold">Quick edits</h3>
+        </div>
+        <button class="rounded-full border border-white/30 p-2 text-white" onclick="toggleDrawer()">✕</button>
+      </div>
+      <div class="mt-6 flex-1 space-y-5 overflow-y-auto pr-2">
+        <section class="drawer-section">
+          <div class="flex items-center justify-between text-white/80">
+            <p>Hero content</p>
+            <span class="status-badge success">Synced</span>
+          </div>
+          <div class="mt-3 space-y-3">
+            <input class="input-ghost w-full" placeholder="Hero title" value="Tangalle · Hidden Coastlines" />
+            <textarea class="input-ghost w-full" rows="3" placeholder="Hero description">Blend mindful beach downtime with turtle conservation.</textarea>
+            <button class="cta-primary w-full bg-white text-slate-900">Save hero</button>
+          </div>
+        </section>
+        <section class="drawer-section">
+          <div class="flex items-center justify-between text-white/80">
+            <p>Highlight cards</p>
+            <span class="mini-chip bg-white/20 text-white">12 items</span>
+          </div>
+          <div class="mt-3 space-y-3">
+            <input class="input-ghost w-full" placeholder="Card title" value="Golden hour paddle" />
+            <div class="flex gap-3">
+              <input class="input-ghost w-full" placeholder="Price" value="$220" />
+              <select class="input-ghost w-full">
+                <option>Featured</option>
+                <option>Default</option>
+              </select>
+            </div>
+            <button class="cta-primary w-full bg-white text-slate-900">Update card</button>
+          </div>
+        </section>
+        <section class="drawer-section">
+          <div class="flex items-center justify-between text-white/80">
+            <p>Gallery sync</p>
+            <span class="status-badge warning">Review</span>
+          </div>
+          <div class="mt-3 space-y-3">
+            <input class="input-ghost w-full" placeholder="Media URL" />
+            <button class="cta-primary w-full bg-white text-slate-900">Upload</button>
+          </div>
+        </section>
+        <section class="drawer-section">
+          <div class="flex items-center justify-between text-white/80">
+            <p>Activity log</p>
+            <span class="mini-chip bg-[#ffe8dc] text-[#ff725e]">Live</span>
+          </div>
+          <ul class="mt-3 space-y-2 text-white/70">
+            <li>• Hero synced by Anya · 15:42</li>
+            <li>• Gallery bulk upload · 14:18</li>
+            <li>• QA checklist triggered · 12:05</li>
+          </ul>
+        </section>
+      </div>
+      <button class="mt-6 rounded-full border border-white/30 px-4 py-3 text-white" onclick="toggleDrawer()">Close drawer</button>
+    </aside>
+
+    <!-- FAB -->
+    <button class="floating-fab" onclick="toggleDrawer()" aria-label="Open admin drawer">
+      ⚙
+    </button>
+  </div>
+
+  <script>
+    function toggleDrawer() {
+      const drawer = document.getElementById('adminDrawer');
+      drawer.classList.toggle('hidden');
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+    });
+  </script>
+</body>
+
+</html>
+

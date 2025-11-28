@@ -3,9 +3,9 @@ import { Helmet } from 'react-helmet-async';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Landmark, 
-  Sun, 
+import {
+  Building,
+  Sun,
   MapPin,
   Calendar,
   Clock,
@@ -17,35 +17,46 @@ import {
   DollarSign,
   Info,
   Cloud,
-  Navigation,
-  Sunrise,
+  Thermometer,
+  Droplets,
   Wind,
-  Home,
-  Activity,
-  TreePalm,
-  Building,
   Crown,
-  Map,
+  Church,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Phone,
   Mail,
   CheckCircle,
-  ChevronRight,
   Globe,
   Heart,
   Bike,
   History,
-  Sparkles
+  Sparkles,
+  Trees,
+  Compass,
+  Luggage,
+  Shield,
+  Car,
+  Wifi,
+  Coffee,
+  Bed,
+  Languages,
+  CircleDollarSign,
+  Sunrise,
+  Landmark,
+  BookOpen,
+  UtensilsCrossed,
+  Leaf,
+  Waves
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import EnhancedBookingModal from '@/components/EnhancedBookingModal';
-import { doc, getDoc, onSnapshot } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
-import { toast } from 'sonner';
+import { getDestinationBySlug } from '@/services/destinationContentService';
 
+// Type Definitions
 interface HeroSlide {
   id: string;
   image: string;
@@ -63,16 +74,42 @@ interface Attraction {
   duration: string;
   price: string;
   highlights: string[];
+  icon?: string;
 }
 
 interface Activity {
   id: string;
   name: string;
   description: string;
-  icon: any;
+  icon: string;
   price: string;
   duration: string;
+  difficulty?: string;
   popular?: boolean;
+}
+
+interface Restaurant {
+  id: string;
+  name: string;
+  cuisine: string;
+  priceRange: string;
+  rating: number;
+  image: string;
+  description: string;
+  specialties: string[];
+  openHours: string;
+}
+
+interface HotelInfo {
+  id: string;
+  name: string;
+  category: string;
+  priceRange: string;
+  rating: number;
+  image: string;
+  description: string;
+  amenities: string[];
+  location: string;
 }
 
 interface DestinationInfo {
@@ -84,411 +121,495 @@ interface DestinationInfo {
   currency: string;
 }
 
-interface FAQ {
-  id: string;
-  question: string;
-  answer: string;
-}
-
-interface Itinerary {
-  id: string;
-  title: string;
-  duration: string;
-  description: string;
-  highlights: string[];
-  price: string;
+interface WeatherInfo {
+  season: string;
+  temperature: string;
+  rainfall: string;
+  humidity: string;
+  bestMonths: string[];
+  packingTips: string[];
 }
 
 interface TravelTip {
   id: string;
   title: string;
-  icon: any;
+  icon: string;
   tips: string[];
 }
 
-interface PolonnaruwaContent {
-  hero: {
-    slides: HeroSlide[];
-    title: string;
-    subtitle: string;
-  };
-  overview: {
-    title: string;
-    description: string;
-    highlights: string[];
-  };
-  seo: {
-    title: string;
-    description: string;
-    keywords: string;
-  };
-  attractions: Attraction[];
-  activities: Activity[];
-  itineraries: Itinerary[];
-  faqs: FAQ[];
-  gallery: string[];
-  travelTips: TravelTip[];
+interface SEOSettings {
+  title: string;
+  description: string;
+  keywords: string;
 }
 
-const defaultContent: PolonnaruwaContent = {
-  hero: {
-    slides: [
-      {
-        id: '1',
-        image: "https://images.unsplash.com/photo-1588598198321-9735fd4f2b45?auto=format&fit=crop&q=80",
-        title: "Ancient Kingdom of Polonnaruwa",
-        subtitle: "UNESCO World Heritage Site Since 1982"
-      },
-      {
-        id: '2',
-        image: "https://images.unsplash.com/photo-1609920658906-8223bd289001?auto=format&fit=crop&q=80",
-        title: "Medieval Capital",
-        subtitle: "11th-13th Century Royal City"
-      },
-      {
-        id: '3',
-        image: "https://images.unsplash.com/photo-1624296398627-22e8db73fbdb?auto=format&fit=crop&q=80",
-        title: "Archaeological Wonder",
-        subtitle: "Where History Comes Alive"
-      }
-    ],
-    title: "Polonnaruwa",
-    subtitle: "Journey Through Sri Lanka's Medieval Capital"
+interface CTASection {
+  title: string;
+  subtitle: string;
+  buttonText: string;
+  buttonLink: string;
+}
+
+// Default Content
+const defaultHeroSlides: HeroSlide[] = [
+  {
+    id: '1',
+    image: 'https://images.unsplash.com/photo-1588598198321-9735fd4f2b45?auto=format&fit=crop&q=80',
+    title: 'Welcome to Polonnaruwa',
+    subtitle: 'Medieval Capital & UNESCO World Heritage Site'
   },
-  overview: {
-    title: "Why Visit Polonnaruwa?",
-    description: "Polonnaruwa, the second ancient capital of Sri Lanka, stands as a magnificent testament to the island's golden age of architecture and irrigation. This UNESCO World Heritage Site showcases the ruins of the medieval capital established by King Vijayabahu I in 1070 AD. The city flourished under King Parakramabahu I, who built an extensive irrigation system including the massive Parakrama Samudra. Today, visitors can explore well-preserved ruins, ancient temples, and colossal Buddha statues that tell the story of a sophisticated civilization.",
-    highlights: [
-      "UNESCO World Heritage Site with ancient ruins",
-      "Gal Vihara - Rock temple with Buddha statues",
-      "Royal Palace complex and audience hall",
-      "Parakrama Samudra - Ancient man-made reservoir",
-      "Vatadage - Circular relic house",
-      "Rankoth Vehera - Golden pinnacle stupa",
-      "Archaeological Museum with artifacts",
-      "Sacred Quadrangle with multiple temples"
-    ]
+  {
+    id: '2',
+    image: 'https://images.unsplash.com/photo-1609920658906-8223bd289001?auto=format&fit=crop&q=80',
+    title: 'Ancient Kingdom',
+    subtitle: '11th-13th Century Royal City'
   },
-  seo: {
-    title: "Polonnaruwa Ancient City Sri Lanka - UNESCO Heritage Site Tours | Recharge Travels",
-    description: "Explore Polonnaruwa, Sri Lanka's medieval capital and UNESCO World Heritage Site. Discover ancient ruins, Buddha statues, and royal palaces with expert guided tours from Recharge Travels.",
-    keywords: "Polonnaruwa ancient city, UNESCO World Heritage Sri Lanka, Gal Vihara Buddha statues, Parakrama Samudra, Polonnaruwa tours, medieval capital Sri Lanka, archaeological sites, Vatadage Polonnaruwa"
+  {
+    id: '3',
+    image: 'https://images.unsplash.com/photo-1624296398627-22e8db73fbdb?auto=format&fit=crop&q=80',
+    title: 'Archaeological Wonder',
+    subtitle: 'Where History Comes Alive'
+  }
+];
+
+const defaultAttractions: Attraction[] = [
+  {
+    id: '1',
+    name: 'Gal Vihara',
+    description: 'A rock temple featuring four magnificent Buddha statues carved from a single granite wall, considered the pinnacle of Sinhalese rock carving. The standing, seated, and reclining Buddha figures showcase extraordinary artistic detail.',
+    image: 'https://images.unsplash.com/photo-1609920658906-8223bd289001?auto=format&fit=crop&q=80',
+    category: 'Religious',
+    rating: 4.9,
+    duration: '1-2 hours',
+    price: 'Included in ticket',
+    highlights: ['Rock Carvings', '4 Buddha Statues', '12th Century Art', 'UNESCO Monument'],
+    icon: 'Sparkles'
   },
-  attractions: [
-    {
-      id: '1',
-      name: "Gal Vihara",
-      description: "A rock temple featuring four magnificent Buddha statues carved from a single granite wall, considered the pinnacle of Sinhalese rock carving. The standing, seated, and reclining Buddha figures showcase extraordinary artistic detail.",
-      image: "https://images.unsplash.com/photo-1609920658906-8223bd289001?auto=format&fit=crop&q=80",
-      category: "Religious",
-      rating: 4.9,
-      duration: "1-2 hours",
-      price: "Included in site ticket",
-      highlights: ["Rock Carvings", "4 Buddha Statues", "12th Century Art", "UNESCO Monument"]
-    },
-    {
-      id: '2',
-      name: "Royal Palace Complex",
-      description: "The ruins of King Parakramabahu's palace, originally seven stories high with 1,000 rooms. The audience hall with its elephant carvings and the council chamber showcase royal grandeur.",
-      image: "https://images.unsplash.com/photo-1588598198321-9735fd4f2b45?auto=format&fit=crop&q=80",
-      category: "Historical",
-      rating: 4.7,
-      duration: "1-1.5 hours",
-      price: "Included in site ticket",
-      highlights: ["Royal Architecture", "Audience Hall", "Council Chamber", "Ancient Ruins"]
-    },
-    {
-      id: '3',
-      name: "Sacred Quadrangle (Dalada Maluwa)",
-      description: "A compact group of ancient religious monuments including the Vatadage, Hatadage, and Atadage. This raised platform contains some of the most sacred and architecturally significant structures.",
-      image: "https://images.unsplash.com/photo-1624296398627-22e8db73fbdb?auto=format&fit=crop&q=80",
-      category: "Religious",
-      rating: 4.8,
-      duration: "1.5-2 hours",
-      price: "Included in site ticket",
-      highlights: ["Vatadage", "Tooth Relic Temples", "Stone Inscriptions", "Sacred Architecture"]
-    },
-    {
-      id: '4',
-      name: "Parakrama Samudra",
-      description: "A massive man-made reservoir built by King Parakramabahu I, covering 2,500 hectares. This ancient irrigation marvel still provides water for cultivation and is perfect for sunset views.",
-      image: "https://images.unsplash.com/photo-1596040033550-d0c85b8c8b23?auto=format&fit=crop&q=80",
-      category: "Engineering",
-      rating: 4.6,
-      duration: "30-45 minutes",
-      price: "Free",
-      highlights: ["Ancient Reservoir", "Sunset Views", "Engineering Marvel", "Birdwatching"]
-    },
-    {
-      id: '5',
-      name: "Rankoth Vehera",
-      description: "The largest stupa in Polonnaruwa, standing 54 meters high. Built by King Nissanka Malla, it follows the architectural style of Anuradhapura period stupas.",
-      image: "https://images.unsplash.com/photo-1552841833-f7248b8f5b59?auto=format&fit=crop&q=80",
-      category: "Religious",
-      rating: 4.5,
-      duration: "30-45 minutes",
-      price: "Included in site ticket",
-      highlights: ["Golden Pinnacle", "4th Largest Stupa", "12th Century", "Buddhist Architecture"]
-    },
-    {
-      id: '6',
-      name: "Archaeological Museum",
-      description: "Houses artifacts discovered from Polonnaruwa including sculptures, inscriptions, and everyday objects that provide insights into medieval life in the ancient capital.",
-      image: "https://images.unsplash.com/photo-1575387873341-dc6809fc860f?auto=format&fit=crop&q=80",
-      category: "Museum",
-      rating: 4.4,
-      duration: "1 hour",
-      price: "From $3",
-      highlights: ["Ancient Artifacts", "Bronze Statues", "Model City", "Historical Context"]
-    }
-  ],
-  activities: [
-    {
-      id: '1',
-      name: "Guided Archaeological Tour",
-      description: "Expert-led tour covering all major monuments with historical insights",
-      icon: History,
-      price: "From $25",
-      duration: "Half day",
-      popular: true
-    },
-    {
-      id: '2',
-      name: "Cycling Tour",
-      description: "Explore the ancient city on bicycle, covering more ground comfortably",
-      icon: Bike,
-      price: "From $15",
-      duration: "3-4 hours",
-      popular: true
-    },
-    {
-      id: '3',
-      name: "Sunrise Photography",
-      description: "Early morning photo tour capturing monuments in golden light",
-      icon: Camera,
-      price: "From $40",
-      duration: "3 hours"
-    },
-    {
-      id: '4',
-      name: "Traditional Village Tour",
-      description: "Visit nearby villages to experience rural life and traditional crafts",
-      icon: Users,
-      price: "From $30",
-      duration: "Half day"
-    },
-    {
-      id: '5',
-      name: "Minneriya Safari",
-      description: "Afternoon elephant safari at nearby Minneriya National Park",
-      icon: Mountain,
-      price: "From $45",
-      duration: "4 hours"
-    },
-    {
-      id: '6',
-      name: "Night Museum Tour",
-      description: "Special evening tour of illuminated monuments (seasonal)",
-      icon: Sparkles,
-      price: "From $35",
-      duration: "2 hours"
-    }
-  ],
-  itineraries: [
-    {
-      id: '1',
-      title: "Polonnaruwa Heritage Day Tour",
-      duration: "1 Day",
-      description: "Comprehensive tour of the ancient city's main attractions",
-      highlights: [
-        "Early morning start to beat the heat",
-        "Royal Palace and Council Chamber",
-        "Sacred Quadrangle exploration",
-        "Gal Vihara Buddha statues",
-        "Traditional Sri Lankan lunch",
-        "Parakrama Samudra sunset"
-      ],
-      price: "From $60 per person"
-    },
-    {
-      id: '2',
-      title: "Ancient Capitals Combo",
-      duration: "2 Days / 1 Night",
-      description: "Explore both Polonnaruwa and nearby Sigiriya Rock Fortress",
-      highlights: [
-        "Day 1: Complete Polonnaruwa tour with museum",
-        "Evening: Traditional dance performance",
-        "Day 2: Early morning Sigiriya climb",
-        "Dambulla Cave Temple visit",
-        "Village safari and lunch",
-        "Return via spice garden"
-      ],
-      price: "From $180 per person"
-    },
-    {
-      id: '3',
-      title: "Cultural Triangle Explorer",
-      duration: "3 Days / 2 Nights",
-      description: "In-depth exploration of Polonnaruwa and surrounding heritage sites",
-      highlights: [
-        "Detailed Polonnaruwa exploration with expert guide",
-        "Minneriya National Park elephant safari",
-        "Sigiriya and Pidurangala rocks",
-        "Dambulla Cave Temples",
-        "Traditional village experiences",
-        "Ancient irrigation system tour"
-      ],
-      price: "From $350 per person"
-    }
-  ],
-  faqs: [
-    {
-      id: '1',
-      question: "What is the best time to visit Polonnaruwa?",
-      answer: "The best time to visit is from January to April and July to September when rainfall is minimal. Early morning (6-10 AM) or late afternoon (3-6 PM) visits are recommended to avoid the midday heat. The site opens at 7 AM daily."
-    },
-    {
-      id: '2',
-      question: "How much time do I need to explore Polonnaruwa properly?",
-      answer: "A minimum of 3-4 hours is needed to see the main attractions. For a comprehensive visit including the museum, plan for 5-6 hours. Cycling can help cover more ground efficiently. Many visitors combine Polonnaruwa with nearby attractions for a full day trip."
-    },
-    {
-      id: '3',
-      question: "What is the entrance fee for Polonnaruwa?",
-      answer: "Foreign adults pay $25 USD (or LKR equivalent) for the site ticket, which covers all monuments within the archaeological site. Children under 12 enter at half price. The museum has a separate small fee. Tickets are valid for one day only."
-    },
-    {
-      id: '4',
-      question: "Can I hire a guide at Polonnaruwa?",
-      answer: "Yes, licensed guides are available at the entrance. Official guides charge around $20-30 for a 3-hour tour. Having a guide greatly enhances the experience as they provide historical context and point out details you might miss. Book through your hotel or at the ticket office."
-    },
-    {
-      id: '5',
-      question: "What should I wear when visiting Polonnaruwa?",
-      answer: "Wear comfortable walking shoes, light-colored loose clothing, and a hat. When entering sacred sites like Vatadage, you must remove shoes and hats. Shoulders and knees should be covered at religious monuments. Bring sunscreen and water as shade is limited."
-    },
-    {
-      id: '6',
-      question: "Is photography allowed at Polonnaruwa?",
-      answer: "Photography is allowed at most sites for personal use. However, flash photography is prohibited inside museums, and you cannot photograph with your back to Buddha statues (considered disrespectful). Drone photography requires special permission. Commercial photography needs permits."
-    }
-  ],
-  gallery: [
-    "https://images.unsplash.com/photo-1588598198321-9735fd4f2b45?auto=format&fit=crop&q=80",
-    "https://images.unsplash.com/photo-1609920658906-8223bd289001?auto=format&fit=crop&q=80",
-    "https://images.unsplash.com/photo-1624296398627-22e8db73fbdb?auto=format&fit=crop&q=80",
-    "https://images.unsplash.com/photo-1552841833-f7248b8f5b59?auto=format&fit=crop&q=80",
-    "https://images.unsplash.com/photo-1596040033550-d0c85b8c8b23?auto=format&fit=crop&q=80",
-    "https://images.unsplash.com/photo-1575387873341-dc6809fc860f?auto=format&fit=crop&q=80"
-  ],
-  travelTips: [
-    {
-      id: '1',
-      title: "Best Time to Visit",
-      icon: Calendar,
-      tips: [
-        "January to April: Dry season, ideal weather",
-        "July to September: Less rain, good visibility",
-        "Early morning: Cooler temperatures, better photos",
-        "Avoid weekends and holidays for fewer crowds"
-      ]
-    },
-    {
-      id: '2',
-      title: "What to Bring",
-      icon: Sun,
-      tips: [
-        "Plenty of water (limited shops inside)",
-        "Sun protection: hat, sunscreen, sunglasses",
-        "Comfortable walking shoes",
-        "Sarong/shawl for temple visits",
-        "Insect repellent for evening visits",
-        "Camera with extra batteries"
-      ]
-    },
-    {
-      id: '3',
-      title: "Site Etiquette",
-      icon: Users,
-      tips: [
-        "Remove shoes and hats at sacred sites",
-        "Don't turn back to Buddha statues for photos",
-        "Dress modestly covering shoulders and knees",
-        "Don't climb on ruins or monuments",
-        "Keep voices low at religious sites",
-        "Follow guide instructions and signs"
-      ]
-    }
+  {
+    id: '2',
+    name: 'Royal Palace Complex',
+    description: 'The ruins of King Parakramabahu\'s palace, originally seven stories high with 1,000 rooms. The audience hall with its elephant carvings and the council chamber showcase royal grandeur.',
+    image: 'https://images.unsplash.com/photo-1588598198321-9735fd4f2b45?auto=format&fit=crop&q=80',
+    category: 'Historical',
+    rating: 4.7,
+    duration: '1-1.5 hours',
+    price: 'Included in ticket',
+    highlights: ['Royal Architecture', 'Audience Hall', 'Council Chamber', '7-Story Palace'],
+    icon: 'Crown'
+  },
+  {
+    id: '3',
+    name: 'Sacred Quadrangle (Dalada Maluwa)',
+    description: 'A compact group of ancient religious monuments including the Vatadage, Hatadage, and Atadage. This raised platform contains some of the most sacred and architecturally significant structures.',
+    image: 'https://images.unsplash.com/photo-1624296398627-22e8db73fbdb?auto=format&fit=crop&q=80',
+    category: 'Religious',
+    rating: 4.8,
+    duration: '1.5-2 hours',
+    price: 'Included in ticket',
+    highlights: ['Vatadage', 'Tooth Relic Temples', 'Stone Inscriptions', 'Sacred Architecture'],
+    icon: 'Church'
+  },
+  {
+    id: '4',
+    name: 'Parakrama Samudra',
+    description: 'A massive man-made reservoir built by King Parakramabahu I, covering 2,500 hectares. This ancient irrigation marvel still provides water for cultivation and is perfect for sunset views.',
+    image: 'https://images.unsplash.com/photo-1596040033550-d0c85b8c8b23?auto=format&fit=crop&q=80',
+    category: 'Engineering',
+    rating: 4.6,
+    duration: '30-45 minutes',
+    price: 'Free',
+    highlights: ['Ancient Reservoir', 'Sunset Views', 'Engineering Marvel', 'Birdwatching'],
+    icon: 'Waves'
+  },
+  {
+    id: '5',
+    name: 'Rankoth Vehera',
+    description: 'The largest stupa in Polonnaruwa, standing 54 meters high. Built by King Nissanka Malla, it follows the architectural style of Anuradhapura period stupas.',
+    image: 'https://images.unsplash.com/photo-1552841833-f7248b8f5b59?auto=format&fit=crop&q=80',
+    category: 'Religious',
+    rating: 4.5,
+    duration: '30-45 minutes',
+    price: 'Included in ticket',
+    highlights: ['Golden Pinnacle', '4th Largest Stupa', '12th Century', 'Buddhist Architecture'],
+    icon: 'Landmark'
+  },
+  {
+    id: '6',
+    name: 'Archaeological Museum',
+    description: 'Houses artifacts discovered from Polonnaruwa including sculptures, inscriptions, and everyday objects that provide insights into medieval life in the ancient capital.',
+    image: 'https://images.unsplash.com/photo-1575387873341-dc6809fc860f?auto=format&fit=crop&q=80',
+    category: 'Museum',
+    rating: 4.4,
+    duration: '1 hour',
+    price: 'From $3',
+    highlights: ['Ancient Artifacts', 'Bronze Statues', 'Model City', 'Historical Context'],
+    icon: 'BookOpen'
+  }
+];
+
+const defaultActivities: Activity[] = [
+  {
+    id: '1',
+    name: 'Guided Archaeological Tour',
+    description: 'Expert-led tour covering all major monuments with historical insights',
+    icon: 'History',
+    price: 'From $25',
+    duration: 'Half day',
+    difficulty: 'Moderate',
+    popular: true
+  },
+  {
+    id: '2',
+    name: 'Cycling Tour',
+    description: 'Explore the ancient city on bicycle, covering more ground comfortably',
+    icon: 'Bike',
+    price: 'From $15',
+    duration: '3-4 hours',
+    difficulty: 'Moderate',
+    popular: true
+  },
+  {
+    id: '3',
+    name: 'Sunrise Photography',
+    description: 'Early morning photo tour capturing monuments in golden light',
+    icon: 'Camera',
+    price: 'From $40',
+    duration: '3 hours',
+    difficulty: 'Easy'
+  },
+  {
+    id: '4',
+    name: 'Minneriya Safari',
+    description: 'Afternoon elephant safari at nearby Minneriya National Park',
+    icon: 'Mountain',
+    price: 'From $45',
+    duration: '4 hours',
+    difficulty: 'Easy',
+    popular: true
+  },
+  {
+    id: '5',
+    name: 'Traditional Village Tour',
+    description: 'Visit nearby villages to experience rural life and traditional crafts',
+    icon: 'Users',
+    price: 'From $30',
+    duration: 'Half day',
+    difficulty: 'Easy'
+  },
+  {
+    id: '6',
+    name: 'Night Museum Tour',
+    description: 'Special evening tour of illuminated monuments (seasonal)',
+    icon: 'Sparkles',
+    price: 'From $35',
+    duration: '2 hours',
+    difficulty: 'Easy'
+  }
+];
+
+const defaultRestaurants: Restaurant[] = [
+  {
+    id: '1',
+    name: 'Lakeside Restaurant',
+    cuisine: 'Traditional Sri Lankan',
+    priceRange: '$$',
+    rating: 4.5,
+    image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80',
+    description: 'Beautiful lakeside dining with views of Parakrama Samudra. Serves authentic rice and curry buffets.',
+    specialties: ['Rice & Curry Buffet', 'Fresh Fish', 'Vegetarian Options', 'Lake Views'],
+    openHours: '7:00 AM - 9:30 PM'
+  },
+  {
+    id: '2',
+    name: 'Deer Park Hotel Restaurant',
+    cuisine: 'International & Sri Lankan',
+    priceRange: '$$$',
+    rating: 4.6,
+    image: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&q=80',
+    description: 'Elegant dining at a colonial-style hotel with wildlife views and refined cuisine.',
+    specialties: ['Tasting Menu', 'BBQ Nights', 'Western Cuisine', 'Garden Setting'],
+    openHours: '6:30 AM - 10:00 PM'
+  },
+  {
+    id: '3',
+    name: 'Thissamaharama Rest House',
+    cuisine: 'Sri Lankan Buffet',
+    priceRange: '$$',
+    rating: 4.3,
+    image: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&q=80',
+    description: 'Historic rest house offering generous lunch buffets popular with tour groups.',
+    specialties: ['Lunch Buffet', 'Kottu', 'Hoppers', 'Cool Drinks'],
+    openHours: '7:00 AM - 10:00 PM'
+  },
+  {
+    id: '4',
+    name: 'New Araliya Restaurant',
+    cuisine: 'Local Cuisine',
+    priceRange: '$',
+    rating: 4.2,
+    image: 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&q=80',
+    description: 'Popular local eatery near the entrance with quick service and budget-friendly prices.',
+    specialties: ['Fried Rice', 'Noodles', 'Short Eats', 'Fresh Juices'],
+    openHours: '6:00 AM - 9:00 PM'
+  }
+];
+
+const defaultHotels: HotelInfo[] = [
+  {
+    id: '1',
+    name: 'Deer Park Hotel',
+    category: '4-Star Hotel',
+    priceRange: 'From $150/night',
+    rating: 4.6,
+    image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80',
+    description: 'Colonial-style hotel with wildlife roaming the grounds, pool, and views of the ancient ruins.',
+    amenities: ['Pool', 'Wildlife Views', 'Restaurant', 'Bar', 'Free WiFi'],
+    location: 'Near Ancient City'
+  },
+  {
+    id: '2',
+    name: 'The Lake Hotel',
+    category: 'Heritage Hotel',
+    priceRange: 'From $100/night',
+    rating: 4.4,
+    image: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&q=80',
+    description: 'Charming lakeside property with stunning views of Parakrama Samudra and comfortable rooms.',
+    amenities: ['Lake Views', 'Restaurant', 'Garden', 'Tour Desk', 'Parking'],
+    location: 'Lakefront'
+  },
+  {
+    id: '3',
+    name: 'Sudu Araliya Hotel',
+    category: 'Mid-Range',
+    priceRange: 'From $50/night',
+    rating: 4.2,
+    image: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&q=80',
+    description: 'Comfortable hotel with pool and garden setting, perfect base for exploring the ruins.',
+    amenities: ['Swimming Pool', 'Restaurant', 'Air Conditioning', 'Free WiFi', 'Bicycle Rental'],
+    location: 'Town Center'
+  },
+  {
+    id: '4',
+    name: 'Giritale Hotel',
+    category: 'Nature Resort',
+    priceRange: 'From $80/night',
+    rating: 4.5,
+    image: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&q=80',
+    description: 'Hilltop resort overlooking Giritale Tank with excellent wildlife and bird watching opportunities.',
+    amenities: ['Hilltop Location', 'Pool', 'Bird Watching', 'Nature Walks', 'Ayurveda'],
+    location: '15 min from Ruins'
+  }
+];
+
+const defaultWeatherInfo: WeatherInfo = {
+  season: 'Dry Zone Climate',
+  temperature: '24-33°C (75-91°F)',
+  rainfall: 'Low Feb-Sep, Moderate Oct-Jan',
+  humidity: '65-80%',
+  bestMonths: ['January', 'February', 'March', 'April', 'July', 'August', 'September'],
+  packingTips: [
+    'Light, modest clothing (cover knees & shoulders)',
+    'Comfortable walking shoes with good grip',
+    'Strong sunscreen and wide-brimmed hat',
+    'Plenty of water bottles',
+    'Sarong or shawl for temple visits',
+    'Insect repellent for evening'
   ]
 };
 
+const defaultTravelTips: TravelTip[] = [
+  {
+    id: '1',
+    title: 'Best Time to Visit',
+    icon: 'Calendar',
+    tips: [
+      'January to April: Dry season, ideal weather',
+      'July to September: Less rain, good visibility',
+      'Early morning (6-10 AM): Cooler, better photos',
+      'Avoid weekends and holidays for fewer crowds',
+      'Site opens at 7 AM daily'
+    ]
+  },
+  {
+    id: '2',
+    title: 'Getting Around',
+    icon: 'Car',
+    tips: [
+      '230km from Colombo (4-5 hours by car)',
+      'Bicycle rental highly recommended ($3-5/day)',
+      'Tuk-tuks available for elderly/disabled',
+      'Site covers large area - plan transport',
+      'Combine with Sigiriya/Dambulla nearby'
+    ]
+  },
+  {
+    id: '3',
+    title: 'Site Etiquette',
+    icon: 'Church',
+    tips: [
+      'Remove shoes and hats at sacred sites',
+      'Dress modestly - cover shoulders and knees',
+      'Don\'t turn back to Buddha statues for photos',
+      'Don\'t climb on ruins or monuments',
+      'Keep voices low at religious sites',
+      'Licensed guides enhance the experience'
+    ]
+  },
+  {
+    id: '4',
+    title: 'Practical Information',
+    icon: 'Shield',
+    tips: [
+      'Entry ticket: $25 USD for foreigners',
+      'Plan minimum 4-5 hours for main sites',
+      'Bring snacks - limited shops inside',
+      'Museum has separate small fee',
+      'Tickets valid for one day only',
+      'ATMs available in town'
+    ]
+  }
+];
+
+const defaultDestinationInfo: DestinationInfo = {
+  population: '15,000',
+  area: '122 km²',
+  elevation: '50-100 m',
+  bestTime: 'Jan - Sep',
+  language: 'Sinhala, English',
+  currency: 'LKR / USD'
+};
+
+const defaultSEOSettings: SEOSettings = {
+  title: 'Polonnaruwa Sri Lanka - Ancient Medieval Capital & UNESCO Heritage Site | Recharge Travels',
+  description: 'Explore Polonnaruwa, Sri Lanka\'s medieval capital and UNESCO World Heritage Site. Discover Gal Vihara Buddha statues, royal palaces, and ancient ruins with expert guided tours.',
+  keywords: 'Polonnaruwa ancient city, UNESCO World Heritage Sri Lanka, Gal Vihara Buddha statues, Parakrama Samudra, Polonnaruwa tours, medieval capital Sri Lanka, Sacred Quadrangle, Vatadage'
+};
+
+const defaultCTASection: CTASection = {
+  title: 'Ready to Walk Through History?',
+  subtitle: 'Explore the magnificent ruins of Sri Lanka\'s medieval capital with our expert guides',
+  buttonText: 'Book Your Tour',
+  buttonLink: '/book'
+};
+
+// Icon mapping function
+const getIconComponent = (iconName: string) => {
+  const iconMap: { [key: string]: any } = {
+    'Building': Building,
+    'Sun': Sun,
+    'MapPin': MapPin,
+    'Calendar': Calendar,
+    'Clock': Clock,
+    'Star': Star,
+    'Mountain': Mountain,
+    'Utensils': Utensils,
+    'Camera': Camera,
+    'Users': Users,
+    'DollarSign': DollarSign,
+    'Info': Info,
+    'Cloud': Cloud,
+    'Thermometer': Thermometer,
+    'Droplets': Droplets,
+    'Wind': Wind,
+    'Crown': Crown,
+    'Church': Church,
+    'Phone': Phone,
+    'Mail': Mail,
+    'CheckCircle': CheckCircle,
+    'Globe': Globe,
+    'Heart': Heart,
+    'Bike': Bike,
+    'History': History,
+    'Sparkles': Sparkles,
+    'Trees': Trees,
+    'Compass': Compass,
+    'Luggage': Luggage,
+    'Shield': Shield,
+    'Car': Car,
+    'Wifi': Wifi,
+    'Coffee': Coffee,
+    'Bed': Bed,
+    'Languages': Languages,
+    'CircleDollarSign': CircleDollarSign,
+    'Sunrise': Sunrise,
+    'Landmark': Landmark,
+    'BookOpen': BookOpen,
+    'UtensilsCrossed': UtensilsCrossed,
+    'Leaf': Leaf,
+    'Waves': Waves
+  };
+  return iconMap[iconName] || Landmark;
+};
+
 const Polonnaruwa = () => {
-  const [content, setContent] = useState<PolonnaruwaContent>(defaultContent);
+  // State for content
+  const [heroSlides, setHeroSlides] = useState<HeroSlide[]>(defaultHeroSlides);
+  const [attractions, setAttractions] = useState<Attraction[]>(defaultAttractions);
+  const [activities, setActivities] = useState<Activity[]>(defaultActivities);
+  const [restaurants, setRestaurants] = useState<Restaurant[]>(defaultRestaurants);
+  const [hotels, setHotels] = useState<HotelInfo[]>(defaultHotels);
+  const [weatherInfo, setWeatherInfo] = useState<WeatherInfo>(defaultWeatherInfo);
+  const [travelTips, setTravelTips] = useState<TravelTip[]>(defaultTravelTips);
+  const [destinationInfo, setDestinationInfo] = useState<DestinationInfo>(defaultDestinationInfo);
+  const [seoSettings, setSeoSettings] = useState<SEOSettings>(defaultSEOSettings);
+  const [ctaSection, setCtaSection] = useState<CTASection>(defaultCTASection);
+
+  // UI State
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedTab, setSelectedTab] = useState('attractions');
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [selectedService, setSelectedService] = useState<string>('');
-  const [galleryIndex, setGalleryIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Load content from Firebase and set up real-time listener
+  // Load content from Firebase
   useEffect(() => {
-    const docRef = doc(db, 'destinations', 'polonnaruwa');
-    
-    // Set up real-time listener
-    const unsubscribe = onSnapshot(docRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data() as PolonnaruwaContent;
-        setContent({
-          ...defaultContent,
-          ...data
-        });
-        toast.success('Content updated', { duration: 2000 });
+    const loadContent = async () => {
+      try {
+        const data = await getDestinationBySlug('polonnaruwa');
+        if (data) {
+          if (data.heroSlides?.length) setHeroSlides(data.heroSlides);
+          if (data.attractions?.length) setAttractions(data.attractions);
+          if (data.activities?.length) setActivities(data.activities);
+          if (data.restaurants?.length) setRestaurants(data.restaurants);
+          if (data.hotels?.length) setHotels(data.hotels);
+          if (data.weatherInfo) setWeatherInfo(data.weatherInfo);
+          if (data.travelTips?.length) setTravelTips(data.travelTips);
+          if (data.destinationInfo) setDestinationInfo(data.destinationInfo);
+          if (data.seoSettings) setSeoSettings(data.seoSettings);
+          if (data.ctaSection) setCtaSection(data.ctaSection);
+        }
+      } catch (error) {
+        console.error('Error loading Polonnaruwa content:', error);
+      } finally {
+        setIsLoading(false);
       }
-    }, (error) => {
-      console.error('Error listening to document:', error);
-      toast.error('Failed to sync content updates');
-    });
-
-    return () => unsubscribe();
+    };
+    loadContent();
   }, []);
 
-  // Cycle through hero slides
+  // Auto-cycle hero slides
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % content.hero.slides.length);
-    }, 5000);
+      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+    }, 6000);
     return () => clearInterval(timer);
-  }, [content.hero.slides.length]);
+  }, [heroSlides.length]);
 
-  // Auto-cycle gallery
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setGalleryIndex((prev) => (prev + 1) % content.gallery.length);
-    }, 4000);
-    return () => clearInterval(timer);
-  }, [content.gallery.length]);
-
-  const weatherInfo = {
-    temperature: "24-33°C",
-    season: "Dry zone climate",
-    rainfall: "Low (Feb-Sep), Moderate (Oct-Jan)"
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
   };
 
-  const destinationInfo: DestinationInfo = {
-    population: "15,000",
-    area: "122 km²",
-    elevation: "50-100m",
-    bestTime: "January to September",
-    language: "Sinhala, Tamil, English",
-    currency: "Sri Lankan Rupee (LKR)"
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
   };
 
   const tabs = [
-    { id: 'attractions', label: 'Attractions', count: content.attractions.length },
-    { id: 'activities', label: 'Activities', count: content.activities.length },
-    { id: 'itineraries', label: 'Tours', count: content.itineraries.length },
-    { id: 'travel-tips', label: 'Travel Tips', count: content.travelTips.length },
-    { id: 'faqs', label: 'FAQs', count: content.faqs.length }
+    { id: 'attractions', label: 'Attractions', count: attractions.length },
+    { id: 'activities', label: 'Activities', count: activities.length },
+    { id: 'dining', label: 'Dining', count: restaurants.length },
+    { id: 'stay', label: 'Stay', count: hotels.length },
+    { id: 'weather', label: 'Weather', count: null },
+    { id: 'tips', label: 'Travel Tips', count: travelTips.length }
   ];
 
   const handleBooking = (service: string) => {
@@ -496,80 +617,49 @@ const Polonnaruwa = () => {
     setShowBookingModal(true);
   };
 
-  // JSON-LD Structured Data for SEO
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "TouristDestination",
-    "name": "Polonnaruwa, Sri Lanka",
-    "description": content.overview.description,
-    "image": content.hero.slides.map(slide => slide.image),
-    "touristType": ["Cultural Tourism", "Archaeological Sites", "Heritage Tourism"],
-    "geo": {
-      "@type": "GeoCoordinates",
-      "latitude": "7.9403",
-      "longitude": "81.0188"
-    },
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": "4.8",
-      "reviewCount": "3567"
-    },
-    "offers": content.activities.map(activity => ({
-      "@type": "Offer",
-      "name": activity.name,
-      "price": activity.price,
-      "priceCurrency": "USD"
-    }))
-  };
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-amber-100">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-orange-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-orange-800 font-medium">Loading Polonnaruwa...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
       <Helmet>
-        <title>{content.seo.title}</title>
-        <meta name="description" content={content.seo.description} />
-        <meta name="keywords" content={content.seo.keywords} />
-        
-        {/* Open Graph Tags */}
-        <meta property="og:title" content={content.seo.title} />
-        <meta property="og:description" content={content.seo.description} />
-        <meta property="og:image" content={content.hero.slides[0].image} />
+        <title>{seoSettings.title}</title>
+        <meta name="description" content={seoSettings.description} />
+        <meta name="keywords" content={seoSettings.keywords} />
+        <meta property="og:title" content={seoSettings.title} />
+        <meta property="og:description" content={seoSettings.description} />
+        <meta property="og:image" content={heroSlides[0]?.image} />
         <meta property="og:url" content="https://recharge-travels-73e76.web.app/destinations/polonnaruwa" />
-        <meta property="og:type" content="website" />
-        
-        {/* Twitter Card Tags */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={content.seo.title} />
-        <meta name="twitter:description" content={content.seo.description} />
-        <meta name="twitter:image" content={content.hero.slides[0].image} />
-        
-        {/* Canonical URL */}
         <link rel="canonical" href="https://recharge-travels-73e76.web.app/destinations/polonnaruwa" />
-        
-        {/* JSON-LD Structured Data */}
-        <script type="application/ld+json">
-          {JSON.stringify(structuredData)}
-        </script>
       </Helmet>
-      
+
       <Header />
-      
+
       <main className="min-h-screen bg-background">
-        {/* Hero Section with Video/Image Slideshow */}
-        <section className="relative h-[80vh] overflow-hidden" aria-label="Hero">
+        {/* Hero Section */}
+        <section className="relative h-[85vh] overflow-hidden">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentSlide}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+              initial={{ opacity: 0, scale: 1.1 }}
+              animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 1 }}
+              transition={{ duration: 1.2 }}
               className="absolute inset-0"
             >
-              <div 
+              <div
                 className="h-full bg-cover bg-center"
-                style={{ backgroundImage: `url(${content.hero.slides[currentSlide].image})` }}
+                style={{ backgroundImage: `url(${heroSlides[currentSlide]?.image})` }}
               >
-                <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60" />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/70" />
               </div>
             </motion.div>
           </AnimatePresence>
@@ -577,55 +667,81 @@ const Polonnaruwa = () => {
           {/* Hero Content */}
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center text-white px-4 max-w-5xl">
-              <motion.h1 
+              <motion.div
+                initial={{ y: -20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="mb-4"
+              >
+                <Badge className="bg-orange-600/80 text-white text-sm px-4 py-1">
+                  Medieval Kingdom Capital
+                </Badge>
+              </motion.div>
+              <motion.h1
                 initial={{ y: 30, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.3 }}
+                transition={{ delay: 0.4 }}
                 className="text-5xl md:text-7xl font-bold mb-6"
               >
-                {content.hero.slides[currentSlide].title}
+                {heroSlides[currentSlide]?.title}
               </motion.h1>
-              <motion.p 
+              <motion.p
                 initial={{ y: 30, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                className="text-xl md:text-2xl mb-8"
+                transition={{ delay: 0.6 }}
+                className="text-xl md:text-2xl mb-8 text-white/90"
               >
-                {content.hero.slides[currentSlide].subtitle}
+                {heroSlides[currentSlide]?.subtitle}
               </motion.p>
               <motion.div
                 initial={{ y: 30, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.7 }}
-                className="flex gap-4 justify-center"
+                transition={{ delay: 0.8 }}
+                className="flex gap-4 justify-center flex-wrap"
               >
-                <Button 
-                  size="lg" 
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-6 text-lg"
-                  onClick={() => handleBooking('Polonnaruwa Tour Package')}
+                <Button
+                  size="lg"
+                  className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-6 text-lg"
+                  onClick={() => handleBooking('Polonnaruwa Heritage Tour')}
                 >
                   Book Now
                 </Button>
-                <Button 
-                  size="lg" 
+                <Button
+                  size="lg"
                   variant="outline"
                   className="bg-white/10 backdrop-blur-sm text-white border-white hover:bg-white/20 px-8 py-6 text-lg"
-                  onClick={() => document.getElementById('overview')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => document.getElementById('content')?.scrollIntoView({ behavior: 'smooth' })}
                 >
-                  Learn More
+                  Explore More
                 </Button>
               </motion.div>
             </div>
           </div>
 
+          {/* Navigation Arrows */}
+          <button
+            onClick={prevSlide}
+            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm text-white p-3 rounded-full hover:bg-white/30 transition-all"
+            aria-label="Previous slide"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+          <button
+            onClick={nextSlide}
+            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm text-white p-3 rounded-full hover:bg-white/30 transition-all"
+            aria-label="Next slide"
+          >
+            <ChevronRight className="w-6 h-6" />
+          </button>
+
           {/* Slide Indicators */}
-          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2">
-            {content.hero.slides.map((_, index) => (
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
+            {heroSlides.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentSlide(index)}
-                className={`w-3 h-3 rounded-full transition-all ${
-                  currentSlide === index ? 'bg-white w-8' : 'bg-white/50'
+                className={`h-2 rounded-full transition-all ${
+                  currentSlide === index ? 'bg-white w-8' : 'bg-white/50 w-2'
                 }`}
                 aria-label={`Go to slide ${index + 1}`}
               />
@@ -633,74 +749,59 @@ const Polonnaruwa = () => {
           </div>
 
           {/* Scroll Indicator */}
-          <motion.div 
+          <motion.div
             animate={{ y: [0, 10, 0] }}
             transition={{ repeat: Infinity, duration: 2 }}
-            className="absolute bottom-12 left-1/2 transform -translate-x-1/2"
+            className="absolute bottom-20 left-1/2 -translate-x-1/2"
           >
-            <ChevronDown className="w-8 h-8 text-white" />
+            <ChevronDown className="w-8 h-8 text-white/70" />
           </motion.div>
         </section>
 
         {/* Quick Info Bar */}
-        <section className="bg-blue-700 text-white py-4" aria-label="Quick Information">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-wrap justify-center items-center gap-8 text-sm">
-              <div className="flex items-center gap-2">
-                <Landmark className="w-4 h-4" />
-                <span>UNESCO Site: Since 1982</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Sun className="w-4 h-4" />
-                <span>Climate: {weatherInfo.temperature}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Crown className="w-4 h-4" />
-                <span>Medieval Capital: 1070-1232 AD</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
-                <span>Best Time: {destinationInfo.bestTime}</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Overview Section */}
-        <section id="overview" className="py-16 bg-gray-50" aria-label="Overview">
-          <div className="container mx-auto px-4">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
-              className="max-w-4xl mx-auto text-center"
-            >
-              <h2 className="text-4xl font-bold mb-6">{content.overview.title}</h2>
-              <p className="text-lg text-gray-700 mb-8 leading-relaxed">
-                {content.overview.description}
-              </p>
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mt-12">
-                {content.overview.highlights.map((highlight, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: index * 0.1 }}
-                    viewport={{ once: true }}
-                    className="bg-white p-4 rounded-lg shadow-md flex items-center gap-3"
-                  >
-                    <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                    <span className="text-sm">{highlight}</span>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
+        <section className="relative -mt-16 z-10 px-4">
+          <div className="container mx-auto">
+            <Card className="bg-white/95 backdrop-blur-md shadow-2xl border-0">
+              <CardContent className="py-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 text-center">
+                  <div className="flex flex-col items-center">
+                    <Crown className="w-6 h-6 text-orange-600 mb-2" />
+                    <span className="text-sm text-muted-foreground">UNESCO Site</span>
+                    <span className="font-semibold">Since 1982</span>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <Thermometer className="w-6 h-6 text-orange-600 mb-2" />
+                    <span className="text-sm text-muted-foreground">Temperature</span>
+                    <span className="font-semibold">{weatherInfo.temperature}</span>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <MapPin className="w-6 h-6 text-orange-600 mb-2" />
+                    <span className="text-sm text-muted-foreground">Area</span>
+                    <span className="font-semibold">{destinationInfo.area}</span>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <Calendar className="w-6 h-6 text-orange-600 mb-2" />
+                    <span className="text-sm text-muted-foreground">Best Time</span>
+                    <span className="font-semibold">{destinationInfo.bestTime}</span>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <Languages className="w-6 h-6 text-orange-600 mb-2" />
+                    <span className="text-sm text-muted-foreground">Language</span>
+                    <span className="font-semibold">{destinationInfo.language}</span>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <CircleDollarSign className="w-6 h-6 text-orange-600 mb-2" />
+                    <span className="text-sm text-muted-foreground">Currency</span>
+                    <span className="font-semibold">{destinationInfo.currency}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </section>
 
         {/* Tabs Navigation */}
-        <nav className="sticky top-0 z-40 bg-background border-b" aria-label="Content Navigation">
+        <nav id="content" className="sticky top-0 z-40 bg-white border-b shadow-sm mt-8">
           <div className="container mx-auto px-4">
             <div className="flex overflow-x-auto scrollbar-hide">
               {tabs.map((tab) => (
@@ -709,15 +810,13 @@ const Polonnaruwa = () => {
                   onClick={() => setSelectedTab(tab.id)}
                   className={`px-6 py-4 font-medium transition-all whitespace-nowrap border-b-2 ${
                     selectedTab === tab.id
-                      ? 'border-blue-600 text-blue-600'
+                      ? 'border-orange-600 text-orange-600'
                       : 'border-transparent text-muted-foreground hover:text-foreground'
                   }`}
-                  aria-label={`View ${tab.label}`}
-                  aria-current={selectedTab === tab.id ? 'page' : undefined}
                 >
                   {tab.label}
                   {tab.count && (
-                    <Badge variant="secondary" className="ml-2">
+                    <Badge variant="secondary" className="ml-2 bg-orange-100 text-orange-700">
                       {tab.count}
                     </Badge>
                   )}
@@ -737,60 +836,78 @@ const Polonnaruwa = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                aria-label="Top Attractions"
               >
-                <h3 className="text-3xl font-bold mb-8 text-center">Top Attractions in Polonnaruwa</h3>
+                <div className="text-center mb-12">
+                  <h2 className="text-4xl font-bold mb-4">Top Attractions in Polonnaruwa</h2>
+                  <p className="text-muted-foreground max-w-2xl mx-auto">
+                    Explore ancient ruins, rock carvings, and the masterpieces of medieval Sri Lankan architecture
+                  </p>
+                </div>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {content.attractions.map((attraction) => (
-                    <Card key={attraction.id} className="group hover:shadow-xl transition-all duration-300 overflow-hidden">
-                      <div className="aspect-video overflow-hidden">
-                        <img 
-                          src={attraction.image} 
-                          alt={attraction.name}
-                          loading="lazy"
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                        />
-                      </div>
-                      <CardHeader>
-                        <div className="flex justify-between items-start">
-                          <CardTitle className="text-xl">{attraction.name}</CardTitle>
-                          <Badge variant="secondary" className="ml-2">
-                            {attraction.category}
-                          </Badge>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-muted-foreground mb-4">{attraction.description}</p>
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {attraction.highlights.map((highlight, idx) => (
-                            <Badge key={idx} variant="outline" className="text-xs">
-                              {highlight}
-                            </Badge>
-                          ))}
-                        </div>
-                        <div className="space-y-2 mb-4">
-                          <div className="flex items-center text-sm">
-                            <Star className="w-4 h-4 text-yellow-500 mr-2" />
-                            <span>{attraction.rating} rating</span>
+                  {attractions.map((attraction, index) => {
+                    const IconComponent = getIconComponent(attraction.icon || 'Landmark');
+                    return (
+                      <motion.div
+                        key={attraction.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                      >
+                        <Card className="group h-full hover:shadow-xl transition-all duration-300 overflow-hidden">
+                          <div className="aspect-video overflow-hidden relative">
+                            <img
+                              src={attraction.image}
+                              alt={attraction.name}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            />
+                            <div className="absolute top-4 left-4">
+                              <Badge className="bg-orange-600 text-white">
+                                {attraction.category}
+                              </Badge>
+                            </div>
+                            <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-full p-2">
+                              <IconComponent className="w-5 h-5 text-orange-600" />
+                            </div>
                           </div>
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <Clock className="w-4 h-4 mr-2" />
-                            <span>{attraction.duration}</span>
-                          </div>
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <DollarSign className="w-4 h-4 mr-2" />
-                            <span>{attraction.price}</span>
-                          </div>
-                        </div>
-                        <Button 
-                          className="w-full bg-blue-600 hover:bg-blue-700"
-                          onClick={() => handleBooking(attraction.name)}
-                        >
-                          Book Now
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  ))}
+                          <CardHeader>
+                            <CardTitle className="flex items-center justify-between">
+                              <span>{attraction.name}</span>
+                              <div className="flex items-center text-yellow-500">
+                                <Star className="w-4 h-4 fill-current" />
+                                <span className="ml-1 text-sm">{attraction.rating}</span>
+                              </div>
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <p className="text-muted-foreground mb-4 line-clamp-2">{attraction.description}</p>
+                            <div className="flex flex-wrap gap-2 mb-4">
+                              {attraction.highlights.slice(0, 3).map((highlight, idx) => (
+                                <Badge key={idx} variant="outline" className="text-xs border-orange-200 text-orange-700">
+                                  {highlight}
+                                </Badge>
+                              ))}
+                            </div>
+                            <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
+                              <span className="flex items-center">
+                                <Clock className="w-4 h-4 mr-1" />
+                                {attraction.duration}
+                              </span>
+                              <span className="flex items-center">
+                                <DollarSign className="w-4 h-4 mr-1" />
+                                {attraction.price}
+                              </span>
+                            </div>
+                            <Button
+                              className="w-full bg-orange-600 hover:bg-orange-700"
+                              onClick={() => handleBooking(attraction.name)}
+                            >
+                              Book Visit
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    );
+                  })}
                 </div>
               </motion.section>
             )}
@@ -802,317 +919,382 @@ const Polonnaruwa = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                aria-label="Activities"
               >
-                <h3 className="text-3xl font-bold mb-8 text-center">Things to Do in Polonnaruwa</h3>
+                <div className="text-center mb-12">
+                  <h2 className="text-4xl font-bold mb-4">Things to Do in Polonnaruwa</h2>
+                  <p className="text-muted-foreground max-w-2xl mx-auto">
+                    From cycling tours to wildlife safaris, discover exciting experiences
+                  </p>
+                </div>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {content.activities.map((activity) => (
-                    <Card key={activity.id} className="hover:shadow-lg transition-shadow">
-                      <CardHeader>
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center">
-                            <div className="p-3 bg-blue-100 rounded-lg mr-4">
-                              <activity.icon className="w-6 h-6 text-blue-600" />
+                  {activities.map((activity, index) => {
+                    const IconComponent = getIconComponent(activity.icon);
+                    return (
+                      <motion.div
+                        key={activity.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                      >
+                        <Card className="h-full hover:shadow-lg transition-shadow">
+                          <CardHeader>
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-center">
+                                <div className="p-3 bg-orange-100 rounded-xl mr-4">
+                                  <IconComponent className="w-6 h-6 text-orange-600" />
+                                </div>
+                                <div>
+                                  <CardTitle className="text-lg">{activity.name}</CardTitle>
+                                  {activity.popular && (
+                                    <Badge className="mt-1 bg-green-500 text-white">Popular</Badge>
+                                  )}
+                                </div>
+                              </div>
                             </div>
-                            <div>
-                              <CardTitle className="text-lg">{activity.name}</CardTitle>
-                              {activity.popular && (
-                                <Badge variant="default" className="mt-1 bg-orange-500">
-                                  Popular
-                                </Badge>
-                              )}
+                          </CardHeader>
+                          <CardContent>
+                            <p className="text-muted-foreground mb-4">{activity.description}</p>
+                            <div className="flex items-center justify-between text-sm mb-4">
+                              <span className="text-orange-600 font-semibold">{activity.price}</span>
+                              <span className="text-muted-foreground">{activity.duration}</span>
+                            </div>
+                            {activity.difficulty && (
+                              <Badge variant="outline" className="mb-4 border-orange-200">
+                                {activity.difficulty}
+                              </Badge>
+                            )}
+                            <Button
+                              variant="outline"
+                              className="w-full border-orange-600 text-orange-600 hover:bg-orange-600 hover:text-white"
+                              onClick={() => handleBooking(activity.name)}
+                            >
+                              Book Activity
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </motion.section>
+            )}
+
+            {/* Dining Tab */}
+            {selectedTab === 'dining' && (
+              <motion.section
+                key="dining"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+              >
+                <div className="text-center mb-12">
+                  <h2 className="text-4xl font-bold mb-4">Where to Eat in Polonnaruwa</h2>
+                  <p className="text-muted-foreground max-w-2xl mx-auto">
+                    From lakeside dining to local eateries near the ancient city
+                  </p>
+                </div>
+                <div className="grid md:grid-cols-2 gap-8">
+                  {restaurants.map((restaurant, index) => (
+                    <motion.div
+                      key={restaurant.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <Card className="h-full hover:shadow-xl transition-all overflow-hidden">
+                        <div className="md:flex">
+                          <div className="md:w-2/5">
+                            <img
+                              src={restaurant.image}
+                              alt={restaurant.name}
+                              className="w-full h-48 md:h-full object-cover"
+                            />
+                          </div>
+                          <div className="md:w-3/5 p-6">
+                            <div className="flex items-start justify-between mb-2">
+                              <h3 className="text-xl font-bold">{restaurant.name}</h3>
+                              <div className="flex items-center">
+                                <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                                <span className="ml-1 text-sm">{restaurant.rating}</span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 mb-3">
+                              <Badge variant="outline" className="border-orange-200 text-orange-700">
+                                {restaurant.cuisine}
+                              </Badge>
+                              <Badge className="bg-orange-100 text-orange-700">
+                                {restaurant.priceRange}
+                              </Badge>
+                            </div>
+                            <p className="text-muted-foreground text-sm mb-4">{restaurant.description}</p>
+                            <div className="mb-4">
+                              <p className="text-xs text-muted-foreground mb-2">Specialties:</p>
+                              <div className="flex flex-wrap gap-1">
+                                {restaurant.specialties.map((specialty, idx) => (
+                                  <Badge key={idx} variant="secondary" className="text-xs">
+                                    {specialty}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                            <div className="flex items-center text-sm text-muted-foreground">
+                              <Clock className="w-4 h-4 mr-1" />
+                              {restaurant.openHours}
                             </div>
                           </div>
                         </div>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-muted-foreground mb-4">{activity.description}</p>
-                        <div className="flex justify-between items-center mb-4">
-                          <span className="text-lg font-semibold text-blue-600">{activity.price}</span>
-                          <span className="text-sm text-muted-foreground">{activity.duration}</span>
-                        </div>
-                        <Button 
-                          variant="outline" 
-                          className="w-full hover:bg-blue-600 hover:text-white"
-                          onClick={() => handleBooking(activity.name)}
-                        >
-                          Book Activity
-                        </Button>
-                      </CardContent>
-                    </Card>
+                      </Card>
+                    </motion.div>
                   ))}
                 </div>
               </motion.section>
             )}
 
-            {/* Itineraries Tab */}
-            {selectedTab === 'itineraries' && (
+            {/* Stay Tab */}
+            {selectedTab === 'stay' && (
               <motion.section
-                key="itineraries"
+                key="stay"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                aria-label="Suggested Tours"
               >
-                <h3 className="text-3xl font-bold mb-8 text-center">Suggested Tours & Itineraries</h3>
-                <div className="space-y-8">
-                  {content.itineraries.map((itinerary) => (
-                    <Card key={itinerary.id} className="overflow-hidden">
-                      <div className="md:flex">
-                        <div className="md:flex-1 p-6">
-                          <div className="flex items-center justify-between mb-4">
-                            <h4 className="text-2xl font-semibold">{itinerary.title}</h4>
-                            <Badge className="bg-blue-100 text-blue-700">
-                              {itinerary.duration}
-                            </Badge>
+                <div className="text-center mb-12">
+                  <h2 className="text-4xl font-bold mb-4">Where to Stay in Polonnaruwa</h2>
+                  <p className="text-muted-foreground max-w-2xl mx-auto">
+                    From heritage hotels to nature resorts near the ancient city
+                  </p>
+                </div>
+                <div className="grid md:grid-cols-2 gap-8">
+                  {hotels.map((hotel, index) => (
+                    <motion.div
+                      key={hotel.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <Card className="h-full hover:shadow-xl transition-all overflow-hidden">
+                        <div className="relative">
+                          <img
+                            src={hotel.image}
+                            alt={hotel.name}
+                            className="w-full h-56 object-cover"
+                          />
+                          <div className="absolute top-4 left-4">
+                            <Badge className="bg-orange-600 text-white">{hotel.category}</Badge>
                           </div>
-                          <p className="text-muted-foreground mb-6">{itinerary.description}</p>
-                          <div className="space-y-2 mb-6">
-                            {itinerary.highlights.map((highlight, idx) => (
-                              <div key={idx} className="flex items-start gap-2">
-                                <ChevronRight className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                                <span className="text-sm">{highlight}</span>
-                              </div>
-                            ))}
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-2xl font-bold text-blue-600">{itinerary.price}</span>
-                            <Button 
-                              className="bg-blue-600 hover:bg-blue-700"
-                              onClick={() => handleBooking(itinerary.title)}
-                            >
-                              Book This Tour
-                            </Button>
+                          <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 flex items-center">
+                            <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                            <span className="ml-1 text-sm font-medium">{hotel.rating}</span>
                           </div>
                         </div>
-                      </div>
-                    </Card>
+                        <CardContent className="p-6">
+                          <div className="flex items-start justify-between mb-2">
+                            <h3 className="text-xl font-bold">{hotel.name}</h3>
+                            <span className="text-orange-600 font-semibold text-sm">{hotel.priceRange}</span>
+                          </div>
+                          <div className="flex items-center text-sm text-muted-foreground mb-3">
+                            <MapPin className="w-4 h-4 mr-1" />
+                            {hotel.location}
+                          </div>
+                          <p className="text-muted-foreground text-sm mb-4">{hotel.description}</p>
+                          <div className="flex flex-wrap gap-2 mb-4">
+                            {hotel.amenities.slice(0, 4).map((amenity, idx) => (
+                              <Badge key={idx} variant="outline" className="text-xs border-orange-200">
+                                {amenity}
+                              </Badge>
+                            ))}
+                            {hotel.amenities.length > 4 && (
+                              <Badge variant="outline" className="text-xs">
+                                +{hotel.amenities.length - 4} more
+                              </Badge>
+                            )}
+                          </div>
+                          <Button
+                            className="w-full bg-orange-600 hover:bg-orange-700"
+                            onClick={() => handleBooking(`${hotel.name} Booking`)}
+                          >
+                            Check Availability
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
                   ))}
+                </div>
+              </motion.section>
+            )}
+
+            {/* Weather Tab */}
+            {selectedTab === 'weather' && (
+              <motion.section
+                key="weather"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+              >
+                <div className="text-center mb-12">
+                  <h2 className="text-4xl font-bold mb-4">Weather in Polonnaruwa</h2>
+                  <p className="text-muted-foreground max-w-2xl mx-auto">
+                    Plan your visit with our comprehensive weather guide
+                  </p>
+                </div>
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                  <Card className="text-center p-6 bg-gradient-to-br from-orange-50 to-amber-50">
+                    <Thermometer className="w-10 h-10 text-orange-600 mx-auto mb-3" />
+                    <h3 className="font-semibold mb-1">Temperature</h3>
+                    <p className="text-2xl font-bold text-orange-600">{weatherInfo.temperature}</p>
+                  </Card>
+                  <Card className="text-center p-6 bg-gradient-to-br from-orange-50 to-amber-50">
+                    <Cloud className="w-10 h-10 text-orange-600 mx-auto mb-3" />
+                    <h3 className="font-semibold mb-1">Climate</h3>
+                    <p className="text-lg font-medium text-orange-600">{weatherInfo.season}</p>
+                  </Card>
+                  <Card className="text-center p-6 bg-gradient-to-br from-orange-50 to-amber-50">
+                    <Droplets className="w-10 h-10 text-orange-600 mx-auto mb-3" />
+                    <h3 className="font-semibold mb-1">Humidity</h3>
+                    <p className="text-2xl font-bold text-orange-600">{weatherInfo.humidity}</p>
+                  </Card>
+                  <Card className="text-center p-6 bg-gradient-to-br from-orange-50 to-amber-50">
+                    <Wind className="w-10 h-10 text-orange-600 mx-auto mb-3" />
+                    <h3 className="font-semibold mb-1">Rainfall</h3>
+                    <p className="text-sm font-medium text-orange-600">{weatherInfo.rainfall}</p>
+                  </Card>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-8">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Calendar className="w-5 h-5 text-orange-600" />
+                        Best Months to Visit
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-wrap gap-2">
+                        {weatherInfo.bestMonths.map((month, idx) => (
+                          <Badge key={idx} className="bg-orange-100 text-orange-700 px-4 py-2">
+                            {month}
+                          </Badge>
+                        ))}
+                      </div>
+                      <p className="text-muted-foreground mt-4 text-sm">
+                        The dry season offers the best conditions for exploring the ancient ruins with minimal heat and rain.
+                      </p>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Luggage className="w-5 h-5 text-orange-600" />
+                        What to Pack
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-2">
+                        {weatherInfo.packingTips.map((tip, idx) => (
+                          <li key={idx} className="flex items-start gap-2">
+                            <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                            <span className="text-sm">{tip}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
                 </div>
               </motion.section>
             )}
 
             {/* Travel Tips Tab */}
-            {selectedTab === 'travel-tips' && (
+            {selectedTab === 'tips' && (
               <motion.section
-                key="travel-tips"
+                key="tips"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                aria-label="Travel Tips"
               >
-                <h3 className="text-3xl font-bold mb-8 text-center">Travel Tips for Polonnaruwa</h3>
-                <div className="grid md:grid-cols-3 gap-8">
-                  {content.travelTips.map((tipSection) => (
-                    <Card key={tipSection.id}>
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-3">
-                          <tipSection.icon className="w-6 h-6 text-blue-600" />
-                          {tipSection.title}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <ul className="space-y-2">
-                          {tipSection.tips.map((tip, idx) => (
-                            <li key={idx} className="flex items-start gap-2">
-                              <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                              <span className="text-sm">{tip}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </CardContent>
-                    </Card>
-                  ))}
+                <div className="text-center mb-12">
+                  <h2 className="text-4xl font-bold mb-4">Travel Tips for Polonnaruwa</h2>
+                  <p className="text-muted-foreground max-w-2xl mx-auto">
+                    Essential information for visiting the medieval capital
+                  </p>
                 </div>
-              </motion.section>
-            )}
-
-            {/* FAQs Tab */}
-            {selectedTab === 'faqs' && (
-              <motion.section
-                key="faqs"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                aria-label="Frequently Asked Questions"
-              >
-                <h3 className="text-3xl font-bold mb-8 text-center">Frequently Asked Questions</h3>
-                <div className="max-w-3xl mx-auto">
-                  <Accordion type="single" collapsible className="space-y-4">
-                    {content.faqs.map((faq) => (
-                      <AccordionItem key={faq.id} value={faq.id} className="border rounded-lg px-4">
-                        <AccordionTrigger className="text-left hover:no-underline">
-                          <h4 className="font-semibold">{faq.question}</h4>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <p className="text-muted-foreground">{faq.answer}</p>
-                        </AccordionContent>
-                      </AccordionItem>
-                    ))}
-                  </Accordion>
+                <div className="grid md:grid-cols-2 gap-8">
+                  {travelTips.map((tipSection, index) => {
+                    const IconComponent = getIconComponent(tipSection.icon);
+                    return (
+                      <motion.div
+                        key={tipSection.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                      >
+                        <Card className="h-full">
+                          <CardHeader>
+                            <CardTitle className="flex items-center gap-3">
+                              <div className="p-2 bg-orange-100 rounded-lg">
+                                <IconComponent className="w-6 h-6 text-orange-600" />
+                              </div>
+                              {tipSection.title}
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <ul className="space-y-3">
+                              {tipSection.tips.map((tip, idx) => (
+                                <li key={idx} className="flex items-start gap-2">
+                                  <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                                  <span className="text-sm">{tip}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    );
+                  })}
                 </div>
               </motion.section>
             )}
           </AnimatePresence>
         </div>
 
-        {/* Map & Directions Section */}
-        <section className="py-16 bg-gray-50" aria-label="Location and Map">
-          <div className="container mx-auto px-4">
-            <h3 className="text-3xl font-bold mb-8 text-center">Getting to Polonnaruwa</h3>
-            <div className="grid lg:grid-cols-2 gap-8">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Map className="w-5 h-5 text-blue-600" />
-                    Location & Directions
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="aspect-video rounded-lg overflow-hidden mb-6">
-                    <iframe
-                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d63287.30830507937!2d80.9829!3d7.9403!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3afb44ba3b16ce27%3A0x3b87d96e2a1d4f3f!2sPolonnaruwa%2C%20Sri%20Lanka!5e0!3m2!1sen!2sus!4v1647887431289!5m2!1sen!2sus"
-                      width="100%"
-                      height="100%"
-                      style={{ border: 0 }}
-                      allowFullScreen
-                      loading="lazy"
-                      referrerPolicy="no-referrer-when-downgrade"
-                      title="Polonnaruwa Map"
-                    ></iframe>
-                  </div>
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="font-semibold mb-2">From Colombo (230 km)</h4>
-                      <p className="text-sm text-muted-foreground">
-                        • By Car: 4-5 hours via A1 highway<br />
-                        • By Bus: 5-6 hours direct service<br />
-                        • By Train: To Habarana, then bus (6 hours total)
-                      </p>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold mb-2">From Kandy (100 km)</h4>
-                      <p className="text-sm text-muted-foreground">
-                        • By Car/Van: 2.5-3 hours<br />
-                        • By Bus: 3-4 hours<br />
-                        • Via Dambulla for combined tour
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Navigation className="w-5 h-5 text-blue-600" />
-                    Transportation Tips
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="p-4 bg-blue-50 rounded-lg">
-                    <h4 className="font-semibold mb-2">Cultural Triangle Tours</h4>
-                    <p className="text-sm">
-                      Combine Polonnaruwa with Sigiriya and Dambulla in our special Cultural Triangle package. 
-                      Includes transport, guide, and entrance tickets.
-                    </p>
-                    <Button 
-                      className="mt-3 bg-blue-600 hover:bg-blue-700"
-                      onClick={() => handleBooking('Cultural Triangle Tour Package')}
-                    >
-                      Book Package
-                    </Button>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-sm flex items-start gap-2">
-                      <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      Bicycle rentals available at entrance (recommended)
-                    </p>
-                    <p className="text-sm flex items-start gap-2">
-                      <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      Tuk-tuk tours available for elderly visitors
-                    </p>
-                    <p className="text-sm flex items-start gap-2">
-                      <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      Licensed guides available at ticket office
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
-
-        {/* Gallery Section */}
-        <section className="py-16" aria-label="Photo Gallery">
-          <div className="container mx-auto px-4">
-            <h3 className="text-3xl font-bold mb-8 text-center">Polonnaruwa Gallery</h3>
-            <div className="relative rounded-lg overflow-hidden aspect-video max-w-4xl mx-auto">
-              <AnimatePresence mode="wait">
-                <motion.img
-                  key={galleryIndex}
-                  src={content.gallery[galleryIndex]}
-                  alt={`Polonnaruwa gallery image ${galleryIndex + 1}`}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.5 }}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
-              </AnimatePresence>
-              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
-                {content.gallery.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setGalleryIndex(index)}
-                    className={`w-2 h-2 rounded-full transition-all ${
-                      galleryIndex === index ? 'bg-white w-8' : 'bg-white/50'
-                    }`}
-                    aria-label={`View gallery image ${index + 1}`}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Call to Action Section */}
-        <section className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-16" aria-label="Call to Action">
+        {/* CTA Section */}
+        <section className="bg-gradient-to-r from-orange-600 to-amber-600 text-white py-16">
           <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Ready to Walk Through History?
-            </h2>
-            <p className="text-xl mb-8 max-w-2xl mx-auto">
-              Explore the magnificent ruins of Sri Lanka's medieval capital with our expert guides and comfortable tours
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                size="lg" 
-                className="bg-white text-blue-600 hover:bg-gray-100"
-                onClick={() => handleBooking('Polonnaruwa Complete Package')}
-              >
-                <Phone className="w-5 h-5 mr-2" />
-                Book Your Tour
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline"
-                className="bg-transparent text-white border-white hover:bg-white/20"
-                onClick={() => window.location.href = 'mailto:info@rechargetravels.com?subject=Polonnaruwa Inquiry'}
-              >
-                <Mail className="w-5 h-5 mr-2" />
-                Contact Us
-              </Button>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+            >
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">{ctaSection.title}</h2>
+              <p className="text-xl mb-8 text-white/90 max-w-2xl mx-auto">{ctaSection.subtitle}</p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button
+                  size="lg"
+                  className="bg-white text-orange-600 hover:bg-gray-100"
+                  onClick={() => handleBooking('Polonnaruwa Complete Package')}
+                >
+                  <Phone className="w-5 h-5 mr-2" />
+                  {ctaSection.buttonText}
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="bg-transparent text-white border-white hover:bg-white/20"
+                  onClick={() => window.location.href = 'mailto:info@rechargetravels.com?subject=Polonnaruwa Inquiry'}
+                >
+                  <Mail className="w-5 h-5 mr-2" />
+                  Contact Us
+                </Button>
+              </div>
+            </motion.div>
           </div>
         </section>
-
       </main>
 
       <Footer />
 
-      {/* Enhanced Booking Modal */}
+      {/* Booking Modal */}
       <EnhancedBookingModal
         isOpen={showBookingModal}
         onClose={() => setShowBookingModal(false)}

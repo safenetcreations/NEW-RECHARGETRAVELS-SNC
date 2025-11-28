@@ -38,6 +38,8 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/services/firebaseService';
 import { useToast } from '@/components/ui/use-toast';
+import { GeminiToolbar } from '@/components/common/GeminiToolbar';
+import { UniversalImageGenerator } from '@/components/common/UniversalImageGenerator';
 
 interface BlogCategory {
   id: string;
@@ -304,8 +306,31 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ postId, onNavigate }) => {
                 />
               </div>
 
+              {/* AI Tools for Excerpt */}
+              {excerpt && (
+                <GeminiToolbar
+                  content={excerpt}
+                  onContentUpdate={setExcerpt}
+                  contentType="blog"
+                  showImageButton={false}
+                  className="mb-2"
+                />
+              )}
+
               <div className="space-y-2">
                 <Label htmlFor="content">Content (Markdown)</Label>
+
+                {/* AI Toolbar for Content */}
+                {content && (
+                  <GeminiToolbar
+                    content={content}
+                    onContentUpdate={setContent}
+                    contentType="blog"
+                    showImageButton={false}
+                    className="mb-3"
+                  />
+                )}
+
                 <Textarea
                   id="content"
                   value={content}
@@ -316,6 +341,8 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ postId, onNavigate }) => {
                 />
                 <p className="text-sm text-muted-foreground">
                   Supports Markdown formatting. Use ## for headings, **bold**, *italic*, etc.
+                  <br />
+                  <span className="text-purple-600 font-medium">✨ Use the AI assistant above to improve your content!</span>
                 </p>
               </div>
             </CardContent>
@@ -412,11 +439,29 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ postId, onNavigate }) => {
                   <p className="text-sm text-muted-foreground">No image selected</p>
                 </div>
               )}
-              <Input
-                value={featuredImage}
-                onChange={(e) => setFeaturedImage(e.target.value)}
-                placeholder="Image URL..."
+
+              {/* AI Image Generator */}
+              <UniversalImageGenerator
+                title={title || 'Blog Post'}
+                description={excerpt || content.substring(0, 200)}
+                onImageGenerated={setFeaturedImage}
+                imageType="blog"
+                suggestedPrompts={[
+                  `${title} - professional blog header`,
+                  'Sri Lanka travel blog image',
+                  'Beautiful Sri Lankan landscape'
+                ]}
               />
+
+              <div className="relative">
+                <Label className="text-xs text-muted-foreground">Or enter image URL manually:</Label>
+                <Input
+                  value={featuredImage}
+                  onChange={(e) => setFeaturedImage(e.target.value)}
+                  placeholder="Image URL..."
+                  className="mt-1"
+                />
+              </div>
             </CardContent>
           </Card>
 

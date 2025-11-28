@@ -22,7 +22,8 @@ import {
   Layout,
   Sparkles,
   Train,
-  Bot
+  Bot,
+  TreePine
 } from 'lucide-react';
 
 interface AdminSidebarProps {
@@ -37,6 +38,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeSection, onSectionCha
     { id: 'page-management', label: 'Page Management', icon: Layout },
     { id: 'pages', label: 'Pages', icon: FileText },
     { id: 'about-sri-lanka', label: 'About Sri Lanka', icon: Globe },
+    { id: 'experiences', label: 'Experience Pages', icon: TreePine },
     { id: 'custom-experience', label: 'Custom Experience', icon: Sparkles },
     { id: 'custom-experience-submissions', label: 'Experience Requests', icon: FileText },
     { id: 'train-journeys', label: 'Train Journeys', icon: Train },

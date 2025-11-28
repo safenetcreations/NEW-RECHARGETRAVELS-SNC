@@ -3,61 +3,65 @@ import { Helmet } from 'react-helmet-async';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Waves, 
-  Sun, 
-  Palmtree, 
+import {
   MapPin,
   Calendar,
   Clock,
   Star,
-  Fish,
+  Wifi,
   Utensils,
   Camera,
+  Hotel,
   Users,
   DollarSign,
   Info,
+  Sun,
   Cloud,
-  Navigation,
-  Sunrise,
+  Thermometer,
+  Droplets,
   Wind,
-  Home,
-  Activity,
-  Anchor,
-  TreePalm,
-  Ship,
-  Turtle,
-  Shell,
-  Map,
-  ChevronDown,
-  Phone,
-  Mail,
-  CheckCircle,
-  ChevronRight,
-  Globe,
-  Heart,
-  Gem,
+  Umbrella,
+  Navigation,
   Mountain,
-  Trees
+  Waves,
+  Gem,
+  Trees,
+  TreePine,
+  Bird,
+  Binoculars,
+  Sunrise,
+  Fish,
+  Globe,
+  Luggage,
+  CreditCard,
+  Phone,
+  Shield,
+  Heart,
+  Coffee,
+  Award,
+  Sparkles,
+  ChevronRight,
+  ChevronLeft,
+  Building2,
+  Landmark,
+  ShoppingBag,
+  Activity,
+  Footprints
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import EnhancedBookingModal from '@/components/EnhancedBookingModal';
-import { doc, getDoc, onSnapshot } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
-import { toast } from 'sonner';
+import { getDestinationBySlug } from '@/services/destinationContentService';
 
+// Type definitions
 interface HeroSlide {
-  id: string;
   image: string;
   title: string;
   subtitle: string;
 }
 
 interface Attraction {
-  id: string;
   name: string;
   description: string;
   image: string;
@@ -65,17 +69,37 @@ interface Attraction {
   rating: number;
   duration: string;
   price: string;
-  highlights: string[];
+  icon?: string;
 }
 
 interface Activity {
-  id: string;
   name: string;
   description: string;
-  icon: any;
+  icon: string;
   price: string;
   duration: string;
+  difficulty?: string;
   popular?: boolean;
+}
+
+interface Restaurant {
+  name: string;
+  cuisine: string;
+  priceRange: string;
+  rating: number;
+  image: string;
+  specialty: string;
+  location: string;
+}
+
+interface HotelInfo {
+  name: string;
+  category: string;
+  priceRange: string;
+  rating: number;
+  image: string;
+  amenities: string[];
+  location: string;
 }
 
 interface DestinationInfo {
@@ -87,637 +111,611 @@ interface DestinationInfo {
   currency: string;
 }
 
-interface FAQ {
-  id: string;
-  question: string;
-  answer: string;
-}
-
-interface Itinerary {
-  id: string;
-  title: string;
-  duration: string;
-  description: string;
-  highlights: string[];
-  price: string;
+interface WeatherInfo {
+  temperature: string;
+  humidity: string;
+  rainfall: string;
+  bestMonths: string;
+  climate: string;
+  waterTemp?: string;
 }
 
 interface TravelTip {
-  id: string;
+  icon: string;
   title: string;
-  icon: any;
-  tips: string[];
+  description: string;
 }
 
-interface RatnapuraContent {
-  hero: {
-    slides: HeroSlide[];
-    title: string;
-    subtitle: string;
-  };
-  overview: {
-    title: string;
-    description: string;
-    highlights: string[];
-  };
-  seo: {
-    title: string;
-    description: string;
-    keywords: string;
-  };
-  attractions: Attraction[];
-  activities: Activity[];
-  itineraries: Itinerary[];
-  faqs: FAQ[];
-  gallery: string[];
-  travelTips: TravelTip[];
+interface SEOSettings {
+  title: string;
+  description: string;
+  keywords: string[];
 }
 
-const defaultContent: RatnapuraContent = {
-  hero: {
-    slides: [
-      {
-        id: '1',
-        image: "https://images.unsplash.com/photo-1601469090980-fc95e8d95544?auto=format&fit=crop&q=80",
-        title: "Welcome to Ratnapura",
-        subtitle: "The City of Gems"
-      },
-      {
-        id: '2',
-        image: "https://images.unsplash.com/photo-1599582909646-9d1c219db59f?auto=format&fit=crop&q=80",
-        title: "Gem Mining Heritage",
-        subtitle: "Discover Precious Stones"
-      },
-      {
-        id: '3',
-        image: "https://images.unsplash.com/photo-1511884642898-4c92249e20b6?auto=format&fit=crop&q=80",
-        title: "Rainforest Gateway",
-        subtitle: "Explore Sinharaja Reserve"
-      }
-    ],
-    title: "Ratnapura",
-    subtitle: "City of Gems with Rainforest Access"
+interface CTASection {
+  title: string;
+  subtitle: string;
+  primaryButton: string;
+  secondaryButton: string;
+}
+
+// Default content
+const defaultHeroSlides: HeroSlide[] = [
+  {
+    image: "https://images.unsplash.com/photo-1601469090980-fc95e8d95544?auto=format&fit=crop&q=80",
+    title: "Discover Ratnapura",
+    subtitle: "The City of Gems - Sri Lanka's Treasure Capital"
   },
-  overview: {
-    title: "Why Visit Ratnapura?",
-    description: "Ratnapura, literally meaning 'City of Gems', is the gem capital of Sri Lanka and the gateway to the pristine Sinharaja Rainforest. This bustling city has been the center of Sri Lanka's gem trade for centuries, where sapphires, rubies, and other precious stones are mined. Beyond gems, Ratnapura offers access to stunning waterfalls, rainforest adventures, and authentic Sri Lankan culture.",
-    highlights: [
-      "World-famous gem mines and markets",
-      "Gateway to Sinharaja World Heritage Rainforest",
-      "Traditional gem cutting and polishing",
-      "Bopath Ella and Katugas Ella waterfalls",
-      "Adam's Peak pilgrimage starting point",
-      "Authentic gem trading experience",
-      "Rainforest trekking and birdwatching",
-      "Rich biodiversity and endemic species"
-    ]
+  {
+    image: "https://images.unsplash.com/photo-1511884642898-4c92249e20b6?auto=format&fit=crop&q=80",
+    title: "Gateway to Sinharaja",
+    subtitle: "UNESCO World Heritage Rainforest"
   },
-  seo: {
-    title: "Ratnapura Sri Lanka - Gem City & Sinharaja Rainforest | Recharge Travels",
-    description: "Explore Ratnapura's gem mines, visit Sinharaja rainforest, and discover waterfalls. Experience Sri Lanka's gem capital with expert guides and tours.",
-    keywords: "Ratnapura gems, Sinharaja rainforest, gem mining Sri Lanka, Ratnapura waterfalls, gem market, Bopath Ella, Adam's Peak from Ratnapura, gem tours"
+  {
+    image: "https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?auto=format&fit=crop&q=80",
+    title: "Majestic Waterfalls",
+    subtitle: "Bopath Ella & Hidden Natural Wonders"
+  }
+];
+
+const defaultAttractions: Attraction[] = [
+  {
+    name: "Gem Mines & Museums",
+    description: "Visit working gem mines to witness the traditional mining process and explore museums showcasing Sri Lanka's world-famous blue sapphires, rubies, and cat's eyes.",
+    image: "https://images.unsplash.com/photo-1601469090980-fc95e8d95544?auto=format&fit=crop&q=80",
+    category: "Gems & Mining",
+    rating: 4.7,
+    duration: "2-3 hours",
+    price: "$20",
+    icon: "Gem"
   },
-  attractions: [
-    {
-      id: '1',
-      name: "Gem Mines & Museums",
-      description: "Visit working gem mines to see the mining process and explore museums showcasing Sri Lanka's precious stones including blue sapphires, rubies, and cat's eyes.",
-      image: "https://images.unsplash.com/photo-1601469090980-fc95e8d95544?auto=format&fit=crop&q=80",
-      category: "Cultural",
-      rating: 4.7,
-      duration: "2-3 hours",
-      price: "From $20",
-      highlights: ["Mine Tours", "Gem Museum", "Mining Process", "Precious Stones"]
-    },
-    {
-      id: '2',
-      name: "Sinharaja Forest Reserve",
-      description: "UNESCO World Heritage rainforest, home to endemic birds, butterflies, and rare wildlife. One of the last remaining primary rainforests in Sri Lanka.",
-      image: "https://images.unsplash.com/photo-1511884642898-4c92249e20b6?auto=format&fit=crop&q=80",
-      category: "Natural",
-      rating: 4.9,
-      duration: "Full day",
-      price: "From $30",
-      highlights: ["Endemic Species", "Rainforest Trek", "Bird Watching", "UNESCO Site"]
-    },
-    {
-      id: '3',
-      name: "Bopath Ella Falls",
-      description: "A 30-meter waterfall shaped like a Bo tree leaf, surrounded by lush vegetation. Popular for swimming and picnics with easy access.",
-      image: "https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?auto=format&fit=crop&q=80",
-      category: "Natural",
-      rating: 4.5,
-      duration: "1-2 hours",
-      price: "Free",
-      highlights: ["Bo Leaf Shape", "Swimming", "Easy Access", "Photography"]
-    },
-    {
-      id: '4',
-      name: "Ratnapura Gem Market",
-      description: "The bustling gem trading center where dealers from around the world come to buy precious stones. Watch expert gem traders at work.",
-      image: "https://images.unsplash.com/photo-1599582909646-9d1c219db59f?auto=format&fit=crop&q=80",
-      category: "Shopping",
-      rating: 4.6,
-      duration: "2 hours",
-      price: "Free to browse",
-      highlights: ["Gem Trading", "Local Market", "Authentic Experience", "Gem Dealers"]
-    },
-    {
-      id: '5',
-      name: "Katugas Ella Falls",
-      description: "A hidden 15-meter waterfall requiring a short jungle trek. Less crowded than other falls, offering a peaceful nature experience.",
-      image: "https://images.unsplash.com/photo-1621569896088-46cc0d472c8d?auto=format&fit=crop&q=80",
-      category: "Natural",
-      rating: 4.4,
-      duration: "2-3 hours",
-      price: "From $5",
-      highlights: ["Hidden Falls", "Jungle Trek", "Natural Pool", "Less Crowded"]
-    },
-    {
-      id: '6',
-      name: "Maha Saman Devalaya",
-      description: "Sacred temple dedicated to god Saman, the deity of Adam's Peak. Important pilgrimage site with beautiful architecture and religious significance.",
-      image: "https://images.unsplash.com/photo-1609920658906-8223bd289001?auto=format&fit=crop&q=80",
-      category: "Religious",
-      rating: 4.5,
-      duration: "1 hour",
-      price: "Free",
-      highlights: ["Sacred Temple", "Pilgrimage Site", "Architecture", "Religious Art"]
-    }
-  ],
-  activities: [
-    {
-      id: '1',
-      name: "Gem Mine Experience",
-      description: "Descend into a working gem mine and try gem washing",
-      icon: Gem,
-      price: "From $30",
-      duration: "3 hours",
-      popular: true
-    },
-    {
-      id: '2',
-      name: "Sinharaja Trekking",
-      description: "Guided rainforest trek with endemic species spotting",
-      icon: Trees,
-      price: "From $40",
-      duration: "Full day",
-      popular: true
-    },
-    {
-      id: '3',
-      name: "Gem Cutting Workshop",
-      description: "Learn traditional gem cutting and polishing techniques",
-      icon: Activity,
-      price: "From $25",
-      duration: "2 hours"
-    },
-    {
-      id: '4',
-      name: "Waterfall Expedition",
-      description: "Visit multiple waterfalls with swimming opportunities",
-      icon: Mountain,
-      price: "From $35",
-      duration: "Half day"
-    },
-    {
-      id: '5',
-      name: "Bird Watching Tour",
-      description: "Early morning birding in rainforest edges",
-      icon: Camera,
-      price: "From $45",
-      duration: "4 hours"
-    },
-    {
-      id: '6',
-      name: "Night Safari",
-      description: "Nocturnal wildlife spotting in forest areas",
-      icon: Sunrise,
-      price: "From $50",
-      duration: "3 hours"
-    }
-  ],
-  itineraries: [
-    {
-      id: '1',
-      title: "Gems & Nature Day Tour",
-      duration: "1 Day",
-      description: "Experience Ratnapura's famous gems and natural beauty",
-      highlights: [
-        "Morning gem mine visit and museum",
-        "Gem market exploration",
-        "Lunch with local cuisine",
-        "Afternoon at Bopath Ella Falls",
-        "Visit gem cutting workshop"
-      ],
-      price: "From $75 per person"
-    },
-    {
-      id: '2',
-      title: "Ratnapura Discovery",
-      duration: "2 Days / 1 Night",
-      description: "Comprehensive gem city experience with nature",
-      highlights: [
-        "Day 1: Gem mines, market, and workshops",
-        "Evening temple visit",
-        "Day 2: Early morning to Sinharaja",
-        "Rainforest trekking",
-        "Waterfall visits"
-      ],
-      price: "From $180 per person"
-    },
-    {
-      id: '3',
-      title: "Gems & Rainforest Adventure",
-      duration: "3 Days / 2 Nights",
-      description: "Deep dive into gems, rainforest, and local culture",
-      highlights: [
-        "Complete gem industry experience",
-        "Full day Sinharaja exploration",
-        "Multiple waterfall visits",
-        "Night safari experience",
-        "Traditional village visit",
-        "Adam's Peak preparation tour"
-      ],
-      price: "From $380 per person"
-    }
-  ],
-  faqs: [
-    {
-      id: '1',
-      question: "Is it safe to buy gems in Ratnapura?",
-      answer: "While Ratnapura is the gem capital, tourists should be cautious when purchasing gems. Always buy from licensed dealers, ask for certificates of authenticity, and consider getting an independent appraisal. Our guided tours include visits to reputable dealers only."
-    },
-    {
-      id: '2',
-      question: "What's the best time to visit Sinharaja Rainforest?",
-      answer: "The best time is from December to April when rainfall is lower. However, as a rainforest, expect some rain year-round. Early mornings (6-10 AM) are best for wildlife spotting. Avoid visiting during heavy monsoon periods (May-July, October-November)."
-    },
-    {
-      id: '3',
-      question: "How far is Ratnapura from Colombo?",
-      answer: "Ratnapura is about 100 km from Colombo, approximately 2-2.5 hours by car via the Colombo-Ratnapura highway. Public buses are available but take longer (3-4 hours). The journey offers scenic views of rubber plantations and rural landscapes."
-    },
-    {
-      id: '4',
-      question: "Can I swim at the waterfalls?",
-      answer: "Yes, swimming is possible at Bopath Ella during the dry season when water levels are safe. Always check current conditions and follow local advice. Some waterfalls have designated swimming areas. Never swim during or after heavy rains."
-    },
-    {
-      id: '5',
-      question: "Do I need special permits for Sinharaja?",
-      answer: "Yes, entry to Sinharaja requires a permit which can be obtained at the entrance. Foreign visitors pay a higher fee than locals. A guide is mandatory for forest treks. We handle all permits and provide experienced guides in our tour packages."
-    },
-    {
-      id: '6',
-      question: "What gems are found in Ratnapura?",
-      answer: "Ratnapura is famous for blue sapphires, rubies, cat's eyes, alexandrite, topaz, garnet, amethyst, and aquamarine. The area produces some of the world's finest blue sapphires. Star sapphires and padparadscha sapphires are particularly prized."
-    }
-  ],
-  gallery: [
-    "https://images.unsplash.com/photo-1601469090980-fc95e8d95544?auto=format&fit=crop&q=80",
-    "https://images.unsplash.com/photo-1599582909646-9d1c219db59f?auto=format&fit=crop&q=80",
-    "https://images.unsplash.com/photo-1511884642898-4c92249e20b6?auto=format&fit=crop&q=80",
-    "https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?auto=format&fit=crop&q=80",
-    "https://images.unsplash.com/photo-1621569896088-46cc0d472c8d?auto=format&fit=crop&q=80",
-    "https://images.unsplash.com/photo-1609920658906-8223bd289001?auto=format&fit=crop&q=80"
-  ],
-  travelTips: [
-    {
-      id: '1',
-      title: "Gem Buying Tips",
-      icon: Gem,
-      tips: [
-        "Only buy from licensed dealers",
-        "Ask for authenticity certificates",
-        "Compare prices at multiple shops",
-        "Be wary of street sellers",
-        "Consider professional appraisal"
-      ]
-    },
-    {
-      id: '2',
-      title: "Rainforest Preparation",
-      icon: Trees,
-      tips: [
-        "Wear long pants and closed shoes",
-        "Bring insect repellent (DEET)",
-        "Carry rain protection always",
-        "Hire authorized guides only",
-        "Start treks early morning"
-      ]
-    },
-    {
-      id: '3',
-      title: "Best Time to Visit",
-      icon: Calendar,
-      tips: [
-        "December to April: Less rain",
-        "Early mornings for wildlife",
-        "Avoid monsoon peaks",
-        "Weekdays less crowded",
-        "Book Sinharaja permits ahead"
-      ]
-    }
-  ]
+  {
+    name: "Sinharaja Forest Reserve",
+    description: "UNESCO World Heritage rainforest, home to endemic birds, rare butterflies, and diverse wildlife. One of the last remaining primary rainforests in Sri Lanka.",
+    image: "https://images.unsplash.com/photo-1511884642898-4c92249e20b6?auto=format&fit=crop&q=80",
+    category: "UNESCO Site",
+    rating: 4.9,
+    duration: "Full Day",
+    price: "$35",
+    icon: "Trees"
+  },
+  {
+    name: "Bopath Ella Falls",
+    description: "A spectacular 30-meter waterfall shaped like a sacred Bo tree leaf, surrounded by lush tropical vegetation. Perfect for swimming and photography.",
+    image: "https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?auto=format&fit=crop&q=80",
+    category: "Waterfalls",
+    rating: 4.6,
+    duration: "2 hours",
+    price: "Free",
+    icon: "Waves"
+  },
+  {
+    name: "Ratnapura Gem Market",
+    description: "The bustling heart of Sri Lanka's gem trade where dealers from around the world come to buy precious stones. Watch expert gem traders negotiate and evaluate gems.",
+    image: "https://images.unsplash.com/photo-1599582909646-9d1c219db59f?auto=format&fit=crop&q=80",
+    category: "Shopping",
+    rating: 4.5,
+    duration: "2 hours",
+    price: "Free",
+    icon: "ShoppingBag"
+  },
+  {
+    name: "Maha Saman Devalaya",
+    description: "Sacred temple dedicated to god Saman, the guardian deity of Adam's Peak. An important pilgrimage site with beautiful architecture and religious significance.",
+    image: "https://images.unsplash.com/photo-1609920658906-8223bd289001?auto=format&fit=crop&q=80",
+    category: "Religious Sites",
+    rating: 4.5,
+    duration: "1 hour",
+    price: "Free",
+    icon: "Landmark"
+  },
+  {
+    name: "Katugas Ella Falls",
+    description: "A hidden 15-meter waterfall requiring a short jungle trek through pristine forest. Less crowded than other falls, offering a peaceful nature experience.",
+    image: "https://images.unsplash.com/photo-1621569896088-46cc0d472c8d?auto=format&fit=crop&q=80",
+    category: "Waterfalls",
+    rating: 4.4,
+    duration: "3 hours",
+    price: "$5",
+    icon: "Mountain"
+  }
+];
+
+const defaultActivities: Activity[] = [
+  {
+    name: "Gem Mine Experience",
+    description: "Descend into a working gem mine and try traditional gem washing techniques used for centuries",
+    icon: "Gem",
+    price: "From $30",
+    duration: "3 hours",
+    difficulty: "Easy",
+    popular: true
+  },
+  {
+    name: "Sinharaja Rainforest Trek",
+    description: "Guided trek through the UNESCO rainforest spotting endemic birds, butterflies, and rare wildlife",
+    icon: "Trees",
+    price: "From $45",
+    duration: "Full Day",
+    difficulty: "Moderate",
+    popular: true
+  },
+  {
+    name: "Gem Cutting Workshop",
+    description: "Learn traditional gem cutting and polishing techniques from master craftsmen",
+    icon: "Activity",
+    price: "From $25",
+    duration: "2 hours",
+    difficulty: "Easy"
+  },
+  {
+    name: "Waterfall Expedition",
+    description: "Visit multiple waterfalls including Bopath Ella with swimming opportunities",
+    icon: "Waves",
+    price: "From $35",
+    duration: "Half Day",
+    difficulty: "Easy"
+  },
+  {
+    name: "Bird Watching Tour",
+    description: "Early morning birding in Sinharaja spotting endemic species like Sri Lanka Blue Magpie",
+    icon: "Bird",
+    price: "From $50",
+    duration: "5 hours",
+    difficulty: "Easy"
+  },
+  {
+    name: "Village & Tea Estate Tour",
+    description: "Experience rural life, visit tea estates, and learn about traditional gem mining villages",
+    icon: "Footprints",
+    price: "From $40",
+    duration: "Half Day",
+    difficulty: "Easy"
+  }
+];
+
+const defaultRestaurants: Restaurant[] = [
+  {
+    name: "Ratnapura Rest House",
+    cuisine: "Sri Lankan Traditional",
+    priceRange: "$$",
+    rating: 4.4,
+    image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80",
+    specialty: "Rice & Curry Buffet",
+    location: "Town Center"
+  },
+  {
+    name: "Gem City Restaurant",
+    cuisine: "Sri Lankan & Chinese",
+    priceRange: "$$",
+    rating: 4.3,
+    image: "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&q=80",
+    specialty: "Devilled Chicken",
+    location: "Main Street"
+  },
+  {
+    name: "Rainforest Café",
+    cuisine: "Café & Light Bites",
+    priceRange: "$",
+    rating: 4.2,
+    image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&q=80",
+    specialty: "Fresh Fruit Juices",
+    location: "Near Sinharaja"
+  },
+  {
+    name: "Saman Hotel Restaurant",
+    cuisine: "Multi-Cuisine",
+    priceRange: "$$",
+    rating: 4.5,
+    image: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&q=80",
+    specialty: "Seafood Platter",
+    location: "Ratnapura Town"
+  }
+];
+
+const defaultHotels: HotelInfo[] = [
+  {
+    name: "Rainforest Edge",
+    category: "Eco Lodge",
+    priceRange: "$$$",
+    rating: 4.7,
+    image: "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&q=80",
+    amenities: ["Sinharaja Access", "Nature Trails", "Restaurant", "Guided Tours"],
+    location: "Sinharaja Border"
+  },
+  {
+    name: "Gem City Hotel",
+    category: "Mid-Range",
+    priceRange: "$$",
+    rating: 4.3,
+    image: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&q=80",
+    amenities: ["City Center", "Restaurant", "Free Parking", "Gem Tours"],
+    location: "Ratnapura Town"
+  },
+  {
+    name: "Sinharaja Rest",
+    category: "Budget Friendly",
+    priceRange: "$",
+    rating: 4.1,
+    image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80",
+    amenities: ["Basic Rooms", "Home Cooking", "Forest Guides", "Bird Watching"],
+    location: "Kudawa Entrance"
+  },
+  {
+    name: "Ratnapura Bungalow",
+    category: "Heritage",
+    priceRange: "$$$",
+    rating: 4.6,
+    image: "https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&q=80",
+    amenities: ["Colonial Heritage", "Garden", "Restaurant", "Gem Museum"],
+    location: "Hill Top"
+  }
+];
+
+const defaultWeatherInfo: WeatherInfo = {
+  temperature: "22-32°C",
+  humidity: "75-90%",
+  rainfall: "High (Wet Zone)",
+  bestMonths: "December to April",
+  climate: "Tropical Wet",
+  waterTemp: "24-26°C"
+};
+
+const defaultTravelTips: TravelTip[] = [
+  {
+    icon: "Gem",
+    title: "Gem Buying Tips",
+    description: "Only buy from licensed dealers, ask for authenticity certificates, and consider getting an independent appraisal before major purchases."
+  },
+  {
+    icon: "Trees",
+    title: "Rainforest Preparation",
+    description: "Wear long pants and closed shoes, bring insect repellent, carry rain protection, and always hire authorized guides for Sinharaja."
+  },
+  {
+    icon: "Sun",
+    title: "Best Time to Visit",
+    description: "December to April has less rain. Early mornings (6-9 AM) are best for wildlife spotting. Avoid heavy monsoon months."
+  },
+  {
+    icon: "Camera",
+    title: "Photography Tips",
+    description: "Bring waterproof camera bags for rainforest. Golden hour at waterfalls is stunning. Ask permission before photographing gem workers."
+  },
+  {
+    icon: "Luggage",
+    title: "What to Pack",
+    description: "Rain jacket essential year-round, comfortable walking shoes, binoculars for birding, and torch for gem mine visits."
+  },
+  {
+    icon: "CreditCard",
+    title: "Payment & Currency",
+    description: "Cash preferred for gem markets and small shops. ATMs available in town. Negotiate prices but remain respectful."
+  }
+];
+
+const defaultSEOSettings: SEOSettings = {
+  title: "Ratnapura - City of Gems & Sinharaja Rainforest | Sri Lanka",
+  description: "Explore Ratnapura's world-famous gem mines, visit UNESCO Sinharaja Rainforest, and discover stunning waterfalls. Sri Lanka's treasure capital awaits.",
+  keywords: ["Ratnapura", "Sri Lanka Gems", "Sinharaja Rainforest", "Blue Sapphire", "Bopath Ella", "Gem Mining", "UNESCO Sri Lanka"]
+};
+
+const defaultCTASection: CTASection = {
+  title: "Ready to Discover Ratnapura's Treasures?",
+  subtitle: "From precious gems to pristine rainforests, experience Sri Lanka's city of gems",
+  primaryButton: "Book Gem Tour",
+  secondaryButton: "Plan Your Trip"
+};
+
+// Icon mapping function
+const getIconComponent = (iconName: string) => {
+  const iconMap: { [key: string]: any } = {
+    'MapPin': MapPin,
+    'Calendar': Calendar,
+    'Clock': Clock,
+    'Star': Star,
+    'Wifi': Wifi,
+    'Utensils': Utensils,
+    'Camera': Camera,
+    'Hotel': Hotel,
+    'Users': Users,
+    'DollarSign': DollarSign,
+    'Info': Info,
+    'Sun': Sun,
+    'Cloud': Cloud,
+    'Thermometer': Thermometer,
+    'Droplets': Droplets,
+    'Wind': Wind,
+    'Umbrella': Umbrella,
+    'Navigation': Navigation,
+    'Mountain': Mountain,
+    'Waves': Waves,
+    'Gem': Gem,
+    'Trees': Trees,
+    'TreePine': TreePine,
+    'Bird': Bird,
+    'Binoculars': Binoculars,
+    'Sunrise': Sunrise,
+    'Fish': Fish,
+    'Globe': Globe,
+    'Luggage': Luggage,
+    'CreditCard': CreditCard,
+    'Phone': Phone,
+    'Shield': Shield,
+    'Heart': Heart,
+    'Coffee': Coffee,
+    'Award': Award,
+    'Sparkles': Sparkles,
+    'Building2': Building2,
+    'Landmark': Landmark,
+    'ShoppingBag': ShoppingBag,
+    'Activity': Activity,
+    'Footprints': Footprints
+  };
+  return iconMap[iconName] || Gem;
 };
 
 const Ratnapura = () => {
-  const [content, setContent] = useState<RatnapuraContent>(defaultContent);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedTab, setSelectedTab] = useState('attractions');
   const [showBookingModal, setShowBookingModal] = useState(false);
-  const [selectedService, setSelectedService] = useState<string>('');
-  const [galleryIndex, setGalleryIndex] = useState(0);
+  const [selectedAttraction, setSelectedAttraction] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Load content from Firebase and set up real-time listener
-  useEffect(() => {
-    const docRef = doc(db, 'destinations', 'ratnapura');
-    
-    // Set up real-time listener
-    const unsubscribe = onSnapshot(docRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data() as RatnapuraContent;
-        setContent({
-          ...defaultContent,
-          ...data
-        });
-        toast.success('Content updated', { duration: 2000 });
-      }
-    }, (error) => {
-      console.error('Error listening to document:', error);
-      toast.error('Failed to sync content updates');
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  // Cycle through hero slides
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % content.hero.slides.length);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, [content.hero.slides.length]);
-
-  // Auto-cycle gallery
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setGalleryIndex((prev) => (prev + 1) % content.gallery.length);
-    }, 4000);
-    return () => clearInterval(timer);
-  }, [content.gallery.length]);
-
-  const weatherInfo = {
-    temperature: "22-32°C",
-    season: "Tropical with rainfall",
-    rainfall: "High (May-Nov), Moderate (Dec-Apr)"
-  };
-
-  const destinationInfo: DestinationInfo = {
+  // State for all content sections
+  const [heroSlides, setHeroSlides] = useState<HeroSlide[]>(defaultHeroSlides);
+  const [attractions, setAttractions] = useState<Attraction[]>(defaultAttractions);
+  const [activities, setActivities] = useState<Activity[]>(defaultActivities);
+  const [restaurants, setRestaurants] = useState<Restaurant[]>(defaultRestaurants);
+  const [hotels, setHotels] = useState<HotelInfo[]>(defaultHotels);
+  const [destinationInfo, setDestinationInfo] = useState<DestinationInfo>({
     population: "52,000",
     area: "20.4 km²",
-    elevation: "130m above sea level",
-    bestTime: "December to April",
+    elevation: "130m",
+    bestTime: "December - April",
     language: "Sinhala, Tamil, English",
     currency: "Sri Lankan Rupee (LKR)"
-  };
+  });
+  const [weatherInfo, setWeatherInfo] = useState<WeatherInfo>(defaultWeatherInfo);
+  const [travelTips, setTravelTips] = useState<TravelTip[]>(defaultTravelTips);
+  const [seoSettings, setSeoSettings] = useState<SEOSettings>(defaultSEOSettings);
+  const [ctaSection, setCtaSection] = useState<CTASection>(defaultCTASection);
 
-  const tabs = [
-    { id: 'attractions', label: 'Attractions', count: content.attractions.length },
-    { id: 'activities', label: 'Activities', count: content.activities.length },
-    { id: 'itineraries', label: 'Tours', count: content.itineraries.length },
-    { id: 'travel-tips', label: 'Travel Tips', count: content.travelTips.length },
-    { id: 'faqs', label: 'FAQs', count: content.faqs.length }
-  ];
+  // Load content from Firebase
+  useEffect(() => {
+    const loadContent = async () => {
+      try {
+        const data = await getDestinationBySlug('ratnapura');
 
-  const handleBooking = (service: string) => {
-    setSelectedService(service);
+        if (data) {
+          if (data.heroSlides?.length) setHeroSlides(data.heroSlides);
+          if (data.attractions?.length) setAttractions(data.attractions);
+          if (data.activities?.length) setActivities(data.activities);
+          if (data.restaurants?.length) setRestaurants(data.restaurants);
+          if (data.hotels?.length) setHotels(data.hotels);
+          if (data.destinationInfo) setDestinationInfo(data.destinationInfo);
+          if (data.weatherInfo) setWeatherInfo(data.weatherInfo);
+          if (data.travelTips?.length) setTravelTips(data.travelTips);
+          if (data.seoSettings) setSeoSettings(data.seoSettings);
+          if (data.ctaSection) setCtaSection(data.ctaSection);
+        }
+      } catch (error) {
+        console.error('Error loading Ratnapura content:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadContent();
+  }, []);
+
+  // Auto-rotate hero slides
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+    }, 6000);
+    return () => clearInterval(timer);
+  }, [heroSlides.length]);
+
+  const handleBookNow = (attractionName: string = '') => {
+    setSelectedAttraction(attractionName);
     setShowBookingModal(true);
   };
 
-  // JSON-LD Structured Data for SEO
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "TouristDestination",
-    "name": "Ratnapura, Sri Lanka",
-    "description": content.overview.description,
-    "image": content.hero.slides.map(slide => slide.image),
-    "touristType": ["Cultural Tourism", "Nature Tourism", "Shopping Tourism"],
-    "geo": {
-      "@type": "GeoCoordinates",
-      "latitude": "6.7056",
-      "longitude": "80.3847"
-    },
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": "4.6",
-      "reviewCount": "1678"
-    },
-    "offers": content.activities.map(activity => ({
-      "@type": "Offer",
-      "name": activity.name,
-      "price": activity.price,
-      "priceCurrency": "USD"
-    }))
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
   };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
+  };
+
+  const tabs = [
+    { id: 'attractions', label: 'Attractions', count: attractions.length },
+    { id: 'activities', label: 'Activities', count: activities.length },
+    { id: 'dining', label: 'Dining', count: restaurants.length },
+    { id: 'stay', label: 'Stay', count: hotels.length },
+    { id: 'weather', label: 'Weather', count: null },
+    { id: 'tips', label: 'Travel Tips', count: travelTips.length }
+  ];
 
   return (
     <>
       <Helmet>
-        <title>{content.seo.title}</title>
-        <meta name="description" content={content.seo.description} />
-        <meta name="keywords" content={content.seo.keywords} />
-        
-        {/* Open Graph Tags */}
-        <meta property="og:title" content={content.seo.title} />
-        <meta property="og:description" content={content.seo.description} />
-        <meta property="og:image" content={content.hero.slides[0].image} />
-        <meta property="og:url" content="https://rechargetravels.com/destinations/ratnapura" />
-        <meta property="og:type" content="website" />
-        
-        {/* Twitter Card Tags */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={content.seo.title} />
-        <meta name="twitter:description" content={content.seo.description} />
-        <meta name="twitter:image" content={content.hero.slides[0].image} />
-        
-        {/* Canonical URL */}
+        <title>{seoSettings.title}</title>
+        <meta name="description" content={seoSettings.description} />
+        <meta name="keywords" content={seoSettings.keywords.join(', ')} />
+        <meta property="og:title" content={seoSettings.title} />
+        <meta property="og:description" content={seoSettings.description} />
         <link rel="canonical" href="https://rechargetravels.com/destinations/ratnapura" />
-        
-        {/* JSON-LD Structured Data */}
-        <script type="application/ld+json">
-          {JSON.stringify(structuredData)}
-        </script>
       </Helmet>
-      
+
       <Header />
-      
-      <main className="min-h-screen bg-background">
-        {/* Hero Section with Video/Image Slideshow */}
-        <section className="relative h-[80vh] overflow-hidden" aria-label="Hero">
+
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+        {/* Hero Section */}
+        <section className="relative h-[85vh] overflow-hidden">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentSlide}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+              initial={{ opacity: 0, scale: 1.1 }}
+              animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 1 }}
+              transition={{ duration: 1.5 }}
               className="absolute inset-0"
             >
-              <div 
-                className="h-full bg-cover bg-center"
-                style={{ backgroundImage: `url(${content.hero.slides[currentSlide].image})` }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60" />
-              </div>
+              <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/70 z-10" />
+              <img
+                src={heroSlides[currentSlide]?.image}
+                alt={heroSlides[currentSlide]?.title}
+                className="w-full h-full object-cover"
+              />
             </motion.div>
           </AnimatePresence>
 
           {/* Hero Content */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center text-white px-4 max-w-5xl">
-              <motion.h1 
-                initial={{ y: 30, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.3 }}
-                className="text-5xl md:text-7xl font-bold mb-6"
-              >
-                {content.hero.slides[currentSlide].title}
-              </motion.h1>
-              <motion.p 
-                initial={{ y: 30, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                className="text-xl md:text-2xl mb-8"
-              >
-                {content.hero.slides[currentSlide].subtitle}
-              </motion.p>
+          <div className="relative z-20 h-full flex items-center justify-center text-center text-white">
+            <div className="max-w-5xl mx-auto px-4">
               <motion.div
-                initial={{ y: 30, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.7 }}
-                className="flex gap-4 justify-center"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6"
               >
-                <Button 
-                  size="lg" 
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-6 text-lg"
-                  onClick={() => handleBooking('Ratnapura Tour Package')}
+                <Badge className="bg-blue-600/90 text-white text-sm px-4 py-2">
+                  <Gem className="w-4 h-4 mr-2 inline" />
+                  Sri Lanka's City of Gems
+                </Badge>
+              </motion.div>
+
+              <motion.h1
+                key={`title-${currentSlide}`}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+                className="text-5xl md:text-7xl font-bold mb-6 drop-shadow-lg"
+              >
+                {heroSlides[currentSlide]?.title}
+              </motion.h1>
+
+              <motion.p
+                key={`subtitle-${currentSlide}`}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="text-xl md:text-2xl mb-8 text-white/90"
+              >
+                {heroSlides[currentSlide]?.subtitle}
+              </motion.p>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                className="flex flex-wrap gap-4 justify-center"
+              >
+                <Button
+                  size="lg"
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  onClick={() => handleBookNow()}
                 >
-                  Book Now
+                  <Gem className="w-5 h-5 mr-2" />
+                  Book Gem Experience
                 </Button>
-                <Button 
-                  size="lg" 
+                <Button
+                  size="lg"
                   variant="outline"
-                  className="bg-white/10 backdrop-blur-sm text-white border-white hover:bg-white/20 px-8 py-6 text-lg"
-                  onClick={() => document.getElementById('overview')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="bg-white/10 backdrop-blur-sm border-white text-white hover:bg-white/20"
                 >
-                  Learn More
+                  <Info className="w-5 h-5 mr-2" />
+                  Explore Guide
                 </Button>
               </motion.div>
             </div>
           </div>
 
+          {/* Navigation Arrows */}
+          <button
+            onClick={prevSlide}
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-30 bg-white/20 hover:bg-white/40 backdrop-blur-sm p-3 rounded-full transition-all"
+          >
+            <ChevronLeft className="w-6 h-6 text-white" />
+          </button>
+          <button
+            onClick={nextSlide}
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-30 bg-white/20 hover:bg-white/40 backdrop-blur-sm p-3 rounded-full transition-all"
+          >
+            <ChevronRight className="w-6 h-6 text-white" />
+          </button>
+
           {/* Slide Indicators */}
-          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2">
-            {content.hero.slides.map((_, index) => (
+          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-3 z-30">
+            {heroSlides.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentSlide(index)}
-                className={`w-3 h-3 rounded-full transition-all ${
-                  currentSlide === index ? 'bg-white w-8' : 'bg-white/50'
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  currentSlide === index ? 'w-8 bg-blue-500' : 'w-2 bg-white/50 hover:bg-white/80'
                 }`}
-                aria-label={`Go to slide ${index + 1}`}
               />
             ))}
           </div>
-
-          {/* Scroll Indicator */}
-          <motion.div 
-            animate={{ y: [0, 10, 0] }}
-            transition={{ repeat: Infinity, duration: 2 }}
-            className="absolute bottom-12 left-1/2 transform -translate-x-1/2"
-          >
-            <ChevronDown className="w-8 h-8 text-white" />
-          </motion.div>
         </section>
 
         {/* Quick Info Bar */}
-        <section className="bg-blue-700 text-white py-4" aria-label="Quick Information">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-wrap justify-center items-center gap-8 text-sm">
-              <div className="flex items-center gap-2">
-                <Gem className="w-4 h-4" />
-                <span>Gem Capital</span>
+        <section className="bg-white shadow-lg py-8 -mt-16 relative z-30 mx-4 lg:mx-auto max-w-6xl rounded-2xl">
+          <div className="container mx-auto px-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+              <div className="text-center">
+                <Users className="w-8 h-8 mx-auto mb-2 text-blue-600" />
+                <h3 className="font-semibold text-gray-800">Population</h3>
+                <p className="text-gray-600 text-sm">{destinationInfo.population}</p>
               </div>
-              <div className="flex items-center gap-2">
-                <Sun className="w-4 h-4" />
-                <span>Climate: {weatherInfo.temperature}</span>
+              <div className="text-center">
+                <MapPin className="w-8 h-8 mx-auto mb-2 text-blue-600" />
+                <h3 className="font-semibold text-gray-800">Area</h3>
+                <p className="text-gray-600 text-sm">{destinationInfo.area}</p>
               </div>
-              <div className="flex items-center gap-2">
-                <Users className="w-4 h-4" />
-                <span>Population: {destinationInfo.population}</span>
+              <div className="text-center">
+                <Mountain className="w-8 h-8 mx-auto mb-2 text-blue-600" />
+                <h3 className="font-semibold text-gray-800">Elevation</h3>
+                <p className="text-gray-600 text-sm">{destinationInfo.elevation}</p>
               </div>
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
-                <span>Best Time: {destinationInfo.bestTime}</span>
+              <div className="text-center">
+                <Sun className="w-8 h-8 mx-auto mb-2 text-blue-600" />
+                <h3 className="font-semibold text-gray-800">Best Time</h3>
+                <p className="text-gray-600 text-sm">{destinationInfo.bestTime}</p>
+              </div>
+              <div className="text-center">
+                <Globe className="w-8 h-8 mx-auto mb-2 text-blue-600" />
+                <h3 className="font-semibold text-gray-800">Language</h3>
+                <p className="text-gray-600 text-sm">{destinationInfo.language}</p>
+              </div>
+              <div className="text-center">
+                <DollarSign className="w-8 h-8 mx-auto mb-2 text-blue-600" />
+                <h3 className="font-semibold text-gray-800">Currency</h3>
+                <p className="text-gray-600 text-sm">{destinationInfo.currency}</p>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Overview Section */}
-        <section id="overview" className="py-16 bg-gray-50" aria-label="Overview">
+        {/* Tab Navigation */}
+        <section className="sticky top-0 z-40 bg-white/95 backdrop-blur-md shadow-md mt-8">
           <div className="container mx-auto px-4">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
-              className="max-w-4xl mx-auto text-center"
-            >
-              <h2 className="text-4xl font-bold mb-6">{content.overview.title}</h2>
-              <p className="text-lg text-gray-700 mb-8 leading-relaxed">
-                {content.overview.description}
-              </p>
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mt-12">
-                {content.overview.highlights.map((highlight, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: index * 0.1 }}
-                    viewport={{ once: true }}
-                    className="bg-white p-4 rounded-lg shadow-md flex items-center gap-3"
-                  >
-                    <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                    <span className="text-sm">{highlight}</span>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* Tabs Navigation */}
-        <nav className="sticky top-0 z-40 bg-background border-b" aria-label="Content Navigation">
-          <div className="container mx-auto px-4">
-            <div className="flex overflow-x-auto scrollbar-hide">
+            <div className="flex space-x-1 overflow-x-auto py-2">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setSelectedTab(tab.id)}
-                  className={`px-6 py-4 font-medium transition-all whitespace-nowrap border-b-2 ${
+                  className={`px-6 py-3 rounded-full whitespace-nowrap transition-all flex items-center gap-2 ${
                     selectedTab === tab.id
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-muted-foreground hover:text-foreground'
+                      ? 'bg-blue-600 text-white shadow-lg'
+                      : 'text-gray-600 hover:bg-blue-100'
                   }`}
-                  aria-label={`View ${tab.label}`}
-                  aria-current={selectedTab === tab.id ? 'page' : undefined}
                 >
                   {tab.label}
-                  {tab.count && (
-                    <Badge variant="secondary" className="ml-2">
+                  {tab.count !== null && (
+                    <Badge variant={selectedTab === tab.id ? "secondary" : "outline"} className="ml-1">
                       {tab.count}
                     </Badge>
                   )}
@@ -725,399 +723,444 @@ const Ratnapura = () => {
               ))}
             </div>
           </div>
-        </nav>
+        </section>
 
         {/* Content Sections */}
-        <div className="container mx-auto px-4 py-12">
-          <AnimatePresence mode="wait">
-            {/* Attractions Tab */}
-            {selectedTab === 'attractions' && (
-              <motion.section
-                key="attractions"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                aria-label="Top Attractions"
-              >
-                <h3 className="text-3xl font-bold mb-8 text-center">Top Attractions in Ratnapura</h3>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {content.attractions.map((attraction) => (
-                    <Card key={attraction.id} className="group hover:shadow-xl transition-all duration-300 overflow-hidden">
-                      <div className="aspect-video overflow-hidden">
-                        <img 
-                          src={attraction.image} 
-                          alt={attraction.name}
-                          loading="lazy"
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                        />
-                      </div>
-                      <CardHeader>
-                        <div className="flex justify-between items-start">
-                          <CardTitle className="text-xl">{attraction.name}</CardTitle>
-                          <Badge variant="secondary" className="ml-2">
+        <section className="container mx-auto px-4 py-12">
+          {/* Attractions Tab */}
+          {selectedTab === 'attractions' && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h2 className="text-3xl font-bold text-gray-800">Top Attractions in Ratnapura</h2>
+                  <p className="text-gray-600 mt-2">Discover gem mines, rainforests, and stunning waterfalls</p>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {attractions.map((attraction, index) => {
+                  const IconComponent = getIconComponent(attraction.icon || 'Gem');
+                  return (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <Card className="overflow-hidden hover:shadow-2xl transition-all duration-300 group border-0 shadow-lg">
+                        <div className="relative h-56 overflow-hidden">
+                          <img
+                            src={attraction.image}
+                            alt={attraction.name}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                          <Badge className="absolute top-4 right-4 bg-blue-600 text-white">
                             {attraction.category}
                           </Badge>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-muted-foreground mb-4">{attraction.description}</p>
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {attraction.highlights.map((highlight, idx) => (
-                            <Badge key={idx} variant="outline" className="text-xs">
-                              {highlight}
-                            </Badge>
-                          ))}
-                        </div>
-                        <div className="space-y-2 mb-4">
-                          <div className="flex items-center text-sm">
-                            <Star className="w-4 h-4 text-yellow-500 mr-2" />
-                            <span>{attraction.rating} rating</span>
-                          </div>
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <Clock className="w-4 h-4 mr-2" />
-                            <span>{attraction.duration}</span>
-                          </div>
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <DollarSign className="w-4 h-4 mr-2" />
-                            <span>{attraction.price}</span>
-                          </div>
-                        </div>
-                        <Button 
-                          className="w-full bg-blue-600 hover:bg-blue-700"
-                          onClick={() => handleBooking(attraction.name)}
-                        >
-                          Book Now
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </motion.section>
-            )}
-
-            {/* Activities Tab */}
-            {selectedTab === 'activities' && (
-              <motion.section
-                key="activities"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                aria-label="Activities"
-              >
-                <h3 className="text-3xl font-bold mb-8 text-center">Things to Do in Ratnapura</h3>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {content.activities.map((activity) => (
-                    <Card key={activity.id} className="hover:shadow-lg transition-shadow">
-                      <CardHeader>
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center">
-                            <div className="p-3 bg-blue-100 rounded-lg mr-4">
-                              <activity.icon className="w-6 h-6 text-blue-600" />
+                          <div className="absolute bottom-4 left-4 flex items-center gap-2">
+                            <div className="bg-white/90 backdrop-blur-sm rounded-full p-2">
+                              <IconComponent className="w-5 h-5 text-blue-600" />
                             </div>
-                            <div>
-                              <CardTitle className="text-lg">{activity.name}</CardTitle>
-                              {activity.popular && (
-                                <Badge variant="default" className="mt-1 bg-orange-500">
-                                  Popular
-                                </Badge>
+                          </div>
+                        </div>
+                        <CardContent className="p-6">
+                          <h3 className="text-xl font-bold mb-2 text-gray-800">{attraction.name}</h3>
+                          <p className="text-gray-600 mb-4 line-clamp-2">{attraction.description}</p>
+
+                          <div className="flex items-center gap-4 mb-4 text-sm">
+                            <span className="flex items-center gap-1 text-yellow-500">
+                              <Star className="w-4 h-4 fill-current" />
+                              {attraction.rating}
+                            </span>
+                            <span className="flex items-center gap-1 text-gray-500">
+                              <Clock className="w-4 h-4" />
+                              {attraction.duration}
+                            </span>
+                            <span className="flex items-center gap-1 text-blue-600 font-semibold">
+                              {attraction.price}
+                            </span>
+                          </div>
+
+                          <Button
+                            className="w-full bg-blue-600 hover:bg-blue-700"
+                            onClick={() => handleBookNow(attraction.name)}
+                          >
+                            Book Experience
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Activities Tab */}
+          {selectedTab === 'activities' && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="mb-8">
+                <h2 className="text-3xl font-bold text-gray-800">Things to Do in Ratnapura</h2>
+                <p className="text-gray-600 mt-2">Gem mining, rainforest trekking, and unique experiences</p>
+              </div>
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {activities.map((activity, index) => {
+                  const IconComponent = getIconComponent(activity.icon);
+                  return (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <Card className={`hover:shadow-xl transition-all duration-300 ${
+                        activity.popular ? 'border-2 border-blue-500 relative' : 'border-0 shadow-lg'
+                      }`}>
+                        {activity.popular && (
+                          <div className="absolute -top-3 left-4 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                            MOST POPULAR
+                          </div>
+                        )}
+                        <CardHeader className="pb-4">
+                          <div className="flex items-center justify-between">
+                            <div className="bg-blue-100 p-4 rounded-2xl">
+                              <IconComponent className="w-8 h-8 text-blue-600" />
+                            </div>
+                            <div className="text-right">
+                              <Badge variant="outline" className="mb-1">{activity.duration}</Badge>
+                              {activity.difficulty && (
+                                <p className="text-xs text-gray-500">{activity.difficulty}</p>
                               )}
                             </div>
                           </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-muted-foreground mb-4">{activity.description}</p>
-                        <div className="flex justify-between items-center mb-4">
-                          <span className="text-lg font-semibold text-blue-600">{activity.price}</span>
-                          <span className="text-sm text-muted-foreground">{activity.duration}</span>
-                        </div>
-                        <Button 
-                          variant="outline" 
-                          className="w-full hover:bg-blue-600 hover:text-white"
-                          onClick={() => handleBooking(activity.name)}
-                        >
-                          Book Activity
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </motion.section>
-            )}
-
-            {/* Itineraries Tab */}
-            {selectedTab === 'itineraries' && (
-              <motion.section
-                key="itineraries"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                aria-label="Suggested Tours"
-              >
-                <h3 className="text-3xl font-bold mb-8 text-center">Suggested Tours & Itineraries</h3>
-                <div className="space-y-8">
-                  {content.itineraries.map((itinerary) => (
-                    <Card key={itinerary.id} className="overflow-hidden">
-                      <div className="md:flex">
-                        <div className="md:flex-1 p-6">
-                          <div className="flex items-center justify-between mb-4">
-                            <h4 className="text-2xl font-semibold">{itinerary.title}</h4>
-                            <Badge className="bg-blue-100 text-blue-700">
-                              {itinerary.duration}
-                            </Badge>
-                          </div>
-                          <p className="text-muted-foreground mb-6">{itinerary.description}</p>
-                          <div className="space-y-2 mb-6">
-                            {itinerary.highlights.map((highlight, idx) => (
-                              <div key={idx} className="flex items-start gap-2">
-                                <ChevronRight className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                                <span className="text-sm">{highlight}</span>
-                              </div>
-                            ))}
-                          </div>
+                          <CardTitle className="mt-4 text-xl">{activity.name}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-gray-600 mb-6">{activity.description}</p>
                           <div className="flex items-center justify-between">
-                            <span className="text-2xl font-bold text-blue-600">{itinerary.price}</span>
-                            <Button 
+                            <span className="text-2xl font-bold text-blue-600">{activity.price}</span>
+                            <Button
                               className="bg-blue-600 hover:bg-blue-700"
-                              onClick={() => handleBooking(itinerary.title)}
+                              onClick={() => handleBookNow(activity.name)}
                             >
-                              Book This Tour
+                              Book Now
                             </Button>
                           </div>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              </motion.section>
-            )}
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
 
-            {/* Travel Tips Tab */}
-            {selectedTab === 'travel-tips' && (
-              <motion.section
-                key="travel-tips"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                aria-label="Travel Tips"
-              >
-                <h3 className="text-3xl font-bold mb-8 text-center">Travel Tips for Ratnapura</h3>
-                <div className="grid md:grid-cols-3 gap-8">
-                  {content.travelTips.map((tipSection) => (
-                    <Card key={tipSection.id}>
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-3">
-                          <tipSection.icon className="w-6 h-6 text-blue-600" />
-                          {tipSection.title}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <ul className="space-y-2">
-                          {tipSection.tips.map((tip, idx) => (
-                            <li key={idx} className="flex items-start gap-2">
-                              <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                              <span className="text-sm">{tip}</span>
-                            </li>
-                          ))}
-                        </ul>
+          {/* Dining Tab */}
+          {selectedTab === 'dining' && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="mb-8">
+                <h2 className="text-3xl font-bold text-gray-800">Where to Eat in Ratnapura</h2>
+                <p className="text-gray-600 mt-2">Authentic Sri Lankan cuisine and local favorites</p>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                {restaurants.map((restaurant, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <Card className="overflow-hidden hover:shadow-xl transition-all flex flex-col md:flex-row border-0 shadow-lg">
+                      <div className="md:w-2/5 h-48 md:h-auto">
+                        <img
+                          src={restaurant.image}
+                          alt={restaurant.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <CardContent className="md:w-3/5 p-6 flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-start justify-between mb-2">
+                            <h3 className="text-xl font-bold text-gray-800">{restaurant.name}</h3>
+                            <Badge className="bg-blue-100 text-blue-700">{restaurant.priceRange}</Badge>
+                          </div>
+                          <p className="text-blue-600 font-medium mb-2">{restaurant.cuisine}</p>
+                          <p className="text-gray-600 text-sm mb-3">
+                            <span className="font-semibold">Specialty:</span> {restaurant.specialty}
+                          </p>
+                          <p className="text-gray-500 text-sm flex items-center gap-1">
+                            <MapPin className="w-4 h-4" />
+                            {restaurant.location}
+                          </p>
+                        </div>
+                        <div className="flex items-center justify-between mt-4">
+                          <div className="flex items-center gap-1">
+                            <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                            <span className="font-bold">{restaurant.rating}</span>
+                          </div>
+                          <Button variant="outline" className="border-blue-500 text-blue-600 hover:bg-blue-50">
+                            View Menu
+                          </Button>
+                        </div>
                       </CardContent>
                     </Card>
-                  ))}
-                </div>
-              </motion.section>
-            )}
-
-            {/* FAQs Tab */}
-            {selectedTab === 'faqs' && (
-              <motion.section
-                key="faqs"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                aria-label="Frequently Asked Questions"
-              >
-                <h3 className="text-3xl font-bold mb-8 text-center">Frequently Asked Questions</h3>
-                <div className="max-w-3xl mx-auto">
-                  <Accordion type="single" collapsible className="space-y-4">
-                    {content.faqs.map((faq) => (
-                      <AccordionItem key={faq.id} value={faq.id} className="border rounded-lg px-4">
-                        <AccordionTrigger className="text-left hover:no-underline">
-                          <h4 className="font-semibold">{faq.question}</h4>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <p className="text-muted-foreground">{faq.answer}</p>
-                        </AccordionContent>
-                      </AccordionItem>
-                    ))}
-                  </Accordion>
-                </div>
-              </motion.section>
-            )}
-          </AnimatePresence>
-        </div>
-
-        {/* Map & Directions Section */}
-        <section className="py-16 bg-gray-50" aria-label="Location and Map">
-          <div className="container mx-auto px-4">
-            <h3 className="text-3xl font-bold mb-8 text-center">Getting to Ratnapura</h3>
-            <div className="grid lg:grid-cols-2 gap-8">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Map className="w-5 h-5 text-blue-600" />
-                    Location & Directions
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="aspect-video rounded-lg overflow-hidden mb-6">
-                    <iframe
-                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d63479.34658720456!2d80.3647!3d6.7056!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ae3bf2f6e7f6e7f%3A0x6e6e6e6e6e6e6e6e!2sRatnapura%2C%20Sri%20Lanka!5e0!3m2!1sen!2sus!4v1647887431289!5m2!1sen!2sus"
-                      width="100%"
-                      height="100%"
-                      style={{ border: 0 }}
-                      allowFullScreen
-                      loading="lazy"
-                      referrerPolicy="no-referrer-when-downgrade"
-                      title="Ratnapura Map"
-                    ></iframe>
-                  </div>
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="font-semibold mb-2">From Colombo (100 km)</h4>
-                      <p className="text-sm text-muted-foreground">
-                        • By Car: 2-2.5 hours via A4 highway<br />
-                        • By Bus: 3-4 hours from Pettah<br />
-                        • Private transport recommended
-                      </p>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold mb-2">To Sinharaja (25 km)</h4>
-                      <p className="text-sm text-muted-foreground">
-                        • By Car: 45 minutes to entrance<br />
-                        • Arrange transport through hotels<br />
-                        • 4WD recommended in rainy season
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Navigation className="w-5 h-5 text-blue-600" />
-                    Transportation Tips
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="p-4 bg-blue-50 rounded-lg">
-                    <h4 className="font-semibold mb-2">Gem & Nature Tours</h4>
-                    <p className="text-sm">
-                      Book our guided tours for safe gem shopping and rainforest exploration. 
-                      Expert guides and comfortable transport included.
-                    </p>
-                    <Button 
-                      className="mt-3 bg-blue-600 hover:bg-blue-700"
-                      onClick={() => handleBooking('Ratnapura Guided Tour')}
-                    >
-                      Book Tour
-                    </Button>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-sm flex items-start gap-2">
-                      <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      Tuk-tuks available for city tours
-                    </p>
-                    <p className="text-sm flex items-start gap-2">
-                      <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      Private vehicles needed for Sinharaja
-                    </p>
-                    <p className="text-sm flex items-start gap-2">
-                      <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      Walking distance to gem markets
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
-
-        {/* Gallery Section */}
-        <section className="py-16" aria-label="Photo Gallery">
-          <div className="container mx-auto px-4">
-            <h3 className="text-3xl font-bold mb-8 text-center">Ratnapura Gallery</h3>
-            <div className="relative rounded-lg overflow-hidden aspect-video max-w-4xl mx-auto">
-              <AnimatePresence mode="wait">
-                <motion.img
-                  key={galleryIndex}
-                  src={content.gallery[galleryIndex]}
-                  alt={`Ratnapura gallery image ${galleryIndex + 1}`}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.5 }}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
-              </AnimatePresence>
-              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
-                {content.gallery.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setGalleryIndex(index)}
-                    className={`w-2 h-2 rounded-full transition-all ${
-                      galleryIndex === index ? 'bg-white w-8' : 'bg-white/50'
-                    }`}
-                    aria-label={`View gallery image ${index + 1}`}
-                  />
+                  </motion.div>
                 ))}
               </div>
-            </div>
-          </div>
+            </motion.div>
+          )}
+
+          {/* Stay Tab */}
+          {selectedTab === 'stay' && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="mb-8">
+                <h2 className="text-3xl font-bold text-gray-800">Where to Stay in Ratnapura</h2>
+                <p className="text-gray-600 mt-2">Eco lodges, guesthouses, and heritage stays</p>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-8">
+                {hotels.map((hotel, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <Card className="overflow-hidden hover:shadow-2xl transition-all border-0 shadow-lg">
+                      <div className="relative h-64">
+                        <img
+                          src={hotel.image}
+                          alt={hotel.name}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                        <div className="absolute bottom-4 left-4 right-4">
+                          <Badge className="bg-blue-600 text-white mb-2">{hotel.category}</Badge>
+                          <h3 className="text-2xl font-bold text-white">{hotel.name}</h3>
+                        </div>
+                        <div className="absolute top-4 right-4 bg-white rounded-full px-3 py-1 flex items-center gap-1">
+                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                          <span className="font-bold text-gray-800">{hotel.rating}</span>
+                        </div>
+                      </div>
+                      <CardContent className="p-6">
+                        <div className="flex items-center gap-2 text-gray-600 mb-4">
+                          <MapPin className="w-4 h-4 text-blue-500" />
+                          {hotel.location}
+                        </div>
+
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {hotel.amenities.map((amenity, i) => (
+                            <Badge key={i} variant="outline" className="bg-blue-50 border-blue-200">
+                              {amenity}
+                            </Badge>
+                          ))}
+                        </div>
+
+                        <div className="flex items-center justify-between pt-4 border-t">
+                          <div>
+                            <span className="text-gray-500 text-sm">From</span>
+                            <p className="text-2xl font-bold text-blue-600">{hotel.priceRange}</p>
+                            <span className="text-gray-500 text-sm">per night</span>
+                          </div>
+                          <Button className="bg-blue-600 hover:bg-blue-700">
+                            Check Availability
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Weather Tab */}
+          {selectedTab === 'weather' && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="mb-8">
+                <h2 className="text-3xl font-bold text-gray-800">Weather in Ratnapura</h2>
+                <p className="text-gray-600 mt-2">Tropical wet zone climate - expect rainfall year-round</p>
+              </div>
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0">
+                  <CardHeader>
+                    <Thermometer className="w-12 h-12 mb-2" />
+                    <CardTitle className="text-white">Temperature</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-4xl font-bold">{weatherInfo.temperature}</p>
+                    <p className="text-white/80 mt-2">Warm tropical climate</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-br from-cyan-500 to-teal-500 text-white border-0">
+                  <CardHeader>
+                    <Droplets className="w-12 h-12 mb-2" />
+                    <CardTitle className="text-white">Humidity</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-4xl font-bold">{weatherInfo.humidity}</p>
+                    <p className="text-white/80 mt-2">High rainforest humidity</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-br from-indigo-500 to-purple-500 text-white border-0">
+                  <CardHeader>
+                    <Umbrella className="w-12 h-12 mb-2" />
+                    <CardTitle className="text-white">Rainfall</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-4xl font-bold">{weatherInfo.rainfall}</p>
+                    <p className="text-white/80 mt-2">{weatherInfo.climate} zone</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-br from-green-500 to-emerald-500 text-white border-0">
+                  <CardHeader>
+                    <Calendar className="w-12 h-12 mb-2" />
+                    <CardTitle className="text-white">Best Months</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-4xl font-bold">{weatherInfo.bestMonths}</p>
+                    <p className="text-white/80 mt-2">Drier season</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-br from-teal-500 to-cyan-500 text-white border-0">
+                  <CardHeader>
+                    <Waves className="w-12 h-12 mb-2" />
+                    <CardTitle className="text-white">Water Temperature</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-4xl font-bold">{weatherInfo.waterTemp}</p>
+                    <p className="text-white/80 mt-2">Waterfall swimming</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-br from-amber-500 to-orange-500 text-white border-0">
+                  <CardHeader>
+                    <Sun className="w-12 h-12 mb-2" />
+                    <CardTitle className="text-white">Climate Type</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-4xl font-bold">{weatherInfo.climate}</p>
+                    <p className="text-white/80 mt-2">Rainforest weather</p>
+                  </CardContent>
+                </Card>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Travel Tips Tab */}
+          {selectedTab === 'tips' && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="mb-8">
+                <h2 className="text-3xl font-bold text-gray-800">Travel Tips for Ratnapura</h2>
+                <p className="text-gray-600 mt-2">Essential advice for your gem city and rainforest adventure</p>
+              </div>
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {travelTips.map((tip, index) => {
+                  const IconComponent = getIconComponent(tip.icon);
+                  return (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <Card className="h-full hover:shadow-lg transition-shadow border-0 shadow-md bg-white">
+                        <CardHeader>
+                          <div className="bg-blue-100 w-14 h-14 rounded-2xl flex items-center justify-center mb-4">
+                            <IconComponent className="w-7 h-7 text-blue-600" />
+                          </div>
+                          <CardTitle className="text-lg">{tip.title}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-gray-600">{tip.description}</p>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
         </section>
 
-        {/* Call to Action Section */}
-        <section className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-16" aria-label="Call to Action">
-          <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Ready to Discover Ratnapura's Treasures?
-            </h2>
-            <p className="text-xl mb-8 max-w-2xl mx-auto">
-              From precious gems to pristine rainforests, let us guide you through Sri Lanka's city of gems
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                size="lg" 
-                className="bg-white text-blue-600 hover:bg-gray-100"
-                onClick={() => handleBooking('Ratnapura Complete Package')}
-              >
-                <Phone className="w-5 h-5 mr-2" />
-                Book Your Trip
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline"
-                className="bg-transparent text-white border-white hover:bg-white/20"
-                onClick={() => window.location.href = 'mailto:info@rechargetravels.com?subject=Ratnapura Inquiry'}
-              >
-                <Mail className="w-5 h-5 mr-2" />
-                Contact Us
-              </Button>
-            </div>
+        {/* CTA Section */}
+        <section className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 py-20">
+          <div className="container mx-auto px-4 text-center text-white">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+            >
+              <Gem className="w-16 h-16 mx-auto mb-6 opacity-80" />
+              <h2 className="text-4xl md:text-5xl font-bold mb-4">{ctaSection.title}</h2>
+              <p className="text-xl mb-8 max-w-2xl mx-auto text-white/90">
+                {ctaSection.subtitle}
+              </p>
+              <div className="flex flex-wrap gap-4 justify-center">
+                <Button
+                  size="lg"
+                  className="bg-white text-blue-600 hover:bg-gray-100"
+                  onClick={() => handleBookNow()}
+                >
+                  <Gem className="w-5 h-5 mr-2" />
+                  {ctaSection.primaryButton}
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-white text-white hover:bg-white/20 bg-transparent"
+                >
+                  <Navigation className="w-5 h-5 mr-2" />
+                  {ctaSection.secondaryButton}
+                </Button>
+              </div>
+            </motion.div>
           </div>
         </section>
+      </div>
 
-      </main>
-
-      <Footer />
-
-      {/* Enhanced Booking Modal */}
+      {/* Booking Modal */}
       <EnhancedBookingModal
         isOpen={showBookingModal}
         onClose={() => setShowBookingModal(false)}
-        preSelectedService={selectedService}
+        preSelectedService={selectedAttraction}
       />
+
+      <Footer />
     </>
   );
 };

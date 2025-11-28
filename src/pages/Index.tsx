@@ -22,6 +22,7 @@ import ComprehensiveSEO from "@/components/seo/ComprehensiveSEO";
 import InteractiveTripBuilder from "@/components/trip-builder/InteractiveTripBuilder";
 // import QuoteCalculator from "@/components/quote-calculator/QuoteCalculator";
 import { useLanguage } from "@/contexts/LanguageContext";
+import HomepageSchema from "@/components/seo/HomepageSchema";
 
 const Index = () => {
   const [hoveredRegion, setHoveredRegion] = useState<{ name: string, description: string } | null>(null);
@@ -30,6 +31,10 @@ const Index = () => {
   const handleLocationsChange = (locations: { pickup: string; dropoff: string }) => {
     console.log('Locations changed:', locations);
   };
+
+  const baseUrl = typeof window !== 'undefined'
+    ? window.location.origin
+    : 'https://recharge-travels-73e76.web.app';
 
   return (
     <>
@@ -69,6 +74,8 @@ const Index = () => {
         ]}
       />
 
+      <HomepageSchema />
+
       <h1 className="sr-only">Recharge Travels - Luxury Sri Lanka Tours & Travel Agency</h1>
 
       {/* Breadcrumb Structured Data for Homepage */}
@@ -81,7 +88,7 @@ const Index = () => {
               "@type": "ListItem",
               "position": 1,
               "name": "Home",
-              "item": "https://www.rechargetravels.com/"
+              "item": baseUrl
             }
           ]
         })}

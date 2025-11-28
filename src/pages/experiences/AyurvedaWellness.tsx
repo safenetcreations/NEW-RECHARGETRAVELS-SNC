@@ -16,6 +16,17 @@ import {
   Treatment,
   Testimonial
 } from '@/services/ayurvedaPublicService';
+import { cachedFetch } from '@/lib/cache';
+
+// Optimized image URL generator
+const getOptimizedImageUrl = (url: string, width: number = 1200): string => {
+  if (!url) return '';
+  if (url.includes('unsplash.com')) {
+    const baseUrl = url.split('?')[0];
+    return `${baseUrl}?w=${width}&q=80&auto=format&fit=crop`;
+  }
+  return url;
+};
 
 // Default content fallbacks
 const defaultHero: HeroContent = {
@@ -58,8 +69,20 @@ const AyurvedaWellness = () => {
 
   const loadPageData = async () => {
     try {
-      const data = await getAyurvedaPageData();
-      if (data.hero) setHero(data.hero);
+      const data = await cachedFetch(
+        'ayurveda-wellness-page',
+        () => getAyurvedaPageData(),
+        10 * 60 * 1000 // Cache for 10 minutes
+      );
+      if (data.hero) {
+        setHero(data.hero);
+        // Preload hero image
+        const link = document.createElement('link');
+        link.rel = 'preload';
+        link.as = 'image';
+        link.href = getOptimizedImageUrl(data.hero.backgroundImage, 1920);
+        document.head.appendChild(link);
+      }
       if (data.philosophy) setPhilosophy(data.philosophy);
       if (data.cta) setCta(data.cta);
       setRetreats(data.retreats);
@@ -96,7 +119,7 @@ const AyurvedaWellness = () => {
       <section className="relative h-[90vh] overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${hero.backgroundImage})` }}
+          style={{ backgroundImage: `url(${getOptimizedImageUrl(hero.backgroundImage, 1920)})` }}
         >
           <div className="absolute inset-0 bg-gradient-to-b from-emerald-900/70 via-emerald-900/50 to-emerald-900/80" />
         </div>
@@ -215,9 +238,10 @@ const AyurvedaWellness = () => {
                   <Card className="overflow-hidden border-0 shadow-xl hover:shadow-2xl transition-all duration-500 group h-full">
                     <div className="relative h-64 overflow-hidden">
                       <img
-                        src={retreat.image || 'https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?auto=format&fit=crop&w=800&q=80'}
+                        src={getOptimizedImageUrl(retreat.image || 'https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2', 800)}
                         alt={retreat.title}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                        loading="lazy"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-emerald-900/60 to-transparent" />
                       <Badge className="absolute top-4 right-4 bg-amber-500 text-emerald-900">
@@ -294,9 +318,10 @@ const AyurvedaWellness = () => {
                 >
                   <div className="md:w-2/5 h-48 md:h-auto">
                     <img
-                      src={treatment.image || 'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=800&q=80'}
+                      src={getOptimizedImageUrl(treatment.image || 'https://images.unsplash.com/photo-1515377905703-c4788e51af15', 800)}
                       alt={treatment.title}
                       className="w-full h-full object-cover"
+                      loading="lazy"
                     />
                   </div>
                   <div className="md:w-3/5 p-6 flex flex-col justify-between">
@@ -402,7 +427,7 @@ const AyurvedaWellness = () => {
       <section className="relative py-32 px-4 overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center bg-fixed"
-          style={{ backgroundImage: `url(${cta.backgroundImage})` }}
+          style={{ backgroundImage: `url(${getOptimizedImageUrl(cta.backgroundImage, 1920)})` }}
         >
           <div className="absolute inset-0 bg-gradient-to-r from-emerald-900/90 to-amber-900/80" />
         </div>

@@ -1,12 +1,16 @@
 import { Helmet } from 'react-helmet-async';
 
 const HomepageSchema = () => {
+  const baseUrl = typeof window !== 'undefined'
+    ? window.location.origin
+    : 'https://recharge-travels-73e76.web.app';
+
   const organizationSchema = {
     "@context": "https://schema.org",
     "@type": "TravelAgency",
     "name": "Recharge Travels Sri Lanka",
-    "url": "https://recharge-travels-73e76.web.app",
-    "logo": "https://recharge-travels-73e76.web.app/logo.png",
+    "url": baseUrl,
+    "logo": `${baseUrl}/logo-v2.png`,
     "description": "Premium travel agency offering luxury tours, transfers, and experiences across Sri Lanka",
     "address": {
       "@type": "PostalAddress",
@@ -49,7 +53,7 @@ const HomepageSchema = () => {
       "@type": "ListItem",
       "position": 1,
       "name": "Home",
-      "item": "https://recharge-travels-73e76.web.app"
+      "item": baseUrl
     }]
   };
 

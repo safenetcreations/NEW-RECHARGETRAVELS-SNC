@@ -6,7 +6,7 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://recharge-travels-73e76.web.app/sitemap.xml
+Sitemap: https://www.rechargetravels.com/sitemap.xml
 
 # Crawl-delay for respectful crawling
 Crawl-delay: 1

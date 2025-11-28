@@ -36,6 +36,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import EnhancedBookingModal from '@/components/EnhancedBookingModal';
 
+// Optimized image URL generator
+const getOptimizedImageUrl = (url: string, width: number = 1200): string => {
+  if (!url) return '';
+  if (url.includes('unsplash.com')) {
+    const baseUrl = url.split('?')[0];
+    return `${baseUrl}?w=${width}&q=80&auto=format&fit=crop`;
+  }
+  return url;
+};
+
 interface SacredSite {
   name: string;
   description: string;
@@ -65,22 +75,31 @@ const PilgrimageTours = () => {
 
   const heroImages = [
     {
-      url: 'https://images.unsplash.com/photo-1590329273188-041ec23505f7?w=1920&h=1080&fit=crop',
+      url: 'https://images.unsplash.com/photo-1590329273188-041ec23505f7',
       caption: 'Temple of the Sacred Tooth Relic'
     },
     {
-      url: 'https://images.unsplash.com/photo-1609920658906-8223bd289001?w=1920&h=1080&fit=crop',
+      url: 'https://images.unsplash.com/photo-1609920658906-8223bd289001',
       caption: 'Sri Pada (Adam\'s Peak)'
     },
     {
-      url: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=1920&h=1080&fit=crop',
+      url: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5',
       caption: 'Ancient Buddhist Temple'
     },
     {
-      url: 'https://images.unsplash.com/photo-1582568653140-d688528df885?w=1920&h=1080&fit=crop',
+      url: 'https://images.unsplash.com/photo-1582568653140-d688528df885',
       caption: 'Sacred Bodhi Tree'
     }
   ];
+
+  // Preload first hero image on mount
+  useEffect(() => {
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'image';
+    link.href = getOptimizedImageUrl(heroImages[0].url, 1920);
+    document.head.appendChild(link);
+  }, []);
 
   const sacredSites: SacredSite[] = [
     {
@@ -317,9 +336,11 @@ const PilgrimageTours = () => {
             className="absolute inset-0"
           >
             <img
-              src={heroImages[heroImageIndex].url}
+              src={getOptimizedImageUrl(heroImages[heroImageIndex].url, 1920)}
               alt={heroImages[heroImageIndex].caption}
               className="w-full h-full object-cover"
+              loading={heroImageIndex === 0 ? 'eager' : 'lazy'}
+              fetchPriority={heroImageIndex === 0 ? 'high' : 'auto'}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/20" />
           </motion.div>
@@ -655,9 +676,10 @@ const PilgrimageTours = () => {
               >
                 <div className="relative overflow-hidden rounded-lg mb-4">
                   <img
-                    src={experience.image}
+                    src={getOptimizedImageUrl(experience.image, 400)}
                     alt={experience.title}
                     className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
+                    loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                   <experience.icon className="absolute bottom-4 left-4 h-8 w-8 text-white" />
@@ -694,9 +716,10 @@ const PilgrimageTours = () => {
                 className="relative overflow-hidden rounded-lg group cursor-pointer"
               >
                 <img
-                  src={image}
+                  src={getOptimizedImageUrl(image, 400)}
                   alt={`Pilgrimage site ${index + 1}`}
                   className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
+                  loading="lazy"
                 />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
               </motion.div>

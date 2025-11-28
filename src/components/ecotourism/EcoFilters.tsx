@@ -98,14 +98,16 @@ const EcoFilters = ({ onFiltersChange, className }: EcoFiltersProps) => {
           <div className="space-y-2">
             <Label htmlFor="category">Category</Label>
             <Select
-              value={filters.category}
-              onValueChange={(value) => updateFilters({ ...filters, category: value })}
+              value={filters.category || 'all_categories'}
+              onValueChange={(value) =>
+                updateFilters({ ...filters, category: value === 'all_categories' ? '' : value })
+              }
             >
               <SelectTrigger>
                 <SelectValue placeholder="All Categories" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Categories</SelectItem>
+                <SelectItem value="all_categories">All Categories</SelectItem>
                 {categories.map((category) => (
                   <SelectItem key={category.value} value={category.value}>
                     {category.label}
@@ -119,14 +121,16 @@ const EcoFilters = ({ onFiltersChange, className }: EcoFiltersProps) => {
           <div className="space-y-2">
             <Label htmlFor="duration">Duration</Label>
             <Select
-              value={filters.duration}
-              onValueChange={(value) => updateFilters({ ...filters, duration: value })}
+              value={filters.duration || 'any_duration'}
+              onValueChange={(value) =>
+                updateFilters({ ...filters, duration: value === 'any_duration' ? '' : value })
+              }
             >
               <SelectTrigger>
                 <SelectValue placeholder="Any Duration" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Any Duration</SelectItem>
+                <SelectItem value="any_duration">Any Duration</SelectItem>
                 {durations.map((duration) => (
                   <SelectItem key={duration.value} value={duration.value}>
                     {duration.label}

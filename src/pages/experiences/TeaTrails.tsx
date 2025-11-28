@@ -10,9 +10,10 @@ import 'leaflet/dist/leaflet.css';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import EnhancedBookingModal from '@/components/EnhancedBookingModal';
-import { 
-  Leaf, Clock, MapPin, ChevronRight, Play, Phone, Mail, 
-  Send, Camera, Coffee, Mountain, Users, Calendar, DollarSign
+import {
+  Leaf, Clock, MapPin, ChevronRight, Play, Phone, Mail,
+  Send, Camera, Coffee, Mountain, Users, Calendar, DollarSign,
+  Star, Award, CheckCircle, Heart, Shield, Zap
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,14 +23,26 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 
-// Types
+// Optimized image URL generator
+const getOptimizedImageUrl = (url: string, width: number = 1200): string => {
+  if (!url) return '';
+  if (url.includes('unsplash.com')) {
+    const baseUrl = url.split('?')[0];
+    return `${baseUrl}?w=${width}&q=80&auto=format&fit=crop`;
+  }
+  return url;
+};
+
+// Enhanced Types with full admin control
 interface TeaTrailsData {
+  id: string;
   slug: string;
   name: string;
   heroImageURL: string;
   seo: {
     title: string;
     description: string;
+    keywords?: string;
   };
   introParagraph: string;
   highlights: Array<{
@@ -43,15 +56,25 @@ interface TeaTrailsData {
     distanceKm: number;
     bestClass: string;
     mapGPXUrl?: string;
+    difficulty?: string;
+    elevation?: string;
   }>;
   galleryImages: Array<{
     url: string;
     alt: string;
+    caption?: string;
   }>;
   faqTag: string;
+  faqs?: Array<{
+    question: string;
+    answer: string;
+  }>;
   ctaHeadline: string;
   ctaSub: string;
   videoURL?: string;
+  isPublished: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 interface Tour {
@@ -63,11 +86,15 @@ interface Tour {
   salePriceUSD: number;
   regularPriceUSD?: number;
   highlights: string[];
-}
-
-interface FAQ {
-  question: string;
-  answer: string;
+  maxGroupSize?: number;
+  includes?: string[];
+  excludes?: string[];
+  itinerary?: Array<{
+    day: number;
+    title: string;
+    description: string;
+  }>;
+  isPublished: boolean;
 }
 
 // Custom marker icon
@@ -83,14 +110,16 @@ const customIcon = L.divIcon({
   popupAnchor: [0, -32]
 });
 
-// Default data (in case Firestore is empty)
+// Enhanced default data with full admin control capabilities
 const defaultTeaTrailsData: TeaTrailsData = {
+  id: 'tea-trails',
   slug: "tea-trails",
   name: "Sri Lanka Tea Trails",
   heroImageURL: "https://images.unsplash.com/photo-1606820854416-439b3305ff39?q=80&w=3840&h=2160&auto=format&fit=crop",
   seo: {
     title: "Sri Lanka Tea Trails | Ceylon Tea Estates & Scenic Walks – Recharge Travels",
-    description: "Walk emerald‑green plantations, visit 19th‑century tea factories and sip world‑famous Ceylon tea in misty hill country. Plan your perfect Tea‑Trails journey with Recharge Travels."
+    description: "Walk emerald‑green plantations, visit 19th‑century tea factories and sip world‑famous Ceylon tea in misty hill country. Plan your perfect Tea‑Trails journey with Recharge Travels.",
+    keywords: "Sri Lanka tea trails, Ceylon tea, tea plantations, Nuwara Eliya, tea tasting, tea factory tour"
   },
   introParagraph: "Wake to the aroma of fresh Ceylon tea, hike through velvety carpets of emerald leaves and learn 150 years of plantation lore from local pickers. Sri Lanka's Tea Trails weave between lofty peaks, tumbling waterfalls and colonial bungalows that once housed British planters. This experience pairs gentle adventure with liquid gold in your cup, revealing how a tiny leaf shaped the island's history—and still fuels its high‑country culture today.",
   highlights: [
@@ -100,47 +129,69 @@ const defaultTeaTrailsData: TeaTrailsData = {
     { icon: "🌄", title: "Lipton's Seat Hike", blurb60: "Sunrise trek to Sir Thomas Lipton's lookout for panoramas across five provinces." }
   ],
   routes: [
-    { routeName: "Kandy → Hatton Heritage Line", duration: "1 day / 105 km", distanceKm: 105, bestClass: "Observation coach" },
-    { routeName: "Nuwara Eliya Tea Loop", duration: "½ day / 30 km scenic drive", distanceKm: 30, bestClass: "Private van" },
-    { routeName: "Haputale → Lipton's Seat Trail", duration: "4 hr hike / 7 km", distanceKm: 7, bestClass: "On foot" }
+    {
+      routeName: "Kandy → Hatton Heritage Line",
+      duration: "1 day / 105 km",
+      distanceKm: 105,
+      bestClass: "Observation coach",
+      difficulty: "Easy",
+      elevation: "500-1500m"
+    },
+    {
+      routeName: "Nuwara Eliya Tea Loop",
+      duration: "½ day / 30 km scenic drive",
+      distanceKm: 30,
+      bestClass: "Private van",
+      difficulty: "Easy",
+      elevation: "1800-2000m"
+    },
+    {
+      routeName: "Haputale → Lipton's Seat Trail",
+      duration: "4 hr hike / 7 km",
+      distanceKm: 7,
+      bestClass: "On foot",
+      difficulty: "Moderate",
+      elevation: "1400-1800m"
+    }
   ],
   galleryImages: [
-    { url: "https://images.unsplash.com/photo-1596018589855-e9c3e317c4dc?w=1200&h=800&auto=format&fit=crop", alt: "Woman in vibrant sari plucking Ceylon tea leaves at sunrise" },
-    { url: "https://images.unsplash.com/photo-1605451730973-b0e21c0b5b0a?w=1200&h=800&auto=format&fit=crop", alt: "Old British tea factory with cast‑iron machinery in Sri Lanka" },
-    { url: "https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=1200&h=800&auto=format&fit=crop", alt: "Aerial view of terraced plantations and misty mountains near Haputale" },
-    { url: "https://images.unsplash.com/photo-1563911892727-df9c92c2d5d2?w=1200&h=800&auto=format&fit=crop", alt: "Ceylon tea tasting session with traditional cups" },
-    { url: "https://images.unsplash.com/photo-1606821306103-85ca0e88bdd8?w=1200&h=800&auto=format&fit=crop", alt: "Misty morning over tea estate hills" },
-    { url: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=1200&h=800&auto=format&fit=crop", alt: "Tea pickers working in the plantations" }
+    { url: "https://images.unsplash.com/photo-1596018589855-e9c3e317c4dc?w=1200&h=800&auto=format&fit=crop", alt: "Woman in vibrant sari plucking Ceylon tea leaves at sunrise", caption: "Traditional tea plucking at dawn" },
+    { url: "https://images.unsplash.com/photo-1605451730973-b0e21c0b5b0a?w=1200&h=800&auto=format&fit=crop", alt: "Old British tea factory with cast‑iron machinery in Sri Lanka", caption: "Historic tea processing machinery" },
+    { url: "https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=1200&h=800&auto=format&fit=crop", alt: "Aerial view of terraced plantations and misty mountains near Haputale", caption: "Breathtaking aerial view of tea terraces" },
+    { url: "https://images.unsplash.com/photo-1563911892727-df9c92c2d5d2?w=1200&h=800&auto=format&fit=crop", alt: "Ceylon tea tasting session with traditional cups", caption: "Authentic tea tasting experience" },
+    { url: "https://images.unsplash.com/photo-1606821306103-85ca0e88bdd8?w=1200&h=800&auto=format&fit=crop", alt: "Misty morning over tea estate hills", caption: "Misty mornings in the tea country" },
+    { url: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=1200&h=800&auto=format&fit=crop", alt: "Tea pickers working in the plantations", caption: "Dedicated tea plantation workers" }
   ],
   faqTag: "tea-trails",
+  faqs: [
+    {
+      question: "What is the best time to visit tea plantations?",
+      answer: "The best time is from December to May when the weather is dry and clear. However, tea plantations can be visited year-round. The misty atmosphere during the monsoon season (June-September) also offers a unique charm."
+    },
+    {
+      question: "Can I participate in tea plucking?",
+      answer: "Yes! Many estates offer tea plucking experiences where you can dress like a tea plucker and learn the traditional 'two leaves and a bud' technique. It's usually available in the morning when actual plucking happens."
+    },
+    {
+      question: "What should I wear when visiting tea estates?",
+      answer: "Wear comfortable walking shoes with good grip as paths can be steep and slippery. Bring layers as temperatures can be cool in the morning and evening. Long pants are recommended to protect against insects and plants."
+    },
+    {
+      question: "How long does a typical tea factory tour take?",
+      answer: "A comprehensive factory tour usually takes 1.5 to 2 hours, including the processing demonstration and tea tasting session. Some estates offer shorter 45-minute tours."
+    },
+    {
+      question: "Can I buy tea directly from the estates?",
+      answer: "Absolutely! Estate shops offer fresh tea at factory prices. You can buy various grades of tea, from premium whole leaf to everyday blends. Staff can help you choose based on your preferences."
+    }
+  ],
   ctaHeadline: "Sip the World's Finest Tea Where It's Grown",
   ctaSub: "Let Recharge Travels craft your perfect hill‑country escape—private transport, colonial bungalows and insider tastings included.",
-  videoURL: "https://www.youtube.com/embed/dQw4w9WgXcQ"
+  videoURL: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+  isPublished: true,
+  createdAt: new Date(),
+  updatedAt: new Date()
 };
-
-// Mock FAQs - in production, these would come from Firestore
-const faqs: FAQ[] = [
-  {
-    question: "What is the best time to visit tea plantations?",
-    answer: "The best time is from December to May when the weather is dry and clear. However, tea plantations can be visited year-round. The misty atmosphere during the monsoon season (June-September) also offers a unique charm."
-  },
-  {
-    question: "Can I participate in tea plucking?",
-    answer: "Yes! Many estates offer tea plucking experiences where you can dress like a tea plucker and learn the traditional 'two leaves and a bud' technique. It's usually available in the morning when actual plucking happens."
-  },
-  {
-    question: "What should I wear when visiting tea estates?",
-    answer: "Wear comfortable walking shoes with good grip as paths can be steep and slippery. Bring layers as temperatures can be cool in the morning and evening. Long pants are recommended to protect against insects and plants."
-  },
-  {
-    question: "How long does a typical tea factory tour take?",
-    answer: "A comprehensive factory tour usually takes 1.5 to 2 hours, including the processing demonstration and tea tasting session. Some estates offer shorter 45-minute tours."
-  },
-  {
-    question: "Can I buy tea directly from the estates?",
-    answer: "Absolutely! Estate shops offer fresh tea at factory prices. You can buy various grades of tea, from premium whole leaf to everyday blends. Staff can help you choose based on your preferences."
-  }
-];
 
 const TeaTrails = () => {
   const [showBookingModal, setShowBookingModal] = useState(false);
@@ -227,6 +278,14 @@ const TeaTrails = () => {
 
   const data = experienceData || defaultTeaTrailsData;
 
+  const faqs = (data.faqs && data.faqs.length > 0
+    ? data.faqs
+    : defaultTeaTrailsData.faqs) || [];
+
+  const baseUrl = typeof window !== 'undefined'
+    ? window.location.origin
+    : 'https://www.rechargetravels.com';
+
   // Handle contact form submission
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -275,19 +334,19 @@ const TeaTrails = () => {
         "@type": "ListItem",
         "position": 1,
         "name": "Home",
-        "item": "https://rechargetravels.com"
+        "item": baseUrl
       },
       {
         "@type": "ListItem",
         "position": 2,
         "name": "Experiences",
-        "item": "https://rechargetravels.com/experiences"
+        "item": `${baseUrl}/experiences`
       },
       {
         "@type": "ListItem",
         "position": 3,
         "name": "Tea Trails",
-        "item": "https://rechargetravels.com/experiences/tea-trails"
+        "item": `${baseUrl}/experiences/tea-trails`
       }
     ]
   };
@@ -331,11 +390,12 @@ const TeaTrails = () => {
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta property="og:type" content="website" />
+        <meta property="og:url" content={`${baseUrl}/experiences/tea-trails`} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={data.name} />
         <meta name="twitter:description" content={data.seo.description} />
         <meta name="twitter:image" content={data.heroImageURL} />
-        <link rel="canonical" href="https://rechargetravels.com/experiences/tea-trails" />
+        <link rel="canonical" href={`${baseUrl}/experiences/tea-trails`} />
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
         <script type="application/ld+json">{JSON.stringify(breadcrumbJsonLd)}</script>
         <script type="application/ld+json">{JSON.stringify(faqJsonLd)}</script>
@@ -460,7 +520,7 @@ const TeaTrails = () => {
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
               >
-                <Card className="overflow-hidden hover:shadow-xl transition-all duration-200 rounded-2xl">
+                <Card className="overflow-hidden hover:shadow-xl transition-all duration-200 rounded-2xl bg-white border border-gray-200">
                   <div className="grid grid-cols-1 lg:grid-cols-2">
                     <div className="h-[300px] lg:h-auto">
                       <MapContainer
@@ -478,21 +538,35 @@ const TeaTrails = () => {
                         </Marker>
                       </MapContainer>
                     </div>
-                    <CardContent className="p-8">
-                      <h3 className="text-2xl font-bold mb-4 text-gray-800">{route.routeName}</h3>
-                      <div className="space-y-3 mb-6">
+                    <CardContent className="p-8 bg-white text-gray-800">
+                      <h3 className="text-2xl md:text-3xl font-extrabold mb-4 text-green-700">
+                        {route.routeName}
+                      </h3>
+                      <div className="space-y-3 mb-6 text-base md:text-lg">
                         <div className="flex items-center gap-3">
-                          <Clock className="w-5 h-5 text-gray-500" />
-                          <span className="text-gray-700">{route.duration}</span>
+                          <Clock className="w-5 h-5 text-green-600" />
+                          <span className="text-gray-800">{route.duration}</span>
                         </div>
                         <div className="flex items-center gap-3">
-                          <MapPin className="w-5 h-5 text-gray-500" />
-                          <span className="text-gray-700">{route.distanceKm} km</span>
+                          <MapPin className="w-5 h-5 text-green-600" />
+                          <span className="text-gray-800">{route.distanceKm} km</span>
                         </div>
                         <div className="flex items-center gap-3">
-                          <Users className="w-5 h-5 text-gray-500" />
-                          <span className="text-gray-700">Best class: {route.bestClass}</span>
+                          <Users className="w-5 h-5 text-green-600" />
+                          <span className="text-gray-800">Best class: {route.bestClass}</span>
                         </div>
+                        {route.difficulty && (
+                          <div className="flex items-center gap-3">
+                            <Zap className="w-5 h-5 text-green-600" />
+                            <span className="text-gray-800">Difficulty: {route.difficulty}</span>
+                          </div>
+                        )}
+                        {route.elevation && (
+                          <div className="flex items-center gap-3">
+                            <Mountain className="w-5 h-5 text-green-600" />
+                            <span className="text-gray-800">Elevation: {route.elevation}</span>
+                          </div>
+                        )}
                       </div>
                       <Button className="bg-green-600 hover:bg-green-700" onClick={() => setShowBookingModal(true)}>
                         Book This Route
@@ -533,7 +607,7 @@ const TeaTrails = () => {
                   />
                 </picture>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <p className="absolute bottom-4 left-4 right-4 text-white text-sm">{image.alt}</p>
+                  <p className="absolute bottom-4 left-4 right-4 text-white text-sm">{image.caption || image.alt}</p>
                 </div>
               </motion.div>
             ))}

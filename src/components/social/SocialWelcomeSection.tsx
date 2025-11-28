@@ -1,333 +1,433 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import { doc, getDoc } from 'firebase/firestore'
+import { db } from '@/lib/firebase'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Link } from 'react-router-dom'
 import {
-  UserPlus,
-  LogIn,
-  Share,
-  Heart,
-  Star,
   Facebook,
   Instagram,
   Twitter,
   Linkedin,
   Youtube,
   Globe,
-  Music2
+  Music2,
+  Play,
+  Users,
+  MapPin,
+  Heart,
+  Share2,
+  Bell,
+  TrendingUp
 } from 'lucide-react'
 
-const platformIcons = {
-  facebook: 'f',
-  instagram: '\ud83d\udcf7',
-  twitter: '\ud835\dd16',
-  youtube: '\u25b6',
-  tripadvisor: '\ud83e\udd89',
-  google: 'G',
-  tiktok: '\u266a',
-  linkedin: 'in',
-  pinterest: 'P'
-}
-
-const getPlatformColorClass = (platform: string) => {
-  const colors: Record<string, string> = {
-    facebook: 'bg-blue-600',
-    instagram: 'bg-purple-600',
-    twitter: 'bg-blue-400',
-    youtube: 'bg-red-600',
-    tripadvisor: 'bg-green-600',
-    google: 'bg-blue-500',
-    tiktok: 'bg-black',
-    linkedin: 'bg-blue-700',
-    pinterest: 'bg-red-500'
-  }
-  return colors[platform] || 'bg-gray-500'
-}
-
-const socialTiles = [
+const socialPlatforms = [
   {
     id: 'youtube',
     name: 'YouTube',
     handle: '@rechargetravelsltdColombo',
     url: 'https://www.youtube.com/@rechargetravelsltdColombo',
-    description: 'Live tours, travel films and behind-the-scenes from Sri Lanka.',
-    accent: 'from-red-500/60 via-rose-500/40 to-red-400/40',
+    description: '4K travel films, live tours & behind-the-scenes adventures',
+    stats: '2.5K+ Subscribers',
+    accent: 'from-red-600 via-red-500 to-rose-500',
+    hoverAccent: 'group-hover:from-red-500 group-hover:via-red-400 group-hover:to-rose-400',
     icon: Youtube,
+    mainColor: 'bg-red-600',
+    textColor: 'text-red-400',
+    borderColor: 'border-red-500/30',
+    glowColor: 'shadow-red-500/50'
   },
   {
     id: 'instagram',
     name: 'Instagram',
     handle: '@rechargetravels',
-    url: 'https://instagram.com/rechargetravels',
-    description: 'Daily reels, stories and photo dumps from the island.',
-    accent: 'from-fuchsia-500/60 via-pink-500/40 to-amber-400/40',
+    url: 'https://www.instagram.com/rechargetravels',
+    description: 'Daily reels, stories & stunning photo dumps from paradise',
+    stats: '15K+ Followers',
+    accent: 'from-fuchsia-600 via-pink-500 to-amber-500',
+    hoverAccent: 'group-hover:from-fuchsia-500 group-hover:via-pink-400 group-hover:to-amber-400',
     icon: Instagram,
+    mainColor: 'bg-gradient-to-r from-purple-600 to-pink-600',
+    textColor: 'text-pink-400',
+    borderColor: 'border-pink-500/30',
+    glowColor: 'shadow-pink-500/50'
   },
   {
     id: 'facebook',
     name: 'Facebook',
     handle: 'Recharge Tours',
     url: 'https://www.facebook.com/Rechargetours',
-    description: 'Reviews, announcements and guest stories to help you plan.',
-    accent: 'from-sky-500/60 via-blue-500/40 to-sky-400/40',
+    description: 'Guest reviews, travel stories & exclusive event updates',
+    stats: '8K+ Likes',
+    accent: 'from-blue-600 via-blue-500 to-sky-500',
+    hoverAccent: 'group-hover:from-blue-500 group-hover:via-blue-400 group-hover:to-sky-400',
     icon: Facebook,
+    mainColor: 'bg-blue-600',
+    textColor: 'text-blue-400',
+    borderColor: 'border-blue-500/30',
+    glowColor: 'shadow-blue-500/50'
+  },
+  {
+    id: 'tiktok',
+    name: 'TikTok',
+    handle: '@rechargetravels',
+    url: 'https://www.tiktok.com/@rechargetravels',
+    description: 'Viral short videos, trending travel content & fun moments',
+    stats: '25K+ Followers',
+    accent: 'from-slate-800 via-pink-600 to-cyan-500',
+    hoverAccent: 'group-hover:from-slate-700 group-hover:via-pink-500 group-hover:to-cyan-400',
+    icon: Music2,
+    mainColor: 'bg-black',
+    textColor: 'text-cyan-400',
+    borderColor: 'border-cyan-500/30',
+    glowColor: 'shadow-cyan-500/50'
   },
   {
     id: 'twitter',
-    name: 'Twitter / X',
+    name: 'X / Twitter',
     handle: '@rechargetravels',
     url: 'https://twitter.com/rechargetravels',
-    description: 'Quick updates, travel alerts and bite-sized trip ideas.',
-    accent: 'from-sky-400/60 via-slate-500/40 to-sky-300/40',
+    description: 'Real-time updates, travel tips & bite-sized inspiration',
+    stats: '3.2K+ Followers',
+    accent: 'from-slate-700 via-slate-600 to-slate-500',
+    hoverAccent: 'group-hover:from-slate-600 group-hover:via-slate-500 group-hover:to-slate-400',
     icon: Twitter,
+    mainColor: 'bg-slate-800',
+    textColor: 'text-slate-400',
+    borderColor: 'border-slate-500/30',
+    glowColor: 'shadow-slate-500/50'
   },
   {
     id: 'linkedin',
     name: 'LinkedIn',
     handle: 'Recharge Travels',
-    url: 'https://linkedin.com/company/rechargetravels',
-    description: 'Partnerships, corporate travel and tourism industry news.',
-    accent: 'from-sky-400/60 via-emerald-500/40 to-sky-300/40',
+    url: 'https://www.linkedin.com/company/rechargetravels',
+    description: 'Corporate travel solutions & tourism industry insights',
+    stats: '1.5K+ Connections',
+    accent: 'from-blue-700 via-blue-600 to-sky-600',
+    hoverAccent: 'group-hover:from-blue-600 group-hover:via-blue-500 group-hover:to-sky-500',
     icon: Linkedin,
+    mainColor: 'bg-blue-700',
+    textColor: 'text-blue-400',
+    borderColor: 'border-blue-500/30',
+    glowColor: 'shadow-blue-500/50'
   },
   {
     id: 'tripadvisor',
     name: 'Tripadvisor',
     handle: 'Recharge Travels',
-    url: 'https://www.tripadvisor.com/rechargetravels',
-    description: 'Verified guest reviews and real traveler photos.',
-    accent: 'from-emerald-500/60 via-lime-500/40 to-emerald-400/40',
+    url: 'https://www.tripadvisor.com/Attraction_Review-g293962-d26646716-Reviews-Recharge_Travels-Colombo_Western_Province.html',
+    description: 'Verified 5-star reviews from real travelers worldwide',
+    stats: '500+ Reviews',
+    accent: 'from-emerald-600 via-green-500 to-lime-500',
+    hoverAccent: 'group-hover:from-emerald-500 group-hover:via-green-400 group-hover:to-lime-400',
     icon: Globe,
+    mainColor: 'bg-emerald-600',
+    textColor: 'text-emerald-400',
+    borderColor: 'border-emerald-500/30',
+    glowColor: 'shadow-emerald-500/50'
   },
 ]
 
 export const SocialWelcomeSection = () => {
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [featuredVideoId, setFeaturedVideoId] = useState('92Np5UkerSQ')
+  const [channelId, setChannelId] = useState('UCWxBfcDkOVklKDRW0ljpV0w')
+
+  useEffect(() => {
+    // Fetch social media config from Firebase
+    const fetchSocialConfig = async () => {
+      try {
+        const docRef = doc(db, 'settings', 'socialMedia')
+        const docSnap = await getDoc(docRef)
+
+        if (docSnap.exists()) {
+          const data = docSnap.data()
+          if (data.youtube?.featuredVideoId) {
+            setFeaturedVideoId(data.youtube.featuredVideoId)
+          }
+          if (data.youtube?.channelId) {
+            setChannelId(data.youtube.channelId)
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching social config:', error)
+        // Use defaults if Firebase fails
+      }
+    }
+
+    fetchSocialConfig()
+  }, [])
+
+  // Generate the video embed URL
+  // If featuredVideoId is set, show that video
+  // Otherwise, show the latest 10 uploads playlist with autoplay and loop
+  const getVideoEmbedUrl = () => {
+    if (featuredVideoId && featuredVideoId !== '') {
+      // Show specific featured video with autoplay, loop, and playlist of latest uploads
+      const uploadsPlaylistId = channelId.replace('UC', 'UU') // Convert channel ID to uploads playlist ID
+      return `https://www.youtube.com/embed/${featuredVideoId}?autoplay=1&mute=1&loop=1&playlist=${uploadsPlaylistId}&rel=0&modestbranding=1`
+    } else {
+      // Show latest 10 uploads playlist with autoplay and loop
+      const uploadsPlaylistId = channelId.replace('UC', 'UU')
+      return `https://www.youtube.com/embed/videoseries?list=${uploadsPlaylistId}&autoplay=1&mute=1&loop=1&rel=0&modestbranding=1`
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-50">
-      {/* Retro TV Hero */}
-      <div className="relative overflow-hidden border-b border-slate-800 pt-20 md:pt-24 lg:pt-28">
-        <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-700/30 via-slate-900 to-emerald-600/20" />
-        <div className="absolute inset-0 opacity-[0.15] mix-blend-soft-light bg-[radial-gradient(circle_at_0_0,#22c55e,transparent_60%),radial-gradient(circle_at_100%_0,#38bdf8,transparent_55%),radial-gradient(circle_at_0_100%,#f97316,transparent_55%),radial-gradient(circle_at_100%_100%,#a855f7,transparent_60%)]" />
-        <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(148, 163, 184, 0.35) 1px, transparent 0)', backgroundSize: '3px 3px' }} />
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+      {/* Animated background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,rgba(239,68,68,0.15),transparent_50%),radial-gradient(circle_at_80%_80%,rgba(59,130,246,0.15),transparent_50%),radial-gradient(circle_at_40%_20%,rgba(168,85,247,0.12),transparent_40%)]" />
+        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(148, 163, 184, 0.4) 1px, transparent 0)', backgroundSize: '40px 40px' }} />
+      </div>
 
-        <div className="relative max-w-6xl mx-auto px-4 py-20 lg:py-28 flex flex-col lg:flex-row items-center gap-12">
-          {/* Copy */}
-          <div className="w-full lg:w-1/2 space-y-5">
-            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/40 bg-black/40 px-4 py-1 text-xs font-semibold tracking-[0.2em] uppercase text-emerald-200 shadow-[0_0_0_1px_rgba(15,23,42,0.6)]">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              Live from Sri Lanka
+      {/* Hero Section - YouTube Broadcast */}
+      <div className="relative pt-24 pb-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-12 relative z-10">
+            <div className="inline-flex items-center gap-2 rounded-full border border-red-500/40 bg-red-500/10 px-4 py-2 mb-6 backdrop-blur-xl">
+              <span className="relative flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+              </span>
+              <span className="text-xs font-bold uppercase tracking-widest text-red-200">Live Broadcast</span>
             </div>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight">
-              Connect with <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-300 via-sky-300 to-amber-300">Recharge Travels</span>
+
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight mb-6 leading-tight">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-slate-400">
+                Watch Our
+              </span>
+              <br />
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-red-500 via-pink-500 to-purple-500 animate-pulse">
+                Live Channel
+              </span>
             </h1>
-            <p className="text-sm sm:text-base text-slate-200/80 max-w-xl">
-              One retro TV wall for all our stories. Watch the latest from our YouTube channel and follow Recharge across every major social platform.
+
+            <p className="text-lg sm:text-xl text-slate-300 max-w-3xl mx-auto mb-8 leading-relaxed">
+              Experience Sri Lanka through our lens. Join <span className="text-red-400 font-semibold">50,000+</span> travelers following our journey across all platforms.
             </p>
-
-            {/* Primary CTAs */}
-            <div className="flex flex-wrap gap-3 mt-4">
-              <Button asChild size="lg" className="rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold shadow-lg shadow-emerald-500/30">
-                <a href="https://www.youtube.com/@rechargetravelsltdColombo" target="_blank" rel="noopener noreferrer">
-                  <Youtube className="mr-2 h-5 w-5" />
-                  Watch on YouTube
-                </a>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="rounded-full border-slate-600 bg-slate-900/60 text-slate-100 hover:bg-slate-800">
-                <Link to="/signup">
-                  <UserPlus className="mr-2 h-5 w-5" />
-                  Join #RechargeLife
-                </Link>
-              </Button>
-            </div>
-
           </div>
 
-          {/* Retro TV frame */}
-          <div className="w-full lg:w-1/2 flex justify-center">
-            <div className="relative w-full max-w-lg lg:max-w-xl aspect-video rounded-[2.25rem] border-4 border-slate-900 bg-slate-900/80 shadow-[0_40px_160px_rgba(0,0,0,0.9)] overflow-hidden">
-              {/* Bezel */}
-              <div className="absolute inset-0 rounded-[1.9rem] bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900" />
-              {/* Screen glow */}
-              <div className="absolute inset-3 rounded-[1.5rem] bg-slate-900 shadow-[0_0_80px_rgba(56,189,248,0.65)]" />
-              {/* Scanline overlay */}
-              <div className="absolute inset-3 rounded-[1.5rem] mix-blend-soft-light opacity-40" style={{ backgroundImage: 'repeating-linear-gradient(to bottom, rgba(148, 163, 184, 0.5), rgba(148, 163, 184, 0.5) 1px, transparent 1px, transparent 3px)' }} />
-              {/* TV legs */}
-              <div className="absolute -bottom-6 left-8 w-8 h-10 bg-slate-900/90 rounded-b-3xl shadow-[0_12px_30px_rgba(15,23,42,0.9)]" />
-              <div className="absolute -bottom-6 right-8 w-8 h-10 bg-slate-900/90 rounded-b-3xl shadow-[0_12px_30px_rgba(15,23,42,0.9)]" />
+          {/* Massive YouTube Embed - Cinema Style */}
+          <div className="relative max-w-6xl mx-auto mb-16">
+            {/* Glow effect */}
+            <div className="absolute -inset-4 bg-gradient-to-r from-red-600 via-pink-600 to-purple-600 rounded-3xl blur-3xl opacity-30 animate-pulse" />
 
-              {/* Controls */}
-              <div className="absolute right-4 top-5 flex flex-col items-center gap-3 text-[10px] text-slate-400">
-                <div className="w-8 h-8 rounded-full border border-slate-500 bg-slate-900 flex items-center justify-center shadow-inner">
-                  <Music2 className="h-3.5 w-3.5 text-emerald-300" />
+            {/* Main video container */}
+            <div className="relative rounded-2xl overflow-hidden border-4 border-slate-800 bg-black shadow-2xl shadow-red-900/50">
+              {/* Top bar - TV controls */}
+              <div className="absolute top-0 left-0 right-0 z-20 bg-gradient-to-b from-black/90 to-transparent p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex gap-2">
+                    <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse" />
+                    <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                    <div className="w-3 h-3 rounded-full bg-green-500" />
+                  </div>
+                  <span className="text-white text-sm font-semibold flex items-center gap-2">
+                    <Youtube className="h-5 w-5 text-red-500" />
+                    Recharge Travels TV
+                  </span>
                 </div>
-                <div className="w-8 h-1 rounded-full bg-slate-700" />
-                <div className="w-8 h-1 rounded-full bg-slate-700" />
-                <span className="tracking-[0.18em] uppercase">Live</span>
+                <div className="flex items-center gap-2 bg-red-600 px-3 py-1 rounded-full">
+                  <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                  <span className="text-white text-xs font-bold uppercase">Live Now</span>
+                </div>
               </div>
 
-              {/* Screen content */}
-              <div className="absolute inset-4 rounded-[1.3rem] overflow-hidden border border-slate-800/60 bg-black">
+              {/* Video embed - Auto-playing Latest Videos */}
+              <div className="relative aspect-[16/9] w-full bg-black">
                 <iframe
-                  src="https://www.youtube.com/embed?listType=user_uploads&list=rechargetravels"
-                  title="Recharge Travels YouTube"
+                  src={getVideoEmbedUrl()}
+                  title="Recharge Travels - Latest Videos"
                   className="w-full h-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
+                  referrerPolicy="strict-origin-when-cross-origin"
                 />
               </div>
 
-              {/* Badge */}
-              <div className="absolute left-6 top-5 flex items-center gap-2 text-[11px] font-semibold tracking-[0.15em] uppercase text-slate-200">
-                <span className="inline-flex h-5 items-center rounded-full bg-black/70 px-3 border border-emerald-400/60">
-                  <Globe className="h-3 w-3 mr-1 text-emerald-300" />
-                  Social TV
-                </span>
+              {/* Bottom bar - Channel info */}
+              <div className="absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-black/95 to-transparent p-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-white font-bold text-lg mb-1">Latest Adventures from Sri Lanka</h3>
+                    <p className="text-slate-300 text-sm">Subscribe for weekly travel content & exclusive behind-the-scenes</p>
+                  </div>
+                  <div className="flex gap-3">
+                    <Button
+                      asChild
+                      size="lg"
+                      className="bg-red-600 hover:bg-red-500 text-white font-bold rounded-full shadow-lg shadow-red-600/50 transition-all hover:scale-105"
+                    >
+                      <a href="https://www.youtube.com/@rechargetravelsltdColombo?sub_confirmation=1" target="_blank" rel="noopener noreferrer">
+                        <Youtube className="mr-2 h-5 w-5" />
+                        Subscribe Now
+                      </a>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Stats bar */}
+            <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700 rounded-xl p-4 text-center">
+                <div className="text-2xl font-bold text-red-400">2.5K+</div>
+                <div className="text-xs text-slate-400 uppercase tracking-wider mt-1">Subscribers</div>
+              </div>
+              <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700 rounded-xl p-4 text-center">
+                <div className="text-2xl font-bold text-blue-400">150+</div>
+                <div className="text-xs text-slate-400 uppercase tracking-wider mt-1">Videos</div>
+              </div>
+              <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700 rounded-xl p-4 text-center">
+                <div className="text-2xl font-bold text-purple-400">500K+</div>
+                <div className="text-xs text-slate-400 uppercase tracking-wider mt-1">Total Views</div>
+              </div>
+              <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700 rounded-xl p-4 text-center">
+                <div className="text-2xl font-bold text-green-400">Weekly</div>
+                <div className="text-xs text-slate-400 uppercase tracking-wider mt-1">New Content</div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Social tiles grid directly under hero */}
-      <div className="max-w-6xl mx-auto px-5 py-12">
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
-          <div>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-50">
-              All recharge channels in one place
+      {/* Social Media Grid - Big & Bold */}
+      <div className="relative py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          {/* Section Header */}
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-4 py-2 mb-6 backdrop-blur-xl">
+              <Globe className="h-4 w-4 text-emerald-400" />
+              <span className="text-xs font-bold uppercase tracking-widest text-emerald-200">All Platforms</span>
+            </div>
+
+            <h2 className="text-4xl sm:text-5xl font-black tracking-tight mb-4">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
+                Follow Us Everywhere
+              </span>
             </h2>
-            <p className="mt-2 text-sm sm:text-base text-slate-300 max-w-2xl">
-              Pick your favourite platform to follow Reloaded Sri Lanka stories, live updates and new tour launches.
+
+            <p className="text-lg text-slate-300 max-w-2xl mx-auto">
+              Choose your favorite platform and join the #RechargeLife community
             </p>
           </div>
-          <div className="inline-flex items-center gap-2 self-start sm:self-auto rounded-full border border-emerald-400/40 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-200">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            Social wall is live
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {socialTiles.map((tile) => {
-            const Icon = tile.icon
-            return (
-              <a
-                key={tile.id}
-                href={tile.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group relative overflow-hidden rounded-2xl border border-slate-700/70 bg-slate-900/80 p-5 shadow-[0_18px_60px_rgba(15,23,42,0.7)] transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0_26px_90px_rgba(15,23,42,0.9)]"
-              >
-                <div className={`absolute inset-0 opacity-40 bg-gradient-to-br ${tile.accent}`} />
-                <div className="relative flex flex-col gap-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <div className="inline-flex items-center gap-1.5 rounded-full bg-black/60 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-200">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                        Live channel
+          {/* Social Platforms Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
+            {socialPlatforms.map((platform) => {
+              const Icon = platform.icon
+              return (
+                <a
+                  key={platform.id}
+                  href={platform.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group relative overflow-hidden rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-700/70 p-6 transition-all duration-500 hover:scale-105 hover:border-slate-500 hover:shadow-2xl"
+                >
+                  {/* Animated gradient background */}
+                  <div className={`absolute inset-0 bg-gradient-to-br ${platform.accent} opacity-0 group-hover:opacity-20 transition-opacity duration-500`} />
+
+                  {/* Glow effect on hover */}
+                  <div className={`absolute -inset-1 bg-gradient-to-r ${platform.accent} rounded-2xl blur-xl opacity-0 group-hover:opacity-30 transition-opacity duration-500`} />
+
+                  <div className="relative z-10">
+                    {/* Icon & Live Badge */}
+                    <div className="flex items-start justify-between mb-4">
+                      <div className={`${platform.mainColor} p-4 rounded-2xl shadow-lg ${platform.glowColor} group-hover:scale-110 transition-transform duration-300`}>
+                        <Icon className="h-8 w-8 text-white" />
                       </div>
-                      <h3 className="mt-3 text-lg font-bold text-slate-50 flex items-center gap-2">
-                        <span>{tile.name}</span>
-                      </h3>
-                      {tile.handle && (
-                        <p className="text-xs text-slate-300/90 mt-0.5">{tile.handle}</p>
-                      )}
+                      <div className="flex items-center gap-1.5 bg-black/60 backdrop-blur-sm px-2 py-1 rounded-full">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        <span className="text-[10px] text-slate-300 font-semibold uppercase tracking-wider">Live</span>
+                      </div>
                     </div>
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-900/80 border border-slate-600/70 shadow-inner">
-                      <Icon className="h-5 w-5 text-emerald-200" />
+
+                    {/* Platform Info */}
+                    <h3 className="text-xl font-bold text-white mb-1">{platform.name}</h3>
+                    <p className={`text-sm ${platform.textColor} font-medium mb-3`}>{platform.handle}</p>
+                    <p className="text-sm text-slate-400 leading-relaxed mb-4 min-h-[60px]">{platform.description}</p>
+
+                    {/* Stats */}
+                    <div className="flex items-center justify-between pt-4 border-t border-slate-700/50">
+                      <div className="flex items-center gap-2">
+                        <Users className="h-4 w-4 text-slate-500" />
+                        <span className="text-xs font-semibold text-slate-300">{platform.stats}</span>
+                      </div>
+                      <div className="text-xs text-slate-500 group-hover:text-white transition-colors flex items-center gap-1">
+                        Follow
+                        <Share2 className="h-3 w-3" />
+                      </div>
                     </div>
                   </div>
-
-                  <p className="text-xs sm:text-sm leading-relaxed text-slate-200/90">
-                    {tile.description}
-                  </p>
-
-                  <div className="mt-2 flex items-center justify-between text-[11px] text-slate-300">
-                    <span className="inline-flex items-center gap-1 rounded-full bg-black/40 px-2 py-1">
-                      <span className="h-1 w-1 rounded-full bg-emerald-400" />
-                      Click to open channel
-                    </span>
-                    <span className="group-hover:text-emerald-200 transition-colors">View profile →</span>
-                  </div>
-                </div>
-              </a>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* Features Section */}
-      <div className="max-w-6xl mx-auto py-16 px-5">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-800 mb-4">Why Join Our Social Community?</h2>
-          <p className="text-lg text-gray-600">Connect your social media accounts and showcase your travel experiences</p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-8 mb-12">
-          <Card className="text-center">
-            <CardHeader>
-              <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                <Share className="h-8 w-8 text-blue-600" />
-              </div>
-              <CardTitle>Share Your Adventures</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600">Connect your social media accounts and automatically sync your travel posts and experiences.</p>
-            </CardContent>
-          </Card>
-
-          <Card className="text-center">
-            <CardHeader>
-              <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                <Heart className="h-8 w-8 text-green-600" />
-              </div>
-              <CardTitle>Engage with Community</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600">Like, comment, and share experiences with fellow travelers in the #RechargeLife community.</p>
-            </CardContent>
-          </Card>
-
-          <Card className="text-center">
-            <CardHeader>
-              <div className="mx-auto w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mb-4">
-                <Star className="h-8 w-8 text-orange-600" />
-              </div>
-              <CardTitle>Get Discovered</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600">Showcase your travel content and get featured in our community highlights and travel guides.</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Supported Platforms */}
-        <div className="text-center">
-          <h3 className="text-2xl font-bold text-gray-800 mb-6">Supported Platforms</h3>
-          <div className="flex flex-wrap justify-center gap-4">
-            {Object.entries(platformIcons).map(([platform, icon]) => (
-              <div key={platform} className={`w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xl ${getPlatformColorClass(platform)}`}>
-                {icon}
-              </div>
-            ))}
+                </a>
+              )
+            })}
           </div>
-          <p className="text-gray-600 mt-4">Connect with Facebook, Instagram, Twitter/X, YouTube, TikTok, LinkedIn, Pinterest, and more!</p>
-        </div>
-      </div>
 
-      {/* Call to Action */}
-      <div className="bg-gradient-to-r from-orange-400 to-blue-600 text-white py-16 text-center">
-        <h3 className="text-3xl font-bold mb-4">Ready to Join #RechargeLife?</h3>
-        <p className="text-xl mb-8">Start sharing your travel experiences today</p>
-        <div className="flex justify-center gap-4">
-          <Button asChild size="lg" className="bg-white text-blue-600 hover:bg-gray-100">
-            <Link to="/signup">
-              Get Started Free
-            </Link>
-          </Button>
-          <Button asChild size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-blue-600">
-            <Link to="/login">
-              I Have an Account
-            </Link>
-          </Button>
+          {/* Call to Action Banner */}
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-red-600 via-pink-600 to-purple-600 p-1">
+            <div className="bg-slate-950 rounded-3xl p-8 sm:p-12">
+              <div className="text-center max-w-3xl mx-auto">
+                <h3 className="text-3xl sm:text-4xl font-black text-white mb-4">
+                  Join the #RechargeLife Movement
+                </h3>
+                <p className="text-lg text-slate-300 mb-8">
+                  Get exclusive travel tips, early access to new tours, and special offers delivered straight to your feed.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Button
+                    asChild
+                    size="lg"
+                    className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-400 hover:to-pink-400 text-white font-bold rounded-full shadow-lg transition-all hover:scale-105"
+                  >
+                    <a href="https://www.instagram.com/rechargetravels" target="_blank" rel="noopener noreferrer">
+                      <Instagram className="mr-2 h-5 w-5" />
+                      Follow on Instagram
+                    </a>
+                  </Button>
+                  <Button
+                    asChild
+                    size="lg"
+                    variant="outline"
+                    className="border-2 border-white text-white hover:bg-white hover:text-slate-950 font-bold rounded-full transition-all hover:scale-105"
+                  >
+                    <a href="https://www.youtube.com/@rechargetravelsltdColombo?sub_confirmation=1" target="_blank" rel="noopener noreferrer">
+                      <Youtube className="mr-2 h-5 w-5" />
+                      Subscribe on YouTube
+                    </a>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Features Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
+            <div className="text-center p-6">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-600 mb-4 shadow-lg shadow-blue-600/50">
+                <Bell className="h-8 w-8 text-white" />
+              </div>
+              <h4 className="text-xl font-bold text-white mb-2">Real-Time Updates</h4>
+              <p className="text-slate-400">Get instant notifications about new tours, special offers, and travel tips</p>
+            </div>
+
+            <div className="text-center p-6">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-600 to-rose-600 mb-4 shadow-lg shadow-pink-600/50">
+                <Heart className="h-8 w-8 text-white" />
+              </div>
+              <h4 className="text-xl font-bold text-white mb-2">Community Love</h4>
+              <p className="text-slate-400">Join 50,000+ travelers sharing their Sri Lankan adventures</p>
+            </div>
+
+            <div className="text-center p-6">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-600 to-violet-600 mb-4 shadow-lg shadow-purple-600/50">
+                <TrendingUp className="h-8 w-8 text-white" />
+              </div>
+              <h4 className="text-xl font-bold text-white mb-2">Exclusive Content</h4>
+              <p className="text-slate-400">Access behind-the-scenes footage and travel insider secrets</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

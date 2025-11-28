@@ -38,6 +38,7 @@ import {
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { db, auth, storage } from './firebase';
 import { firebaseDb } from '@/lib/firebase-db';
+import { firebaseAuthService } from '@/services/firebaseAuthService';
 
 // Initialize Firebase Functions
 const functions = getFunctions();
@@ -110,10 +111,21 @@ export const authService = {
   },
 
   async signInWithOAuth(options: { provider: string, options?: any }) {
-    // Firebase doesn't support OAuth the same way as Supabase
-    // You'll need to implement provider-specific login
-    // For now, returning a placeholder
-    return { error: new Error('OAuth login not yet implemented. Please use email/password login.') };
+    const { provider } = options;
+
+    // Currently we support Google OAuth via Firebase
+    if (provider === 'google') {
+      const { user, error } = await firebaseAuthService.signInWithGoogle();
+
+      if (error) {
+        return { data: { user: null }, error: new Error(error) };
+      }
+
+      return { data: { user }, error: null };
+    }
+
+    // Other providers (facebook, apple) not wired yet
+    return { data: { user: null }, error: new Error('This social login is not enabled yet. Please use Google or email/password.') };
   }
 };
 

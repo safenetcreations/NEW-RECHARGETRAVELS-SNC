@@ -277,10 +277,10 @@ const AirportTransfers = () => {
               <img
                 src={heroSlides[currentSlide].image}
                 alt={heroSlides[currentSlide].title}
-                className="w-full h-full object-cover opacity-30"
+                className="w-full h-full object-cover opacity-25"
               />
             )}
-            <div className="absolute inset-0 bg-gradient-to-b from-slate-900/80 via-blue-900/70 to-slate-900/90" />
+            <div className="absolute inset-0 bg-gradient-to-b from-slate-900/90 via-slate-900/85 to-slate-900/95" />
           </div>
 
           {/* Hero Content */}
@@ -323,7 +323,7 @@ const AirportTransfers = () => {
 
               {/* Booking Widget - Always Visible */}
               <div className="max-w-5xl mx-auto">
-                <Card className="bg-white/95 backdrop-blur-xl shadow-2xl border-0 overflow-hidden">
+                <Card className="bg-white shadow-[0_0_80px_20px_rgba(255,255,255,0.15),0_25px_60px_-15px_rgba(0,0,0,0.5)] border-4 border-white overflow-hidden ring-2 ring-white/30">
                   {/* Step Progress */}
                   {step < 4 && (
                     <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
@@ -388,8 +388,8 @@ const AirportTransfers = () => {
                                   if (!e.target.value) setSelectedAirport(null);
                                 }}
                                 onFocus={() => setShowAirportResults(true)}
-                                placeholder="Search airports worldwide..."
-                                className="pl-10 py-3 border-gray-200 focus:border-blue-500 rounded-xl"
+                                placeholder="Search airports..."
+                                className="pl-10 py-3 h-14 bg-white border-2 border-gray-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 rounded-xl text-gray-900 placeholder:text-gray-600 font-semibold shadow-md"
                               />
                               {selectedAirport && (
                                 <button
@@ -442,7 +442,7 @@ const AirportTransfers = () => {
                                 }}
                                 onFocus={() => setShowDestinationResults(true)}
                                 placeholder="Hotel, city, or destination..."
-                                className="pl-10 py-3 border-gray-200 focus:border-blue-500 rounded-xl"
+                                className="pl-10 py-3 h-14 bg-white border-2 border-gray-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 rounded-xl text-gray-900 placeholder:text-gray-600 font-semibold shadow-md"
                               />
                               {selectedDestination && (
                                 <button
@@ -491,13 +491,13 @@ const AirportTransfers = () => {
                           <div>
                             <Label className="text-sm font-semibold text-gray-700 mb-2 block">Pickup Date</Label>
                             <div className="relative">
-                              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-500" />
                               <Input
                                 type="date"
                                 value={pickupDate}
                                 onChange={(e) => setPickupDate(e.target.value)}
                                 min={getMinDate()}
-                                className="pl-10 py-3 rounded-xl"
+                                className="pl-10 py-3 h-14 bg-white border-2 border-gray-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 rounded-xl text-gray-900 font-semibold shadow-md"
                               />
                             </div>
                           </div>
@@ -507,12 +507,12 @@ const AirportTransfers = () => {
                               {transferType === 'arrival' ? 'Flight Arrival Time' : 'Pickup Time'}
                             </Label>
                             <div className="relative">
-                              <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                              <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-500" />
                               <Input
                                 type="time"
                                 value={pickupTime}
                                 onChange={(e) => setPickupTime(e.target.value)}
-                                className="pl-10 py-3 rounded-xl"
+                                className="pl-10 py-3 h-14 bg-white border-2 border-gray-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 rounded-xl text-gray-900 font-semibold shadow-md"
                               />
                             </div>
                           </div>
@@ -526,7 +526,7 @@ const AirportTransfers = () => {
                                   value={returnDate}
                                   onChange={(e) => setReturnDate(e.target.value)}
                                   min={pickupDate || getMinDate()}
-                                  className="py-3 rounded-xl"
+                                  className="py-3 h-14 bg-white border-2 border-gray-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 rounded-xl text-gray-900 font-semibold shadow-md"
                                 />
                               </div>
                               <div>
@@ -535,7 +535,7 @@ const AirportTransfers = () => {
                                   type="time"
                                   value={returnTime}
                                   onChange={(e) => setReturnTime(e.target.value)}
-                                  className="py-3 rounded-xl"
+                                  className="py-3 h-14 bg-white border-2 border-gray-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 rounded-xl text-gray-900 font-semibold shadow-md"
                                 />
                               </div>
                             </>
@@ -546,76 +546,76 @@ const AirportTransfers = () => {
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                           <div>
                             <Label className="text-sm font-semibold text-gray-700 mb-2 block flex items-center gap-2">
-                              <Users className="w-4 h-4" /> Adults
+                              <Users className="w-4 h-4 text-blue-500" /> Adults
                             </Label>
-                            <div className="flex items-center border rounded-xl">
+                            <div className="flex items-center h-14 bg-white border-2 border-gray-400 rounded-xl overflow-hidden shadow-md">
                               <button
                                 type="button"
                                 onClick={() => setAdults(Math.max(1, adults - 1))}
-                                className="px-3 py-2 hover:bg-gray-100"
+                                className="px-4 py-2 hover:bg-gray-200 text-gray-700 font-bold transition-colors"
                               >-</button>
-                              <span className="flex-1 text-center font-medium">{adults}</span>
+                              <span className="flex-1 text-center font-bold text-gray-900">{adults}</span>
                               <button
                                 type="button"
                                 onClick={() => setAdults(adults + 1)}
-                                className="px-3 py-2 hover:bg-gray-100"
+                                className="px-4 py-2 hover:bg-gray-200 text-gray-700 font-bold transition-colors"
                               >+</button>
                             </div>
                           </div>
 
                           <div>
                             <Label className="text-sm font-semibold text-gray-700 mb-2 block flex items-center gap-2">
-                              <User className="w-4 h-4" /> Children
+                              <User className="w-4 h-4 text-blue-500" /> Children
                             </Label>
-                            <div className="flex items-center border rounded-xl">
+                            <div className="flex items-center h-14 bg-white border-2 border-gray-400 rounded-xl overflow-hidden shadow-md">
                               <button
                                 type="button"
                                 onClick={() => setChildren(Math.max(0, children - 1))}
-                                className="px-3 py-2 hover:bg-gray-100"
+                                className="px-4 py-2 hover:bg-gray-200 text-gray-700 font-bold transition-colors"
                               >-</button>
-                              <span className="flex-1 text-center font-medium">{children}</span>
+                              <span className="flex-1 text-center font-bold text-gray-900">{children}</span>
                               <button
                                 type="button"
                                 onClick={() => setChildren(children + 1)}
-                                className="px-3 py-2 hover:bg-gray-100"
+                                className="px-4 py-2 hover:bg-gray-200 text-gray-700 font-bold transition-colors"
                               >+</button>
                             </div>
                           </div>
 
                           <div>
                             <Label className="text-sm font-semibold text-gray-700 mb-2 block flex items-center gap-2">
-                              <Baby className="w-4 h-4" /> Infants
+                              <Baby className="w-4 h-4 text-blue-500" /> Infants
                             </Label>
-                            <div className="flex items-center border rounded-xl">
+                            <div className="flex items-center h-14 bg-white border-2 border-gray-400 rounded-xl overflow-hidden shadow-md">
                               <button
                                 type="button"
                                 onClick={() => setInfants(Math.max(0, infants - 1))}
-                                className="px-3 py-2 hover:bg-gray-100"
+                                className="px-4 py-2 hover:bg-gray-200 text-gray-700 font-bold transition-colors"
                               >-</button>
-                              <span className="flex-1 text-center font-medium">{infants}</span>
+                              <span className="flex-1 text-center font-bold text-gray-900">{infants}</span>
                               <button
                                 type="button"
                                 onClick={() => setInfants(infants + 1)}
-                                className="px-3 py-2 hover:bg-gray-100"
+                                className="px-4 py-2 hover:bg-gray-200 text-gray-700 font-bold transition-colors"
                               >+</button>
                             </div>
                           </div>
 
                           <div>
                             <Label className="text-sm font-semibold text-gray-700 mb-2 block flex items-center gap-2">
-                              <Luggage className="w-4 h-4" /> Luggage
+                              <Luggage className="w-4 h-4 text-blue-500" /> Luggage
                             </Label>
-                            <div className="flex items-center border rounded-xl">
+                            <div className="flex items-center h-14 bg-white border-2 border-gray-400 rounded-xl overflow-hidden shadow-md">
                               <button
                                 type="button"
                                 onClick={() => setLuggage(Math.max(0, luggage - 1))}
-                                className="px-3 py-2 hover:bg-gray-100"
+                                className="px-4 py-2 hover:bg-gray-200 text-gray-700 font-bold transition-colors"
                               >-</button>
-                              <span className="flex-1 text-center font-medium">{luggage}</span>
+                              <span className="flex-1 text-center font-bold text-gray-900">{luggage}</span>
                               <button
                                 type="button"
                                 onClick={() => setLuggage(luggage + 1)}
-                                className="px-3 py-2 hover:bg-gray-100"
+                                className="px-4 py-2 hover:bg-gray-200 text-gray-700 font-bold transition-colors"
                               >+</button>
                             </div>
                           </div>

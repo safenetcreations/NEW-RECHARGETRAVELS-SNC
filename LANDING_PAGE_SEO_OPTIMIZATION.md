@@ -50,7 +50,7 @@ The landing page (`/`) has been fully optimized for Google SEO with comprehensiv
   "name": "Recharge Travels & Tours Ltd",
   "description": "Premier travel agency...",
   "url": "https://recharge-travels-73e76.web.app",
-  "logo": "https://recharge-travels-73e76.web.app/logo.png",
+  "logo": "https://www.rechargetravels.com/logo.png",
   "image": "https://i.imgur.com/AEnBWJf.jpeg",
   "address": {...},
   "geo": {...},

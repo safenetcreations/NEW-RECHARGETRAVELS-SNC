@@ -20,6 +20,34 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
+    function driverAdminOnlyFields() {
+      return [
+        'current_status',
+        'verified_level',
+        'verification_date',
+        'verified_by_admin_id',
+        'is_sltda_approved',
+        'suspension_reason'
+      ];
+    }
+
+    function driverAdminOnlyDocFields() {
+      return [
+        'verification_status',
+        'verified_by_admin_id',
+        'verification_date',
+        'rejection_reason'
+      ];
+    }
+
+    function validDriverStatus(status) {
+      return status in ['incomplete', 'pending_verification', 'verified', 'suspended', 'inactive'];
+    }
+
+    function isDriverSelfWrite(driverId) {
+      return isOwner(driverId) && request.resource.data.user_id == driverId;
+    }
+
     // Wild Tours Collection - Public read, admin write
     match /wildTours/{tourId} {
       // Anyone can read active tours
@@ -75,7 +103,89 @@ service cloud.firestore {
     // Drivers Collection - Public read, admin write
     match /drivers/{driverId} {
       allow read: if true;
-      allow write: if isAdmin();
+
+      allow create: if isDriverSelfWrite(driverId)
+                    && validDriverStatus(request.resource.data.current_status)
+                    && !request.resource.data.keys().hasAny(driverAdminOnlyFields());
+
+      allow update: if isAdmin()
+                    || (
+                      isDriverSelfWrite(driverId)
+                      && validDriverStatus(request.resource.data.current_status)
+                      && !request.resource.data.diff(resource.data).changedKeys().hasAny(driverAdminOnlyFields())
+                    );
+
+      allow delete: if isAdmin();
+    }
+
+    // Driver Documents - Owner read/write limited fields, admin full
+    match /driver_documents/{docId} {
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.driver_id == request.auth.uid);
+
+      allow create: if isAuthenticated()
+                    && request.resource.data.driver_id == request.auth.uid
+                    && request.resource.data.verification_status == 'pending'
+                    && !request.resource.data.keys().hasAny(driverAdminOnlyDocFields());
+
+      allow update: if isAdmin()
+                    || (
+                      isAuthenticated()
+                      && resource.data.driver_id == request.auth.uid
+                      && !request.resource.data.diff(resource.data).changedKeys().hasAny(driverAdminOnlyDocFields())
+                    );
+
+      allow delete: if isAdmin();
+    }
+
+    // Driver Photos - Owner read/write limited fields, admin full
+    match /driver_photos/{photoId} {
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.driver_id == request.auth.uid);
+
+      allow create: if isAuthenticated()
+                    && request.resource.data.driver_id == request.auth.uid
+                    && request.resource.data.verification_status == 'pending';
+
+      allow update: if isAdmin()
+                    || (
+                      isAuthenticated()
+                      && resource.data.driver_id == request.auth.uid
+                      && request.resource.data.verification_status == resource.data.verification_status
+                    );
+
+      allow delete: if isAdmin();
+    }
+
+    // Driver Availability - Owner/admin
+    match /driver_availability/{availId} {
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.driver_id == request.auth.uid);
+      allow create, update: if isAdmin()
+                            || (isAuthenticated() && request.resource.data.driver_id == request.auth.uid)
+                            || (isAuthenticated() && request.resource.data.auto_update_flag == true);
+      allow delete: if isAdmin() || (isAuthenticated() && resource.data.driver_id == request.auth.uid);
+    }
+
+    // Driver Vehicles - Owner/admin
+    match /driver_vehicles/{vehicleId} {
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.driver_id == request.auth.uid);
+      allow create, update: if isAdmin()
+                            || (isAuthenticated() && request.resource.data.driver_id == request.auth.uid);
+      allow delete: if isAdmin() || (isAuthenticated() && resource.data.driver_id == request.auth.uid);
+    }
+
+    // Driver Wallets - Driver read, admin write
+    match /driver_wallets/{walletId} {
+      allow read: if isAdmin() || (isAuthenticated() && walletId == request.auth.uid);
+      allow create: if isAuthenticated()
+                    && walletId == request.auth.uid
+                    && request.resource.data.balance <= 0;
+      allow update, delete: if isAdmin();
+    }
+
+    // Driver Orders - Driver read own, admin manage
+    match /driver_orders/{orderId} {
+      allow read: if isAdmin() || (isAuthenticated() && (resource.data.driver_id == request.auth.uid || resource.data.customer_id == request.auth.uid));
+      allow create: if isAdmin() || (isAuthenticated() && request.resource.data.customer_id == request.auth.uid);
+      allow update, delete: if isAdmin();
     }
 
     // Pages Collection - Public read, admin write

@@ -31,8 +31,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import EnhancedBookingModal from '@/components/EnhancedBookingModal';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { getDestinationBySlug } from '@/services/destinationContentService';
 
 interface HeroSlide {
   image: string;
@@ -66,6 +65,32 @@ interface DestinationInfo {
   bestTime: string;
   language: string;
   currency: string;
+}
+
+interface WeatherInfo {
+  temperature: string;
+  season: string;
+  rainfall: string;
+}
+
+interface Accommodation {
+  name: string;
+  type: string;
+  price: string;
+  features: string[];
+}
+
+interface DiningOption {
+  name: string;
+  cuisine: string;
+  specialty: string;
+  priceRange: string;
+}
+
+interface CTASection {
+  title: string;
+  subtitle: string;
+  buttonText: string;
 }
 
 const Ella = () => {
@@ -205,7 +230,7 @@ const Ella = () => {
     currency: "Sri Lankan Rupee (LKR)"
   });
 
-  const [accommodations] = useState([
+  const [accommodations, setAccommodations] = useState<Accommodation[]>([
     {
       name: "98 Acres Resort & Spa",
       type: "Luxury Resort",
@@ -232,7 +257,7 @@ const Ella = () => {
     }
   ]);
 
-  const [restaurants] = useState([
+  const [restaurants, setRestaurants] = useState<DiningOption[]>([
     {
       name: "Cafe Chill",
       cuisine: "International & Local",
@@ -259,6 +284,19 @@ const Ella = () => {
     }
   ]);
 
+  const [weatherInfo, setWeatherInfo] = useState<WeatherInfo>({
+    temperature: "15-25°C",
+    season: "Cool and Pleasant",
+    rainfall: "Low (Jan-Apr), High (Oct-Dec)"
+  });
+
+  const [ctaSection, setCtaSection] = useState<CTASection>({
+    title: "Ready to Explore Ella's Natural Beauty?",
+    subtitle:
+      "Let us help you plan the perfect hill country getaway with customized tours and experiences",
+    buttonText: "Start Planning Your Trip",
+  });
+
   // Cycle through hero slides
   useEffect(() => {
     const timer = setInterval(() => {
@@ -267,34 +305,103 @@ const Ella = () => {
     return () => clearInterval(timer);
   }, [heroSlides.length]);
 
-  // Load custom images from Firebase
+  // Load dynamic content from Firestore destination document
   useEffect(() => {
-    const loadCustomImages = async () => {
+    const loadContent = async () => {
       try {
-        const docRef = doc(db, 'destinations', 'ella');
-        const docSnap = await getDoc(docRef);
-        
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          if (data.heroImages) {
-            setHeroSlides(data.heroImages);
+        const data = await getDestinationBySlug('ella');
+
+        if (data) {
+          const anyData: any = data;
+
+          if (Array.isArray(anyData.heroSlides) && anyData.heroSlides.length) {
+            setHeroSlides(anyData.heroSlides as HeroSlide[]);
+          } else if (Array.isArray(anyData.heroImages) && anyData.heroImages.length) {
+            // Backwards compatibility with older schema
+            setHeroSlides(anyData.heroImages as HeroSlide[]);
           }
-          if (data.attractions) {
-            setAttractions(data.attractions);
+
+          if (Array.isArray(anyData.attractions) && anyData.attractions.length) {
+            setAttractions(anyData.attractions as Attraction[]);
+          }
+
+          if (Array.isArray(anyData.activities) && anyData.activities.length) {
+            setActivities(
+              anyData.activities.map((activity: any) => ({
+                ...activity,
+                icon: getIconComponent(activity.icon),
+              }))
+            );
+          }
+
+          if (anyData.destinationInfo) {
+            setDestinationInfo(anyData.destinationInfo as DestinationInfo);
+          }
+
+          if (anyData.weatherInfo) {
+            setWeatherInfo({
+              temperature: anyData.weatherInfo.temperature || "15-25°C",
+              season: anyData.weatherInfo.season || "Cool and Pleasant",
+              rainfall: anyData.weatherInfo.rainfall || "Low (Jan-Apr), High (Oct-Dec)",
+            });
+          }
+
+          if (Array.isArray(anyData.hotels) && anyData.hotels.length) {
+            setAccommodations(
+              anyData.hotels.map((hotel: any) => ({
+                name: hotel.name,
+                type: hotel.type || (hotel.starRating ? `${hotel.starRating}-Star Hotel` : 'Hotel'),
+                price: hotel.priceRange || hotel.price || '',
+                features: hotel.amenities || [],
+              }))
+            );
+          }
+
+          if (Array.isArray(anyData.restaurants) && anyData.restaurants.length) {
+            setRestaurants(
+              anyData.restaurants.map((rest: any) => ({
+                name: rest.name,
+                cuisine: rest.cuisine || '',
+                specialty: rest.description || rest.specialty || '',
+                priceRange: rest.priceRange || '',
+              }))
+            );
+          }
+
+          if (anyData.ctaSection) {
+            setCtaSection({
+              title: anyData.ctaSection.title || "Ready to Explore Ella's Natural Beauty?",
+              subtitle:
+                anyData.ctaSection.subtitle ||
+                "Let us help you plan the perfect hill country getaway with customized tours and experiences",
+              buttonText: anyData.ctaSection.buttonText || "Start Planning Your Trip",
+            });
           }
         }
       } catch (error) {
-        console.error('Error loading custom images:', error);
+        console.error('Error loading destination content for Ella:', error);
       }
     };
 
-    loadCustomImages();
+    loadContent();
   }, []);
 
-  const weatherInfo = {
-    temperature: "15-25°C",
-    season: "Cool and Pleasant",
-    rainfall: "Low (Jan-Apr), High (Oct-Dec)"
+  const getIconComponent = (iconName: string) => {
+    const iconMap: { [key: string]: any } = {
+      Sunrise,
+      Train,
+      Coffee,
+      Utensils,
+      Wind,
+      Camera,
+      Mountain,
+      TreePine,
+      Heart,
+      Navigation,
+      Sun,
+    };
+
+    return iconMap[iconName] || Camera;
   };
 
   const tabs = [
@@ -737,17 +844,17 @@ const Ella = () => {
         <div className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white py-16">
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Ready to Explore Ella's Natural Beauty?
+              {ctaSection.title}
             </h2>
             <p className="text-xl mb-8 max-w-2xl mx-auto">
-              Let us help you plan the perfect hill country getaway with customized tours and experiences
+              {ctaSection.subtitle}
             </p>
             <Button 
               size="lg" 
               className="bg-white text-emerald-600 hover:bg-gray-100"
               onClick={() => setShowBookingModal(true)}
             >
-              Start Planning Your Trip
+              {ctaSection.buttonText}
             </Button>
           </div>
         </div>

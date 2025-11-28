@@ -255,12 +255,15 @@ const VehicleBookingModal = ({ vehicle, isOpen, onClose }: VehicleBookingModalPr
                 {vehicle.drivers && vehicle.drivers.length > 0 && (
                   <div>
                     <Label htmlFor="driver">Preferred Driver (Optional)</Label>
-                    <Select value={selectedDriver} onValueChange={setSelectedDriver}>
+                    <Select
+                      value={selectedDriver || 'any_driver'}
+                      onValueChange={(value) => setSelectedDriver(value === 'any_driver' ? '' : value)}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Any available driver" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Any available driver</SelectItem>
+                        <SelectItem value="any_driver">Any available driver</SelectItem>
                         {vehicle.drivers.map((driverAssignment: any) => (
                           <SelectItem key={driverAssignment.driver.id} value={driverAssignment.driver.id}>
                             {driverAssignment.driver.name} (★ {driverAssignment.driver.rating.toFixed(1)})

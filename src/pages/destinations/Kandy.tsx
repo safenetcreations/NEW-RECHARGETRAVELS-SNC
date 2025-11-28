@@ -35,8 +35,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import EnhancedBookingModal from '@/components/EnhancedBookingModal';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { Link } from 'react-router-dom';
+import { getDestinationBySlug } from '@/services/destinationContentService';
 
 interface HeroSlide {
   image: string;
@@ -70,6 +70,46 @@ interface DestinationInfo {
   bestTime: string;
   language: string;
   currency: string;
+}
+
+interface WeatherInfo {
+  temperature: string;
+  humidity: string;
+  rainfall: string;
+  season: string;
+}
+
+interface Restaurant {
+  name: string;
+  description: string;
+  image: string;
+  cuisine: string;
+  priceRange: string;
+  rating: number;
+  address: string;
+}
+
+interface HotelItem {
+  name: string;
+  description: string;
+  image: string;
+  starRating: number;
+  priceRange: string;
+  amenities: string[];
+  address: string;
+}
+
+interface TravelTip {
+  title: string;
+  content: string;
+  icon?: string;
+  category: string;
+}
+
+interface CTASection {
+  title: string;
+  subtitle: string;
+  buttonText: string;
 }
 
 const Kandy = () => {
@@ -208,34 +248,65 @@ const Kandy = () => {
     currency: "Sri Lankan Rupee (LKR)"
   });
 
-  const [weatherInfo] = useState({
+  const [weatherInfo, setWeatherInfo] = useState<WeatherInfo>({
     temperature: "20-28°C",
     humidity: "75-85%",
     rainfall: "Moderate",
     season: "Tropical Highland"
   });
 
-  // Load content from Firebase
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [hotels, setHotels] = useState<HotelItem[]>([]);
+  const [travelTips, setTravelTips] = useState<TravelTip[]>([]);
+  const [ctaSection, setCtaSection] = useState<CTASection>({
+    title: "Ready to Explore Kandy?",
+    subtitle:
+      "Immerse yourself in Sri Lanka's cultural heritage with our expert guides and exclusive tours",
+    buttonText: "Book Now",
+  });
+
+  // Load content from Firestore destination document
   useEffect(() => {
     const loadContent = async () => {
       try {
-        const docRef = doc(db, 'destinations', 'kandy');
-        const docSnap = await getDoc(docRef);
-        
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          if (data.heroSlides) setHeroSlides(data.heroSlides);
-          if (data.attractions) setAttractions(data.attractions);
-          if (data.activities) {
-            setActivities(data.activities.map((activity: any) => ({
-              ...activity,
-              icon: getIconComponent(activity.icon)
-            })));
+        const data = await getDestinationBySlug('kandy');
+
+        if (data) {
+          if (data.heroSlides && data.heroSlides.length) {
+            setHeroSlides(data.heroSlides as HeroSlide[]);
           }
-          if (data.destinationInfo) setDestinationInfo(data.destinationInfo);
+          if (data.attractions && data.attractions.length) {
+            setAttractions(data.attractions as Attraction[]);
+          }
+          if (data.activities && data.activities.length) {
+            setActivities(
+              (data.activities as any[]).map((activity) => ({
+                ...activity,
+                icon: getIconComponent(activity.icon),
+              }))
+            );
+          }
+          if (data.destinationInfo) {
+            setDestinationInfo(data.destinationInfo as DestinationInfo);
+          }
+          if (data.weatherInfo) {
+            setWeatherInfo(data.weatherInfo as WeatherInfo);
+          }
+          if (data.restaurants) {
+            setRestaurants(data.restaurants as Restaurant[]);
+          }
+          if (data.hotels) {
+            setHotels(data.hotels as HotelItem[]);
+          }
+          if (data.travelTips) {
+            setTravelTips(data.travelTips as TravelTip[]);
+          }
+          if (data.ctaSection) {
+            setCtaSection(data.ctaSection as CTASection);
+          }
         }
       } catch (error) {
-        console.error('Error loading content:', error);
+        console.error('Error loading destination content:', error);
       }
     };
 
@@ -329,9 +400,11 @@ const Kandy = () => {
                 <Button size="lg" onClick={() => handleBookNow()}>
                   Book Your Experience
                 </Button>
-                <Button size="lg" variant="outline" className="bg-white/10 backdrop-blur-sm">
-                  <Info className="w-4 h-4 mr-2" />
-                  Travel Guide
+                <Button asChild size="lg" variant="outline" className="bg-white/10 backdrop-blur-sm">
+                  <Link to="/travel-guide">
+                    <Info className="w-4 h-4 mr-2" />
+                    Travel Guide
+                  </Link>
                 </Button>
               </motion.div>
             </div>
@@ -499,19 +572,114 @@ const Kandy = () => {
 
           {/* Hotels Tab */}
           {selectedTab === 'hotels' && (
-            <div className="text-center py-12">
-              <Hotel className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-              <h3 className="text-xl font-semibold mb-2">Hotels Coming Soon</h3>
-              <p className="text-gray-600">We're working on bringing you the best hotel recommendations in Kandy</p>
+            <div>
+              <h2 className="text-3xl font-bold mb-8">Where to Stay in Kandy</h2>
+              {hotels.length === 0 ? (
+                <div className="text-center py-12">
+                  <Hotel className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                  <h3 className="text-xl font-semibold mb-2">Hotels Coming Soon</h3>
+                  <p className="text-gray-600">
+                    We're working on bringing you the best hotel recommendations in Kandy
+                  </p>
+                </div>
+              ) : (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {hotels.map((hotel, index) => (
+                    <Card
+                      key={index}
+                      className="overflow-hidden hover:shadow-xl transition-shadow"
+                    >
+                      <div className="h-48 relative">
+                        <img
+                          src={hotel.image}
+                          alt={hotel.name}
+                          className="w-full h-full object-cover"
+                        />
+                        <Badge className="absolute top-4 left-4 bg-black/70 text-white">
+                          {hotel.starRating}-star
+                        </Badge>
+                      </div>
+                      <CardContent className="p-6 space-y-3">
+                        <h3 className="text-xl font-bold">{hotel.name}</h3>
+                        <p className="text-gray-600 text-sm">{hotel.description}</p>
+                        <p className="text-sm text-gray-500">{hotel.address}</p>
+                        <div className="flex items-center justify-between mt-2">
+                          <span className="text-amber-600 font-semibold">
+                            {hotel.priceRange}
+                          </span>
+                        </div>
+                        {hotel.amenities.length > 0 && (
+                          <div className="mt-2 flex flex-wrap gap-1">
+                            {hotel.amenities.map((amenity, i) => (
+                              <Badge
+                                key={i}
+                                variant="outline"
+                                className="text-xs text-gray-600 border-gray-200"
+                              >
+                                {amenity}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                        <Button
+                          className="w-full mt-3"
+                          onClick={() => handleBookNow(hotel.name)}
+                        >
+                          Book This Stay
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
           {/* Restaurants Tab */}
           {selectedTab === 'restaurants' && (
-            <div className="text-center py-12">
-              <Utensils className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-              <h3 className="text-xl font-semibold mb-2">Restaurants Coming Soon</h3>
-              <p className="text-gray-600">Discover the best dining experiences in Kandy</p>
+            <div>
+              <h2 className="text-3xl font-bold mb-8">Where to Eat in Kandy</h2>
+              {restaurants.length === 0 ? (
+                <div className="text-center py-12">
+                  <Utensils className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                  <h3 className="text-xl font-semibold mb-2">Restaurants Coming Soon</h3>
+                  <p className="text-gray-600">
+                    Discover the best dining experiences in Kandy
+                  </p>
+                </div>
+              ) : (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {restaurants.map((restaurant, index) => (
+                    <Card
+                      key={index}
+                      className="overflow-hidden hover:shadow-xl transition-shadow"
+                    >
+                      <div className="h-40 relative">
+                        <img
+                          src={restaurant.image}
+                          alt={restaurant.name}
+                          className="w-full h-full object-cover"
+                        />
+                        <Badge className="absolute top-4 left-4 bg-black/70 text-white">
+                          {restaurant.cuisine}
+                        </Badge>
+                      </div>
+                      <CardContent className="p-6 space-y-3">
+                        <h3 className="text-xl font-bold">{restaurant.name}</h3>
+                        <p className="text-gray-600 text-sm">{restaurant.description}</p>
+                        <p className="text-sm text-gray-500">{restaurant.address}</p>
+                        <div className="flex items-center justify-between mt-2 text-sm text-gray-600">
+                          <span>{restaurant.priceRange}</span>
+                          <span className="flex items-center gap-1">
+                            <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                            {restaurant.rating.toFixed(1)}
+                          </span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -564,6 +732,23 @@ const Kandy = () => {
                   </CardContent>
                 </Card>
               </div>
+              {travelTips.length > 0 && (
+                <div className="mt-10">
+                  <h3 className="text-2xl font-bold mb-4">Travel Tips for Kandy</h3>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {travelTips.map((tip, index) => (
+                      <Card key={index} className="border border-dashed">
+                        <CardContent className="p-4 space-y-1">
+                          <p className="text-sm font-semibold text-amber-700">
+                            {tip.title}
+                          </p>
+                          <p className="text-sm text-gray-600">{tip.content}</p>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </section>
@@ -571,16 +756,23 @@ const Kandy = () => {
         {/* CTA Section */}
         <section className="bg-gradient-to-r from-amber-600 to-orange-600 py-16">
           <div className="container mx-auto px-4 text-center text-white">
-            <h2 className="text-4xl font-bold mb-4">Ready to Explore Kandy?</h2>
+            <h2 className="text-4xl font-bold mb-4">{ctaSection.title}</h2>
             <p className="text-xl mb-8 max-w-2xl mx-auto">
-              Immerse yourself in Sri Lanka's cultural heritage with our expert guides and exclusive tours
+              {ctaSection.subtitle}
             </p>
             <div className="flex gap-4 justify-center">
               <Button size="lg" variant="secondary" onClick={() => handleBookNow()}>
-                Book Now
+                {ctaSection.buttonText}
               </Button>
-              <Button size="lg" variant="outline" className="bg-white/10 backdrop-blur-sm text-white border-white hover:bg-white/20">
-                Contact Us
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="bg-white/10 backdrop-blur-sm text-white border-white hover:bg-white/20"
+              >
+                <Link to="/book-now">
+                  Contact Us
+                </Link>
               </Button>
             </div>
           </div>

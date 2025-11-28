@@ -52,8 +52,8 @@ const FooterMobile = ({
           >
             <div className="flex items-center space-x-3">
               <img 
-                src="https://i.imgur.com/kzqjJ57.png" 
-                alt="Recharge Travels Logo" 
+                src="/logo-v2.png" 
+                alt="Recharge Travels logo - Redefine your journey, refresh your soul" 
                 className="h-8 w-auto"
               />
               <span className="font-chakra font-bold text-wild-orange">About Recharge Travels</span>

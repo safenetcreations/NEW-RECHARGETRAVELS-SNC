@@ -10,14 +10,17 @@ interface FooterBrandProps {
 }
 
 const FooterBrand = ({ isDarkMode }: FooterBrandProps) => {
-  const [logoUrl, setLogoUrl] = useState('https://i.imgur.com/kzqjJ57.png')
+  const [logoUrl, setLogoUrl] = useState('/logo-v2.png')
 
   useEffect(() => {
     const loadLogo = async () => {
       try {
         const siteDoc = await getDoc(doc(db, 'site-settings', 'images'))
         if (siteDoc.exists() && siteDoc.data().logo) {
-          setLogoUrl(siteDoc.data().logo)
+          const storedLogo = siteDoc.data().logo as string
+          // Enforce the new brand logo unless the stored value already points to it
+          const isNewBrand = storedLogo.includes('/logo-v2.png') || storedLogo.includes('rechargetravels.com/logo-v2.png')
+          setLogoUrl(isNewBrand ? storedLogo : '/logo-v2.png')
         }
       } catch (error) {
         console.error('Error loading logo:', error)
@@ -52,10 +55,10 @@ const FooterBrand = ({ isDarkMode }: FooterBrandProps) => {
           <Link to="/">
             <img 
               src={logoUrl} 
-              alt="Recharge Travels Logo" 
-              className="h-10 w-auto hover:opacity-80 transition-opacity cursor-pointer"
-              onError={(e) => {
-                e.currentTarget.src = 'https://i.imgur.com/kzqjJ57.png'
+              alt="Recharge Travels logo - Redefine your journey, refresh your soul" 
+            className="h-10 w-auto hover:opacity-80 transition-opacity cursor-pointer"
+            onError={(e) => {
+                e.currentTarget.src = '/logo-v2.png'
               }}
             />
           </Link>

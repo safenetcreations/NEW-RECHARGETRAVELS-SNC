@@ -128,12 +128,15 @@ const EcoBookingWidget = ({ tour, accommodations }: EcoBookingWidgetProps) => {
         {accommodations && accommodations.length > 0 && (
           <div className="space-y-2">
             <label className="text-sm font-medium">Accommodation (Optional)</label>
-            <Select value={selectedAccommodation} onValueChange={setSelectedAccommodation}>
+            <Select
+              value={selectedAccommodation || 'none'}
+              onValueChange={(value) => setSelectedAccommodation(value === 'none' ? '' : value)}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select accommodation" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">No accommodation needed</SelectItem>
+                <SelectItem value="none">No accommodation needed</SelectItem>
                 {accommodations.map((accommodation) => (
                   <SelectItem key={accommodation.id} value={accommodation.id}>
                     <div className="flex flex-col">

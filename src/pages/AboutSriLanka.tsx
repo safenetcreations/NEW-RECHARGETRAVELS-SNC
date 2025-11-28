@@ -49,9 +49,12 @@ const AboutSriLanka: React.FC = () => {
     const loadHeroSlides = async () => {
       try {
         const slides = await getAboutSriLankaHeroSlides();
-        if (slides && slides.length > 0) {
-          setHeroSlides(slides);
+        // Filter out slides with empty or invalid image URLs
+        const validSlides = slides?.filter(slide => slide.image && slide.image.trim() !== '') || [];
+        if (validSlides.length > 0) {
+          setHeroSlides(validSlides);
         }
+        // Keep DEFAULT_ABOUT_SLIDES if no valid slides from Firebase
       } catch (error) {
         console.error('Failed to load hero slides:', error);
       } finally {

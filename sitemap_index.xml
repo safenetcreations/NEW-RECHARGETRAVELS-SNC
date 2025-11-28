@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemap>
+    <loc>https://www.rechargetravels.com/sitemap.xml</loc>
+    <lastmod>2025-11-28</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://www.rechargetravels.com/sitemap-destinations.xml</loc>
+    <lastmod>2025-11-28</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://www.rechargetravels.com/sitemap-tours.xml</loc>
+    <lastmod>2025-11-28</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://www.rechargetravels.com/sitemap-transport.xml</loc>
+    <lastmod>2025-11-28</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://www.rechargetravels.com/sitemap-experiences.xml</loc>
+    <lastmod>2025-11-28</lastmod>
+  </sitemap>
+</sitemapindex>

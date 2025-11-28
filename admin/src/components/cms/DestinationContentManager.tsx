@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
+import { useSearchParams } from 'react-router-dom';
 import {
     Plus, Edit, Trash2, Save, X, MapPin, Image, Upload, Eye, EyeOff,
     Star, Clock, DollarSign, Users, Building, Camera, Utensils, Hotel,
@@ -208,6 +209,17 @@ export const DestinationContentManager: React.FC = () => {
     const [isCreating, setIsCreating] = useState(false);
     const [newDestinationName, setNewDestinationName] = useState('');
     const { toast } = useToast();
+    const [searchParams] = useSearchParams();
+    const destinationSlug = searchParams.get('destination');
+
+    useEffect(() => {
+        if (destinationSlug && destinations.length > 0) {
+            const destination = destinations.find(d => d.slug === destinationSlug);
+            if (destination) {
+                setSelectedDestination(destination);
+            }
+        }
+    }, [destinationSlug, destinations]);
 
     // Fetch all destinations
     const fetchDestinations = useCallback(async () => {

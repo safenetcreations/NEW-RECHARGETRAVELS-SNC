@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import {
   Cloud,
   Mountain,
   Camera,
@@ -28,7 +28,8 @@ import {
   Mail,
   Shield,
   Award,
-  Heart
+  Heart,
+  Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -36,238 +37,110 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import EnhancedBookingModal from '@/components/EnhancedBookingModal';
+import hotAirBalloonSigiriyaPageService, { HotAirBalloonSigiriyaPageContent } from '@/services/hotAirBalloonSigiriyaPageService';
+import { cachedFetch } from '@/lib/cache';
 
-interface FlightPackage {
-  name: string;
-  duration: string;
-  price: string;
-  highlights: string[];
-  included: string[];
-  icon: React.FC<any>;
-  bestFor: string;
-}
+// Optimized image URL generator
+const getOptimizedImageUrl = (url: string, width: number = 1200): string => {
+  if (!url) return '';
+  if (url.includes('unsplash.com')) {
+    const baseUrl = url.split('?')[0];
+    return `${baseUrl}?w=${width}&q=80&auto=format&fit=crop`;
+  }
+  return url;
+};
 
-interface TimeSlot {
-  time: string;
-  description: string;
-  advantages: string[];
-  price: string;
-}
+// Default fallback hero images
+const defaultHeroImages = [
+  { id: '1', url: 'https://images.unsplash.com/photo-1507608616759-54f48f0af0ee', caption: 'Hot Air Balloon at Sunrise' },
+  { id: '2', url: 'https://images.unsplash.com/photo-1495562569060-2eec283d3391', caption: 'Sigiriya Rock from Above' },
+  { id: '3', url: 'https://images.unsplash.com/photo-1474496517593-015d8c59cd3e', caption: 'Balloon Flight Adventure' },
+  { id: '4', url: 'https://images.unsplash.com/photo-1570710891163-6d3b5c47248b', caption: 'Sri Lanka Landscape' }
+];
+
+// Icon mapping for dynamic icons from Firebase
+const iconMap: Record<string, React.FC<any>> = {
+  Cloud, Mountain, Camera, Clock, MapPin, Calendar, Star, Users, Sunrise, Sun,
+  Wind, Navigation, Package, Globe, Phone, Mail, Shield, Award, Heart, Info
+};
 
 const HotAirBalloonSigiriya = () => {
   const [activeTab, setActiveTab] = useState('experience');
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
   const [heroImageIndex, setHeroImageIndex] = useState(0);
+  const [pageContent, setPageContent] = useState<HotAirBalloonSigiriyaPageContent | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const heroImages = [
-    {
-      url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1920&h=1080&fit=crop',
-      caption: 'Hot Air Balloon over Sigiriya'
-    },
-    {
-      url: 'https://images.unsplash.com/photo-1569163139394-de4b5c4c4e3f?w=1920&h=1080&fit=crop',
-      caption: 'Sunrise Balloon Flight'
-    },
-    {
-      url: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1920&h=1080&fit=crop',
-      caption: 'Aerial View of Ancient City'
-    },
-    {
-      url: 'https://images.unsplash.com/photo-1540979388789-6cee28a1cdc9?w=1920&h=1080&fit=crop',
-      caption: 'Floating Above the Clouds'
-    }
-  ];
-
-  const flightPackages: FlightPackage[] = [
-    {
-      name: "Classic Sunrise Flight",
-      duration: "1 hour flight",
-      price: "$210 per person",
-      highlights: [
-        "Sunrise views over Sigiriya",
-        "360-degree panoramic views",
-        "Traditional champagne toast",
-        "Flight certificate"
-      ],
-      included: [
-        "Hotel pickup (5:00 AM)",
-        "Light refreshments",
-        "1-hour balloon flight",
-        "Champagne celebration",
-        "Return transfer"
-      ],
-      icon: Sunrise,
-      bestFor: "First-time flyers"
-    },
-    {
-      name: "Premium Photo Flight",
-      duration: "1.5 hours flight",
-      price: "$280 per person",
-      highlights: [
-        "Extended flight time",
-        "Professional photographer",
-        "Multiple altitude levels",
-        "Private basket section"
-      ],
-      included: [
-        "VIP hotel pickup",
-        "Breakfast box",
-        "90-minute flight",
-        "Photo package (50+ images)",
-        "Luxury return transfer"
-      ],
-      icon: Camera,
-      bestFor: "Photography enthusiasts"
-    },
-    {
-      name: "Romantic Couple Flight",
-      duration: "1 hour flight",
-      price: "$450 per couple",
-      highlights: [
-        "Private basket compartment",
-        "Romantic sunrise setting",
-        "Special champagne service",
-        "Commemorative gifts"
-      ],
-      included: [
-        "Private transfers",
-        "Exclusive basket area",
-        "Premium champagne",
-        "Professional photos",
-        "Romantic breakfast"
-      ],
-      icon: Heart,
-      bestFor: "Couples & anniversaries"
-    },
-    {
-      name: "Family Adventure Flight",
-      duration: "1 hour flight",
-      price: "$180 per person (kids 50% off)",
-      highlights: [
-        "Family-friendly experience",
-        "Educational commentary",
-        "Kids' activity pack",
-        "Group photos included"
-      ],
-      included: [
-        "Family vehicle pickup",
-        "Kid-friendly snacks",
-        "Safety briefing for children",
-        "Flight certificates for all",
-        "Comfortable transfers"
-      ],
-      icon: Users,
-      bestFor: "Families with children 7+"
-    }
-  ];
-
-  const timeSlots: TimeSlot[] = [
-    {
-      time: "5:30 AM - 7:00 AM",
-      description: "Early Morning Sunrise Flight",
-      advantages: [
-        "Spectacular sunrise views",
-        "Coolest temperatures",
-        "Calmest wind conditions",
-        "Best photography light"
-      ],
-      price: "Standard rates"
-    },
-    {
-      time: "6:00 AM - 7:30 AM",
-      description: "Prime Morning Flight",
-      advantages: [
-        "Golden hour lighting",
-        "Clear visibility",
-        "Optimal weather conditions",
-        "Wildlife activity below"
-      ],
-      price: "Standard rates"
-    }
-  ];
-
-  const flightPath = [
-    {
-      stage: "Launch Site",
-      description: "Begin at Kandalama or Dambulla launch field",
-      duration: "20 minutes prep"
-    },
-    {
-      stage: "Initial Ascent",
-      description: "Gentle rise to 500 feet for panoramic views",
-      duration: "10 minutes"
-    },
-    {
-      stage: "Sigiriya Approach",
-      description: "Float towards the iconic Lion Rock fortress",
-      duration: "20 minutes"
-    },
-    {
-      stage: "Maximum Altitude",
-      description: "Reach up to 2,000 feet for stunning vistas",
-      duration: "15 minutes"
-    },
-    {
-      stage: "Cultural Triangle Tour",
-      description: "Views of ancient cities and temples",
-      duration: "15 minutes"
-    },
-    {
-      stage: "Descent & Landing",
-      description: "Gentle descent to designated landing area",
-      duration: "10 minutes"
-    }
-  ];
-
-  const faqs = [
-    {
-      question: "Is hot air ballooning safe?",
-      answer: "Yes, hot air ballooning is one of the safest forms of aviation. Our pilots are internationally certified with thousands of flight hours. All equipment is regularly inspected and maintained to international standards. We monitor weather conditions closely and only fly in safe conditions."
-    },
-    {
-      question: "What should I wear for the balloon flight?",
-      answer: "Dress in comfortable layers as mornings can be cool but warm up quickly. Wear flat, closed-toe shoes (no heels or sandals). Avoid loose scarves or hats that might blow away. Bring a light jacket and sunglasses. The temperature in the balloon is similar to ground level."
-    },
-    {
-      question: "Are there age or health restrictions?",
-      answer: "Children must be at least 7 years old and tall enough to see over the basket edge (about 4 feet). Pregnant women cannot fly for safety reasons. Passengers should be able to stand for the duration of the flight. Those with heart conditions or mobility issues should consult their doctor."
-    },
-    {
-      question: "What happens if the weather is bad?",
-      answer: "Safety is our priority. If weather conditions are unsuitable, we'll reschedule your flight for the next available date. If rescheduling isn't possible, we provide a full refund. We make weather decisions by 10 PM the night before and will contact you immediately."
-    },
-    {
-      question: "How high do the balloons fly?",
-      answer: "Typically between 500 to 2,000 feet, depending on wind conditions and air traffic regulations. This altitude provides the best views while maintaining safety. The pilot varies the altitude throughout the flight for different perspectives of the landscape."
-    },
-    {
-      question: "Can I bring a camera?",
-      answer: "Absolutely! We encourage photography. Ensure your camera has a strap. Drones are not permitted due to aviation regulations. Many passengers find phones adequate for photos, but professional cameras are welcome. Some packages include a professional photographer."
-    }
-  ];
-
+  // Fetch content from Firebase with caching
   useEffect(() => {
+    const loadContent = async () => {
+      try {
+        const content = await cachedFetch<HotAirBalloonSigiriyaPageContent>(
+          'hot-air-balloon-sigiriya-page',
+          () => hotAirBalloonSigiriyaPageService.getPageContent(),
+          10 * 60 * 1000 // Cache for 10 minutes
+        );
+        setPageContent(content);
+
+        // Preload hero images for faster display
+        if (content?.hero?.images?.length) {
+          content.hero.images.slice(0, 3).forEach((img, index) => {
+            const link = document.createElement('link');
+            link.rel = index === 0 ? 'preload' : 'prefetch';
+            link.as = 'image';
+            link.href = getOptimizedImageUrl(img.url, 1920);
+            document.head.appendChild(link);
+          });
+        }
+      } catch (error) {
+        console.error('Error loading page content:', error);
+        setPageContent(hotAirBalloonSigiriyaPageService.getDefaultContent());
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadContent();
+  }, []);
+
+  // Hero image rotation
+  useEffect(() => {
+    if (!pageContent?.hero?.images?.length) return;
     const interval = setInterval(() => {
-      setHeroImageIndex((prev) => (prev + 1) % heroImages.length);
+      setHeroImageIndex((prev) => (prev + 1) % pageContent.hero.images.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [pageContent?.hero?.images?.length]);
 
   const handleBookingClick = (packageName?: string) => {
     setSelectedPackage(packageName || null);
     setIsBookingModalOpen(true);
   };
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-purple-50">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-purple-600 mx-auto mb-4" />
+          <p className="text-gray-600">Loading hot air balloon experience...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const heroImages = pageContent?.hero?.images?.length ? pageContent.hero.images : defaultHeroImages;
+  const currentHeroImage = heroImages[heroImageIndex] || { url: '', caption: '' };
+
   return (
     <>
       <Helmet>
-        <title>Hot Air Ballooning Sigiriya | Sunrise Flights Over Lion Rock | Recharge Travels</title>
-        <meta name="description" content="Experience breathtaking hot air balloon rides over Sigiriya Rock Fortress. Sunrise flights with panoramic views of Sri Lanka's Cultural Triangle." />
-        <meta name="keywords" content="hot air balloon Sigiriya, balloon rides Sri Lanka, Sigiriya sunrise flight, aerial tours, Lion Rock balloon, adventure activities Sri Lanka" />
-        <meta property="og:title" content="Hot Air Ballooning Over Sigiriya - Unforgettable Sky Adventure" />
-        <meta property="og:description" content="Float above ancient kingdoms with sunrise hot air balloon flights over Sigiriya and Sri Lanka's Cultural Triangle." />
-        <meta property="og:image" content="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&h=630&fit=crop" />
+        <title>{pageContent?.seo?.title || 'Hot Air Ballooning Sigiriya | Recharge Travels'}</title>
+        <meta name="description" content={pageContent?.seo?.description || ''} />
+        <meta name="keywords" content={pageContent?.seo?.keywords?.join(', ') || ''} />
+        <meta property="og:title" content={pageContent?.seo?.title || ''} />
+        <meta property="og:description" content={pageContent?.seo?.description || ''} />
+        <meta property="og:image" content={pageContent?.seo?.ogImage || ''} />
         <link rel="canonical" href="https://www.rechargetravels.com/experiences/hot-air-balloon-sigiriya" />
       </Helmet>
 
@@ -285,9 +158,11 @@ const HotAirBalloonSigiriya = () => {
             className="absolute inset-0"
           >
             <img
-              src={heroImages[heroImageIndex].url}
-              alt={heroImages[heroImageIndex].caption}
+              src={getOptimizedImageUrl(currentHeroImage.url, 1920)}
+              alt={currentHeroImage.caption}
               className="w-full h-full object-cover"
+              loading={heroImageIndex === 0 ? 'eager' : 'lazy'}
+              fetchPriority={heroImageIndex === 0 ? 'high' : 'auto'}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/20" />
           </motion.div>
@@ -301,19 +176,19 @@ const HotAirBalloonSigiriya = () => {
               transition={{ duration: 0.8 }}
             >
               <h1 className="text-5xl md:text-7xl font-bold mb-6 drop-shadow-lg">
-                Hot Air Ballooning
+                {pageContent?.hero?.title || 'Hot Air Ballooning'}
               </h1>
               <p className="text-xl md:text-2xl mb-8 font-light drop-shadow">
-                Soar Above Sigiriya's Ancient Wonders at Sunrise
+                {pageContent?.hero?.subtitle || "Soar Above Sigiriya's Ancient Wonders at Sunrise"}
               </p>
               <Button
                 onClick={() => handleBookingClick()}
                 size="lg"
-                className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-6 text-lg rounded-full 
+                className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-6 text-lg rounded-full
                          transform hover:scale-105 transition-all duration-300 shadow-xl"
               >
                 <Cloud className="mr-2 h-5 w-5" />
-                Book Your Flight
+                {pageContent?.hero?.ctaText || 'Book Your Flight'}
               </Button>
             </motion.div>
           </div>
@@ -338,36 +213,33 @@ const HotAirBalloonSigiriya = () => {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 className="text-4xl font-bold mb-6">A Magical Journey Above Ancient Kingdoms</h2>
+            <h2 className="text-4xl font-bold mb-6">
+              {pageContent?.overview?.title || 'A Magical Journey Above Ancient Kingdoms'}
+            </h2>
             <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
-              Experience the breathtaking beauty of Sri Lanka's Cultural Triangle from a unique perspective. 
-              Float peacefully above the iconic Sigiriya Rock Fortress, ancient cities, and lush landscapes 
-              as the sun rises over the horizon. This once-in-a-lifetime adventure offers unparalleled views 
-              and unforgettable memories.
+              {pageContent?.overview?.description || ''}
             </p>
           </motion.div>
 
           {/* Quick Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-            {[
-              { icon: Navigation, label: "Flight Altitude", value: "2,000ft" },
-              { icon: Clock, label: "Flight Duration", value: "60-90min" },
-              { icon: Award, label: "Safety Record", value: "100%" },
-              { icon: Users, label: "Happy Flyers", value: "15,000+" }
-            ].map((stat, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="text-center"
-              >
-                <stat.icon className="h-12 w-12 text-purple-600 mx-auto mb-3" />
-                <div className="text-3xl font-bold text-gray-800">{stat.value}</div>
-                <div className="text-gray-600">{stat.label}</div>
-              </motion.div>
-            ))}
+            {pageContent?.stats?.map((stat, index) => {
+              const IconComponent = iconMap[stat.iconName] || Navigation;
+              return (
+                <motion.div
+                  key={stat.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  className="text-center"
+                >
+                  <IconComponent className="h-12 w-12 text-purple-600 mx-auto mb-3" />
+                  <div className="text-3xl font-bold text-gray-800">{stat.value}</div>
+                  <div className="text-gray-600">{stat.label}</div>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -386,7 +258,7 @@ const HotAirBalloonSigiriya = () => {
             {/* Experience Tab */}
             <TabsContent value="experience" className="space-y-6">
               <h3 className="text-2xl font-bold mb-6">What to Expect</h3>
-              
+
               <div className="grid md:grid-cols-2 gap-6">
                 <Card>
                   <CardHeader>
@@ -397,8 +269,8 @@ const HotAirBalloonSigiriya = () => {
                   </CardHeader>
                   <CardContent>
                     <p className="text-gray-600 mb-4">
-                      Your adventure begins before sunrise with a pickup from your hotel. 
-                      Arrive at the launch site to watch the magical inflation process as 
+                      Your adventure begins before sunrise with a pickup from your hotel.
+                      Arrive at the launch site to watch the magical inflation process as
                       your balloon comes to life in the pre-dawn light.
                     </p>
                     <ul className="space-y-2 text-sm">
@@ -431,8 +303,8 @@ const HotAirBalloonSigiriya = () => {
                   </CardHeader>
                   <CardContent>
                     <p className="text-gray-600 mb-4">
-                      As you gently rise into the sky, watch the landscape transform below. 
-                      Your pilot will point out landmarks and share stories about the ancient 
+                      As you gently rise into the sky, watch the landscape transform below.
+                      Your pilot will point out landmarks and share stories about the ancient
                       kingdoms that once ruled these lands.
                     </p>
                     <ul className="space-y-2 text-sm">
@@ -469,7 +341,7 @@ const HotAirBalloonSigiriya = () => {
                         Sigiriya Lion Rock
                       </h4>
                       <p className="text-sm text-gray-600">
-                        The iconic 5th-century fortress rises majestically from the plains, 
+                        The iconic 5th-century fortress rises majestically from the plains,
                         offering spectacular aerial views of its summit and ancient gardens.
                       </p>
                     </div>
@@ -479,7 +351,7 @@ const HotAirBalloonSigiriya = () => {
                         Cultural Triangle
                       </h4>
                       <p className="text-sm text-gray-600">
-                        Glimpse ancient capitals of Anuradhapura and Polonnaruwa, with their 
+                        Glimpse ancient capitals of Anuradhapura and Polonnaruwa, with their
                         stupas and reservoirs visible from your elevated vantage point.
                       </p>
                     </div>
@@ -489,7 +361,7 @@ const HotAirBalloonSigiriya = () => {
                         Sunrise Splendor
                       </h4>
                       <p className="text-sm text-gray-600">
-                        Watch the sun rise over misty mountains and forests, painting the 
+                        Watch the sun rise over misty mountains and forests, painting the
                         landscape in golden hues - a photographer's dream come true.
                       </p>
                     </div>
@@ -502,65 +374,68 @@ const HotAirBalloonSigiriya = () => {
             <TabsContent value="packages" className="space-y-6">
               <h3 className="text-2xl font-bold mb-6">Choose Your Perfect Flight</h3>
               <div className="grid md:grid-cols-2 gap-6">
-                {flightPackages.map((pkg, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <Card className="h-full hover:shadow-xl transition-shadow">
-                      <CardHeader>
-                        <div className="flex items-center justify-between mb-3">
-                          <pkg.icon className="h-10 w-10 text-purple-600" />
-                          <Badge className="bg-purple-600">{pkg.duration}</Badge>
-                        </div>
-                        <CardTitle className="text-xl">{pkg.name}</CardTitle>
-                        <p className="text-2xl font-bold text-purple-600">{pkg.price}</p>
-                        <p className="text-sm text-gray-500">{pkg.bestFor}</p>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div>
-                          <h4 className="font-semibold mb-2">Experience Highlights:</h4>
-                          <ul className="space-y-1 text-sm">
-                            {pkg.highlights.map((highlight, idx) => (
-                              <li key={idx} className="flex items-start">
-                                <ChevronRight className="h-4 w-4 text-purple-600 mr-1 mt-0.5 flex-shrink-0" />
-                                <span>{highlight}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                        <div>
-                          <h4 className="font-semibold mb-2">Package Includes:</h4>
-                          <ul className="space-y-1 text-sm">
-                            {pkg.included.map((item, idx) => (
-                              <li key={idx} className="flex items-center">
-                                <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                                <span>{item}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                        <Button 
-                          className="w-full bg-purple-600 hover:bg-purple-700"
-                          onClick={() => handleBookingClick(pkg.name)}
-                        >
-                          Book This Package
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))}
+                {pageContent?.flightPackages?.map((pkg, index) => {
+                  const IconComponent = iconMap[pkg.iconName] || Cloud;
+                  return (
+                    <motion.div
+                      key={pkg.id}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <Card className="h-full hover:shadow-xl transition-shadow">
+                        <CardHeader>
+                          <div className="flex items-center justify-between mb-3">
+                            <IconComponent className="h-10 w-10 text-purple-600" />
+                            <Badge className="bg-purple-600">{pkg.duration}</Badge>
+                          </div>
+                          <CardTitle className="text-xl">{pkg.name}</CardTitle>
+                          <p className="text-2xl font-bold text-purple-600">{pkg.price}</p>
+                          <p className="text-sm text-gray-500">{pkg.bestFor}</p>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div>
+                            <h4 className="font-semibold mb-2">Experience Highlights:</h4>
+                            <ul className="space-y-1 text-sm">
+                              {pkg.highlights?.map((highlight, idx) => (
+                                <li key={idx} className="flex items-start">
+                                  <ChevronRight className="h-4 w-4 text-purple-600 mr-1 mt-0.5 flex-shrink-0" />
+                                  <span>{highlight}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                          <div>
+                            <h4 className="font-semibold mb-2">Package Includes:</h4>
+                            <ul className="space-y-1 text-sm">
+                              {pkg.included?.map((item, idx) => (
+                                <li key={idx} className="flex items-center">
+                                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                                  <span>{item}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                          <Button
+                            className="w-full bg-purple-600 hover:bg-purple-700"
+                            onClick={() => handleBookingClick(pkg.name)}
+                          >
+                            Book This Package
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  );
+                })}
               </div>
 
               {/* Time Slots */}
               <div>
                 <h4 className="text-xl font-semibold mb-4">Flight Time Options</h4>
                 <div className="grid md:grid-cols-2 gap-4">
-                  {timeSlots.map((slot, index) => (
-                    <Card key={index}>
+                  {pageContent?.timeSlots?.map((slot) => (
+                    <Card key={slot.id}>
                       <CardHeader>
                         <CardTitle className="text-lg flex items-center">
                           <Clock className="h-5 w-5 mr-2 text-purple-600" />
@@ -570,7 +445,7 @@ const HotAirBalloonSigiriya = () => {
                       </CardHeader>
                       <CardContent>
                         <ul className="space-y-1">
-                          {slot.advantages.map((advantage, idx) => (
+                          {slot.advantages?.map((advantage, idx) => (
                             <li key={idx} className="text-sm flex items-center">
                               <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
                               {advantage}
@@ -587,16 +462,16 @@ const HotAirBalloonSigiriya = () => {
             {/* Journey Tab */}
             <TabsContent value="journey" className="space-y-6">
               <h3 className="text-2xl font-bold mb-6">Your Flight Journey</h3>
-              
+
               <Card>
                 <CardHeader>
                   <CardTitle>Flight Path & Timeline</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {flightPath.map((stage, index) => (
+                    {pageContent?.flightPath?.map((stage, index) => (
                       <motion.div
-                        key={index}
+                        key={stage.id}
                         initial={{ opacity: 0, x: -20 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
@@ -681,7 +556,7 @@ const HotAirBalloonSigiriya = () => {
             {/* Preparation Tab */}
             <TabsContent value="prepare" className="space-y-6">
               <h3 className="text-2xl font-bold mb-6">Prepare for Your Flight</h3>
-              
+
               <div className="grid md:grid-cols-2 gap-6">
                 <Card>
                   <CardHeader>
@@ -806,36 +681,23 @@ const HotAirBalloonSigiriya = () => {
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-12">Safety First</h2>
           <div className="grid md:grid-cols-3 gap-6">
-            {[
-              {
-                icon: Shield,
-                title: "Certified Pilots",
-                description: "All pilots hold international commercial licenses with thousands of flight hours experience."
-              },
-              {
-                icon: Award,
-                title: "Premium Equipment",
-                description: "Modern balloons maintained to highest international aviation standards with regular inspections."
-              },
-              {
-                icon: Users,
-                title: "Insurance Coverage",
-                description: "Comprehensive insurance coverage for all passengers included in your flight package."
-              }
-            ].map((item, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="text-center"
-              >
-                <item.icon className="h-16 w-16 text-purple-600 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
-                <p className="text-gray-600">{item.description}</p>
-              </motion.div>
-            ))}
+            {pageContent?.safetyFeatures?.map((item, index) => {
+              const IconComponent = iconMap[item.iconName] || Shield;
+              return (
+                <motion.div
+                  key={item.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  className="text-center"
+                >
+                  <IconComponent className="h-16 w-16 text-purple-600 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
+                  <p className="text-gray-600">{item.description}</p>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -845,18 +707,9 @@ const HotAirBalloonSigiriya = () => {
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-12">Balloon Flight Gallery</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {[
-              "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop",
-              "https://images.unsplash.com/photo-1569163139394-de4b5c4c4e3f?w=400&h=300&fit=crop",
-              "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=400&h=300&fit=crop",
-              "https://images.unsplash.com/photo-1540979388789-6cee28a1cdc9?w=400&h=300&fit=crop",
-              "https://images.unsplash.com/photo-1514762263431-d3255330e167?w=400&h=300&fit=crop",
-              "https://images.unsplash.com/photo-1495546992359-fa0d45e1f588?w=400&h=300&fit=crop",
-              "https://images.unsplash.com/photo-1473448912268-2022ce9509d8?w=400&h=300&fit=crop",
-              "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=400&h=300&fit=crop"
-            ].map((image, index) => (
+            {pageContent?.gallery?.map((image, index) => (
               <motion.div
-                key={index}
+                key={image.id}
                 initial={{ opacity: 0, scale: 0.8 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
@@ -864,9 +717,10 @@ const HotAirBalloonSigiriya = () => {
                 className="relative overflow-hidden rounded-lg group cursor-pointer"
               >
                 <img
-                  src={image}
-                  alt={`Hot air balloon ${index + 1}`}
+                  src={getOptimizedImageUrl(image.url, 400)}
+                  alt={image.alt}
                   className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
+                  loading="lazy"
                 />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
               </motion.div>
@@ -880,8 +734,8 @@ const HotAirBalloonSigiriya = () => {
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
           <Accordion type="single" collapsible className="space-y-4">
-            {faqs.map((faq, index) => (
-              <AccordionItem key={index} value={`item-${index}`}>
+            {pageContent?.faqs?.map((faq, index) => (
+              <AccordionItem key={faq.id} value={`item-${index}`}>
                 <AccordionTrigger className="text-left hover:text-purple-600">
                   {faq.question}
                 </AccordionTrigger>
@@ -903,11 +757,10 @@ const HotAirBalloonSigiriya = () => {
             viewport={{ once: true }}
           >
             <h2 className="text-4xl font-bold mb-6 text-white">
-              Ready to Touch the Sky?
+              {pageContent?.cta?.title || 'Ready to Touch the Sky?'}
             </h2>
             <p className="text-xl mb-8 text-white/90">
-              Book your hot air balloon adventure over Sigiriya today. 
-              Create memories that will last a lifetime as you float above ancient wonders.
+              {pageContent?.cta?.description || 'Book your hot air balloon adventure over Sigiriya today.'}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
@@ -916,16 +769,16 @@ const HotAirBalloonSigiriya = () => {
                 onClick={() => handleBookingClick()}
               >
                 <Cloud className="mr-2 h-5 w-5" />
-                Book Your Flight
+                {pageContent?.cta?.primaryButtonText || 'Book Your Flight'}
               </Button>
               <Button
                 size="lg"
                 variant="outline"
                 className="border-white text-white hover:bg-white/10 px-8 py-6 text-lg"
-                onClick={() => window.location.href = 'tel:+94765059595'}
+                onClick={() => window.location.href = `tel:${pageContent?.contact?.phone || '+94765059595'}`}
               >
                 <Phone className="mr-2 h-5 w-5" />
-                Call for Details
+                {pageContent?.cta?.secondaryButtonText || 'Call for Details'}
               </Button>
             </div>
           </motion.div>
@@ -939,20 +792,20 @@ const HotAirBalloonSigiriya = () => {
             <div className="flex flex-col items-center">
               <Phone className="h-8 w-8 mb-3 text-purple-400" />
               <h3 className="font-semibold mb-2">Call Us</h3>
-              <p className="text-gray-300">+94 76 505 9595</p>
-              <p className="text-sm text-gray-400">Available 24/7</p>
+              <p className="text-gray-300">{pageContent?.contact?.phone || '+94 76 505 9595'}</p>
+              <p className="text-sm text-gray-400">{pageContent?.contact?.phoneNote || 'Available 24/7'}</p>
             </div>
             <div className="flex flex-col items-center">
               <Mail className="h-8 w-8 mb-3 text-purple-400" />
               <h3 className="font-semibold mb-2">Email Us</h3>
-              <p className="text-gray-300">info@rechargetravels.com</p>
-              <p className="text-sm text-gray-400">Quick response</p>
+              <p className="text-gray-300">{pageContent?.contact?.email || 'info@rechargetravels.com'}</p>
+              <p className="text-sm text-gray-400">{pageContent?.contact?.emailNote || 'Quick response'}</p>
             </div>
             <div className="flex flex-col items-center">
               <Globe className="h-8 w-8 mb-3 text-purple-400" />
               <h3 className="font-semibold mb-2">Visit Website</h3>
-              <p className="text-gray-300">www.rechargetravels.com</p>
-              <p className="text-sm text-gray-400">More experiences</p>
+              <p className="text-gray-300">{pageContent?.contact?.website || 'www.rechargetravels.com'}</p>
+              <p className="text-sm text-gray-400">{pageContent?.contact?.websiteNote || 'More experiences'}</p>
             </div>
           </div>
         </div>

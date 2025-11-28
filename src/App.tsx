@@ -16,8 +16,8 @@ import GoogleAnalytics from '@/components/analytics/GoogleAnalytics';
 
 const Index = lazy(() => import('@/pages/Index'));
 const CulturalTours = lazy(() => import('@/pages/CulturalToursNew'));
-const WildTours = lazy(() => import('@/pages/WildTours'));
-const NationalParksOverview = lazy(() => import('@/pages/NationalParksOverview'));
+const WildTours = lazy(() => import('@/pages/WildToursNew'));
+const NationalParksOverview = lazy(() => import('@/pages/NationalParksNew'));
 const ParkLandingPage = lazy(() => import('@/components/wildTours/ParkLandingPage'));
 const LuxurySafari = lazy(() => import('@/pages/LuxurySafari'));
 const Blog = lazy(() => import('@/pages/Blog'));
@@ -26,8 +26,9 @@ const AboutSriLanka = lazy(() => import('@/pages/AboutSriLanka'));
 const AboutRechargeTravel = lazy(() => import('@/pages/AboutRechargeTravel'));
 const AboutSocial = lazy(() => import('@/pages/AboutSocial'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
+const FAQ = lazy(() => import('@/pages/FAQ'));
 const Photography = lazy(() => import('@/pages/PhotographyNew'));
-const RamayanaTrail = lazy(() => import('@/pages/RamayanaTrail'));
+const RamayanaTrail = lazy(() => import('@/pages/RamayanaTrailNew'));
 const RamayanaTrailTour = lazy(() => import('@/pages/RamayanaTrailTour'));
 const AyurvedaWellnessTour = lazy(() => import('@/pages/AyurvedaWellnessTour'));
 const Ecotourism = lazy(() => import('@/pages/EcotourismNew'));
@@ -37,6 +38,9 @@ const CulinaryTours = lazy(() => import('@/pages/CulinaryToursNew'));
 const Honeymoon = lazy(() => import('@/pages/Honeymoon'));
 const HoneymoonsWeddings = lazy(() => import('@/pages/romance/HoneymoonsWeddings'));
 const WellnessPackages = lazy(() => import('@/pages/WellnessPackages'));
+const JoinUsDrivers = lazy(() => import('@/pages/JoinUsDrivers'));
+const DriversDirectory = lazy(() => import('@/pages/DriversDirectory'));
+const DriverPublicProfile = lazy(() => import('@/pages/DriverPublicProfile'));
 const LuxuryTours = lazy(() => import('@/pages/LuxuryTours'));
 const Colombo = lazy(() => import('@/pages/destinations/Colombo'));
 const Kandy = lazy(() => import('@/pages/destinations/Kandy'));
@@ -44,6 +48,9 @@ const Galle = lazy(() => import('@/pages/destinations/Galle'));
 const Sigiriya = lazy(() => import('@/pages/destinations/Sigiriya'));
 const Ella = lazy(() => import('@/pages/destinations/Ella'));
 const Jaffna = lazy(() => import('@/pages/destinations/Jaffna'));
+const DelftIsland = lazy(() => import('@/pages/destinations/DelftIsland'));
+const Mullaitivu = lazy(() => import('@/pages/destinations/Mullaitivu'));
+const Hatton = lazy(() => import('@/pages/destinations/Hatton'));
 const NuwaraEliya = lazy(() => import('@/pages/destinations/NuwaraEliya'));
 const Trincomalee = lazy(() => import('@/pages/destinations/Trincomalee'));
 const ArugamBay = lazy(() => import('@/pages/destinations/ArugamBay'));
@@ -148,8 +155,17 @@ const Hotels = lazy(() => import('@/pages/Hotels'));
 const HotelDetail = lazy(() => import('@/pages/HotelDetail'));
 const ContentUpdater = lazy(() => import('@/pages/ContentUpdater'));
 const BookNow = lazy(() => import('@/pages/BookNow'));
+const AITripPlanner = lazy(() => import('@/pages/AITripPlanner'));
 const DynamicPage = lazy(() => import('@/pages/DynamicPage'));
 const SearchResults = lazy(() => import('@/pages/SearchResults'));
+
+// Vehicle Rental Pages
+const VehicleRental = lazy(() => import('@/pages/vehicle-rental/VehicleRental'));
+const VehicleBrowse = lazy(() => import('@/pages/vehicle-rental/VehicleBrowse'));
+const VehicleDetail = lazy(() => import('@/pages/vehicle-rental/VehicleDetail'));
+const VehicleBooking = lazy(() => import('@/pages/vehicle-rental/VehicleBooking'));
+const OwnerDashboard = lazy(() => import('@/pages/vehicle-rental/OwnerDashboard'));
+const ListVehicle = lazy(() => import('@/pages/vehicle-rental/ListVehicle'));
 
 import './App.css';
 
@@ -203,6 +219,9 @@ function App() {
                 <Route path="/destinations/sigiriya" element={<Sigiriya />} />
                 <Route path="/destinations/ella" element={<Ella />} />
                 <Route path="/destinations/jaffna" element={<Jaffna />} />
+                <Route path="/destinations/delft-island" element={<DelftIsland />} />
+                <Route path="/destinations/mullaitivu" element={<Mullaitivu />} />
+                <Route path="/destinations/hatton" element={<Hatton />} />
                 <Route path="/destinations/nuwaraeliya" element={withSiteChrome(NuwaraEliya)} />
                 <Route path="/destinations/trincomalee" element={<Trincomalee />} />
                 <Route path="/destinations/arugam-bay" element={<ArugamBay />} />
@@ -279,17 +298,32 @@ function App() {
                 <Route path="/scenic/ravana-falls" element={<RavanaFalls />} />
                 <Route path="/scenic/nine-arch-bridge" element={<NineArchBridge />} />
 
+                {/* Vehicle Rental */}
+                <Route path="/vehicle-rental" element={<VehicleRental />} />
+                <Route path="/vehicle-rental/browse" element={<VehicleBrowse />} />
+                <Route path="/vehicle-rental/vehicle/:id" element={<VehicleDetail />} />
+                <Route path="/vehicle-rental/booking/:id" element={<VehicleBooking />} />
+                <Route path="/vehicle-rental/owner-dashboard" element={<OwnerDashboard />} />
+                <Route path="/vehicle-rental/list-vehicle" element={<ListVehicle />} />
+
                 <Route path="/blog" element={withSiteChrome(Blog)} />
                 <Route path="/blog/:slug" element={withSiteChrome(BlogPost)} />
                 <Route path="/about/sri-lanka" element={withSiteChrome(AboutSriLanka)} />
                 <Route path="/about" element={withSiteChrome(AboutRechargeTravel)} />
+                <Route path="/faq" element={withSiteChrome(FAQ)} />
                 <Route path="/connect-with-us" element={withSiteChrome(AboutSocial)} />
+                <Route path="/drivers" element={withSiteChrome(DriversDirectory)} />
+                <Route path="/drivers/:id" element={withSiteChrome(DriverPublicProfile)} />
+                <Route path="/join-with-us" element={withSiteChrome(JoinUsDrivers)} />
+                <Route path="/driver/dashboard" element={withSiteChrome(DriverDashboard)} />
                 <Route path="/search" element={<SearchResults />} />
                 <Route path="/book-now" element={<BookNow />} />
+                <Route path="/ai-trip-planner" element={<AITripPlanner />} />
                 <Route path="/wallet" element={withSiteChrome(WalletTransactions)} />
                 <Route path="/wallet/transactions" element={withSiteChrome(WalletTransactions)} />
                 <Route path="/login" element={withSiteChrome(AdminLogin)} />
                 <Route path="/signup" element={withSiteChrome(Signup)} />
+                <Route path="/driver/dashboard" element={withSiteChrome(DriverDashboard)} />
                 <Route path="/admin/custom-trips" element={<CustomTripRequestsAdmin />} />
                 {/* Admin panel is now at: https://recharge-travels-admin.web.app */}
                 <Route path="/admin" element={<AdminRedirect />} />

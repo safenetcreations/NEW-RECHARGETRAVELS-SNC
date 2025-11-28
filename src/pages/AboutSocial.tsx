@@ -8,6 +8,8 @@ import { PlatformTabs } from '@/components/social/PlatformTabs'
 import { PublicPostsGrid } from '@/components/social/PublicPostsGrid'
 import { AdminAccountManager } from '@/components/social/AdminAccountManager'
 import { SocialWelcomeSection } from '@/components/social/SocialWelcomeSection'
+import Header from '@/components/Header'
+import Footer from '@/components/Footer'
 
 const AboutSocial = () => {
   const { user } = useAuth()
@@ -65,78 +67,17 @@ const AboutSocial = () => {
 
   console.log('AboutSocial render - user:', user, 'platforms:', platforms, 'posts:', posts)
 
-  // Show welcome section for unauthenticated users
-  if (!user) {
-    return (
-      <>
-        <Helmet>
-          <title>#RechargeLife - Live Social Media Feed | Recharge Travels</title>
-          <meta name="description" content="Follow Recharge Travels live across all social media platforms. See our latest posts, updates and travel experiences." />
-        </Helmet>
-
-        <div className="bg-gray-50">
-          <SocialWelcomeSection />
-
-          <div className="max-w-7xl mx-auto p-5">
-            <SocialFeedHeader updateTime={updateTime} />
-
-            <PlatformTabs 
-              platforms={platforms || []}
-              currentFilter={currentFilter}
-              onFilterPlatform={handleFilterPlatform}
-            />
-
-            <PublicPostsGrid
-              posts={posts || []}
-              platforms={platforms || []}
-              loading={loading}
-              onFilterPlatform={handleFilterPlatform}
-            />
-          </div>
-        </div>
-      </>
-    )
-  }
-
-  // Show full interface for authenticated users
+  // Always show the premium hero section with YouTube broadcast
   return (
     <>
       <Helmet>
-        <title>#RechargeLife - Live Social Media Feed | Recharge Travels</title>
-        <meta name="description" content="Follow Recharge Travels live across all social media platforms. See our latest posts, updates and travel experiences." />
+        <title>Connect With Us - Live on All Platforms | Recharge Travels</title>
+        <meta name="description" content="Watch our live YouTube channel and follow Recharge Travels across Instagram, Facebook, TikTok, Twitter, LinkedIn and TripAdvisor. Join 50,000+ travelers in the #RechargeLife community." />
       </Helmet>
 
-      <div className="min-h-screen bg-gray-50">
-        <SocialFeedHeader updateTime={updateTime} />
-
-        <PlatformTabs 
-          platforms={platforms || []}
-          currentFilter={currentFilter}
-          onFilterPlatform={handleFilterPlatform}
-        />
-
-        <div className="max-w-7xl mx-auto p-5">
-          {/* Admin-only account management section */}
-          {isAdmin && (
-            <AdminAccountManager
-              platforms={platforms || []}
-              connectedAccounts={connectedAccounts || []}
-              onConnectAccount={connectAccount}
-              onDisconnectAccount={disconnectAccount}
-              onSyncPosts={handleSyncPosts}
-              syncing={syncing}
-            />
-          )}
-
-          {/* Public social media feed */}
-          <PublicPostsGrid
-            posts={posts || []}
-            platforms={platforms || []}
-            loading={loading}
-            onFilterPlatform={handleFilterPlatform}
-          />
-        </div>
-      </div>
+      <Header />
+      <SocialWelcomeSection />
+      <Footer />
     </>
   )
 }

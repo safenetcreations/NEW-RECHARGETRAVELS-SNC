@@ -40,6 +40,25 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import EnhancedBookingModal from '@/components/EnhancedBookingModal';
 import { trainJourneysPageService, TrainJourneysPageContent } from '@/services/trainJourneysPageService';
 import { toast } from 'sonner';
+import { cachedFetch } from '@/lib/cache';
+
+// Optimized image URL generator
+const getOptimizedImageUrl = (url: string, width: number = 1200): string => {
+  if (!url) return '';
+  if (url.includes('unsplash.com')) {
+    const baseUrl = url.split('?')[0];
+    return `${baseUrl}?w=${width}&q=80&auto=format&fit=crop`;
+  }
+  return url;
+};
+
+// Default fallback hero images for train journeys
+const defaultHeroImages = [
+  { id: '1', url: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957', caption: 'Scenic Train Through Tea Country' },
+  { id: '2', url: 'https://images.unsplash.com/photo-1474487548417-781cb71495f3', caption: 'Famous Nine Arch Bridge' },
+  { id: '3', url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4', caption: 'Mountain Railway Views' },
+  { id: '4', url: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4', caption: 'Blue Train Journey' }
+];
 
 const TrainJourneys = () => {
   const [activeTab, setActiveTab] = useState('routes');
@@ -59,13 +78,28 @@ const TrainJourneys = () => {
     return iconMap[iconName] || Star;
   };
 
-  // Load content from Firebase
+  // Load content from Firebase with caching
   useEffect(() => {
     const loadContent = async () => {
       try {
         setLoading(true);
-        const data = await trainJourneysPageService.getPageContent();
+        const data = await cachedFetch<TrainJourneysPageContent>(
+          'train-journeys-page',
+          () => trainJourneysPageService.getPageContent(),
+          10 * 60 * 1000 // Cache for 10 minutes
+        );
         setContent(data);
+
+        // Preload hero images for faster display
+        if (data?.hero?.images?.length) {
+          data.hero.images.slice(0, 3).forEach((img, index) => {
+            const link = document.createElement('link');
+            link.rel = index === 0 ? 'preload' : 'prefetch';
+            link.as = 'image';
+            link.href = getOptimizedImageUrl(img.url, 1920);
+            document.head.appendChild(link);
+          });
+        }
       } catch (error) {
         console.error('Error loading train journeys content:', error);
         toast.error('Failed to load page content');
@@ -77,15 +111,16 @@ const TrainJourneys = () => {
     loadContent();
   }, []);
 
+  // Get hero images with fallback
+  const heroImages = content?.hero?.images?.length ? content.hero.images : defaultHeroImages;
+
   // Hero image carousel
   useEffect(() => {
-    if (!content?.hero.images.length) return;
-
     const interval = setInterval(() => {
-      setHeroImageIndex((prev) => (prev + 1) % content.hero.images.length);
+      setHeroImageIndex((prev) => (prev + 1) % heroImages.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, [content]);
+  }, [heroImages.length]);
 
   const handleBookingClick = (packageName?: string) => {
     setSelectedPackage(packageName || null);
@@ -126,9 +161,11 @@ const TrainJourneys = () => {
             className="absolute inset-0"
           >
             <img
-              src={content.hero.images[heroImageIndex].url}
-              alt={content.hero.images[heroImageIndex].caption}
+              src={getOptimizedImageUrl(heroImages[heroImageIndex]?.url || '', 1920)}
+              alt={heroImages[heroImageIndex]?.caption || 'Scenic Train Journey'}
               className="w-full h-full object-cover"
+              loading={heroImageIndex === 0 ? 'eager' : 'lazy'}
+              fetchPriority={heroImageIndex === 0 ? 'high' : 'auto'}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/20" />
           </motion.div>
@@ -472,9 +509,10 @@ const TrainJourneys = () => {
                 >
                   <div className="relative overflow-hidden rounded-lg mb-4">
                     <img
-                      src={highlight.image}
+                      src={getOptimizedImageUrl(highlight.image, 400)}
                       alt={highlight.title}
                       className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
+                      loading="lazy"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                     <IconComponent className="absolute bottom-4 left-4 h-8 w-8 text-white" />
@@ -503,9 +541,10 @@ const TrainJourneys = () => {
                 className="relative overflow-hidden rounded-lg group cursor-pointer"
               >
                 <img
-                  src={image}
+                  src={getOptimizedImageUrl(image, 400)}
                   alt={`Train journey ${index + 1}`}
                   className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
+                  loading="lazy"
                 />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
               </motion.div>

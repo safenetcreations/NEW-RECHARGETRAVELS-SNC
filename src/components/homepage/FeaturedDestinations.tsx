@@ -92,9 +92,18 @@ const shuffleArray = <T,>(array: T[]): T[] => {
   return shuffled;
 };
 
+// Resolve the best href for a destination, preferring CMS link/path when available
+const getDestinationHref = (destination: FeaturedDestination): string => {
+  const slug = destination.name.toLowerCase().replace(/\s+/g, '-');
+  const pathFromCms = destination.link || (destination as any).path;
+  return pathFromCms || `/destinations/${slug}`;
+};
+
 const FeaturedDestinations = () => {
-  const [destinations, setDestinations] = useState<FeaturedDestination[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [destinations, setDestinations] = useState<FeaturedDestination[]>(
+    shuffleArray(fallbackDestinations as unknown as FeaturedDestination[])
+  );
+  const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
 
   // Fetch destinations from CMS
@@ -104,16 +113,12 @@ const FeaturedDestinations = () => {
         setLoading(true);
         const data = await cmsService.featuredDestinations.getAll();
         if (data && data.length > 0) {
-          // Shuffle the CMS data
-          setDestinations(shuffleArray(data));
-        } else {
-          // Use fallback if no CMS data
-          setDestinations(shuffleArray(fallbackDestinations as unknown as FeaturedDestination[]));
+          // Shuffle the CMS data and override initial fallback
+          setDestinations(shuffleArray(data as FeaturedDestination[]));
         }
       } catch (error) {
         console.error('Error fetching featured destinations:', error);
-        // Use fallback on error
-        setDestinations(shuffleArray(fallbackDestinations as unknown as FeaturedDestination[]));
+        // Keep already-seeded fallback destinations on error
       } finally {
         setLoading(false);
       }
@@ -149,20 +154,30 @@ const FeaturedDestinations = () => {
     setCurrentPage((prev) => (prev - 1 + totalPages) % totalPages);
   }, [totalPages]);
 
-  if (loading) {
-    return (
-      <section className="py-20 bg-gradient-to-b from-gray-900 via-slate-900 to-gray-900">
-        <div className="container mx-auto px-4 lg:px-8 text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading destinations...</p>
-        </div>
-      </section>
-    );
-  }
-
   return (
-    <section className="py-20 bg-gradient-to-b from-gray-900 via-slate-900 to-gray-900">
-      <div className="container mx-auto px-4 lg:px-8">
+    <section className="relative py-20 bg-gradient-to-b from-emerald-50 via-sky-50 to-amber-50 overflow-hidden">
+      <div className="pointer-events-none absolute inset-0">
+        {/* Top hill-country strip (e.g. Ella/Sigiriya) */}
+        <div
+          className="absolute inset-x-0 top-0 h-64 bg-cover bg-center opacity-30"
+          style={{
+            backgroundImage:
+              "url('https://images.unsplash.com/photo-1566296314736-6eaac1ca0cb9?w=1600&auto=format&fit=crop&q=80')",
+          }}
+        />
+        {/* Bottom beach/ocean strip (e.g. Mirissa/Galle) */}
+        <div
+          className="absolute inset-x-0 bottom-0 h-64 bg-cover bg-center opacity-30"
+          style={{
+            backgroundImage:
+              "url('https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=1600&auto=format&fit=crop&q=80')",
+          }}
+        />
+        {/* Soft wash so text stays readable over photos */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white/85 via-emerald-50/80 to-sky-50/85" />
+      </div>
+
+      <div className="relative container mx-auto px-4 lg:px-8">
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -170,18 +185,21 @@ const FeaturedDestinations = () => {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <div className="inline-flex items-center gap-2 bg-orange-500/20 px-6 py-3 rounded-full mb-6 border border-orange-500/30">
-            <Compass className="w-5 h-5 text-orange-400" />
-            <span className="text-orange-300 font-semibold tracking-wide uppercase">Discover Paradise</span>
-            <Sparkles className="w-5 h-5 text-yellow-400" />
+          <div className="inline-flex items-center gap-2 bg-white/80 px-6 py-3 rounded-full mb-6 border border-emerald-200 shadow-sm">
+            <Compass className="w-5 h-5 text-emerald-600" />
+            <span className="text-emerald-700 font-semibold tracking-wide uppercase">Discover Paradise</span>
+            <Sparkles className="w-5 h-5 text-amber-500" />
           </div>
 
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
-            Explore Sri Lanka <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-yellow-400">Featured Destinations</span>
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 mb-6">
+            Explore Sri Lanka{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 via-teal-500 to-amber-500">
+              Featured Destinations
+            </span>
           </h2>
 
-          <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto">
-            From ancient wonders to pristine beaches, discover the most captivating destinations that make Sri Lanka an unforgettable journey
+          <p className="text-lg md:text-xl text-slate-600 max-w-3xl mx-auto">
+            From misty tea hills to sunlit beaches and ancient cities, step into the landscapes that make Sri Lanka feel alive.
           </p>
         </motion.div>
 
@@ -196,8 +214,8 @@ const FeaturedDestinations = () => {
               transition={{ delay: index * 0.1 }}
               className="group"
             >
-              <Link to={`/destinations/${destination.name.toLowerCase().replace(/\s+/g, '-')}`}>
-                <div className="relative h-[400px] rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500">
+              <Link to={getDestinationHref(destination)}>
+                <div className="relative h-[400px] rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 bg-slate-900">
                   {/* Background Image */}
                   <div
                     className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
@@ -205,7 +223,7 @@ const FeaturedDestinations = () => {
                   />
 
                   {/* Fallback gradient if image fails */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-900 to-purple-900 -z-10" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-900 to-sky-900 -z-10" />
 
                   {/* Gradient Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
@@ -333,18 +351,18 @@ const FeaturedDestinations = () => {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-8 border-t border-white/10">
-          {[
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-8 border-t border-emerald-100 text-slate-900">
+          {[ 
             { value: '25+', label: 'Destinations' },
             { value: '8', label: 'UNESCO Sites' },
             { value: '1,340km', label: 'Coastline' },
             { value: '4.9★', label: 'Average Rating' }
           ].map((stat, idx) => (
             <div key={idx} className="text-center">
-              <div className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-yellow-400 mb-2">
+              <div className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-1">
                 {stat.value}
               </div>
-              <div className="text-gray-400 font-medium">{stat.label}</div>
+              <div className="text-sm md:text-base text-slate-700 font-semibold tracking-wide">{stat.label}</div>
             </div>
           ))}
         </div>

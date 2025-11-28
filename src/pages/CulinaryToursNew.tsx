@@ -11,15 +11,17 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Calendar, MapPin, Users, Star, ChefHat, Flame, Utensils, 
+import {
+  Calendar, MapPin, Users, Star, ChefHat, Flame, Utensils,
   Clock, Heart, Share2, Filter, Search, Play, X,
-  Check, Award, Globe, Leaf, ShoppingBag, Camera, TrendingUp, MessageCircle 
+  Check, Award, Globe, Leaf, ShoppingBag, Camera, TrendingUp, MessageCircle
 } from 'lucide-react';
 import { collection, getDocs, query, where, orderBy, addDoc, updateDoc, doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { TourSEO } from '@/components/seo/SEOMetaTags';
+import { SEOSchema } from '@/components/seo/SEOSchema';
 
 interface CulinaryTour {
   id: string;
@@ -77,7 +79,7 @@ const CulinaryToursNew = () => {
   const [selectedTour, setSelectedTour] = useState<CulinaryTour | null>(null);
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
   const [wishlist, setWishlist] = useState<string[]>([]);
-  
+
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -99,7 +101,7 @@ const CulinaryToursNew = () => {
       const toursRef = collection(db, 'culinary_tours');
       const q = query(toursRef, where('is_active', '==', true), orderBy('featured', 'desc'));
       const snapshot = await getDocs(q);
-      
+
       const toursData: CulinaryTour[] = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
@@ -128,7 +130,7 @@ const CulinaryToursNew = () => {
       const reviewsRef = collection(db, 'culinary_reviews');
       const q = query(reviewsRef, orderBy('date', 'desc'));
       const snapshot = await getDocs(q);
-      
+
       const reviewsData: Review[] = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
@@ -150,7 +152,7 @@ const CulinaryToursNew = () => {
 
     // Search filter
     if (searchQuery) {
-      filtered = filtered.filter(tour => 
+      filtered = filtered.filter(tour =>
         tour.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         tour.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
         tour.location.toLowerCase().includes(searchQuery.toLowerCase())
@@ -212,12 +214,12 @@ const CulinaryToursNew = () => {
   };
 
   const toggleWishlist = (tourId: string) => {
-    setWishlist(prev => 
-      prev.includes(tourId) 
+    setWishlist(prev =>
+      prev.includes(tourId)
         ? prev.filter(id => id !== tourId)
         : [...prev, tourId]
     );
-    
+
     toast({
       title: wishlist.includes(tourId) ? "Removed from wishlist" : "Added to wishlist",
     });
@@ -240,6 +242,35 @@ const CulinaryToursNew = () => {
 
   return (
     <>
+      {/* Enhanced SEO */}
+      <TourSEO
+        tourName="Culinary Tours Sri Lanka"
+        description="Discover authentic Sri Lankan cuisine through cooking classes, street food tours, and spice garden visits. Learn from expert chefs. Book your food adventure today!"
+        price={75}
+        duration="Various"
+        image="https://www.rechargetravels.com/images/culinary-tours.jpg"
+      />
+
+      <SEOSchema
+        type="TouristTrip"
+        data={{
+          name: "Sri Lanka Culinary Tours",
+          description: "Authentic food experiences including cooking classes, street food tours, spice gardens, and fine dining across Sri Lanka.",
+          image: "https://www.rechargetravels.com/images/culinary-tours.jpg",
+          price: 75,
+          currency: "USD",
+          itinerary: [
+            { name: "Cooking Classes", description: "Learn traditional Sri Lankan recipes" },
+            { name: "Street Food Tours", description: "Explore local food markets" },
+            { name: "Spice Garden Visits", description: "Discover Ceylon spices" }
+          ],
+          rating: {
+            value: 4.9,
+            count: 150
+          }
+        }}
+      />
+
       <Helmet>
         <title>Culinary Tours in Sri Lanka - Authentic Food Experiences | Recharge Travels</title>
         <meta name="description" content="Discover Sri Lanka's rich culinary heritage through authentic cooking classes, street food tours, spice garden visits, and fine dining experiences. Book your culinary adventure today!" />
@@ -248,13 +279,13 @@ const CulinaryToursNew = () => {
         <meta property="og:description" content="Savor the authentic flavors and spices of Sri Lankan cuisine with our culinary tours." />
         <meta property="og:type" content="website" />
       </Helmet>
-      
+
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50">
         <Header />
-        
+
         {/* Hero Section */}
         <section className="relative h-[90vh] flex items-center justify-center overflow-hidden">
-          <div 
+          <div
             className="absolute inset-0 bg-cover bg-center transform scale-105"
             style={{
               backgroundImage: `url('https://images.unsplash.com/photo-1596040033229-a9821ebd058d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')`,
@@ -262,7 +293,7 @@ const CulinaryToursNew = () => {
           >
             <div className="absolute inset-0 bg-gradient-to-b from-orange-900/70 via-orange-800/60 to-orange-900/80" />
           </div>
-          
+
           <div className="relative z-10 text-center text-white px-4 max-w-5xl mx-auto">
             <div className="mb-6 flex justify-center gap-2 animate-fade-in">
               <Badge className="bg-orange-500/90 text-white px-4 py-2 text-sm backdrop-blur-sm">
@@ -274,31 +305,31 @@ const CulinaryToursNew = () => {
                 100+ Happy Foodies
               </Badge>
             </div>
-            
+
             <h1 className="text-7xl md:text-8xl font-cinzel font-bold mb-6 animate-fade-in leading-tight">
               Flavors of
               <span className="block bg-gradient-to-r from-yellow-300 via-amber-200 to-orange-300 bg-clip-text text-transparent">
                 Ceylon
               </span>
             </h1>
-            
+
             <p className="text-2xl md:text-3xl font-playfair mb-8 animate-fade-in opacity-90 leading-relaxed">
               Embark on a gastronomic odyssey through Sri Lanka's<br />
               aromatic spice gardens and ancient culinary traditions
             </p>
-            
+
             <div className="flex flex-wrap justify-center gap-4 animate-scale-in">
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white px-10 py-7 text-lg rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300"
                 onClick={() => document.getElementById('experiences')?.scrollIntoView({ behavior: 'smooth' })}
               >
                 <ChefHat className="mr-2 w-5 h-5" />
                 Explore Experiences
               </Button>
-              
-              <Button 
-                size="lg" 
+
+              <Button
+                size="lg"
                 variant="outline"
                 className="bg-white/10 backdrop-blur-md border-2 border-white/50 text-white hover:bg-white/20 px-10 py-7 text-lg rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300"
               >
@@ -306,7 +337,7 @@ const CulinaryToursNew = () => {
                 Watch Video Tour
               </Button>
             </div>
-            
+
             {/* Quick Stats */}
             <div className="grid grid-cols-3 gap-8 mt-16 max-w-3xl mx-auto">
               {[
@@ -322,7 +353,7 @@ const CulinaryToursNew = () => {
               ))}
             </div>
           </div>
-          
+
           <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
             <ChefHat className="w-10 h-10 text-white" />
           </div>
@@ -419,7 +450,7 @@ const CulinaryToursNew = () => {
             <div className="absolute top-0 left-0 w-96 h-96 bg-yellow-400 rounded-full blur-3xl"></div>
             <div className="absolute bottom-0 right-0 w-96 h-96 bg-orange-400 rounded-full blur-3xl"></div>
           </div>
-          
+
           <div className="container mx-auto px-4 relative z-10">
             <div className="text-center mb-16">
               <h2 className="text-5xl font-cinzel font-bold mb-6">Why Our Culinary Tours?</h2>
@@ -430,25 +461,25 @@ const CulinaryToursNew = () => {
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
               {[
-                { 
-                  icon: Award, 
-                  title: 'Expert Chefs', 
-                  description: 'Learn from award-winning local chefs with decades of experience' 
+                {
+                  icon: Award,
+                  title: 'Expert Chefs',
+                  description: 'Learn from award-winning local chefs with decades of experience'
                 },
-                { 
-                  icon: Leaf, 
-                  title: 'Fresh Ingredients', 
-                  description: 'Organic produce from local markets and our own spice gardens' 
+                {
+                  icon: Leaf,
+                  title: 'Fresh Ingredients',
+                  description: 'Organic produce from local markets and our own spice gardens'
                 },
-                { 
-                  icon: Users, 
-                  title: 'Small Groups', 
-                  description: 'Intimate experiences with maximum 8-10 participants' 
+                {
+                  icon: Users,
+                  title: 'Small Groups',
+                  description: 'Intimate experiences with maximum 8-10 participants'
                 },
-                { 
-                  icon: Check, 
-                  title: 'Authentic Recipes', 
-                  description: 'Traditional family recipes passed down through generations' 
+                {
+                  icon: Check,
+                  title: 'Authentic Recipes',
+                  description: 'Traditional family recipes passed down through generations'
                 }
               ].map((feature, idx) => (
                 <Card key={idx} className="bg-white/10 backdrop-blur-lg border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105">
@@ -508,15 +539,15 @@ const CulinaryToursNew = () => {
               Join us for an unforgettable culinary journey through the flavors of Ceylon
             </p>
             <div className="flex flex-wrap justify-center gap-4">
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 className="bg-white text-orange-600 hover:bg-gray-100 px-10 py-7 text-lg rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300"
                 onClick={() => document.getElementById('experiences')?.scrollIntoView({ behavior: 'smooth' })}
               >
                 Book Your Experience
               </Button>
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 variant="outline"
                 className="border-2 border-white text-white hover:bg-white/10 px-10 py-7 text-lg rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300"
               >
@@ -548,18 +579,18 @@ const TourGrid = ({ tours, onSelectTour, wishlist, onToggleWishlist }: any) => {
   return (
     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
       {tours.map((tour: CulinaryTour) => (
-        <Card 
-          key={tour.id} 
+        <Card
+          key={tour.id}
           className="group hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-white border-2 border-orange-100 overflow-hidden"
         >
           <div className="relative overflow-hidden h-64">
-            <img 
-              src={tour.image} 
+            <img
+              src={tour.image}
               alt={tour.title}
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            
+
             {/* Badges */}
             <div className="absolute top-4 left-4 flex gap-2">
               {tour.featured && (
@@ -578,8 +609,8 @@ const TourGrid = ({ tours, onSelectTour, wishlist, onToggleWishlist }: any) => {
               onClick={() => onToggleWishlist(tour.id)}
               className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-full p-2 hover:bg-white transition-all duration-300 transform hover:scale-110"
             >
-              <Heart 
-                className={`w-5 h-5 ${wishlist.includes(tour.id) ? 'text-red-500 fill-current' : 'text-gray-600'}`} 
+              <Heart
+                className={`w-5 h-5 ${wishlist.includes(tour.id) ? 'text-red-500 fill-current' : 'text-gray-600'}`}
               />
             </button>
 
@@ -641,7 +672,7 @@ const TourGrid = ({ tours, onSelectTour, wishlist, onToggleWishlist }: any) => {
               </div>
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button 
+                  <Button
                     className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white rounded-full px-6 shadow-lg transform hover:scale-105 transition-all duration-300"
                     onClick={() => onSelectTour(tour)}
                   >
@@ -691,7 +722,7 @@ const BookingDialogContent = ({ tour }: { tour: CulinaryTour }) => {
               <div className="text-sm text-gray-600">per person</div>
             </div>
           </div>
-          
+
           {tour.highlights && (
             <div className="flex flex-wrap gap-2 mt-3">
               {tour.highlights.slice(0, 4).map((highlight, i) => (
@@ -709,21 +740,21 @@ const BookingDialogContent = ({ tour }: { tour: CulinaryTour }) => {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">Date</label>
-              <Input 
-                type="date" 
+              <Input
+                type="date"
                 value={bookingData.date}
-                onChange={(e) => setBookingData({...bookingData, date: e.target.value})}
+                onChange={(e) => setBookingData({ ...bookingData, date: e.target.value })}
                 className="border-orange-200 focus:border-orange-500"
               />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">Number of Guests</label>
-              <Input 
-                type="number" 
-                min="1" 
+              <Input
+                type="number"
+                min="1"
                 max={tour.maxGroupSize}
                 value={bookingData.guests}
-                onChange={(e) => setBookingData({...bookingData, guests: parseInt(e.target.value)})}
+                onChange={(e) => setBookingData({ ...bookingData, guests: parseInt(e.target.value) })}
                 className="border-orange-200 focus:border-orange-500"
               />
             </div>
@@ -731,10 +762,10 @@ const BookingDialogContent = ({ tour }: { tour: CulinaryTour }) => {
 
           <div className="space-y-2">
             <label className="text-sm font-medium">Full Name</label>
-            <Input 
+            <Input
               placeholder="Your full name"
               value={bookingData.contactName}
-              onChange={(e) => setBookingData({...bookingData, contactName: e.target.value})}
+              onChange={(e) => setBookingData({ ...bookingData, contactName: e.target.value })}
               className="border-orange-200 focus:border-orange-500"
             />
           </div>
@@ -742,21 +773,21 @@ const BookingDialogContent = ({ tour }: { tour: CulinaryTour }) => {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">Email</label>
-              <Input 
+              <Input
                 type="email"
                 placeholder="your@email.com"
                 value={bookingData.contactEmail}
-                onChange={(e) => setBookingData({...bookingData, contactEmail: e.target.value})}
+                onChange={(e) => setBookingData({ ...bookingData, contactEmail: e.target.value })}
                 className="border-orange-200 focus:border-orange-500"
               />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">Phone</label>
-              <Input 
+              <Input
                 type="tel"
                 placeholder="+94 XX XXX XXXX"
                 value={bookingData.contactPhone}
-                onChange={(e) => setBookingData({...bookingData, contactPhone: e.target.value})}
+                onChange={(e) => setBookingData({ ...bookingData, contactPhone: e.target.value })}
                 className="border-orange-200 focus:border-orange-500"
               />
             </div>
@@ -764,11 +795,11 @@ const BookingDialogContent = ({ tour }: { tour: CulinaryTour }) => {
 
           <div className="space-y-2">
             <label className="text-sm font-medium">Special Requests (Optional)</label>
-            <Textarea 
+            <Textarea
               placeholder="Dietary restrictions, allergies, or special requirements..."
               rows={3}
               value={bookingData.specialRequests}
-              onChange={(e) => setBookingData({...bookingData, specialRequests: e.target.value})}
+              onChange={(e) => setBookingData({ ...bookingData, specialRequests: e.target.value })}
               className="border-orange-200 focus:border-orange-500 resize-none"
             />
           </div>
@@ -794,7 +825,7 @@ const BookingDialogContent = ({ tour }: { tour: CulinaryTour }) => {
           </div>
         </div>
 
-        <Button 
+        <Button
           className="w-full bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white py-6 text-lg rounded-full shadow-lg"
         >
           Confirm Booking

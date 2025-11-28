@@ -199,12 +199,12 @@ const WildTours = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-4xl md:text-5xl font-playfair font-bold text-gray-900 mb-6 leading-tight">
-              Your Way, Your Budget
+              Leopard, Whale & Elephant Safaris — Your Way
             </h2>
             <p className="text-lg md:text-xl text-gray-700 leading-relaxed font-montserrat mb-8">
-              Choose from <strong className="text-amber-700">Semi-Luxury experiences</strong> with private guides, premium vehicles, and boutique accommodations,
-              or <strong className="text-green-700">Budget-Friendly adventures</strong> with shared tours, local guides, and authentic guesthouse stays.
-              Every option delivers unforgettable wildlife encounters tailored to your travel style.
+              Curate your Sri Lankan wildlife journey: <strong className="text-amber-700">Semi-Luxury safaris</strong> with private jeeps, marine biologists,
+              and boutique eco-lodges, or <strong className="text-green-700">Budget-friendly adventures</strong> with trusted local guides, shared boats,
+              and authentic stays. Track leopards in Yala, witness “The Gathering” of elephants, and chase blue whales off Mirissa — tailored to how you travel.
             </p>
             
             <div className="grid md:grid-cols-2 gap-8 mt-12">
@@ -218,12 +218,12 @@ const WildTours = () => {
                 <CardContent className="p-6">
                   <ul className="space-y-3 text-left">
                     {[
-                      'Private vehicles with A/C',
-                      'Expert naturalist guides',
-                      'Boutique eco-lodges & resorts',
-                      'Premium equipment included',
-                      'Gourmet meals & refreshments',
-                      'Small group sizes (max 6-8)'
+                      'Private jeeps & boats for leopard, whale, and elephant encounters',
+                      'Lead naturalists, marine biologists, and park rangers',
+                      'Boutique eco-lodges near Yala, Udawalawe, Wilpattu, and Mirissa',
+                      'Pro-grade optics and safety gear included',
+                      'Chef-curated meals and sundowner setups',
+                      'Micro groups (max 6–8) for prime sightings'
                     ].map((feature, index) => (
                       <li key={index} className="flex items-center gap-2 font-montserrat">
                         <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
@@ -244,12 +244,12 @@ const WildTours = () => {
                 <CardContent className="p-6">
                   <ul className="space-y-3 text-left">
                     {[
-                      'Shared vehicles & boats',
-                      'Experienced local guides',
-                      'Authentic guesthouses & homestays',
-                      'Essential equipment provided',
-                      'Traditional local meals',
-                      'Larger groups (8-15 people)'
+                      'Trusted shared jeeps and boats for leopard, elephant, and whale days',
+                      'Local trackers who know every hide, nesting beach, and lagoon',
+                      'Guesthouses/homestays near parks and whale harbors',
+                      'Binoculars and life vests provided where needed',
+                      'Home-style Sri Lankan meals between game drives',
+                      'Social groups (8–15) to keep trips budget-friendly'
                     ].map((feature, index) => (
                       <li key={index} className="flex items-center gap-2 font-montserrat">
                         <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />

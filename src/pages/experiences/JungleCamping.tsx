@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import {
   Tent,
   Trees,
   Camera,
@@ -28,7 +28,14 @@ import {
   Mail,
   Shield,
   Flashlight,
-  Eye
+  Eye,
+  Loader2,
+  Mountain,
+  Leaf,
+  Compass,
+  Crown,
+  Backpack,
+  Home
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -36,262 +43,111 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import EnhancedBookingModal from '@/components/EnhancedBookingModal';
+import jungleCampingPageService, { JungleCampingPageContent } from '@/services/jungleCampingPageService';
+import { cachedFetch } from '@/lib/cache';
 
-interface CampingPackage {
-  name: string;
-  duration: string;
-  price: string;
-  highlights: string[];
-  included: string[];
-  icon: React.FC<any>;
-  difficulty: string;
-}
+// Optimized image URL generator
+const getOptimizedImageUrl = (url: string, width: number = 1200): string => {
+  if (!url) return '';
+  if (url.includes('unsplash.com')) {
+    const baseUrl = url.split('?')[0];
+    return `${baseUrl}?w=${width}&q=80&auto=format&fit=crop`;
+  }
+  return url;
+};
 
-interface WildlifeSpotting {
-  animal: string;
-  bestTime: string;
-  frequency: string;
-  description: string;
-}
+// Default fallback hero images
+const defaultHeroImages = [
+  { id: '1', url: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4', caption: 'Jungle Camping Adventure' },
+  { id: '2', url: 'https://images.unsplash.com/photo-1510312305653-8ed496efae75', caption: 'Campfire Under Stars' },
+  { id: '3', url: 'https://images.unsplash.com/photo-1445308394109-4ec2920981b1', caption: 'Safari Tent Experience' },
+  { id: '4', url: 'https://images.unsplash.com/photo-1533873984035-25970ab07461', caption: 'Wilderness Exploration' }
+];
+
+// Icon mapping for dynamic icons from Firebase
+const iconMap: Record<string, React.FC<any>> = {
+  Tent, Trees, Camera, Clock, MapPin, Calendar, Star, Users, Sunrise, Moon,
+  Flame, Binoculars, Package, Globe, Phone, Mail, Shield, Flashlight, Eye,
+  Mountain, Leaf, Compass, Crown, Backpack, Home, Info, DollarSign
+};
 
 const JungleCamping = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
   const [heroImageIndex, setHeroImageIndex] = useState(0);
+  const [pageContent, setPageContent] = useState<JungleCampingPageContent | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const heroImages = [
-    {
-      url: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=1920&h=1080&fit=crop',
-      caption: 'Jungle Camping in Wilpattu'
-    },
-    {
-      url: 'https://images.unsplash.com/photo-1533873984035-25970ab07461?w=1920&h=1080&fit=crop',
-      caption: 'Campfire Under Stars'
-    },
-    {
-      url: 'https://images.unsplash.com/photo-1517824806704-9040b037703b?w=1920&h=1080&fit=crop',
-      caption: 'Wilderness Adventure'
-    },
-    {
-      url: 'https://images.unsplash.com/photo-1563299796-17596ed6b017?w=1920&h=1080&fit=crop',
-      caption: 'Safari Tent Experience'
-    }
-  ];
-
-  const campingPackages: CampingPackage[] = [
-    {
-      name: "Basic Wilderness Experience",
-      duration: "2 Days / 1 Night",
-      price: "$120 per person",
-      highlights: [
-        "Guided jungle trek",
-        "Night safari walk",
-        "Traditional campfire dinner",
-        "Wildlife spotting"
-      ],
-      included: [
-        "Basic tent accommodation",
-        "All meals",
-        "Park entrance fees",
-        "Expert naturalist guide",
-        "Safety equipment"
-      ],
-      icon: Tent,
-      difficulty: "Easy"
-    },
-    {
-      name: "Adventure Camping Safari",
-      duration: "3 Days / 2 Nights",
-      price: "$220 per person",
-      highlights: [
-        "Multiple camping locations",
-        "Jeep safari included",
-        "Bird watching sessions",
-        "Night photography"
-      ],
-      included: [
-        "Safari tent with bedding",
-        "All meals & beverages",
-        "4x4 safari vehicle",
-        "Camping gear",
-        "Binoculars & guides"
-      ],
-      icon: Binoculars,
-      difficulty: "Moderate"
-    },
-    {
-      name: "Luxury Glamping Experience",
-      duration: "3 Days / 2 Nights",
-      price: "$380 per person",
-      highlights: [
-        "Luxury safari tents",
-        "Private wildlife tours",
-        "Gourmet bush dining",
-        "Spa treatments available"
-      ],
-      included: [
-        "Deluxe tent with bathroom",
-        "Fine dining experience",
-        "Private safari guide",
-        "Premium amenities",
-        "Photography assistance"
-      ],
-      icon: Star,
-      difficulty: "Comfort"
-    },
-    {
-      name: "Family Jungle Adventure",
-      duration: "2 Days / 1 Night",
-      price: "$95 per person (kids 50% off)",
-      highlights: [
-        "Family-friendly activities",
-        "Educational programs",
-        "Safe camping areas",
-        "Children's nature walks"
-      ],
-      included: [
-        "Family tents",
-        "Kid-friendly meals",
-        "Nature activities",
-        "Safety supervision",
-        "Educational materials"
-      ],
-      icon: Users,
-      difficulty: "Family Friendly"
-    }
-  ];
-
-  const wildlifeSpottings: WildlifeSpotting[] = [
-    {
-      animal: "Leopard",
-      bestTime: "Early morning & late evening",
-      frequency: "Rare but possible",
-      description: "Sri Lanka's apex predator, most active during dawn and dusk"
-    },
-    {
-      animal: "Sloth Bear",
-      bestTime: "Throughout the day",
-      frequency: "Occasional sightings",
-      description: "Unique to the region, often seen foraging for termites"
-    },
-    {
-      animal: "Elephants",
-      bestTime: "Near water sources",
-      frequency: "Common sightings",
-      description: "Small herds frequent the park's water holes"
-    },
-    {
-      animal: "Spotted Deer",
-      bestTime: "Throughout the day",
-      frequency: "Very common",
-      description: "Large herds graze in open areas"
-    },
-    {
-      animal: "Water Buffalo",
-      bestTime: "Near lakes and ponds",
-      frequency: "Common",
-      description: "Often seen wallowing in water bodies"
-    },
-    {
-      animal: "Peacocks",
-      bestTime: "Morning and evening",
-      frequency: "Very common",
-      description: "National bird, spectacular during mating displays"
-    }
-  ];
-
-  const campingEssentials = [
-    {
-      category: "Clothing",
-      items: [
-        "Long pants and shirts (protection)",
-        "Light jacket for cool nights",
-        "Hat and sunglasses",
-        "Comfortable hiking shoes",
-        "Extra socks and underwear"
-      ]
-    },
-    {
-      category: "Personal Items",
-      items: [
-        "Insect repellent (DEET 30%+)",
-        "Sunscreen and lip balm",
-        "Personal medications",
-        "Toiletries and wet wipes",
-        "Small towel"
-      ]
-    },
-    {
-      category: "Equipment",
-      items: [
-        "Headlamp or flashlight",
-        "Camera with extra batteries",
-        "Binoculars for wildlife",
-        "Power bank for devices",
-        "Reusable water bottle"
-      ]
-    },
-    {
-      category: "Optional Items",
-      items: [
-        "Books or e-reader",
-        "Playing cards",
-        "Journal and pen",
-        "Snacks from home",
-        "Whistle for emergencies"
-      ]
-    }
-  ];
-
-  const faqs = [
-    {
-      question: "Is jungle camping safe?",
-      answer: "Yes, jungle camping in Wilpattu is safe when done with licensed operators. Our experienced guides know the terrain, wildlife behavior, and safety protocols. Camps are set up in designated safe zones, and guides carry communication devices for emergencies. We follow strict safety guidelines and have never had any serious incidents."
-    },
-    {
-      question: "What's the best time for jungle camping?",
-      answer: "The best time is during the dry season from February to October when weather is predictable and wildlife congregates near water sources. Avoid monsoon months (November-January) when heavy rains can make camping uncomfortable and some areas inaccessible."
-    },
-    {
-      question: "What wildlife might we see?",
-      answer: "Wilpattu is famous for leopards, sloth bears, elephants, spotted deer, water buffalo, crocodiles, and over 200 bird species. While leopard sightings are rare and special, you're almost guaranteed to see deer, peacocks, and various birds. Early morning and evening offer the best wildlife viewing opportunities."
-    },
-    {
-      question: "What facilities are available at the campsite?",
-      answer: "Basic camps have tents with mattresses, shared toilet facilities, and a dining area. Adventure camps add better bedding and private facilities. Luxury glamping includes en-suite bathrooms, proper beds, and solar power. All camps provide meals, drinking water, and basic first aid."
-    },
-    {
-      question: "Can children participate in jungle camping?",
-      answer: "Yes, we offer family-friendly camping packages suitable for children aged 6 and above. These camps are in safer areas with additional supervision, shorter walks, and engaging educational activities. Children must be supervised at all times."
-    },
-    {
-      question: "What if it rains during camping?",
-      answer: "Our tents are waterproof and camps have covered common areas. Light rain adds to the jungle atmosphere! For heavy rain, we have contingency plans including early return options or moving to nearby eco-lodges. Rain gear is provided if needed."
-    }
-  ];
-
+  // Fetch content from Firebase with caching
   useEffect(() => {
+    const loadContent = async () => {
+      try {
+        const content = await cachedFetch<JungleCampingPageContent>(
+          'jungle-camping-page',
+          () => jungleCampingPageService.getPageContent(),
+          10 * 60 * 1000 // Cache for 10 minutes
+        );
+        setPageContent(content);
+
+        // Preload hero images
+        if (content?.hero?.images?.length) {
+          content.hero.images.slice(0, 3).forEach((img, index) => {
+            const link = document.createElement('link');
+            link.rel = index === 0 ? 'preload' : 'prefetch';
+            link.as = 'image';
+            link.href = getOptimizedImageUrl(img.url, 1920);
+            document.head.appendChild(link);
+          });
+        }
+      } catch (error) {
+        console.error('Error loading page content:', error);
+        setPageContent(jungleCampingPageService.getDefaultContent());
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadContent();
+  }, []);
+
+  // Hero image rotation
+  useEffect(() => {
+    if (!pageContent?.hero?.images?.length) return;
     const interval = setInterval(() => {
-      setHeroImageIndex((prev) => (prev + 1) % heroImages.length);
+      setHeroImageIndex((prev) => (prev + 1) % pageContent.hero.images.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [pageContent?.hero?.images?.length]);
 
   const handleBookingClick = (packageName?: string) => {
     setSelectedPackage(packageName || null);
     setIsBookingModalOpen(true);
   };
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-green-50">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-green-600 mx-auto mb-4" />
+          <p className="text-gray-600">Loading jungle camping experience...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const heroImages = pageContent?.hero?.images?.length ? pageContent.hero.images : defaultHeroImages;
+  const currentHeroImage = heroImages[heroImageIndex] || defaultHeroImages[0];
+
   return (
     <>
       <Helmet>
-        <title>Jungle Camping Wilpattu | Sri Lanka Wildlife Safari Camping | Recharge Travels</title>
-        <meta name="description" content="Experience authentic jungle camping in Wilpattu National Park. Wildlife safaris, campfire dinners, and wilderness adventures in Sri Lanka's largest national park." />
-        <meta name="keywords" content="jungle camping Sri Lanka, Wilpattu camping, wildlife safari camping, wilderness experience, eco camping, national park camping" />
-        <meta property="og:title" content="Jungle Camping in Wilpattu - Wilderness Adventure" />
-        <meta property="og:description" content="Camp under the stars in Wilpattu National Park with expert guides, wildlife encounters, and authentic jungle experiences." />
-        <meta property="og:image" content="https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=1200&h=630&fit=crop" />
+        <title>{pageContent?.seo?.title || 'Jungle Camping Sri Lanka | Recharge Travels'}</title>
+        <meta name="description" content={pageContent?.seo?.description || ''} />
+        <meta name="keywords" content={pageContent?.seo?.keywords?.join(', ') || ''} />
+        <meta property="og:title" content={pageContent?.seo?.title || ''} />
+        <meta property="og:description" content={pageContent?.seo?.description || ''} />
+        <meta property="og:image" content={pageContent?.seo?.ogImage || ''} />
         <link rel="canonical" href="https://www.rechargetravels.com/experiences/jungle-camping" />
       </Helmet>
 
@@ -309,9 +165,11 @@ const JungleCamping = () => {
             className="absolute inset-0"
           >
             <img
-              src={heroImages[heroImageIndex].url}
-              alt={heroImages[heroImageIndex].caption}
+              src={getOptimizedImageUrl(currentHeroImage.url, 1920)}
+              alt={currentHeroImage.caption}
               className="w-full h-full object-cover"
+              loading={heroImageIndex === 0 ? 'eager' : 'lazy'}
+              fetchPriority={heroImageIndex === 0 ? 'high' : 'auto'}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/20" />
           </motion.div>
@@ -325,19 +183,19 @@ const JungleCamping = () => {
               transition={{ duration: 0.8 }}
             >
               <h1 className="text-5xl md:text-7xl font-bold mb-6 drop-shadow-lg">
-                Jungle Camping Adventure
+                {pageContent?.hero?.title || 'Jungle Camping Adventure'}
               </h1>
               <p className="text-xl md:text-2xl mb-8 font-light drop-shadow">
-                Sleep Under Stars in Wilpattu's Wild Heart
+                {pageContent?.hero?.subtitle || 'Sleep Under Stars in the Wild Heart of Sri Lanka'}
               </p>
               <Button
                 onClick={() => handleBookingClick()}
                 size="lg"
-                className="bg-green-600 hover:bg-green-700 text-white px-8 py-6 text-lg rounded-full 
+                className="bg-green-600 hover:bg-green-700 text-white px-8 py-6 text-lg rounded-full
                          transform hover:scale-105 transition-all duration-300 shadow-xl"
               >
                 <Tent className="mr-2 h-5 w-5" />
-                Book Camping Trip
+                {pageContent?.hero?.ctaText || 'Book Camping Trip'}
               </Button>
             </motion.div>
           </div>
@@ -362,36 +220,33 @@ const JungleCamping = () => {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 className="text-4xl font-bold mb-6">Immerse Yourself in Wilderness</h2>
+            <h2 className="text-4xl font-bold mb-6">
+              {pageContent?.overview?.title || 'Immerse Yourself in Wilderness'}
+            </h2>
             <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
-              Experience the raw beauty of Sri Lanka's largest national park through an authentic 
-              jungle camping adventure. Sleep under starlit skies, wake to the calls of exotic birds, 
-              and explore pristine wilderness with expert naturalist guides. Wilpattu offers an 
-              unmatched opportunity to connect with nature and witness incredible wildlife.
+              {pageContent?.overview?.description || ''}
             </p>
           </motion.div>
 
           {/* Quick Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-            {[
-              { icon: Trees, label: "Park Area", value: "1,317 km²" },
-              { icon: Eye, label: "Wildlife Species", value: "200+" },
-              { icon: Moon, label: "Clear Night Sky", value: "90%" },
-              { icon: Shield, label: "Safety Record", value: "100%" }
-            ].map((stat, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="text-center"
-              >
-                <stat.icon className="h-12 w-12 text-green-600 mx-auto mb-3" />
-                <div className="text-3xl font-bold text-gray-800">{stat.value}</div>
-                <div className="text-gray-600">{stat.label}</div>
-              </motion.div>
-            ))}
+            {pageContent?.stats?.map((stat, index) => {
+              const IconComponent = iconMap[stat.iconName] || Trees;
+              return (
+                <motion.div
+                  key={stat.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  className="text-center"
+                >
+                  <IconComponent className="h-12 w-12 text-green-600 mx-auto mb-3" />
+                  <div className="text-3xl font-bold text-gray-800">{stat.value}</div>
+                  <div className="text-gray-600">{stat.label}</div>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -409,8 +264,8 @@ const JungleCamping = () => {
 
             {/* Overview Tab */}
             <TabsContent value="overview" className="space-y-6">
-              <h3 className="text-2xl font-bold mb-6">The Wilpattu Experience</h3>
-              
+              <h3 className="text-2xl font-bold mb-6">The Wilderness Experience</h3>
+
               <div className="grid md:grid-cols-2 gap-6">
                 <Card>
                   <CardHeader>
@@ -421,7 +276,7 @@ const JungleCamping = () => {
                   </CardHeader>
                   <CardContent>
                     <p className="text-gray-600 mb-4">
-                      Start your days with early morning wildlife drives when animals are most active. 
+                      Start your days with early morning wildlife drives when animals are most active.
                       Explore diverse habitats from dense jungle to open grasslands and serene lakes.
                     </p>
                     <ul className="space-y-2 text-sm">
@@ -454,7 +309,7 @@ const JungleCamping = () => {
                   </CardHeader>
                   <CardContent>
                     <p className="text-gray-600 mb-4">
-                      As darkness falls, the jungle comes alive with nocturnal sounds. Gather around 
+                      As darkness falls, the jungle comes alive with nocturnal sounds. Gather around
                       the campfire for stories, traditional dinner, and stargazing opportunities.
                     </p>
                     <ul className="space-y-2 text-sm">
@@ -491,7 +346,7 @@ const JungleCamping = () => {
                         <ul className="space-y-2 text-sm text-gray-600">
                           <li className="flex items-start">
                             <span className="font-medium mr-2">2:00 PM:</span>
-                            Pickup and journey to Wilpattu
+                            Pickup and journey to the park
                           </li>
                           <li className="flex items-start">
                             <span className="font-medium mr-2">4:00 PM:</span>
@@ -546,84 +401,86 @@ const JungleCamping = () => {
             <TabsContent value="packages" className="space-y-6">
               <h3 className="text-2xl font-bold mb-6">Choose Your Camping Adventure</h3>
               <div className="grid md:grid-cols-2 gap-6">
-                {campingPackages.map((pkg, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <Card className="h-full hover:shadow-xl transition-shadow">
-                      <CardHeader>
-                        <div className="flex items-center justify-between mb-3">
-                          <pkg.icon className="h-10 w-10 text-green-600" />
-                          <div className="text-right">
-                            <Badge className="bg-green-600">{pkg.duration}</Badge>
-                            <Badge variant="outline" className="ml-2">{pkg.difficulty}</Badge>
+                {pageContent?.campingPackages?.map((pkg, index) => {
+                  const IconComponent = iconMap[pkg.iconName] || Tent;
+                  return (
+                    <motion.div
+                      key={pkg.id}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <Card className="h-full hover:shadow-xl transition-shadow">
+                        <CardHeader>
+                          <div className="flex items-center justify-between mb-3">
+                            <IconComponent className="h-10 w-10 text-green-600" />
+                            <div className="text-right">
+                              <Badge className="bg-green-600">{pkg.duration}</Badge>
+                              <Badge variant="outline" className="ml-2">{pkg.difficulty}</Badge>
+                            </div>
                           </div>
-                        </div>
-                        <CardTitle className="text-xl">{pkg.name}</CardTitle>
-                        <p className="text-2xl font-bold text-green-600">{pkg.price}</p>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div>
-                          <h4 className="font-semibold mb-2">Experience Highlights:</h4>
-                          <ul className="space-y-1 text-sm">
-                            {pkg.highlights.map((highlight, idx) => (
-                              <li key={idx} className="flex items-start">
-                                <ChevronRight className="h-4 w-4 text-green-600 mr-1 mt-0.5 flex-shrink-0" />
-                                <span>{highlight}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                        <div>
-                          <h4 className="font-semibold mb-2">Package Includes:</h4>
-                          <ul className="space-y-1 text-sm">
-                            {pkg.included.map((item, idx) => (
-                              <li key={idx} className="flex items-center">
-                                <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                                <span>{item}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                        <Button 
-                          className="w-full bg-green-600 hover:bg-green-700"
-                          onClick={() => handleBookingClick(pkg.name)}
-                        >
-                          Book This Package
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))}
+                          <CardTitle className="text-xl">{pkg.name}</CardTitle>
+                          <p className="text-2xl font-bold text-green-600">{pkg.price}</p>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div>
+                            <h4 className="font-semibold mb-2">Experience Highlights:</h4>
+                            <ul className="space-y-1 text-sm">
+                              {pkg.highlights?.map((highlight, idx) => (
+                                <li key={idx} className="flex items-start">
+                                  <ChevronRight className="h-4 w-4 text-green-600 mr-1 mt-0.5 flex-shrink-0" />
+                                  <span>{highlight}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                          <div>
+                            <h4 className="font-semibold mb-2">Package Includes:</h4>
+                            <ul className="space-y-1 text-sm">
+                              {pkg.included?.map((item, idx) => (
+                                <li key={idx} className="flex items-center">
+                                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                                  <span>{item}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                          <Button
+                            className="w-full bg-green-600 hover:bg-green-700"
+                            onClick={() => handleBookingClick(pkg.name)}
+                          >
+                            Book This Package
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  );
+                })}
               </div>
             </TabsContent>
 
             {/* Wildlife Tab */}
             <TabsContent value="wildlife" className="space-y-6">
-              <h3 className="text-2xl font-bold mb-6">Wildlife of Wilpattu</h3>
-              
+              <h3 className="text-2xl font-bold mb-6">Wildlife Encounters</h3>
+
               <Card className="mb-6">
                 <CardHeader>
-                  <CardTitle>About Wilpattu National Park</CardTitle>
+                  <CardTitle>About the National Park</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-600">
-                    Wilpattu, meaning "land of lakes," is Sri Lanka's largest and oldest national park. 
-                    Its unique feature is the presence of "villus" (natural lakes) that dot the landscape, 
-                    attracting diverse wildlife. The park's varied habitats support an incredible array of 
-                    fauna, making it one of the best places for wildlife viewing in Sri Lanka.
+                    Sri Lanka's national parks are home to incredible biodiversity. The unique feature
+                    of natural lakes attracts diverse wildlife, making it one of the best places for
+                    wildlife viewing. The varied habitats support an incredible array of fauna.
                   </p>
                 </CardContent>
               </Card>
 
               <div className="grid gap-4">
-                {wildlifeSpottings.map((animal, index) => (
+                {pageContent?.wildlifeSpottings?.map((animal, index) => (
                   <motion.div
-                    key={index}
+                    key={animal.id}
                     initial={{ opacity: 0, x: -20 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
@@ -655,7 +512,7 @@ const JungleCamping = () => {
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-600 mb-4">
-                    Wilpattu is a birder's paradise with over 200 recorded species including many endemics.
+                    The park is a birder's paradise with over 200 recorded species including many endemics.
                   </p>
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
@@ -684,25 +541,31 @@ const JungleCamping = () => {
             {/* Preparation Tab */}
             <TabsContent value="prepare" className="space-y-6">
               <h3 className="text-2xl font-bold mb-6">Prepare for Your Jungle Adventure</h3>
-              
+
               <div className="grid md:grid-cols-2 gap-6">
-                {campingEssentials.map((category, index) => (
-                  <Card key={index}>
-                    <CardHeader>
-                      <CardTitle className="text-lg">{category.category}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <ul className="space-y-2">
-                        {category.items.map((item, idx) => (
-                          <li key={idx} className="flex items-center text-sm">
-                            <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                            <span>{item}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </CardContent>
-                  </Card>
-                ))}
+                {pageContent?.campingEssentials?.map((category, index) => {
+                  const IconComponent = iconMap[category.iconName] || Package;
+                  return (
+                    <Card key={category.id}>
+                      <CardHeader>
+                        <CardTitle className="text-lg flex items-center">
+                          <IconComponent className="h-5 w-5 mr-2 text-green-600" />
+                          {category.category}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <ul className="space-y-2">
+                          {category.items?.map((item, idx) => (
+                            <li key={idx} className="flex items-center text-sm">
+                              <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
 
               <Card>
@@ -800,18 +663,9 @@ const JungleCamping = () => {
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-12">Jungle Camping Gallery</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {[
-              "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=400&h=300&fit=crop",
-              "https://images.unsplash.com/photo-1533873984035-25970ab07461?w=400&h=300&fit=crop",
-              "https://images.unsplash.com/photo-1517824806704-9040b037703b?w=400&h=300&fit=crop",
-              "https://images.unsplash.com/photo-1563299796-17596ed6b017?w=400&h=300&fit=crop",
-              "https://images.unsplash.com/photo-1445308394109-4ec2920981b1?w=400&h=300&fit=crop",
-              "https://images.unsplash.com/photo-1510672981848-a1c4f1cb5ccf?w=400&h=300&fit=crop",
-              "https://images.unsplash.com/photo-1487730116645-74489c95b41b?w=400&h=300&fit=crop",
-              "https://images.unsplash.com/photo-1496545672447-f699b503d270?w=400&h=300&fit=crop"
-            ].map((image, index) => (
+            {pageContent?.gallery?.map((image, index) => (
               <motion.div
-                key={index}
+                key={image.id}
                 initial={{ opacity: 0, scale: 0.8 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
@@ -819,8 +673,8 @@ const JungleCamping = () => {
                 className="relative overflow-hidden rounded-lg group cursor-pointer"
               >
                 <img
-                  src={image}
-                  alt={`Jungle camping ${index + 1}`}
+                  src={image.url}
+                  alt={image.alt}
                   className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
                 />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
@@ -835,8 +689,8 @@ const JungleCamping = () => {
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
           <Accordion type="single" collapsible className="space-y-4">
-            {faqs.map((faq, index) => (
-              <AccordionItem key={index} value={`item-${index}`}>
+            {pageContent?.faqs?.map((faq, index) => (
+              <AccordionItem key={faq.id} value={`item-${index}`}>
                 <AccordionTrigger className="text-left hover:text-green-600">
                   {faq.question}
                 </AccordionTrigger>
@@ -858,11 +712,10 @@ const JungleCamping = () => {
             viewport={{ once: true }}
           >
             <h2 className="text-4xl font-bold mb-6 text-white">
-              Ready for Your Wilderness Adventure?
+              {pageContent?.cta?.title || 'Ready for Your Wilderness Adventure?'}
             </h2>
             <p className="text-xl mb-8 text-white/90">
-              Experience the thrill of camping in Sri Lanka's wild heart. 
-              Book your jungle camping adventure today!
+              {pageContent?.cta?.description || 'Experience the thrill of camping in Sri Lanka\'s wild heart.'}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
@@ -871,16 +724,16 @@ const JungleCamping = () => {
                 onClick={() => handleBookingClick()}
               >
                 <Tent className="mr-2 h-5 w-5" />
-                Book Camping Trip
+                {pageContent?.cta?.primaryButtonText || 'Book Camping Trip'}
               </Button>
               <Button
                 size="lg"
                 variant="outline"
                 className="border-white text-white hover:bg-white/10 px-8 py-6 text-lg"
-                onClick={() => window.location.href = 'tel:+94765059595'}
+                onClick={() => window.location.href = `tel:${pageContent?.contact?.phone || '+94765059595'}`}
               >
                 <Phone className="mr-2 h-5 w-5" />
-                Call for Details
+                {pageContent?.cta?.secondaryButtonText || 'Call for Details'}
               </Button>
             </div>
           </motion.div>
@@ -894,20 +747,20 @@ const JungleCamping = () => {
             <div className="flex flex-col items-center">
               <Phone className="h-8 w-8 mb-3 text-green-400" />
               <h3 className="font-semibold mb-2">Call Us</h3>
-              <p className="text-gray-300">+94 76 505 9595</p>
-              <p className="text-sm text-gray-400">Available 24/7</p>
+              <p className="text-gray-300">{pageContent?.contact?.phone || '+94 76 505 9595'}</p>
+              <p className="text-sm text-gray-400">{pageContent?.contact?.phoneNote || 'Available 24/7'}</p>
             </div>
             <div className="flex flex-col items-center">
               <Mail className="h-8 w-8 mb-3 text-green-400" />
               <h3 className="font-semibold mb-2">Email Us</h3>
-              <p className="text-gray-300">info@rechargetravels.com</p>
-              <p className="text-sm text-gray-400">Quick response</p>
+              <p className="text-gray-300">{pageContent?.contact?.email || 'info@rechargetravels.com'}</p>
+              <p className="text-sm text-gray-400">{pageContent?.contact?.emailNote || 'Quick response'}</p>
             </div>
             <div className="flex flex-col items-center">
               <Globe className="h-8 w-8 mb-3 text-green-400" />
               <h3 className="font-semibold mb-2">Visit Website</h3>
-              <p className="text-gray-300">www.rechargetravels.com</p>
-              <p className="text-sm text-gray-400">More experiences</p>
+              <p className="text-gray-300">{pageContent?.contact?.website || 'www.rechargetravels.com'}</p>
+              <p className="text-sm text-gray-400">{pageContent?.contact?.websiteNote || 'More experiences'}</p>
             </div>
           </div>
         </div>

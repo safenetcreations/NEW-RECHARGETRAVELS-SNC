@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import {
   Shell,
   Fish,
   Camera,
@@ -27,7 +27,8 @@ import {
   Mail,
   Droplets,
   Microscope,
-  TrendingUp
+  TrendingUp,
+  Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,257 +36,120 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import EnhancedBookingModal from '@/components/EnhancedBookingModal';
+import { seaCucumberPageService, SeaCucumberPageContent } from '@/services/seaCucumberPageService';
+import { cachedFetch } from '@/lib/cache';
 
-interface FarmLocation {
-  name: string;
-  description: string;
-  location: string;
-  specialization: string;
-  tourFeatures: string[];
-  duration: string;
-  groupSize: string;
-  accessibility: string;
-}
+// Optimized image URL generator
+const getOptimizedImageUrl = (url: string, width: number = 1200): string => {
+  if (!url) return '';
+  if (url.includes('unsplash.com')) {
+    const baseUrl = url.split('?')[0];
+    return `${baseUrl}?w=${width}&q=80&auto=format&fit=crop`;
+  }
+  return url;
+};
 
-interface TourPackage {
-  name: string;
-  duration: string;
-  price: string;
-  highlights: string[];
-  included: string[];
-  icon: React.FC<any>;
-  level: string;
-}
+// Default fallback hero images
+const defaultHeroImages = [
+  { id: '1', url: 'https://images.unsplash.com/photo-1583212292454-1fe6229603b7', caption: 'Sea Cucumber Farm' },
+  { id: '2', url: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5', caption: 'Coastal Waters' },
+  { id: '3', url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e', caption: 'Marine Life' },
+  { id: '4', url: 'https://images.unsplash.com/photo-1559825481-12a05cc00344', caption: 'Ocean Experience' }
+];
+
+// Icon mapping for dynamic content
+const iconMap: Record<string, React.FC<any>> = {
+  Shell, Fish, TrendingUp, Users, Microscope, Waves, Camera, Clock, MapPin
+};
 
 const SeaCucumberFarming = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
   const [heroImageIndex, setHeroImageIndex] = useState(0);
+  const [pageContent, setPageContent] = useState<SeaCucumberPageContent | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const heroImages = [
-    {
-      url: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=1920&h=1080&fit=crop',
-      caption: 'Sea Cucumber Farming Facility'
-    },
-    {
-      url: 'https://images.unsplash.com/photo-1583212292454-1fe6229603b7?w=1920&h=1080&fit=crop',
-      caption: 'Underwater Sea Gardens'
-    },
-    {
-      url: 'https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5?w=1920&h=1080&fit=crop',
-      caption: 'Marine Aquaculture'
-    },
-    {
-      url: 'https://images.unsplash.com/photo-1682687981630-cefe9cd73072?w=1920&h=1080&fit=crop',
-      caption: 'Sustainable Ocean Farming'
-    }
-  ];
-
-  const farmLocations: FarmLocation[] = [
-    {
-      name: "Mannar Sea Cucumber Research Center",
-      description: "Leading facility for sea cucumber research and sustainable farming practices in Sri Lanka.",
-      location: "Mannar District",
-      specialization: "Research & Commercial Farming",
-      tourFeatures: ["Research lab visit", "Breeding facility tour", "Underwater observation", "Expert presentations"],
-      duration: "3 hours",
-      groupSize: "Up to 15 people",
-      accessibility: "Wheelchair accessible areas"
-    },
-    {
-      name: "Jaffna Peninsula Aquaculture Farms",
-      description: "Traditional and modern sea cucumber farming techniques in the historic waters of Jaffna.",
-      location: "Jaffna Peninsula",
-      specialization: "Traditional Farming Methods",
-      tourFeatures: ["Traditional harvesting demo", "Processing facility", "Local community interaction", "Market visit"],
-      duration: "4 hours",
-      groupSize: "Up to 20 people",
-      accessibility: "Partial accessibility"
-    },
-    {
-      name: "Kalpitiya Sustainable Marine Farm",
-      description: "Eco-friendly sea cucumber farming integrated with marine conservation efforts.",
-      location: "Kalpitiya",
-      specialization: "Sustainable Aquaculture",
-      tourFeatures: ["Eco-farming methods", "Snorkeling with sea cucumbers", "Conservation workshop", "Coral reef integration"],
-      duration: "Half day",
-      groupSize: "Up to 12 people",
-      accessibility: "Beach and boat access"
-    },
-    {
-      name: "Eastern Province Export Facility",
-      description: "Commercial sea cucumber farming operation with focus on international export standards.",
-      location: "Batticaloa",
-      specialization: "Export Processing",
-      tourFeatures: ["Commercial operations", "Quality control lab", "Export processing", "Business insights"],
-      duration: "2.5 hours",
-      groupSize: "Up to 10 people",
-      accessibility: "Full facility access"
-    }
-  ];
-
-  const tourPackages: TourPackage[] = [
-    {
-      name: "Educational Farm Visit",
-      duration: "Half Day",
-      price: "$45",
-      highlights: [
-        "Guided facility tour",
-        "Expert presentations",
-        "Hands-on activities",
-        "Q&A session"
-      ],
-      included: [
-        "Transport from hotel",
-        "Professional guide",
-        "Refreshments",
-        "Educational materials",
-        "Certificate"
-      ],
-      icon: Microscope,
-      level: "All levels"
-    },
-    {
-      name: "Marine Biologist Experience",
-      duration: "Full Day",
-      price: "$120",
-      highlights: [
-        "Work with researchers",
-        "Laboratory experience",
-        "Underwater observation",
-        "Data collection"
-      ],
-      included: [
-        "All equipment",
-        "Lunch included",
-        "Research participation",
-        "Snorkeling gear",
-        "Professional photos"
-      ],
-      icon: Fish,
-      level: "Intermediate"
-    },
-    {
-      name: "Investor's Tour",
-      duration: "2 Days",
-      price: "$350",
-      highlights: [
-        "Multiple farm visits",
-        "Business presentations",
-        "Market analysis",
-        "Networking opportunities"
-      ],
-      included: [
-        "Accommodation",
-        "All meals",
-        "Business meetings",
-        "Market tours",
-        "Investment guide"
-      ],
-      icon: TrendingUp,
-      level: "Business focused"
-    },
-    {
-      name: "Family Discovery Tour",
-      duration: "3 Hours",
-      price: "$30 per person",
-      highlights: [
-        "Kid-friendly activities",
-        "Touch pool experience",
-        "Educational games",
-        "Photo opportunities"
-      ],
-      included: [
-        "Family guide",
-        "Children's activities",
-        "Snacks and drinks",
-        "Educational booklets",
-        "Souvenir"
-      ],
-      icon: Users,
-      level: "Family friendly"
-    }
-  ];
-
-  const seaCucumberFacts = [
-    {
-      title: "Ecological Importance",
-      facts: [
-        "Recycle nutrients in marine ecosystems",
-        "Clean ocean floor sediments",
-        "Improve water quality",
-        "Support coral reef health"
-      ]
-    },
-    {
-      title: "Economic Value",
-      facts: [
-        "High demand in Asian markets",
-        "Medicinal properties",
-        "Luxury food product",
-        "Growing global market"
-      ]
-    },
-    {
-      title: "Farming Benefits",
-      facts: [
-        "Sustainable income source",
-        "Low environmental impact",
-        "Community employment",
-        "Export opportunities"
-      ]
-    }
-  ];
-
-  const faqs = [
-    {
-      question: "What exactly are sea cucumbers?",
-      answer: "Sea cucumbers are marine animals that live on the ocean floor. Despite their name, they're not vegetables but echinoderms related to starfish and sea urchins. They play a crucial role in marine ecosystems and are considered a delicacy in many Asian cuisines."
-    },
-    {
-      question: "Is it safe to touch or handle sea cucumbers?",
-      answer: "Yes, most farmed sea cucumber species are completely safe to touch. Our guides will show you the proper handling techniques. Some species can release sticky threads when stressed, but these are harmless. We provide gloves for those who prefer them."
-    },
-    {
-      question: "What should I wear for the farm tour?",
-      answer: "Wear comfortable, water-resistant clothing and shoes that can get wet. Sun protection is essential. For tours involving snorkeling or water activities, bring swimwear. We provide any specialized equipment needed for the tours."
-    },
-    {
-      question: "Are the tours suitable for children?",
-      answer: "Yes! Our Family Discovery Tours are designed specifically for children aged 5 and above. The educational content is adapted to be engaging and age-appropriate. Children must be supervised at all times, especially near water areas."
-    },
-    {
-      question: "Can I purchase sea cucumbers at the farms?",
-      answer: "Some facilities have retail shops where you can purchase processed sea cucumber products. However, live specimens are not sold to tourists. We can arrange visits to local markets where dried sea cucumber products are available."
-    },
-    {
-      question: "What's the best time of year to visit?",
-      answer: "Sea cucumber farms operate year-round, but the best visiting conditions are during the dry seasons (December to March for the west coast, May to September for the east coast). This ensures calmer seas for any water-based activities."
-    }
-  ];
-
+  // Load content from Firebase with caching
   useEffect(() => {
+    const loadContent = async () => {
+      try {
+        const content = await cachedFetch<SeaCucumberPageContent>(
+          'sea-cucumber-farming-page',
+          () => seaCucumberPageService.getPageContent(),
+          10 * 60 * 1000 // Cache for 10 minutes
+        );
+        setPageContent(content);
+
+        // Preload hero images
+        if (content?.hero?.images?.length) {
+          content.hero.images.slice(0, 3).forEach((img, index) => {
+            const link = document.createElement('link');
+            link.rel = index === 0 ? 'preload' : 'prefetch';
+            link.as = 'image';
+            link.href = getOptimizedImageUrl(img.url, 1920);
+            document.head.appendChild(link);
+          });
+        }
+      } catch (error) {
+        console.error('Error loading page content:', error);
+        // Use default content on error
+        setPageContent(seaCucumberPageService.getDefaultContent());
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadContent();
+  }, []);
+
+  // Get data from pageContent or use defaults
+  const heroImages = pageContent?.hero?.images?.length ? pageContent.hero.images : defaultHeroImages;
+  const farmLocations = pageContent?.farmLocations || [];
+  const tourPackages = pageContent?.tourPackages || [];
+  const seaCucumberFacts = pageContent?.facts || [];
+  const faqs = pageContent?.faqs || [];
+  const stats = pageContent?.stats || [];
+  const gallery = pageContent?.gallery || [];
+
+  // Hero image rotation
+  useEffect(() => {
+    if (heroImages.length === 0) return;
     const interval = setInterval(() => {
       setHeroImageIndex((prev) => (prev + 1) % heroImages.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [heroImages.length]);
 
   const handleBookingClick = (packageName?: string) => {
     setSelectedPackage(packageName || null);
     setIsBookingModalOpen(true);
   };
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <>
+        <Header />
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="h-12 w-12 animate-spin text-teal-600 mx-auto mb-4" />
+            <p className="text-gray-600">Loading experience...</p>
+          </div>
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
   return (
     <>
       <Helmet>
-        <title>Sea Cucumber Farm Tours Sri Lanka | Marine Aquaculture Experience | Recharge Travels</title>
-        <meta name="description" content="Visit sustainable sea cucumber farms in Sri Lanka. Educational tours showcasing marine aquaculture, conservation, and traditional farming methods." />
-        <meta name="keywords" content="sea cucumber farming Sri Lanka, marine aquaculture tours, sustainable farming, educational tours, Mannar sea cucumber, aquaculture experience" />
-        <meta property="og:title" content="Sea Cucumber Farm Tours - Discover Marine Aquaculture" />
-        <meta property="og:description" content="Explore sustainable sea cucumber farming in Sri Lanka with educational tours and hands-on experiences." />
-        <meta property="og:image" content="https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=1200&h=630&fit=crop" />
+        <title>{pageContent?.seo.title || 'Sea Cucumber Farm Tours Sri Lanka | Recharge Travels'}</title>
+        <meta name="description" content={pageContent?.seo.description || 'Visit sustainable sea cucumber farms in Sri Lanka.'} />
+        <meta name="keywords" content={pageContent?.seo.keywords?.join(', ') || 'sea cucumber farming Sri Lanka'} />
+        <meta property="og:title" content={pageContent?.hero.title || 'Sea Cucumber Farm Tours'} />
+        <meta property="og:description" content={pageContent?.seo.description || ''} />
+        <meta property="og:image" content={pageContent?.seo.ogImage || ''} />
         <link rel="canonical" href="https://www.rechargetravels.com/experiences/sea-cucumber-farming" />
       </Helmet>
 
@@ -294,21 +158,25 @@ const SeaCucumberFarming = () => {
       {/* Hero Section */}
       <section className="relative h-[70vh] min-h-[600px] w-full overflow-hidden">
         <AnimatePresence mode="wait">
-          <motion.div
-            key={heroImageIndex}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1 }}
-            className="absolute inset-0"
-          >
-            <img
-              src={heroImages[heroImageIndex].url}
-              alt={heroImages[heroImageIndex].caption}
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/20" />
-          </motion.div>
+          {heroImages[heroImageIndex] && (
+            <motion.div
+              key={heroImageIndex}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1 }}
+              className="absolute inset-0"
+            >
+              <img
+                src={getOptimizedImageUrl(heroImages[heroImageIndex].url, 1920)}
+                alt={heroImages[heroImageIndex].caption}
+                className="w-full h-full object-cover"
+                loading={heroImageIndex === 0 ? 'eager' : 'lazy'}
+                fetchPriority={heroImageIndex === 0 ? 'high' : 'auto'}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/20" />
+            </motion.div>
+          )}
         </AnimatePresence>
 
         <div className="absolute inset-0 flex items-center justify-center z-10">
@@ -319,19 +187,19 @@ const SeaCucumberFarming = () => {
               transition={{ duration: 0.8 }}
             >
               <h1 className="text-5xl md:text-7xl font-bold mb-6 drop-shadow-lg">
-                Sea Cucumber Farm Tours
+                {pageContent?.hero.title || 'Sea Cucumber Farm Tours'}
               </h1>
               <p className="text-xl md:text-2xl mb-8 font-light drop-shadow">
-                Discover Sustainable Marine Aquaculture in Sri Lanka
+                {pageContent?.hero.subtitle || 'Discover Sustainable Marine Aquaculture in Sri Lanka'}
               </p>
               <Button
                 onClick={() => handleBookingClick()}
                 size="lg"
-                className="bg-teal-600 hover:bg-teal-700 text-white px-8 py-6 text-lg rounded-full 
+                className="bg-teal-600 hover:bg-teal-700 text-white px-8 py-6 text-lg rounded-full
                          transform hover:scale-105 transition-all duration-300 shadow-xl"
               >
                 <Shell className="mr-2 h-5 w-5" />
-                Book Farm Tour
+                {pageContent?.hero.ctaText || 'Book Farm Tour'}
               </Button>
             </motion.div>
           </div>
@@ -356,36 +224,31 @@ const SeaCucumberFarming = () => {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 className="text-4xl font-bold mb-6">Explore the World of Sea Cucumber Farming</h2>
+            <h2 className="text-4xl font-bold mb-6">{pageContent?.overview.title || 'Explore the World of Sea Cucumber Farming'}</h2>
             <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
-              Discover the fascinating world of sea cucumber aquaculture in Sri Lanka. Visit 
-              state-of-the-art farming facilities, learn about sustainable marine farming practices, 
-              and understand the ecological and economic importance of these remarkable creatures. 
-              Perfect for students, researchers, investors, and curious travelers.
+              {pageContent?.overview.description || 'Discover the fascinating world of sea cucumber aquaculture in Sri Lanka.'}
             </p>
           </motion.div>
 
           {/* Quick Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-            {[
-              { icon: Shell, label: "Farm Locations", value: "15+" },
-              { icon: Fish, label: "Species Farmed", value: "8" },
-              { icon: TrendingUp, label: "Annual Production", value: "500+ tons" },
-              { icon: Users, label: "Jobs Created", value: "2,000+" }
-            ].map((stat, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="text-center"
-              >
-                <stat.icon className="h-12 w-12 text-teal-600 mx-auto mb-3" />
-                <div className="text-3xl font-bold text-gray-800">{stat.value}</div>
-                <div className="text-gray-600">{stat.label}</div>
-              </motion.div>
-            ))}
+            {stats.map((stat, index) => {
+              const IconComponent = iconMap[stat.iconName] || Shell;
+              return (
+                <motion.div
+                  key={stat.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  className="text-center"
+                >
+                  <IconComponent className="h-12 w-12 text-teal-600 mx-auto mb-3" />
+                  <div className="text-3xl font-bold text-gray-800">{stat.value}</div>
+                  <div className="text-gray-600">{stat.label}</div>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -555,59 +418,62 @@ const SeaCucumberFarming = () => {
             <TabsContent value="tours" className="space-y-6">
               <h3 className="text-2xl font-bold mb-6">Choose Your Experience Level</h3>
               <div className="grid md:grid-cols-2 gap-6">
-                {tourPackages.map((tour, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <Card className="h-full hover:shadow-xl transition-shadow">
-                      <CardHeader>
-                        <div className="flex items-center justify-between mb-3">
-                          <tour.icon className="h-10 w-10 text-teal-600" />
-                          <div className="text-right">
-                            <Badge className="bg-teal-600">{tour.duration}</Badge>
-                            <Badge variant="outline" className="ml-2">{tour.level}</Badge>
+                {tourPackages.map((tour, index) => {
+                  const TourIcon = iconMap[tour.iconName] || Shell;
+                  return (
+                    <motion.div
+                      key={tour.id}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <Card className="h-full hover:shadow-xl transition-shadow">
+                        <CardHeader>
+                          <div className="flex items-center justify-between mb-3">
+                            <TourIcon className="h-10 w-10 text-teal-600" />
+                            <div className="text-right">
+                              <Badge className="bg-teal-600">{tour.duration}</Badge>
+                              <Badge variant="outline" className="ml-2">{tour.level}</Badge>
+                            </div>
                           </div>
-                        </div>
-                        <CardTitle className="text-xl">{tour.name}</CardTitle>
-                        <p className="text-2xl font-bold text-teal-600">{tour.price}</p>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div>
-                          <h4 className="font-semibold mb-2">Experience Highlights:</h4>
-                          <ul className="space-y-1 text-sm">
-                            {tour.highlights.map((highlight, idx) => (
-                              <li key={idx} className="flex items-start">
-                                <ChevronRight className="h-4 w-4 text-teal-600 mr-1 mt-0.5 flex-shrink-0" />
-                                <span>{highlight}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                        <div>
-                          <h4 className="font-semibold mb-2">Included:</h4>
-                          <ul className="space-y-1 text-sm">
-                            {tour.included.map((item, idx) => (
-                              <li key={idx} className="flex items-center">
-                                <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                                <span>{item}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                        <Button 
-                          className="w-full bg-teal-600 hover:bg-teal-700"
-                          onClick={() => handleBookingClick(tour.name)}
-                        >
-                          Book This Experience
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))}
+                          <CardTitle className="text-xl">{tour.name}</CardTitle>
+                          <p className="text-2xl font-bold text-teal-600">{tour.price}</p>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div>
+                            <h4 className="font-semibold mb-2">Experience Highlights:</h4>
+                            <ul className="space-y-1 text-sm">
+                              {tour.highlights.map((highlight, idx) => (
+                                <li key={idx} className="flex items-start">
+                                  <ChevronRight className="h-4 w-4 text-teal-600 mr-1 mt-0.5 flex-shrink-0" />
+                                  <span>{highlight}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                          <div>
+                            <h4 className="font-semibold mb-2">Included:</h4>
+                            <ul className="space-y-1 text-sm">
+                              {tour.included.map((item, idx) => (
+                                <li key={idx} className="flex items-center">
+                                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                                  <span>{item}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                          <Button
+                            className="w-full bg-teal-600 hover:bg-teal-700"
+                            onClick={() => handleBookingClick(tour.name)}
+                          >
+                            Book This Experience
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  );
+                })}
               </div>
             </TabsContent>
 
@@ -729,18 +595,9 @@ const SeaCucumberFarming = () => {
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-12">Sea Cucumber Farming Gallery</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {[
-              "https://images.unsplash.com/photo-1583212292454-1fe6229603b7?w=400&h=300&fit=crop",
-              "https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5?w=400&h=300&fit=crop",
-              "https://images.unsplash.com/photo-1682687981630-cefe9cd73072?w=400&h=300&fit=crop",
-              "https://images.unsplash.com/photo-1574482620811-1aa16ffe3c82?w=400&h=300&fit=crop",
-              "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&h=300&fit=crop",
-              "https://images.unsplash.com/photo-1682687220777-2c60708d6889?w=400&h=300&fit=crop",
-              "https://images.unsplash.com/photo-1584649054802-56f5e38a8e72?w=400&h=300&fit=crop",
-              "https://images.unsplash.com/photo-1574263867128-a3d06eb5a883?w=400&h=300&fit=crop"
-            ].map((image, index) => (
+            {gallery.map((image, index) => (
               <motion.div
-                key={index}
+                key={image.id || index}
                 initial={{ opacity: 0, scale: 0.8 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
@@ -748,8 +605,8 @@ const SeaCucumberFarming = () => {
                 className="relative overflow-hidden rounded-lg group cursor-pointer"
               >
                 <img
-                  src={image}
-                  alt={`Sea cucumber farming ${index + 1}`}
+                  src={image.url}
+                  alt={image.alt || `Sea cucumber farming ${index + 1}`}
                   className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
                 />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
@@ -787,11 +644,10 @@ const SeaCucumberFarming = () => {
             viewport={{ once: true }}
           >
             <h2 className="text-4xl font-bold mb-6 text-white">
-              Ready to Explore Marine Aquaculture?
+              {pageContent?.cta?.title || 'Ready to Explore Marine Aquaculture?'}
             </h2>
             <p className="text-xl mb-8 text-white/90">
-              Join us for an educational journey into sustainable sea cucumber farming. 
-              Perfect for students, researchers, and eco-conscious travelers.
+              {pageContent?.cta?.description || 'Join us for an educational journey into sustainable sea cucumber farming. Perfect for students, researchers, and eco-conscious travelers.'}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
@@ -800,16 +656,16 @@ const SeaCucumberFarming = () => {
                 onClick={() => handleBookingClick()}
               >
                 <Shell className="mr-2 h-5 w-5" />
-                Book Farm Tour
+                {pageContent?.cta?.primaryButtonText || 'Book Farm Tour'}
               </Button>
               <Button
                 size="lg"
                 variant="outline"
                 className="border-white text-white hover:bg-white/10 px-8 py-6 text-lg"
-                onClick={() => window.location.href = 'tel:+94765059595'}
+                onClick={() => window.location.href = `tel:${pageContent?.contact?.phone || '+94765059595'}`}
               >
                 <Phone className="mr-2 h-5 w-5" />
-                Call for Details
+                {pageContent?.cta?.secondaryButtonText || 'Call for Details'}
               </Button>
             </div>
           </motion.div>
@@ -823,20 +679,20 @@ const SeaCucumberFarming = () => {
             <div className="flex flex-col items-center">
               <Phone className="h-8 w-8 mb-3 text-teal-400" />
               <h3 className="font-semibold mb-2">Call Us</h3>
-              <p className="text-gray-300">+94 76 505 9595</p>
-              <p className="text-sm text-gray-400">Available 24/7</p>
+              <p className="text-gray-300">{pageContent?.contact?.phone || '+94 76 505 9595'}</p>
+              <p className="text-sm text-gray-400">{pageContent?.contact?.phoneNote || 'Available 24/7'}</p>
             </div>
             <div className="flex flex-col items-center">
               <Mail className="h-8 w-8 mb-3 text-teal-400" />
               <h3 className="font-semibold mb-2">Email Us</h3>
-              <p className="text-gray-300">info@rechargetravels.com</p>
-              <p className="text-sm text-gray-400">Quick response</p>
+              <p className="text-gray-300">{pageContent?.contact?.email || 'info@rechargetravels.com'}</p>
+              <p className="text-sm text-gray-400">{pageContent?.contact?.emailNote || 'Quick response'}</p>
             </div>
             <div className="flex flex-col items-center">
               <Globe className="h-8 w-8 mb-3 text-teal-400" />
               <h3 className="font-semibold mb-2">Visit Website</h3>
-              <p className="text-gray-300">www.rechargetravels.com</p>
-              <p className="text-sm text-gray-400">More experiences</p>
+              <p className="text-gray-300">{pageContent?.contact?.website || 'www.rechargetravels.com'}</p>
+              <p className="text-sm text-gray-400">{pageContent?.contact?.websiteNote || 'More experiences'}</p>
             </div>
           </div>
         </div>

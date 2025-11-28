@@ -30,8 +30,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import EnhancedBookingModal from '@/components/EnhancedBookingModal';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { getDestinationBySlug } from '@/services/destinationContentService';
 
 interface HeroSlide {
   image: string;
@@ -65,6 +64,40 @@ interface DestinationInfo {
   bestTime: string;
   language: string;
   currency: string;
+}
+
+interface WeatherInfo {
+  temperature: string;
+  season: string;
+  rainfall: string;
+}
+
+interface Accommodation {
+  name: string;
+  type: string;
+  price: string;
+  features: string[];
+}
+
+interface DiningOption {
+  name: string;
+  cuisine: string;
+  specialty: string;
+  priceRange: string;
+}
+
+interface SurfSpot {
+  name: string;
+  level: string;
+  waveType: string;
+  bestTime: string;
+  crowdLevel: string;
+}
+
+interface CTASection {
+  title: string;
+  subtitle: string;
+  buttonText: string;
 }
 
 const ArugamBay = () => {
@@ -204,7 +237,7 @@ const ArugamBay = () => {
     currency: "Sri Lankan Rupee (LKR)"
   });
 
-  const [accommodations] = useState([
+  const [accommodations, setAccommodations] = useState<Accommodation[]>([
     {
       name: "Jetwing Surf",
       type: "Luxury Resort",
@@ -231,7 +264,7 @@ const ArugamBay = () => {
     }
   ]);
 
-  const [restaurants] = useState([
+  const [restaurants, setRestaurants] = useState<DiningOption[]>([
     {
       name: "Hideaway Restaurant",
       cuisine: "Seafood & International",
@@ -258,7 +291,7 @@ const ArugamBay = () => {
     }
   ]);
 
-  const [surfSpots] = useState([
+  const [surfSpots, setSurfSpots] = useState<SurfSpot[]>([
     {
       name: "Main Point",
       level: "Intermediate to Advanced",
@@ -289,6 +322,19 @@ const ArugamBay = () => {
     }
   ]);
 
+  const [weatherInfo, setWeatherInfo] = useState<WeatherInfo>({
+    temperature: "26-32°C",
+    season: "Dry Season (Apr-Oct)",
+    rainfall: "Low during surf season"
+  });
+
+  const [ctaSection, setCtaSection] = useState<CTASection>({
+    title: "Ready to Catch the Perfect Wave?",
+    subtitle:
+      "Let us help you plan the ultimate surf adventure in Arugam Bay with expert guides and local insights",
+    buttonText: "Start Planning Your Surf Trip",
+  });
+
   // Cycle through hero slides
   useEffect(() => {
     const timer = setInterval(() => {
@@ -297,34 +343,110 @@ const ArugamBay = () => {
     return () => clearInterval(timer);
   }, [heroSlides.length]);
 
-  // Load custom images from Firebase
+  // Load dynamic content from Firestore destination document
   useEffect(() => {
-    const loadCustomImages = async () => {
+    const loadContent = async () => {
       try {
-        const docRef = doc(db, 'destinations', 'arugambay');
-        const docSnap = await getDoc(docRef);
-        
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          if (data.heroImages) {
-            setHeroSlides(data.heroImages);
+        let data = await getDestinationBySlug('arugam-bay');
+
+        // Backward compatibility with legacy doc id
+        if (!data) {
+          data = await getDestinationBySlug('arugambay');
+        }
+
+        if (data) {
+          const anyData: any = data;
+
+          if (Array.isArray(anyData.heroSlides) && anyData.heroSlides.length) {
+            setHeroSlides(anyData.heroSlides as HeroSlide[]);
+          } else if (Array.isArray(anyData.heroImages) && anyData.heroImages.length) {
+            // Legacy field name
+            setHeroSlides(anyData.heroImages as HeroSlide[]);
           }
-          if (data.attractions) {
-            setAttractions(data.attractions);
+
+          if (Array.isArray(anyData.attractions) && anyData.attractions.length) {
+            setAttractions(anyData.attractions as Attraction[]);
+          }
+
+          if (Array.isArray(anyData.activities) && anyData.activities.length) {
+            setActivities(
+              anyData.activities.map((activity: any) => ({
+                ...activity,
+                icon: getIconComponent(activity.icon),
+              }))
+            );
+          }
+
+          if (anyData.destinationInfo) {
+            setDestinationInfo(anyData.destinationInfo as DestinationInfo);
+          }
+
+          if (anyData.weatherInfo) {
+            setWeatherInfo({
+              temperature: anyData.weatherInfo.temperature || "26-32°C",
+              season: anyData.weatherInfo.season || "Dry Season (Apr-Oct)",
+              rainfall: anyData.weatherInfo.rainfall || "Low during surf season",
+            });
+          }
+
+          if (Array.isArray(anyData.hotels) && anyData.hotels.length) {
+            setAccommodations(
+              anyData.hotels.map((hotel: any) => ({
+                name: hotel.name,
+                type: hotel.type || (hotel.starRating ? `${hotel.starRating}-Star Hotel` : 'Hotel'),
+                price: hotel.priceRange || hotel.price || '',
+                features: hotel.amenities || [],
+              }))
+            );
+          }
+
+          if (Array.isArray(anyData.restaurants) && anyData.restaurants.length) {
+            setRestaurants(
+              anyData.restaurants.map((rest: any) => ({
+                name: rest.name,
+                cuisine: rest.cuisine || '',
+                specialty: rest.description || rest.specialty || '',
+                priceRange: rest.priceRange || '',
+              }))
+            );
+          }
+
+          if (Array.isArray(anyData.surfSpots) && anyData.surfSpots.length) {
+            setSurfSpots(anyData.surfSpots as SurfSpot[]);
+          }
+
+          if (anyData.ctaSection) {
+            setCtaSection({
+              title: anyData.ctaSection.title || "Ready to Catch the Perfect Wave?",
+              subtitle:
+                anyData.ctaSection.subtitle ||
+                "Let us help you plan the ultimate surf adventure in Arugam Bay with expert guides and local insights",
+              buttonText: anyData.ctaSection.buttonText || "Start Planning Your Surf Trip",
+            });
           }
         }
       } catch (error) {
-        console.error('Error loading custom images:', error);
+        console.error('Error loading destination content for Arugam Bay:', error);
       }
     };
 
-    loadCustomImages();
+    loadContent();
   }, []);
 
-  const weatherInfo = {
-    temperature: "26-32°C",
-    season: "Dry Season (Apr-Oct)",
-    rainfall: "Low during surf season"
+  const getIconComponent = (iconName: string) => {
+    const iconMap: { [key: string]: any } = {
+      Waves,
+      Anchor,
+      Sunrise,
+      Fish,
+      Utensils,
+      Camera,
+      Wind,
+      Sun,
+      TreePalm,
+    };
+
+    return iconMap[iconName] || Waves;
   };
 
   const tabs = [
@@ -851,17 +973,17 @@ const ArugamBay = () => {
         <div className="bg-gradient-to-r from-cyan-600 to-blue-600 text-white py-16">
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Ready to Catch the Perfect Wave?
+              {ctaSection.title}
             </h2>
             <p className="text-xl mb-8 max-w-2xl mx-auto">
-              Let us help you plan the ultimate surf adventure in Arugam Bay with expert guides and local insights
+              {ctaSection.subtitle}
             </p>
             <Button 
               size="lg" 
               className="bg-white text-cyan-600 hover:bg-gray-100"
               onClick={() => setShowBookingModal(true)}
             >
-              Start Planning Your Surf Trip
+              {ctaSection.buttonText}
             </Button>
           </div>
         </div>

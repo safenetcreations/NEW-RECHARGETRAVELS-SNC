@@ -21,6 +21,9 @@ const CulturalToursManager = lazy(() => import('@/components/cms/CulturalToursMa
 const PhotographyToursManager = lazy(() => import('@/components/cms/PhotographyToursManager'));
 const BeachToursManager = lazy(() => import('@/components/cms/BeachToursManager'));
 const EcotourismToursManager = lazy(() => import('@/components/cms/EcotourismToursManager'));
+const RamayanaToursManager = lazy(() => import('@/components/cms/RamayanaToursManager'));
+const NationalParksManager = lazy(() => import('@/components/cms/NationalParksManager'));
+const WildToursManager = lazy(() => import('@/components/cms/WildToursManager'));
 const DestinationContentManager = lazy(() => import('@/components/cms/DestinationContentManager'));
 
 const queryClient = new QueryClient();
@@ -64,6 +67,9 @@ function App() {
                 <Route path="/photography" element={<PhotographyToursManager />} />
                 <Route path="/beach" element={<BeachToursManager />} />
                 <Route path="/ecotourism" element={<EcotourismToursManager />} />
+                <Route path="/ramayana" element={<RamayanaToursManager />} />
+                <Route path="/nationalparks" element={<NationalParksManager />} />
+                <Route path="/wildtours" element={<WildToursManager />} />
                 <Route path="/destinations" element={<DestinationContentManager />} />
                 <Route path="/posts" element={<PostsSection />} />
                 <Route path="/posts/new" element={<CreatePost />} />

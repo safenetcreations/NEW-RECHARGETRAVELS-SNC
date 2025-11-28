@@ -62,6 +62,10 @@ export interface TransferStructuredData {
 }
 
 export const generateTransferStructuredData = (route: PopularRoute): TransferStructuredData => {
+  const baseUrl = typeof window !== 'undefined'
+    ? window.location.origin
+    : 'https://recharge-travels-73e76.web.app';
+
   const structuredData: TransferStructuredData = {
     '@context': 'https://schema.org',
     '@type': ['TaxiService', 'TransferService'],
@@ -70,8 +74,8 @@ export const generateTransferStructuredData = (route: PopularRoute): TransferStr
     provider: {
       '@type': 'Organization',
       name: 'Recharge Travels',
-      url: 'https://rechargetravels.com',
-      logo: 'https://rechargetravels.com/logo.png',
+      url: baseUrl,
+      logo: `${baseUrl}/logo-v2.png`,
       sameAs: [
         'https://facebook.com/rechargetravels',
         'https://instagram.com/rechargetravels',
@@ -138,13 +142,17 @@ export const generateTransferStructuredData = (route: PopularRoute): TransferStr
 
 // Local Business structured data for company
 export const generateLocalBusinessData = () => {
+  const baseUrl = typeof window !== 'undefined'
+    ? window.location.origin
+    : 'https://recharge-travels-73e76.web.app';
+
   return {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
-    '@id': 'https://rechargetravels.com/#business',
+    '@id': `${baseUrl}/#business`,
     name: 'Recharge Travels',
     description: 'Premium airport transfers and private transportation services across Sri Lanka',
-    url: 'https://rechargetravels.com',
+    url: baseUrl,
     telephone: '+94771234567',
     email: 'info@rechargetravels.com',
     address: {

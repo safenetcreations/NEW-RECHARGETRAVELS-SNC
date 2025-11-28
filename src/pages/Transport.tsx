@@ -5,6 +5,8 @@ import { Phone, Car, Clock, Shield, MapPin, Users, Star, Sparkles, Calendar } fr
 import { LoadScript } from '@react-google-maps/api'
 import TransportBookingForm from '@/components/TransportBookingForm'
 import { GOOGLE_MAPS_API_KEY, googleMapsLibraries, isDemoMode } from '@/lib/googleMapsConfig'
+import { SEOMetaTags } from '@/components/seo/SEOMetaTags'
+import { SEOSchema } from '@/components/seo/SEOSchema'
 
 const TransportContent = () => {
   const vehicleTypes = [
@@ -17,6 +19,25 @@ const TransportContent = () => {
 
   return (
     <>
+      {/* SEO Meta Tags */}
+      <SEOMetaTags
+        title="Sri Lanka Transport Services - Airport Transfers & Car Rentals"
+        description="Premium transport services across Sri Lanka. Airport transfers, private drivers, car rentals. 24/7 service, modern fleet, professional drivers. Book online now!"
+        keywords="Sri Lanka transport, airport transfer Colombo, car rental Sri Lanka, private driver, taxi service, vehicle hire, Colombo airport taxi"
+        image="https://www.rechargetravels.com/images/transport-hero.jpg"
+        url="https://www.rechargetravels.com/transport"
+      />
+
+      {/* Schema Markup */}
+      <SEOSchema
+        type="LocalBusiness"
+        data={{
+          name: "Recharge Travels - Transport Services",
+          description: "Premium transport and car rental services in Sri Lanka with professional drivers and modern fleet. Available 24/7.",
+          image: "https://www.rechargetravels.com/images/transport-hero.jpg",
+        }}
+      />
+
       {/* Enhanced Hero Section */}
       <section className="relative bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-800 text-white py-24 overflow-hidden">
         {/* Background Elements */}
@@ -42,15 +63,15 @@ const TransportContent = () => {
           <p className="text-xl md:text-2xl mb-10 max-w-4xl mx-auto text-blue-100">
             Safe, comfortable, and punctual transport solutions. From airport transfers to custom journeys with professional drivers and modern vehicles.
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button 
+            <Button
               className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-8 py-4 rounded-xl text-lg font-semibold shadow-xl transform hover:scale-105 transition-all duration-300"
             >
               <Calendar className="w-5 h-5 mr-2" />
               Book Transport Now
             </Button>
-            <Button 
+            <Button
               variant="outline"
               className="border-2 border-white text-white hover:bg-white hover:text-blue-800 px-8 py-4 rounded-xl text-lg font-semibold backdrop-blur-sm"
             >
@@ -90,7 +111,7 @@ const TransportContent = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              
+
               {/* Booking Form */}
               <div className="lg:col-span-2">
                 <TransportBookingForm />
@@ -98,7 +119,7 @@ const TransportContent = () => {
 
               {/* Sidebar */}
               <div className="space-y-6">
-                
+
                 {/* Enhanced Vehicle Types */}
                 <Card className="border-0 shadow-xl">
                   <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-lg">
@@ -121,9 +142,9 @@ const TransportContent = () => {
                                 <div className="text-sm text-gray-600">{vehicle.price}</div>
                               </div>
                             </div>
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
+                            <Button
+                              size="sm"
+                              variant="outline"
                               className="opacity-0 group-hover:opacity-100 transition-opacity border-blue-500 text-blue-600 hover:bg-blue-500 hover:text-white"
                             >
                               Select

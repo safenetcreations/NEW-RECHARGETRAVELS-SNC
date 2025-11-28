@@ -38,6 +38,22 @@ const TravelGuideManager = lazy(() => import('@/components/admin/panel/TravelGui
 const BlogManager = lazy(() => import('@/components/admin/panel/BlogManager'));
 const BlogEditor = lazy(() => import('@/components/admin/panel/BlogEditor'));
 const AIContentGenerator = lazy(() => import('@/components/admin/panel/AIContentGenerator'));
+const DestinationContentManager = lazy(() => import('@/components/admin/panel/DestinationContentManager'));
+const DriverVerificationQueue = lazy(() => import('@/components/admin/panel/DriverVerificationQueue'));
+const NegomboDestinationManagement = lazy(
+  () => import('@/components/admin/panel/NegomboDestinationManagement'),
+);
+const AdamsPeakDestinationManagement = lazy(
+  () => import('@/components/admin/panel/AdamsPeakDestinationManagement'),
+);
+const SocialMediaManager = lazy(() => import('@/components/admin/panel/SocialMediaManager'));
+const GroupTransportBookingsManagement = lazy(
+  () => import('@/components/admin/panel/GroupTransportBookingsManagement'),
+);
+const ContentManagementDashboard = lazy(
+  () => import('@/components/cms/ContentManagementDashboard'),
+);
+const TripBuilderManager = lazy(() => import('@/components/admin/panel/TripBuilderManager'));
 
 const AdminPanel: React.FC = () => {
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -73,6 +89,12 @@ const AdminPanel: React.FC = () => {
           return <LuxuryExperiencesManager />;
         case 'travel-guide':
           return <TravelGuideManager />;
+        case 'destination-content':
+          return <DestinationContentManager />;
+        case 'negombo-destination':
+          return <NegomboDestinationManagement />;
+        case 'adams-peak-destination':
+          return <AdamsPeakDestinationManagement />;
         // Services
         case 'hotels':
           return <HotelsManagement />;
@@ -86,6 +108,8 @@ const AdminPanel: React.FC = () => {
           return <div className="p-6"><h2 className="text-2xl font-bold">Experiences Manager - Use Luxury Experiences instead</h2></div>;
         case 'drivers':
           return <DriversManagement />;
+        case 'driver-verification':
+          return <DriverVerificationQueue />;
         case 'bookings':
           return <BookingsManagement />;
         case 'reviews':
@@ -115,6 +139,12 @@ const AdminPanel: React.FC = () => {
           return <SettingsSection />;
         case 'ai-test':
           return <AITest />;
+        // Legacy CMS dashboard (includes Group Transport CMS)
+        case 'content-dashboard':
+          return <ContentManagementDashboard />;
+        // Group Transport bookings (new panel)
+        case 'group-transport-bookings':
+          return <GroupTransportBookingsManagement />;
         // Blog System
         case 'blog-manager':
           return <BlogManager onNavigate={setActiveSection} />;
@@ -122,6 +152,12 @@ const AdminPanel: React.FC = () => {
           return <BlogEditor onNavigate={setActiveSection} />;
         case 'ai-content-generator':
           return <AIContentGenerator onNavigate={setActiveSection} />;
+        // Social Media
+        case 'social-media':
+          return <SocialMediaManager />;
+        // Trip Builder
+        case 'trip-builder':
+          return <TripBuilderManager />;
         default:
           return <DashboardSection />;
       }

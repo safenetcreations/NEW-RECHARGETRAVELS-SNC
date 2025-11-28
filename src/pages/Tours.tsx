@@ -8,6 +8,8 @@ import { Link } from 'react-router-dom'
 import { useTours } from '@/hooks/useTours'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import BookingModal from '@/components/BookingModal'
+import { SEOMetaTags } from '@/components/seo/SEOMetaTags'
+import { SEOSchema } from '@/components/seo/SEOSchema'
 
 const Tours = () => {
   const [searchTerm, setSearchTerm] = useState('')
@@ -15,21 +17,21 @@ const Tours = () => {
   const [duration, setDuration] = useState('')
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
   const [selectedTour, setSelectedTour] = useState<any>(null)
-  
+
   const { filteredTours, filters, setFilters, isLoading } = useTours()
 
   // Apply local filters
   const locallyFilteredTours = filteredTours.filter(tour => {
     const matchesSearch = tour.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         tour.description.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesPrice = !priceRange || 
-                        (priceRange === 'under-50' && tour.price_per_person < 50) ||
-                        (priceRange === '50-100' && tour.price_per_person >= 50 && tour.price_per_person <= 100) ||
-                        (priceRange === 'over-100' && tour.price_per_person > 100)
+      tour.description.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesPrice = !priceRange ||
+      (priceRange === 'under-50' && tour.price_per_person < 50) ||
+      (priceRange === '50-100' && tour.price_per_person >= 50 && tour.price_per_person <= 100) ||
+      (priceRange === 'over-100' && tour.price_per_person > 100)
     const matchesDuration = !duration ||
-                           (duration === 'half-day' && tour.duration_days <= 1) ||
-                           (duration === 'full-day' && tour.duration_days > 1 && tour.duration_days <= 2) ||
-                           (duration === 'multi-day' && tour.duration_days > 2)
+      (duration === 'half-day' && tour.duration_days <= 1) ||
+      (duration === 'full-day' && tour.duration_days > 1 && tour.duration_days <= 2) ||
+      (duration === 'multi-day' && tour.duration_days > 2)
     return matchesSearch && matchesPrice && matchesDuration
   })
 
@@ -57,6 +59,25 @@ const Tours = () => {
 
   return (
     <>
+      {/* SEO Meta Tags */}
+      <SEOMetaTags
+        title="Sri Lanka Tours & Travel Packages - Best Deals 2025"
+        description="Discover amazing Sri Lanka tour packages. Cultural tours, wildlife safaris, beach holidays & adventure tours. SLTDA certified. Book online with best prices guaranteed!"
+        keywords="Sri Lanka tours, tour packages Sri Lanka, Sri Lanka travel, cultural tours, wildlife safaris, beach holidays, adventure tours, Sri Lanka vacation packages"
+        image="https://www.rechargetravels.com/images/tours-hero.jpg"
+        url="https://www.rechargetravels.com/tours"
+      />
+
+      {/* Schema Markup for Tours */}
+      <SEOSchema
+        type="LocalBusiness"
+        data={{
+          name: "Recharge Travels - Sri Lanka Tours",
+          description: "Premium tour operator in Sri Lanka offering cultural tours, wildlife safaris, beach holidays and personalized travel experiences since 2014.",
+          image: "https://www.rechargetravels.com/images/tours-hero.jpg",
+        }}
+      />
+
       {/* Enhanced Hero Section */}
       <section className="relative bg-gradient-to-br from-emerald-600 via-green-700 to-teal-800 text-white py-20 overflow-hidden">
         {/* Background Elements */}
@@ -72,31 +93,31 @@ const Tours = () => {
               🎉 Early Bird Special - Save 25% on All Tours!
             </span>
           </div>
-          
+
           <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white via-blue-100 to-emerald-100 bg-clip-text text-transparent">
             Discover Magical Sri Lanka
           </h1>
           <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto text-green-100">
             From ancient temples to wildlife safaris, explore the pearl of the Indian Ocean with our expertly guided tours and create memories that last a lifetime.
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
-            <Button 
-              size="lg" 
+            <Button
+              size="lg"
               className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-8 py-4 rounded-xl text-lg font-semibold shadow-xl transform hover:scale-105 transition-all duration-300"
             >
               <Calendar className="w-5 h-5 mr-2" />
               Book Tour Now
             </Button>
-            <Button 
-              variant="outline" 
-              size="lg" 
+            <Button
+              variant="outline"
+              size="lg"
               className="border-2 border-white text-white hover:bg-white hover:text-green-800 px-8 py-4 rounded-xl text-lg font-semibold backdrop-blur-sm"
             >
               View All Tours
             </Button>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
               <div className="text-3xl font-bold mb-2">150+</div>
@@ -184,13 +205,13 @@ const Tours = () => {
                 </Button>
 
                 <div className="relative h-56 bg-gradient-to-r from-blue-400 to-purple-600 overflow-hidden">
-                  <img 
-                    src={tour.images?.[0] || "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop"} 
-                    alt={tour.title} 
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                  <img
+                    src={tour.images?.[0] || "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop"}
+                    alt={tour.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                  
+
                   {/* Floating Price Tag */}
                   <div className="absolute bottom-4 left-4">
                     <div className="bg-white rounded-xl px-4 py-2 shadow-lg">
@@ -224,7 +245,7 @@ const Tours = () => {
 
                 <CardContent className="pt-0">
                   <p className="text-gray-600 mb-4 line-clamp-3">{tour.description}</p>
-                  
+
                   <div className="mb-6">
                     <span className="inline-block bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full mr-2 mb-2">
                       {tour.category}
@@ -233,10 +254,10 @@ const Tours = () => {
                       {tour.difficulty_level}
                     </span>
                   </div>
-                  
+
                   {/* Enhanced Action Buttons */}
                   <div className="flex flex-col gap-3">
-                    <Button 
+                    <Button
                       onClick={() => handleBookTour(tour)}
                       className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
                     >
@@ -249,8 +270,8 @@ const Tours = () => {
                           View Details
                         </Button>
                       </Link>
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         className="px-4 border-2 border-gray-300 hover:border-blue-500 hover:text-blue-600 rounded-xl transition-all duration-300"
                       >
                         <Star className="w-4 h-4" />
@@ -275,12 +296,12 @@ const Tours = () => {
               </Card>
             ))}
           </div>
-          
+
           {locallyFilteredTours.length === 0 && (
             <div className="text-center py-12">
               <p className="text-gray-600 text-lg">No tours found matching your criteria.</p>
-              <Button 
-                className="mt-4" 
+              <Button
+                className="mt-4"
                 onClick={handleClearFilters}
               >
                 Clear All Filters

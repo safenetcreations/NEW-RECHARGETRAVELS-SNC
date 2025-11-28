@@ -38,6 +38,25 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { whaleWatchingPageService, WhaleWatchingPageContent } from '@/services/whaleWatchingPageService';
 import { toast } from 'sonner';
+import { cachedFetch } from '@/lib/cache';
+
+// Optimized image URL generator
+const getOptimizedImageUrl = (url: string, width: number = 1200): string => {
+  if (!url) return '';
+  if (url.includes('unsplash.com')) {
+    const baseUrl = url.split('?')[0];
+    return `${baseUrl}?w=${width}&q=80&auto=format&fit=crop`;
+  }
+  return url;
+};
+
+// Default fallback hero images for whale watching
+const defaultHeroImages = [
+  { id: '1', url: 'https://images.unsplash.com/photo-1570913149827-d2ac84ab3f9a', caption: 'Blue Whale in Sri Lankan Waters' },
+  { id: '2', url: 'https://images.unsplash.com/photo-1511259474226-3c0a03c2b1a8', caption: 'Whale Tail Breaching' },
+  { id: '3', url: 'https://images.unsplash.com/photo-1568430462989-44163eb1752f', caption: 'Dolphins Swimming' },
+  { id: '4', url: 'https://images.unsplash.com/photo-1454372182658-c712e4c5a1db', caption: 'Whale Watching Boat Tour' }
+];
 
 const WhaleWatching = () => {
   const navigate = useNavigate();
@@ -57,13 +76,26 @@ const WhaleWatching = () => {
     return iconMap[iconName] || Star;
   };
 
-  // Load content from Firebase
+  // Load content from Firebase with caching
   useEffect(() => {
     const loadContent = async () => {
       try {
         setLoading(true);
-        const data = await whaleWatchingPageService.getPageContent();
+        const data = await cachedFetch(
+          'whale-watching-page',
+          () => whaleWatchingPageService.getPageContent(),
+          10 * 60 * 1000 // Cache for 10 minutes
+        );
         setContent(data);
+
+        // Preload first hero image
+        if (data?.hero?.images?.[0]?.url) {
+          const link = document.createElement('link');
+          link.rel = 'preload';
+          link.as = 'image';
+          link.href = getOptimizedImageUrl(data.hero.images[0].url, 1920);
+          document.head.appendChild(link);
+        }
       } catch (error) {
         console.error('Error loading whale watching content:', error);
         toast.error('Failed to load page content');
@@ -75,16 +107,17 @@ const WhaleWatching = () => {
     loadContent();
   }, []);
 
+  // Get hero images with fallback
+  const heroImages = content?.hero?.images?.length ? content.hero.images : defaultHeroImages;
+
   // Hero image carousel
   useEffect(() => {
-    if (!content) return;
-
     const interval = setInterval(() => {
-      setHeroImageIndex((prev) => (prev + 1) % content.hero.images.length);
+      setHeroImageIndex((prev) => (prev + 1) % heroImages.length);
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [content]);
+  }, [heroImages.length]);
 
   const handleBookingClick = (packageName?: string) => {
     navigate('/booking/whale-watching');
@@ -131,9 +164,11 @@ const WhaleWatching = () => {
             className="absolute inset-0"
           >
             <img
-              src={content.hero.images[heroImageIndex].url}
-              alt={content.hero.images[heroImageIndex].caption}
+              src={getOptimizedImageUrl(heroImages[heroImageIndex]?.url || '', 1920)}
+              alt={heroImages[heroImageIndex]?.caption || 'Whale Watching'}
               className="w-full h-full object-cover"
+              loading={heroImageIndex === 0 ? 'eager' : 'lazy'}
+              fetchPriority={heroImageIndex === 0 ? 'high' : 'auto'}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/20" />
           </motion.div>

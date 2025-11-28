@@ -99,5 +99,72 @@
     "files": [
       "ADMIN_CREDENTIALS.md"
     ]
+  },
+  {
+    "timestamp": "2025-11-27T15:51:38Z",
+    "summary": "Updated Recharge Travels branding to the new official logo across assets, UI, and SEO metadata.",
+    "details": [
+      "Replaced the public logo asset and favicon bundle with the latest logo from rechargetravels.com and regenerated the favicon.ico sprites.",
+      "Pointed header/footer components and admin defaults to the on-site /logo.png instead of legacy imgur fallbacks, improving resilience and consistency.",
+      "Aligned structured data and SEO helpers (blog/homepage schema, transfer structured data, landing doc) to the new https://www.rechargetravels.com/logo.png endpoint with refreshed alt copy."
+    ],
+    "files": [
+      "public/logo.png",
+      "public/favicon.png",
+      "public/favicon.ico",
+      "src/components/header/Logo.tsx",
+      "src/components/footer/FooterBrand.tsx",
+      "src/components/footer/FooterMobile.tsx",
+      "src/components/footer/FooterAbout.tsx",
+      "src/components/admin/AdminImageManager.tsx",
+      "src/components/seo/BlogSEO.tsx",
+      "src/components/seo/HomepageSchema.tsx",
+      "src/utils/structuredData.ts",
+      "LANDING_PAGE_SEO_OPTIMIZATION.md"
+    ]
+  },
+  {
+    "timestamp": "2025-11-27T16:35:00Z",
+    "summary": "Bypassed cached legacy logo by versioning the asset and redeployed after fixing GroupTransport JSX.",
+    "details": [
+      "Added new versioned logo assets (now /logo-v2.png) and pointed all UI fallbacks, favicons, manifest icons, and structured data to the versioned URL to bust client caches.",
+      "Adjusted header/footer logic to prefer the new logo even when Firestore still stores old URLs, and updated admin defaults/placeholders to the new domain path.",
+      "Fixed JSX tag mismatches in GroupTransport hero section to restore successful builds, then rebuilt and redeployed hosting + Firestore rules/indexes to recharge-travels-73e76."
+    ],
+    "files": [
+      "public/logo-new.png",
+      "public/logo-v2.png",
+      "public/manifest.json",
+      "index.html",
+      "src/components/header/Logo.tsx",
+      "src/components/footer/FooterBrand.tsx",
+      "src/components/footer/FooterMobile.tsx",
+      "src/components/footer/FooterAbout.tsx",
+      "src/components/admin/AdminImageManager.tsx",
+      "src/components/seo/BlogSEO.tsx",
+      "src/components/seo/HomepageSchema.tsx",
+      "src/components/seo/ComprehensiveSEO.tsx",
+      "src/utils/structuredData.ts",
+      "src/lib/seo-service.ts",
+      "src/lib/enhanced-seo-service.ts",
+      "src/pages/TravelGuide.tsx",
+      "src/pages/transport/GroupTransport.tsx"
+    ]
+  },
+  {
+    "timestamp": "2025-11-28T00:00:00Z",
+    "summary": "Added a daily SEO indexing agent and aligned sitemap sources to the custom domain.",
+    "details": [
+      "Introduced a Python SEO agent that rebuilds sitemap.xml from seed routes, existing entries, and optional crawling, then submits to Google Search Console and can ping IndexNow.",
+      "Documented setup for the agent (service account, cron example, IndexNow key) and captured Python dependencies in a dedicated requirements file.",
+      "Updated the sitemap generator base URL and robots.txt sitemap pointer to www.rechargetravels.com to keep automated submissions canonical."
+    ],
+    "files": [
+      "scripts/seo_indexing_agent.py",
+      "scripts/seo_indexing_agent_requirements.txt",
+      "scripts/SEO_AGENT.md",
+      "src/lib/sitemap-generator.ts",
+      "public/robots.txt"
+    ]
   }
 ]

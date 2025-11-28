@@ -31,8 +31,8 @@ const FooterAbout = ({ isDarkMode }: FooterAboutProps) => {
       <div className="flex items-center space-x-3 mb-6">
         <Link to="/">
           <img 
-            src="https://i.imgur.com/kzqjJ57.png" 
-            alt="Recharge Travels Logo" 
+            src="/logo-v2.png" 
+            alt="Recharge Travels logo - Redefine your journey, refresh your soul" 
             className="h-12 w-auto hover:opacity-80 transition-opacity cursor-pointer"
           />
         </Link>

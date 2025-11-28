@@ -275,14 +275,20 @@ export const SmartSearch: React.FC = () => {
                   <MapPin className="h-4 w-4" />
                   Location
                 </label>
-                <Select value={filters.location} onValueChange={(value) => 
-                  setFilters(prev => ({ ...prev, location: value }))
-                }>
+                <Select
+                  value={filters.location || 'any_location'}
+                  onValueChange={(value) =>
+                    setFilters(prev => ({
+                      ...prev,
+                      location: value === 'any_location' ? '' : value,
+                    }))
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Any location" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Any location</SelectItem>
+                    <SelectItem value="any_location">Any location</SelectItem>
                     {availableLocations.map(location => (
                       <SelectItem key={location} value={location}>
                         {location}
@@ -295,14 +301,20 @@ export const SmartSearch: React.FC = () => {
               {/* Category Filter */}
               <div className="space-y-2">
                 <label className="text-sm font-medium">Category</label>
-                <Select value={filters.category} onValueChange={(value) => 
-                  setFilters(prev => ({ ...prev, category: value }))
-                }>
+                <Select
+                  value={filters.category || 'any_category'}
+                  onValueChange={(value) =>
+                    setFilters(prev => ({
+                      ...prev,
+                      category: value === 'any_category' ? '' : value,
+                    }))
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Any category" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Any category</SelectItem>
+                    <SelectItem value="any_category">Any category</SelectItem>
                     {categories.map(category => (
                       <SelectItem key={category} value={category}>
                         {category}

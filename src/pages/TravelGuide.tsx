@@ -155,7 +155,7 @@ const generateArticleSchema = () => {
       "name": "Recharge Travels & Tours Ltd",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://www.rechargetravels.com/logo.png"
+        "url": `${typeof window !== 'undefined' ? window.location.origin : 'https://recharge-travels-73e76.web.app'}/logo-v2.png`
       }
     },
     "datePublished": "2024-01-01",

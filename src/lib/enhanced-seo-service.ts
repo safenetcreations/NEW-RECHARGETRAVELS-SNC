@@ -124,7 +124,7 @@ export class EnhancedSEOService {
       "name": "Recharge Travels",
       "description": "Licensed Sri Lanka tour operator specializing in wildlife safaris, cultural tours, and adventure travel",
       "url": this.baseUrl,
-      "logo": `${this.baseUrl}/logo.png`,
+      "logo": `${this.baseUrl}/logo-v2.png`,
       "image": "https://images.unsplash.com/photo-1588001400947-6385aef4ab0e?q=80&w=2074",
       "telephone": "+94777721999",
       "email": "info@rechargetravels.com",

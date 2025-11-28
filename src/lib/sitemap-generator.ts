@@ -9,7 +9,7 @@ export interface SitemapUrl {
 }
 
 export class SitemapGenerator {
-  private static baseUrl = 'https://recharge-travels.lovableproject.com';
+  private static baseUrl = 'https://www.rechargetravels.com';
 
   static async generateMainSitemap(): Promise<string> {
     const urls: SitemapUrl[] = [
@@ -61,23 +61,48 @@ export class SitemapGenerator {
   }
 
   static async generateDestinationsSitemap(): Promise<string> {
+    // Static destination pages that are hardcoded in the app
+    const staticDestinations = [
+      'colombo', 'kandy', 'galle', 'sigiriya', 'ella', 'nuwaraeliya', 'jaffna',
+      'delft-island', 'mullaitivu', 'hatton', 'trincomalee', 'arugam-bay', 'mirissa', 'weligama', 'bentota',
+      'dambulla', 'hikkaduwa', 'mannar', 'polonnaruwa', 'anuradhapura', 'kalpitiya',
+      'adams-peak', 'wadduwa', 'matara', 'tangalle', 'negombo', 'badulla',
+      'ratnapura', 'puttalam', 'hambantota', 'vavuniya', 'kurunegala', 'batticaloa'
+    ];
+
+    const staticUrls: SitemapUrl[] = staticDestinations.map(slug => ({
+      loc: `${this.baseUrl}/destinations/${slug}`,
+      lastmod: new Date().toISOString(),
+      changefreq: 'weekly' as const,
+      priority: 0.8
+    }));
+
     try {
       const { data: destinations } = await supabaseCMS
         .from('destination')
         .select('slug, updated_at')
         .eq('published', true);
 
-      const urls: SitemapUrl[] = (destinations || []).map(dest => ({
+      const dbUrls: SitemapUrl[] = (destinations || []).map(dest => ({
         loc: `${this.baseUrl}/destinations/${dest.slug}`,
         lastmod: dest.updated_at,
-        changefreq: 'weekly',
+        changefreq: 'weekly' as const,
         priority: 0.8
       }));
 
-      return this.generateSitemapXML(urls);
+      // Combine static and database destinations, removing duplicates
+      const allUrls = [...staticUrls];
+      dbUrls.forEach(dbUrl => {
+        if (!allUrls.find(u => u.loc === dbUrl.loc)) {
+          allUrls.push(dbUrl);
+        }
+      });
+
+      return this.generateSitemapXML(allUrls);
     } catch (error) {
       console.error('Error generating destinations sitemap:', error);
-      return this.generateSitemapXML([]);
+      // Return static destinations even if database fails
+      return this.generateSitemapXML(staticUrls);
     }
   }
 

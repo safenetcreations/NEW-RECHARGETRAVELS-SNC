@@ -38,7 +38,8 @@
     "seed:luxury-experiences": "cd scripts && npx ts-node seedLuxuryExperiences.ts",
     "seed:jungle-camping": "cd scripts && npx ts-node seedJungleCampingData.ts",
     "seed:lagoon-safari": "cd scripts && npx ts-node seedLagoonSafariData.ts",
-    "seed:cooking-class": "cd scripts && npx ts-node seedCookingClassData.ts"
+    "seed:cooking-class": "cd scripts && npx ts-node seedCookingClassData.ts",
+    "seed:tea-trails": "cd scripts && npx ts-node seedTeaTrails.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

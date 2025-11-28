@@ -3,10 +3,10 @@ import { Helmet } from 'react-helmet-async';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Bird, 
-  Waves, 
-  Sunrise, 
+import {
+  Bird,
+  Waves,
+  Sunrise,
   MapPin,
   Calendar,
   Clock,
@@ -34,8 +34,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import EnhancedBookingModal from '@/components/EnhancedBookingModal';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { Link } from 'react-router-dom';
+import { getDestinationBySlug } from '@/services/destinationContentService';
 
 interface HeroSlide {
   image: string;
@@ -69,6 +69,46 @@ interface DestinationInfo {
   bestTime: string;
   language: string;
   currency: string;
+}
+
+interface WeatherInfo {
+  temperature: string;
+  humidity: string;
+  rainfall: string;
+  season: string;
+}
+
+interface HotelItem {
+  name: string;
+  description: string;
+  image: string;
+  starRating: number;
+  priceRange: string;
+  amenities: string[];
+  address: string;
+}
+
+interface RestaurantItem {
+  name: string;
+  description: string;
+  image: string;
+  cuisine: string;
+  priceRange: string;
+  rating: number;
+  address: string;
+}
+
+interface TravelTip {
+  title: string;
+  content: string;
+  icon?: string;
+  category: string;
+}
+
+interface CTASection {
+  title: string;
+  subtitle: string;
+  buttonText: string;
 }
 
 const Puttalam = () => {
@@ -207,34 +247,108 @@ const Puttalam = () => {
     currency: "Sri Lankan Rupee (LKR)"
   });
 
-  const [weatherInfo] = useState({
+  const [weatherInfo, setWeatherInfo] = useState<WeatherInfo>({
     temperature: "26-32°C",
     humidity: "70-80%",
     rainfall: "Low-Moderate",
     season: "Tropical Dry Zone"
   });
 
-  // Load content from Firebase
+  const [hotels, setHotels] = useState<HotelItem[]>([]);
+  const [restaurants, setRestaurants] = useState<RestaurantItem[]>([]);
+  const [travelTips, setTravelTips] = useState<TravelTip[]>([]);
+  const [ctaSection, setCtaSection] = useState<CTASection>({
+    title: "Ready to Explore Puttalam's Natural Wonders?",
+    subtitle:
+      "Experience the magic of flamingo-filled lagoons, traditional salt pans, and untouched coastal beauty",
+    buttonText: "Book Your Adventure",
+  });
+
+  // Load content from Firestore destination document
   useEffect(() => {
     const loadContent = async () => {
       try {
-        const docRef = doc(db, 'destinations', 'puttalam');
-        const docSnap = await getDoc(docRef);
-        
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          if (data.heroSlides) setHeroSlides(data.heroSlides);
-          if (data.attractions) setAttractions(data.attractions);
-          if (data.activities) {
-            setActivities(data.activities.map((activity: any) => ({
-              ...activity,
-              icon: getIconComponent(activity.icon)
-            })));
+        const data = await getDestinationBySlug('puttalam');
+
+        if (data) {
+          const anyData: any = data;
+
+          if (Array.isArray(anyData.heroSlides) && anyData.heroSlides.length) {
+            setHeroSlides(anyData.heroSlides as HeroSlide[]);
           }
-          if (data.destinationInfo) setDestinationInfo(data.destinationInfo);
+
+          if (Array.isArray(anyData.attractions) && anyData.attractions.length) {
+            setAttractions(anyData.attractions as Attraction[]);
+          }
+
+          if (Array.isArray(anyData.activities) && anyData.activities.length) {
+            setActivities(
+              anyData.activities.map((activity: any) => ({
+                ...activity,
+                icon: getIconComponent(activity.icon),
+              }))
+            );
+          }
+
+          if (anyData.destinationInfo) {
+            setDestinationInfo(anyData.destinationInfo as DestinationInfo);
+          }
+
+          if (anyData.weatherInfo) {
+            setWeatherInfo({
+              temperature: anyData.weatherInfo.temperature || "26-32°C",
+              humidity: anyData.weatherInfo.humidity || "70-80%",
+              rainfall: anyData.weatherInfo.rainfall || "Low-Moderate",
+              season: anyData.weatherInfo.season || "Tropical Dry Zone",
+            });
+          }
+
+          if (Array.isArray(anyData.hotels) && anyData.hotels.length) {
+            setHotels(
+              anyData.hotels.map((hotel: any) => ({
+                name: hotel.name,
+                description: hotel.description || '',
+                image: hotel.image || '',
+                starRating: hotel.starRating || 0,
+                priceRange: hotel.priceRange || hotel.price || '',
+                amenities: hotel.amenities || [],
+                address: hotel.address || '',
+              }))
+            );
+          }
+
+          if (Array.isArray(anyData.restaurants) && anyData.restaurants.length) {
+            setRestaurants(
+              anyData.restaurants.map((rest: any) => ({
+                name: rest.name,
+                description: rest.description || '',
+                image: rest.image || '',
+                cuisine: rest.cuisine || '',
+                priceRange: rest.priceRange || '',
+                rating: rest.rating || 0,
+                address: rest.address || '',
+              }))
+            );
+          }
+
+          if (Array.isArray(anyData.travelTips) && anyData.travelTips.length) {
+            setTravelTips(anyData.travelTips as TravelTip[]);
+          }
+
+          if (anyData.ctaSection) {
+            setCtaSection({
+              title:
+                anyData.ctaSection.title ||
+                "Ready to Explore Puttalam's Natural Wonders?",
+              subtitle:
+                anyData.ctaSection.subtitle ||
+                "Experience the magic of flamingo-filled lagoons, traditional salt pans, and untouched coastal beauty",
+              buttonText: anyData.ctaSection.buttonText || "Book Your Adventure",
+            });
+          }
         }
       } catch (error) {
-        console.error('Error loading content:', error);
+        console.error('Error loading destination content for Puttalam:', error);
       }
     };
 
@@ -327,9 +441,16 @@ const Puttalam = () => {
                 <Button size="lg" onClick={() => handleBookNow()}>
                   Book Your Experience
                 </Button>
-                <Button size="lg" variant="outline" className="bg-white/10 backdrop-blur-sm">
-                  <Info className="w-4 h-4 mr-2" />
-                  Travel Guide
+                <Button
+                  asChild
+                  size="lg"
+                  variant="outline"
+                  className="bg-white/10 backdrop-blur-sm"
+                >
+                  <Link to="/travel-guide">
+                    <Info className="w-4 h-4 mr-2" />
+                    Travel Guide
+                  </Link>
                 </Button>
               </motion.div>
             </div>
@@ -497,19 +618,132 @@ const Puttalam = () => {
 
           {/* Hotels Tab */}
           {selectedTab === 'hotels' && (
-            <div className="text-center py-12">
-              <Hotel className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-              <h3 className="text-xl font-semibold mb-2">Hotels Coming Soon</h3>
-              <p className="text-gray-600">We're working on bringing you the best hotel recommendations in Puttalam</p>
+            <div>
+              <h2 className="text-3xl font-bold mb-8">Where to Stay in Puttalam</h2>
+              {hotels.length === 0 ? (
+                <div className="text-center py-12">
+                  <Hotel className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                  <h3 className="text-xl font-semibold mb-2">Hotels Coming Soon</h3>
+                  <p className="text-gray-600">
+                    We're working on bringing you the best hotel recommendations in Puttalam
+                  </p>
+                </div>
+              ) : (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {hotels.map((hotel, index) => (
+                    <Card
+                      key={index}
+                      className="overflow-hidden hover:shadow-xl transition-shadow"
+                    >
+                      <div className="h-48 relative">
+                        {hotel.image && (
+                          <img
+                            src={hotel.image}
+                            alt={hotel.name}
+                            className="w-full h-full object-cover"
+                          />
+                        )}
+                        {hotel.starRating > 0 && (
+                          <Badge className="absolute top-4 left-4 bg-black/70 text-white">
+                            {hotel.starRating}-star
+                          </Badge>
+                        )}
+                      </div>
+                      <CardContent className="p-6 space-y-3">
+                        <h3 className="text-xl font-bold">{hotel.name}</h3>
+                        {hotel.description && (
+                          <p className="text-gray-600 text-sm">{hotel.description}</p>
+                        )}
+                        {hotel.address && (
+                          <p className="text-sm text-gray-500">{hotel.address}</p>
+                        )}
+                        <div className="flex items-center justify-between mt-2">
+                          <span className="text-amber-600 font-semibold">
+                            {hotel.priceRange}
+                          </span>
+                        </div>
+                        {hotel.amenities.length > 0 && (
+                          <div className="mt-2 flex flex-wrap gap-1">
+                            {hotel.amenities.map((amenity, i) => (
+                              <Badge
+                                key={i}
+                                variant="outline"
+                                className="text-xs text-gray-600 border-gray-200"
+                              >
+                                {amenity}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                        <Button
+                          className="w-full mt-3"
+                          onClick={() => handleBookNow(hotel.name)}
+                        >
+                          Book This Stay
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
           {/* Restaurants Tab */}
           {selectedTab === 'restaurants' && (
-            <div className="text-center py-12">
-              <Utensils className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-              <h3 className="text-xl font-semibold mb-2">Restaurants Coming Soon</h3>
-              <p className="text-gray-600">Discover the best dining experiences in Puttalam</p>
+            <div>
+              <h2 className="text-3xl font-bold mb-8">Where to Eat in Puttalam</h2>
+              {restaurants.length === 0 ? (
+                <div className="text-center py-12">
+                  <Utensils className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                  <h3 className="text-xl font-semibold mb-2">Restaurants Coming Soon</h3>
+                  <p className="text-gray-600">
+                    Discover the best dining experiences in Puttalam
+                  </p>
+                </div>
+              ) : (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {restaurants.map((restaurant, index) => (
+                    <Card
+                      key={index}
+                      className="overflow-hidden hover:shadow-xl transition-shadow"
+                    >
+                      <div className="h-40 relative">
+                        {restaurant.image && (
+                          <img
+                            src={restaurant.image}
+                            alt={restaurant.name}
+                            className="w-full h-full object-cover"
+                          />
+                        )}
+                        {restaurant.cuisine && (
+                          <Badge className="absolute top-4 left-4 bg-black/70 text-white">
+                            {restaurant.cuisine}
+                          </Badge>
+                        )}
+                      </div>
+                      <CardContent className="p-6 space-y-3">
+                        <h3 className="text-xl font-bold">{restaurant.name}</h3>
+                        {restaurant.description && (
+                          <p className="text-gray-600 text-sm">{restaurant.description}</p>
+                        )}
+                        {restaurant.address && (
+                          <p className="text-sm text-gray-500">{restaurant.address}</p>
+                        )}
+                        <div className="flex items-center justify-between mt-2 text-sm text-gray-600">
+                          <span>{restaurant.priceRange}</span>
+                          {restaurant.rating > 0 && (
+                            <span className="flex items-center gap-1">
+                              <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                              {restaurant.rating.toFixed(1)}
+                            </span>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -570,53 +804,75 @@ const Puttalam = () => {
         <section className="bg-gray-50 py-12">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold mb-8 text-center">Travel Tips for Puttalam</h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
-              <Card>
-                <CardHeader>
-                  <Bird className="w-8 h-8 text-amber-600 mb-2" />
-                  <CardTitle>Best Bird Watching</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600">Visit during November to March when thousands of migratory birds arrive. Early morning is the best time for sightings.</p>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader>
-                  <Sunrise className="w-8 h-8 text-amber-600 mb-2" />
-                  <CardTitle>Salt Pan Photography</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600">The salt pans create stunning geometric patterns best captured during golden hour. Respect workers' privacy when photographing.</p>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader>
-                  <Fish className="w-8 h-8 text-amber-600 mb-2" />
-                  <CardTitle>Fresh Seafood</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600">Try the local lagoon prawns and crab curry. Visit the fish market early morning for the freshest catch.</p>
-                </CardContent>
-              </Card>
-            </div>
+            {travelTips.length > 0 ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                {travelTips.map((tip, index) => (
+                  <Card key={index}>
+                    <CardHeader>
+                      <CardTitle>{tip.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-600">{tip.content}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                <Card>
+                  <CardHeader>
+                    <Bird className="w-8 h-8 text-amber-600 mb-2" />
+                    <CardTitle>Best Bird Watching</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600">Visit during November to March when thousands of migratory birds arrive. Early morning is the best time for sightings.</p>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader>
+                    <Sunrise className="w-8 h-8 text-amber-600 mb-2" />
+                    <CardTitle>Salt Pan Photography</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600">The salt pans create stunning geometric patterns best captured during golden hour. Respect workers' privacy when photographing.</p>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader>
+                    <Fish className="w-8 h-8 text-amber-600 mb-2" />
+                    <CardTitle>Fresh Seafood</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600">Try the local lagoon prawns and crab curry. Visit the fish market early morning for the freshest catch.</p>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
           </div>
         </section>
 
         {/* CTA Section */}
         <section className="bg-gradient-to-r from-amber-600 to-orange-600 py-16">
           <div className="container mx-auto px-4 text-center text-white">
-            <h2 className="text-4xl font-bold mb-4">Ready to Explore Puttalam's Natural Wonders?</h2>
+            <h2 className="text-4xl font-bold mb-4">{ctaSection.title}</h2>
             <p className="text-xl mb-8 max-w-2xl mx-auto">
-              Experience the magic of flamingo-filled lagoons, traditional salt pans, and untouched coastal beauty
+              {ctaSection.subtitle}
             </p>
             <div className="flex gap-4 justify-center">
               <Button size="lg" variant="secondary" onClick={() => handleBookNow()}>
-                Book Your Adventure
+                {ctaSection.buttonText}
               </Button>
-              <Button size="lg" variant="outline" className="bg-white/10 backdrop-blur-sm text-white border-white hover:bg-white/20">
-                Contact Our Experts
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="bg-white/10 backdrop-blur-sm text-white border-white hover:bg-white/20"
+              >
+                <Link to="/book-now">
+                  Contact Our Experts
+                </Link>
               </Button>
             </div>
           </div>

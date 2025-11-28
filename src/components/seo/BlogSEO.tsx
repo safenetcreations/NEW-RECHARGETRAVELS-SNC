@@ -16,9 +16,12 @@ const BlogSEO: React.FC<BlogSEOProps> = ({
   title = 'Sri Lanka Travel Blog - Recharge Travels',
   description = 'Discover Sri Lanka through our travel blog featuring destinations, wildlife, culture, food, and adventure guides.',
   image = '/images/blog-og.jpg',
-  url = 'https://recharge-travels.com/blog',
+  url = 'https://www.rechargetravels.com/blog',
   type = 'website'
 }) => {
+  const baseUrl = typeof window !== 'undefined'
+    ? window.location.origin
+    : 'https://recharge-travels-73e76.web.app';
   const getAuthorName = (author: BlogPost['author'] | undefined) => {
     if (!author) return 'Recharge Travels';
     if (typeof author === 'string') return author;
@@ -32,7 +35,7 @@ const BlogSEO: React.FC<BlogSEOProps> = ({
   const seoDescription = post?.excerpt || description;
   const seoImage = post?.featured_image || image;
   const seoUrl = post?.slug
-    ? `https://recharge-travels.com/blog/${post.slug}`
+    ? `${baseUrl}/blog/${post.slug}`
     : url;
 
   // Article schema for blog posts
@@ -51,7 +54,7 @@ const BlogSEO: React.FC<BlogSEOProps> = ({
       name: 'Recharge Travels',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://recharge-travels.com/logo.png'
+        url: `${baseUrl}/logo-v2.png`
       }
     },
     datePublished: post.published_at || post.created_at,
@@ -74,7 +77,7 @@ const BlogSEO: React.FC<BlogSEOProps> = ({
       name: 'Recharge Travels',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://recharge-travels.com/logo.png'
+        url: `${baseUrl}/logo-v2.png`
       }
     }
   } : null;
@@ -88,13 +91,13 @@ const BlogSEO: React.FC<BlogSEOProps> = ({
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: 'https://recharge-travels.com'
+        item: baseUrl
       },
       {
         '@type': 'ListItem',
         position: 2,
         name: 'Blog',
-        item: 'https://recharge-travels.com/blog'
+        item: `${baseUrl}/blog`
       },
       ...(post ? [{
         '@type': 'ListItem',

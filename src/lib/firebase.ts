@@ -37,7 +37,7 @@ try {
   
   // Analytics only in browser environment
   if (typeof window !== 'undefined') {
-    analytics = getAnalytics(app);
+    // analytics = getAnalytics(app); // Commented out to prevent premature initialization
   }
 } catch (error) {
   console.error('❌ Firebase initialization error:', error);

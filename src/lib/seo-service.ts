@@ -175,7 +175,7 @@ export class SEOService {
       "name": "Recharge Travels",
       "description": "Premier Sri Lanka travel agency offering customized tours, wildlife safaris, cultural experiences, and comprehensive travel services",
       "url": this.baseUrl,
-      "logo": `${this.baseUrl}/logo.png`,
+      "logo": `${this.baseUrl}/logo-v2.png`,
       "image": `${this.baseUrl}/images/sri-lanka-hero.jpg`,
       "telephone": "+94-11-123-4567",
       "email": "info@rechargetravels.com",
@@ -591,7 +591,7 @@ export class SEOService {
         "name": "Recharge Travels",
         "logo": {
           "@type": "ImageObject",
-          "url": `${this.baseUrl}/logo.png`
+          "url": `${this.baseUrl}/logo-v2.png`
         }
       },
       "mainEntityOfPage": {

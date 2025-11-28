@@ -351,6 +351,22 @@ const ALL_DESTINATIONS: Omit<Destination, 'selectedAttractions'>[] = [
             { id: 'delft-island', name: 'Delft Island Day Trip', price: 10, duration: 360, description: 'Wild horses and Dutch ruins', category: 'Adventure' },
         ]
     },
+    {
+        id: 'mullaitivu',
+        name: 'Mullaitivu',
+        lat: 9.2671,
+        lng: 80.8142,
+        description: 'Serene Northern Beaches',
+        image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=300&fit=crop',
+        category: 'beach',
+        icon: '🌊',
+        attractions: [
+            { id: 'mullaitivu-beach', name: 'Mullaitivu Beach', price: 0, duration: 180, description: 'Pristine untouched northern coastline', category: 'Relaxation' },
+            { id: 'war-memorial', name: 'War Memorial', price: 0, duration: 60, description: 'Historical significance and memorial site', category: 'Culture' },
+            { id: 'nanthi-kadal-lagoon', name: 'Nanthi Kadal Lagoon', price: 0, duration: 120, description: 'Scenic lagoon and bird watching', category: 'Nature' },
+            { id: 'maritime-museum-multi', name: 'Maritime Museum', price: 5, duration: 90, description: 'Local maritime history', category: 'Culture' },
+        ]
+    },
 ];
 
 // Category Labels with Colors
@@ -578,13 +594,12 @@ const InteractiveTripBuilder: React.FC = () => {
                             <React.Fragment key={step}>
                                 <button
                                     onClick={() => setCurrentStep(step)}
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all ${
-                                        currentStep === step
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all ${currentStep === step
                                             ? 'bg-teal-600 text-white shadow-lg'
                                             : currentStep > step
                                                 ? 'bg-teal-100 text-teal-700'
                                                 : 'bg-gray-100 text-gray-500'
-                                    }`}
+                                        }`}
                                 >
                                     <span className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-sm font-bold">
                                         {currentStep > step ? <Check className="w-4 h-4" /> : step}
@@ -649,28 +664,25 @@ const InteractiveTripBuilder: React.FC = () => {
                                             <button
                                                 key={hotel.stars}
                                                 onClick={() => setSelectedHotelRating(hotel.stars)}
-                                                className={`p-3 rounded-xl transition-all text-center ${
-                                                    selectedHotelRating === hotel.stars
+                                                className={`p-3 rounded-xl transition-all text-center ${selectedHotelRating === hotel.stars
                                                         ? 'bg-amber-500 text-white shadow-lg scale-105'
                                                         : 'bg-white hover:bg-amber-100 text-gray-700 border border-amber-200'
-                                                }`}
+                                                    }`}
                                             >
                                                 <div className="flex justify-center gap-0.5 mb-1">
                                                     {[...Array(hotel.stars)].map((_, i) => (
                                                         <Star
                                                             key={i}
-                                                            className={`w-4 h-4 ${
-                                                                selectedHotelRating === hotel.stars
+                                                            className={`w-4 h-4 ${selectedHotelRating === hotel.stars
                                                                     ? 'text-white fill-white'
                                                                     : 'text-amber-500 fill-amber-500'
-                                                            }`}
+                                                                }`}
                                                         />
                                                     ))}
                                                 </div>
                                                 <div className="font-semibold text-sm">{hotel.label}</div>
-                                                <div className={`text-xs mt-0.5 ${
-                                                    selectedHotelRating === hotel.stars ? 'text-amber-100' : 'text-gray-500'
-                                                }`}>
+                                                <div className={`text-xs mt-0.5 ${selectedHotelRating === hotel.stars ? 'text-amber-100' : 'text-gray-500'
+                                                    }`}>
                                                     {hotel.description}
                                                 </div>
                                             </button>
@@ -684,11 +696,10 @@ const InteractiveTripBuilder: React.FC = () => {
                                         <button
                                             key={cat.id}
                                             onClick={() => setActiveCategory(cat.id)}
-                                            className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all ${
-                                                activeCategory === cat.id
+                                            className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all ${activeCategory === cat.id
                                                     ? 'bg-teal-600 text-white shadow-lg scale-105'
                                                     : cat.color + ' hover:scale-105'
-                                            }`}
+                                                }`}
                                         >
                                             {cat.icon}
                                             <span className="text-sm">{cat.label}</span>
@@ -706,9 +717,8 @@ const InteractiveTripBuilder: React.FC = () => {
                                                 whileHover={{ scale: 1.03 }}
                                                 whileTap={{ scale: 0.98 }}
                                                 onClick={() => addDestination(dest)}
-                                                className={`relative cursor-pointer rounded-2xl overflow-hidden shadow-lg transition-all group ${
-                                                    isSelected ? 'ring-4 ring-teal-500 ring-offset-2' : ''
-                                                }`}
+                                                className={`relative cursor-pointer rounded-2xl overflow-hidden shadow-lg transition-all group ${isSelected ? 'ring-4 ring-teal-500 ring-offset-2' : ''
+                                                    }`}
                                             >
                                                 <div className="aspect-[4/3] relative">
                                                     <img
@@ -841,16 +851,14 @@ const InteractiveTripBuilder: React.FC = () => {
                                                                             <div
                                                                                 key={attr.id}
                                                                                 onClick={() => toggleAttraction(dest.id, attr.id)}
-                                                                                className={`p-4 rounded-xl cursor-pointer transition-all ${
-                                                                                    isSelected
+                                                                                className={`p-4 rounded-xl cursor-pointer transition-all ${isSelected
                                                                                         ? 'bg-teal-50 border-2 border-teal-500 shadow-md'
                                                                                         : 'bg-white border-2 border-transparent hover:border-teal-200'
-                                                                                }`}
+                                                                                    }`}
                                                                             >
                                                                                 <div className="flex items-start gap-3">
-                                                                                    <div className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                                                                                        isSelected ? 'bg-teal-500 border-teal-500' : 'border-gray-300'
-                                                                                    }`}>
+                                                                                    <div className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center ${isSelected ? 'bg-teal-500 border-teal-500' : 'border-gray-300'
+                                                                                        }`}>
                                                                                         {isSelected && <Check className="w-4 h-4 text-white" />}
                                                                                     </div>
                                                                                     <div className="flex-1 min-w-0">
@@ -1159,7 +1167,7 @@ const InteractiveTripBuilder: React.FC = () => {
                                 <Input
                                     id="name"
                                     value={quoteForm.name}
-                                    onChange={(e) => setQuoteForm({...quoteForm, name: e.target.value})}
+                                    onChange={(e) => setQuoteForm({ ...quoteForm, name: e.target.value })}
                                     placeholder="John Doe"
                                     required
                                 />
@@ -1170,7 +1178,7 @@ const InteractiveTripBuilder: React.FC = () => {
                                     id="email"
                                     type="email"
                                     value={quoteForm.email}
-                                    onChange={(e) => setQuoteForm({...quoteForm, email: e.target.value})}
+                                    onChange={(e) => setQuoteForm({ ...quoteForm, email: e.target.value })}
                                     placeholder="you@example.com"
                                     required
                                 />
@@ -1182,7 +1190,7 @@ const InteractiveTripBuilder: React.FC = () => {
                                 <Input
                                     id="phone"
                                     value={quoteForm.phone}
-                                    onChange={(e) => setQuoteForm({...quoteForm, phone: e.target.value})}
+                                    onChange={(e) => setQuoteForm({ ...quoteForm, phone: e.target.value })}
                                     placeholder="+1 234 567 8900"
                                 />
                             </div>
@@ -1193,7 +1201,7 @@ const InteractiveTripBuilder: React.FC = () => {
                                     type="number"
                                     min="1"
                                     value={quoteForm.travelers}
-                                    onChange={(e) => setQuoteForm({...quoteForm, travelers: e.target.value})}
+                                    onChange={(e) => setQuoteForm({ ...quoteForm, travelers: e.target.value })}
                                 />
                             </div>
                         </div>
@@ -1202,7 +1210,7 @@ const InteractiveTripBuilder: React.FC = () => {
                             <Input
                                 id="dates"
                                 value={quoteForm.dates}
-                                onChange={(e) => setQuoteForm({...quoteForm, dates: e.target.value})}
+                                onChange={(e) => setQuoteForm({ ...quoteForm, dates: e.target.value })}
                                 placeholder="e.g., Dec 15-25, 2024"
                             />
                         </div>
@@ -1211,7 +1219,7 @@ const InteractiveTripBuilder: React.FC = () => {
                             <Textarea
                                 id="message"
                                 value={quoteForm.message}
-                                onChange={(e) => setQuoteForm({...quoteForm, message: e.target.value})}
+                                onChange={(e) => setQuoteForm({ ...quoteForm, message: e.target.value })}
                                 placeholder="Tell us about your travel style, interests, or any special requirements..."
                                 rows={3}
                             />

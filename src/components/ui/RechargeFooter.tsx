@@ -21,16 +21,61 @@ import { getFeaturedDestinations, FeaturedDestination, DEFAULT_FEATURED_DESTINAT
 
 const RechargeFooter: React.FC = () => {
   const [email, setEmail] = useState('')
-  const [destinations, setDestinations] = useState<FeaturedDestination[]>(
-    DEFAULT_FEATURED_DESTINATIONS.map((dest, index) => ({ ...dest, id: `default-${index}` }))
-  )
+  const baseChoices: FeaturedDestination[] = [
+    {
+      id: 'ella',
+      name: 'Ella',
+      to: '/destinations/ella',
+      image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=450&fit=crop&q=80&auto=format',
+      emoji: '🏔️'
+    },
+    {
+      id: 'mirissa',
+      name: 'Mirissa',
+      to: '/destinations/mirissa',
+      image: 'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=800&h=450&fit=crop&q=80&auto=format',
+      emoji: '🐋'
+    }
+  ]
+
+  const flipDaily = (arr: FeaturedDestination[]) => {
+    const today = new Date().getDate()
+    return today % 2 === 0 ? arr : [...arr].reverse()
+  }
+
+  const [destinations, setDestinations] = useState<FeaturedDestination[]>(flipDaily(baseChoices))
 
   useEffect(() => {
     const loadDestinations = async () => {
-      const data = await getFeaturedDestinations()
-      if (data.length > 0) {
-        setDestinations(data)
+      try {
+        const data = await getFeaturedDestinations()
+        if (data && data.length > 0) {
+          // If CMS provides options, filter to Ella and Mirissa only
+          const filtered = data.filter(
+            (d) => d.name.toLowerCase().includes('ella') || d.name.toLowerCase().includes('mirissa')
+          )
+
+          if (filtered.length > 0) {
+            const merged = [...filtered]
+
+            // Ensure both Ella and Mirissa show even if only one exists in CMS
+            baseChoices.forEach((fallback) => {
+              const hasChoice = merged.some((d) => d.name.toLowerCase().includes(fallback.name.toLowerCase()))
+              if (!hasChoice) {
+                merged.push(fallback)
+              }
+            })
+
+            setDestinations(flipDaily(merged.slice(0, 2)))
+            return
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load featured destinations, falling back to defaults', err)
       }
+
+      // Fallback: hard-coded Ella + Mirissa with daily flip
+      setDestinations(flipDaily(baseChoices))
     }
     loadDestinations()
   }, [])
@@ -114,7 +159,12 @@ const RechargeFooter: React.FC = () => {
             {/* Column 1: Company */}
             <div className="footer-column">
               <div className="brand-logo">
-                <div className="brand-logo-icon">🌴</div>
+                <img
+                  src="/logo-v2.png"
+                  alt="Recharge Travels logo - Redefine your journey, refresh your soul"
+                  className="brand-logo-icon-image"
+                  loading="lazy"
+                />
                 <h2 className="brand-name">Recharge<span>Travels</span></h2>
               </div>
               <p className="brand-description">
@@ -166,7 +216,14 @@ const RechargeFooter: React.FC = () => {
               <div className="destinations-grid">
                 {destinations.map((dest) => (
                   <Link to={dest.to} key={dest.name} className="destination-card">
-                    <img src={dest.image} alt={dest.name} />
+                    <img
+                      src={dest.image}
+                      alt={dest.name}
+                      onError={(e) => {
+                        e.currentTarget.onerror = null
+                        e.currentTarget.src = '/logo-v2.png'
+                      }}
+                    />
                     <div className="card-content">
                       <span>{dest.emoji} {dest.name}</span>
                       <span className="explore-text">
@@ -467,15 +524,14 @@ const RechargeFooter: React.FC = () => {
           margin-bottom: 20px !important;
         }
 
-        .brand-logo-icon {
-          width: 50px !important;
-          height: 50px !important;
-          background: linear-gradient(135deg, #ff6b35, #f9a825) !important;
+        .brand-logo-icon-image {
+          width: 56px !important;
+          height: 56px !important;
+          object-fit: contain !important;
           border-radius: 12px !important;
-          display: flex !important;
-          align-items: center !important;
-          justify-content: center !important;
-          font-size: 24px !important;
+          box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+          background: #ffffff !important;
+          padding: 4px !important;
         }
 
         .brand-name {

@@ -1,771 +1,551 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { Helmet } from 'react-helmet-async'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { MapPin, Clock, Star, Search, Filter, Users, Utensils, Camera, Hotel } from 'lucide-react'
-import LoadingSpinner from '@/components/LoadingSpinner'
+import { Link } from 'react-router-dom'
+import { MapPin, Mountain, Waves, Sun, Compass, Building2, ArrowRight, Star, Clock, Users } from 'lucide-react'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import { cmsService } from '@/services/cmsService'
-import type { FeaturedDestination } from '@/types/cms'
+import { destinationsByRegion } from '@/components/header/navigation/menuData'
 
-// Top 10 Sri Lankan cities data with enhanced information
-const TOP_CITIES = [
-  {
-    name: 'Colombo',
-    slug: 'colombo',
-    province: 'Western Province',
-    description: 'The bustling commercial capital with colonial architecture, vibrant markets, and world-class dining.',
-    highlights: ['Galle Face Green', 'National Museum', 'Pettah Markets'],
-    population: '750,000+',
-    image: 'https://images.unsplash.com/photo-1577717903315-1691ae25ab3f?w=500&h=300&fit=crop',
-    experienceTypes: ['Fine Dining', 'Shopping', 'Museums', 'Nightlife']
+// Enhanced destination data with images
+const destinationImages: Record<string, { image: string; highlights: string[]; bestTime: string }> = {
+  // Northern
+  'jaffna': { 
+    image: 'https://images.unsplash.com/photo-1609921141835-ed42426faa5f?w=600&h=400&fit=crop',
+    highlights: ['Nallur Temple', 'Jaffna Fort', 'Unique Cuisine'],
+    bestTime: 'Jan - Sep'
   },
-  {
-    name: 'Kandy',
-    slug: 'kandy',
-    province: 'Central Province', 
-    description: 'Sacred city home to the Temple of the Tooth, surrounded by misty mountains and cultural heritage.',
-    highlights: ['Temple of the Tooth', 'Royal Botanical Gardens', 'Kandy Lake'],
-    population: '125,000+',
-    image: 'https://images.unsplash.com/photo-1588598198321-9735fd0f5073?w=500&h=300&fit=crop',
-    experienceTypes: ['Cultural Sites', 'Nature Walks', 'Traditional Arts', 'Sacred Tours']
+  'delft-island': { 
+    image: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=600&h=400&fit=crop',
+    highlights: ['Wild Ponies', 'Dutch Ruins', 'Pristine Beaches'],
+    bestTime: 'Mar - Sep'
   },
-  {
-    name: 'Galle',
-    slug: 'galle',
-    province: 'Southern Province',
-    description: 'Historic port city with Dutch colonial fort, stunning beaches, and charming cobblestone streets.',
-    highlights: ['Galle Fort', 'Dutch Reformed Church', 'Lighthouse'],
-    population: '100,000+',
-    image: 'https://images.unsplash.com/photo-1569154941061-e231b4725ef1?w=500&h=300&fit=crop',
-    experienceTypes: ['Historic Tours', 'Beach Activities', 'Art Galleries', 'Sunset Views']
+  'mullaitivu': { 
+    image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&h=400&fit=crop',
+    highlights: ['Pristine Beaches', 'Fishing Villages', 'War Memorials'],
+    bestTime: 'Mar - Sep'
   },
-  {
-    name: 'Anuradhapura',
-    slug: 'anuradhapura',
-    province: 'North Central Province',
-    description: 'Ancient capital with magnificent stupas, sacred trees, and 2,400 years of Buddhist history.',
-    highlights: ['Sri Maha Bodhi', 'Ruwanwelisaya', 'Ancient Reservoirs'],
-    population: '60,000+',
-    image: 'https://images.unsplash.com/photo-1588001400947-6385aef4ab0e?w=500&h=300&fit=crop',
-    experienceTypes: ['Archaeological Sites', 'Spiritual Journeys', 'Cycling Tours', 'Photography']
+  'mannar': { 
+    image: 'https://images.unsplash.com/photo-1624719573151-83bb9c88a6f1?w=600&h=400&fit=crop',
+    highlights: ['Baobab Trees', 'Bird Sanctuary', 'Adam\'s Bridge'],
+    bestTime: 'Feb - Sep'
   },
-  {
-    name: 'Polonnaruwa',
-    slug: 'polonnaruwa', 
-    province: 'North Central Province',
-    description: 'Medieval capital showcasing exquisite stone carvings, ancient palaces, and UNESCO heritage.',
-    highlights: ['Gal Vihara', 'Royal Palace', 'Parakrama Samudra'],
-    population: '15,000+',
-    image: 'https://images.unsplash.com/photo-1588598137318-6cd0e2e4f2f3?w=500&h=300&fit=crop',
-    experienceTypes: ['Ancient Ruins', 'Cultural Learning', 'Nature Reserves', 'Historical Tours']
+  'vavuniya': { 
+    image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600&h=400&fit=crop',
+    highlights: ['Tamil Culture', 'Hindu Temples', 'Local Markets'],
+    bestTime: 'Year Round'
   },
-  {
-    name: 'Nuwara Eliya',
-    slug: 'nuwara-eliya',
-    province: 'Central Province',
-    description: 'Cool mountain retreat known as "Little England" with tea plantations and colonial charm.',
-    highlights: ['Tea Plantations', 'Victoria Park', 'Lake Gregory'],
-    population: '30,000+',
-    image: 'https://images.unsplash.com/photo-1605538883669-825200433431?w=500&h=300&fit=crop',
-    experienceTypes: ['Tea Estate Tours', 'Cool Climate', 'Hiking Trails', 'Colonial Architecture']
+  // Central
+  'kandy': { 
+    image: 'https://images.unsplash.com/photo-1588598198321-9735fd0f5073?w=600&h=400&fit=crop',
+    highlights: ['Temple of Tooth', 'Botanical Gardens', 'Kandy Lake'],
+    bestTime: 'Jan - Apr'
   },
-  {
-    name: 'Ella',
-    slug: 'ella',
-    province: 'Uva Province',
-    description: 'Mountain village paradise with dramatic viewpoints, waterfalls, and the famous Nine Arch Bridge.',
-    highlights: ['Nine Arch Bridge', 'Little Adams Peak', 'Ravana Falls'],
-    population: '10,000+',
-    image: 'https://images.unsplash.com/photo-1605538883669-825200433431?w=500&h=300&fit=crop',
-    experienceTypes: ['Hiking Adventures', 'Railway Journeys', 'Waterfall Visits', 'Instagram Spots']
+  'nuwaraeliya': { 
+    image: 'https://images.unsplash.com/photo-1605538883669-825200433431?w=600&h=400&fit=crop',
+    highlights: ['Tea Estates', 'Gregory Lake', 'Cool Climate'],
+    bestTime: 'Feb - May'
   },
-  {
-    name: 'Mirissa',
-    slug: 'mirissa',
-    province: 'Southern Province',
-    description: 'Tropical beach paradise famous for whale watching, pristine sands, and vibrant nightlife.',
-    highlights: ['Whale Watching', 'Coconut Tree Hill', 'Secret Beach'],
-    population: '5,000+',
-    image: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=500&h=300&fit=crop',
-    experienceTypes: ['Whale Watching', 'Beach Relaxation', 'Water Sports', 'Sunset Parties']
+  'ella': { 
+    image: 'https://images.unsplash.com/photo-1586861635167-e5223aadc9fe?w=600&h=400&fit=crop',
+    highlights: ['Nine Arch Bridge', 'Little Adam\'s Peak', 'Ravana Falls'],
+    bestTime: 'Jan - Mar'
   },
-  {
-    name: 'Trincomalee',
-    slug: 'trincomalee',
-    province: 'Eastern Province',
-    description: 'Historic port with pristine beaches, hot springs, and one of the world\'s finest natural harbors.',
-    highlights: ['Nilaveli Beach', 'Fort Frederick', 'Koneswaram Temple'],
-    population: '100,000+',
-    image: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=500&h=300&fit=crop',
-    experienceTypes: ['Beach Paradise', 'Snorkeling', 'Historical Sites', 'Wildlife Watching']
+  'hatton': { 
+    image: 'https://images.unsplash.com/photo-1596895111956-bf1cf0599ce5?w=600&h=400&fit=crop',
+    highlights: ['Adam\'s Peak', 'Tea Plantations', 'Scenic Trains'],
+    bestTime: 'Dec - May'
   },
-  {
-    name: 'Jaffna',
-    slug: 'jaffna',
-    province: 'Northern Province',
-    description: 'Cultural heart of Tamil Sri Lanka with unique cuisine, vibrant festivals, and resilient heritage.',
-    highlights: ['Jaffna Fort', 'Nallur Temple', 'Delft Island'],
-    population: '90,000+',
-    image: 'https://images.unsplash.com/photo-1609921141835-ed42426faa5f?w=500&h=300&fit=crop',
-    experienceTypes: ['Tamil Culture', 'Unique Cuisine', 'Island Hopping', 'Festival Celebrations']
+  'adams-peak': { 
+    image: 'https://images.unsplash.com/photo-1609921141835-ed42426faa5f?w=600&h=400&fit=crop',
+    highlights: ['Sacred Footprint', 'Sunrise Trek', 'Pilgrimage'],
+    bestTime: 'Dec - May'
   },
-  {
-    name: 'Sigiriya',
-    slug: 'sigiriya',
-    province: 'Central Province',
-    description: 'Ancient rock fortress and UNESCO World Heritage site with stunning frescoes and gardens.',
-    highlights: ['Lion Rock', 'Mirror Wall', 'Water Gardens'],
-    population: '15,000+',
-    image: 'https://images.unsplash.com/photo-1588598137318-6cd0e2e4f2f3?w=500&h=300&fit=crop',
-    experienceTypes: ['Ancient History', 'Rock Climbing', 'Archaeological Sites', 'Sunset Views']
+  'badulla': { 
+    image: 'https://images.unsplash.com/photo-1609177225088-e482d69e7a7f?w=600&h=400&fit=crop',
+    highlights: ['Dunhinda Falls', 'Temple Tours', 'Train Journey'],
+    bestTime: 'Jan - Apr'
   },
-  {
-    name: 'Arugam Bay',
-    slug: 'arugam-bay',
-    province: 'Eastern Province',
-    description: 'World-renowned surfing destination with laid-back vibes and pristine beaches.',
-    highlights: ['Main Point', 'Whiskey Point', 'Elephant Rock'],
-    population: '3,500+',
-    image: 'https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=500&h=300&fit=crop',
-    experienceTypes: ['Surfing', 'Beach Life', 'Lagoon Safari', 'Nightlife']
+  'sigiriya': { 
+    image: 'https://images.unsplash.com/photo-1588598137318-6cd0e2e4f2f3?w=600&h=400&fit=crop',
+    highlights: ['Lion Rock', 'Ancient Frescoes', 'Water Gardens'],
+    bestTime: 'Jan - Apr'
   },
-  {
-    name: 'Weligama',
-    slug: 'weligama',
-    province: 'Southern Province',
-    description: 'Beginner-friendly surf paradise with stilt fishermen and coconut tree hills.',
-    highlights: ['Weligama Bay', 'Taprobane Island', 'Snake Island'],
-    population: '22,000+',
-    image: 'https://images.unsplash.com/photo-1539979611693-e7d7db50e4e6?w=500&h=300&fit=crop',
-    experienceTypes: ['Surf Schools', 'Beach Bars', 'Stilt Fishing', 'Island Hopping']
+  'dambulla': { 
+    image: 'https://images.unsplash.com/photo-1612449956144-e8e27b842902?w=600&h=400&fit=crop',
+    highlights: ['Cave Temples', 'Golden Buddha', 'UNESCO Site'],
+    bestTime: 'Feb - Sep'
   },
-  {
-    name: 'Bentota',
-    slug: 'bentota',
-    province: 'Southern Province',
-    description: 'Luxury beach resort town with river safaris, water sports, and romantic getaways.',
-    highlights: ['Bentota Beach', 'Madu River', 'Brief Garden'],
-    population: '25,000+',
-    image: 'https://images.unsplash.com/photo-1585409677983-0f6c41ca1c4b?w=500&h=300&fit=crop',
-    experienceTypes: ['Luxury Resorts', 'Water Sports', 'River Safari', 'Spa Retreats']
+  'polonnaruwa': { 
+    image: 'https://images.unsplash.com/photo-1588598137318-6cd0e2e4f2f3?w=600&h=400&fit=crop',
+    highlights: ['Gal Vihara', 'Ancient Ruins', 'Cycling Tours'],
+    bestTime: 'Feb - Sep'
   },
-  {
-    name: 'Dambulla',
-    slug: 'dambulla',
-    province: 'Central Province',
-    description: 'Home to the magnificent cave temples with ancient Buddhist murals and statues.',
-    highlights: ['Cave Temples', 'Golden Buddha', 'Rose Quartz Mountain'],
-    population: '75,000+',
-    image: 'https://images.unsplash.com/photo-1609921141835-ed42426faa5f?w=500&h=300&fit=crop',
-    experienceTypes: ['Cave Temples', 'Cultural Heritage', 'Village Tours', 'Market Visit']
+  'anuradhapura': { 
+    image: 'https://images.unsplash.com/photo-1586765226855-e59dd4401b8a?w=600&h=400&fit=crop',
+    highlights: ['Sri Maha Bodhi', 'Ancient Stupas', 'Sacred City'],
+    bestTime: 'Feb - Sep'
   },
-  {
-    name: 'Hikkaduwa',
-    slug: 'hikkaduwa',
-    province: 'Southern Province',
-    description: 'Vibrant beach town famous for coral reefs, surfing, and lively nightlife.',
-    highlights: ['Coral Sanctuary', 'Beach Parties', 'Turtle Hatchery'],
-    population: '18,000+',
-    image: 'https://images.unsplash.com/photo-1519452575417-564c1401ecc0?w=500&h=300&fit=crop',
-    experienceTypes: ['Snorkeling', 'Surfing', 'Beach Bars', 'Glass Bottom Boats']
+  'kurunegala': { 
+    image: 'https://images.unsplash.com/photo-1606820246174-bc6c7f7c2f28?w=600&h=400&fit=crop',
+    highlights: ['Elephant Rock', 'Lake Views', 'Temple Visits'],
+    bestTime: 'Year Round'
   },
-  {
-    name: 'Mannar',
-    slug: 'mannar',
-    province: 'Northern Province',
-    description: 'Remote island district known for its unique baobab trees, bird sanctuaries, and ancient trade history.',
-    highlights: ['Baobab Trees', 'Adam\'s Bridge', 'Vankalai Sanctuary'],
-    population: '100,000+',
-    image: 'https://images.unsplash.com/photo-1624719573151-83bb9c88a6f1?w=500&h=300&fit=crop',
-    experienceTypes: ['Bird Watching', 'Cultural Heritage', 'Kite Surfing', 'Pearl Diving History']
+  'ratnapura': { 
+    image: 'https://images.unsplash.com/photo-1602407294553-6ac9170b3ed0?w=600&h=400&fit=crop',
+    highlights: ['Gem Mining', 'Waterfalls', 'Rainforest'],
+    bestTime: 'Dec - Apr'
   },
-  {
-    name: 'Polonnaruwa',
-    slug: 'polonnaruwa',
-    province: 'North Central Province',
-    description: 'Ancient city with magnificent ruins, royal palaces, and Buddhist temples from the 11th century.',
-    highlights: ['Gal Vihara', 'Royal Palace', 'Parakrama Samudra'],
-    population: '15,000+',
-    image: 'https://images.unsplash.com/photo-1612449956144-e8e27b842902?w=500&h=300&fit=crop',
-    experienceTypes: ['Ancient Ruins', 'Cycling Tours', 'Archaeological Sites', 'Lake Views']
+  // Southern
+  'galle': { 
+    image: 'https://images.unsplash.com/photo-1569154941061-e231b4725ef1?w=600&h=400&fit=crop',
+    highlights: ['Dutch Fort', 'Lighthouse', 'Colonial Streets'],
+    bestTime: 'Dec - Apr'
   },
-  {
-    name: 'Anuradhapura',
-    slug: 'anuradhapura',
-    province: 'North Central Province',
-    description: 'Sacred Buddhist city with ancient stupas, the Sri Maha Bodhi tree, and thousands of years of history.',
-    highlights: ['Sri Maha Bodhi', 'Ruwanwelisaya', 'Jetavanaramaya'],
-    population: '50,000+',
-    image: 'https://images.unsplash.com/photo-1586765226855-e59dd4401b8a?w=500&h=300&fit=crop',
-    experienceTypes: ['Sacred Sites', 'Buddhist Pilgrimage', 'Ancient Architecture', 'Cultural Tours']
+  'mirissa': { 
+    image: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=600&h=400&fit=crop',
+    highlights: ['Whale Watching', 'Coconut Tree Hill', 'Beach Life'],
+    bestTime: 'Nov - Apr'
   },
-  {
-    name: 'Kalpitiya',
-    slug: 'kalpitiya',
-    province: 'North Western Province',
-    description: 'Kitesurfing paradise with pristine lagoons, dolphin watching, and untouched beaches.',
-    highlights: ['Kite Surfing', 'Dolphin Watching', 'Bar Reef'],
-    population: '40,000+',
-    image: 'https://images.unsplash.com/photo-1530053969600-caed2596d242?w=500&h=300&fit=crop',
-    experienceTypes: ['Kite Surfing', 'Dolphin Tours', 'Lagoon Safari', 'Beach Camping']
+  'weligama': { 
+    image: 'https://images.unsplash.com/photo-1539979611693-e7d7db50e4e6?w=600&h=400&fit=crop',
+    highlights: ['Surfing', 'Stilt Fishermen', 'Beach Bars'],
+    bestTime: 'Nov - Apr'
   },
-  {
-    name: 'Adam\'s Peak',
-    slug: 'adams-peak',
-    province: 'Sabaragamuwa Province',
-    description: 'Sacred mountain pilgrimage site with spectacular sunrise views and spiritual significance.',
-    highlights: ['Sacred Footprint', 'Sunrise Trek', 'Butterfly Season'],
-    population: '5,000+',
-    image: 'https://images.unsplash.com/photo-1609921141835-ed42426faa5f?w=500&h=300&fit=crop',
-    experienceTypes: ['Mountain Trekking', 'Pilgrimage', 'Sunrise Views', 'Tea Estate Trails']
+  'hikkaduwa': { 
+    image: 'https://images.unsplash.com/photo-1519452575417-564c1401ecc0?w=600&h=400&fit=crop',
+    highlights: ['Coral Reefs', 'Nightlife', 'Turtle Beach'],
+    bestTime: 'Nov - Apr'
   },
-  {
-    name: 'Wadduwa',
-    slug: 'wadduwa',
-    province: 'Western Province',
-    description: 'Tranquil beach town perfect for relaxation with golden beaches and Ayurvedic wellness centers.',
-    highlights: ['Golden Beaches', 'Ayurveda Retreats', 'Water Sports'],
-    population: '30,000+',
-    image: 'https://images.unsplash.com/photo-1540202404-a2f29016b523?w=500&h=300&fit=crop',
-    experienceTypes: ['Beach Relaxation', 'Ayurvedic Spa', 'Water Sports', 'Fishing Villages']
+  'bentota': { 
+    image: 'https://images.unsplash.com/photo-1585409677983-0f6c41ca1c4b?w=600&h=400&fit=crop',
+    highlights: ['Luxury Resorts', 'River Safari', 'Water Sports'],
+    bestTime: 'Nov - Apr'
   },
-  {
-    name: 'Matara',
-    slug: 'matara',
-    province: 'Southern Province',
-    description: 'Southern city with colonial charm blending Dutch fortifications, beaches, and cultural vibrancy.',
-    highlights: ['Matara Fort', 'Parey Dewa Temple', 'Polhena Beach'],
-    population: '70,000+',
-    image: 'https://images.unsplash.com/photo-1601401828718-23dd19408305?w=500&h=300&fit=crop',
-    experienceTypes: ['Fort Exploration', 'Cultural Tours', 'Beach Activities', 'Temple Visits']
+  'tangalle': { 
+    image: 'https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?w=600&h=400&fit=crop',
+    highlights: ['Turtle Nesting', 'Secret Beaches', 'Luxury Stays'],
+    bestTime: 'Nov - Apr'
   },
-  {
-    name: 'Tangalle',
-    slug: 'tangalle',
-    province: 'Southern Province',
-    description: 'Hidden beachside escape offering untouched beaches, luxury retreats, and sea turtle nesting sites.',
-    highlights: ['Tangalle Beach', 'Rekawa Turtle Hatchery', 'Mulkirigala Temple'],
-    population: '10,000+',
-    image: 'https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?w=500&h=300&fit=crop',
-    experienceTypes: ['Beach Retreat', 'Turtle Watching', 'Temple Exploration', 'Peaceful Stays']
+  'matara': { 
+    image: 'https://images.unsplash.com/photo-1601401828718-23dd19408305?w=600&h=400&fit=crop',
+    highlights: ['Dutch Fort', 'Beach Temple', 'Colonial Heritage'],
+    bestTime: 'Nov - Apr'
   },
-  {
-    name: 'Negombo',
-    slug: 'negombo',
-    province: 'Western Province',
-    description: 'Beach gateway near the airport, ideal for first or last night stays with canals and seafood markets.',
-    highlights: ['Negombo Beach', 'Dutch Canal', 'Fish Market'],
-    population: '140,000+',
-    image: 'https://images.unsplash.com/photo-1597660952261-aa0aaccd46d1?w=500&h=300&fit=crop',
-    experienceTypes: ['Beach Walks', 'Canal Tours', 'Seafood Dining', 'Airport Proximity']
+  'hambantota': { 
+    image: 'https://images.unsplash.com/photo-1619537903549-0981a665b60b?w=600&h=400&fit=crop',
+    highlights: ['Safari Gateway', 'Port City', 'Beaches'],
+    bestTime: 'Year Round'
   },
-  {
-    name: 'Badulla',
-    slug: 'badulla',
-    province: 'Uva Province',
-    description: 'Hill country heritage town marking the end of the scenic railway with temples and waterfalls.',
-    highlights: ['Muthiyangana Temple', 'Dunhinda Falls', 'Railway Station'],
-    population: '45,000+',
-    image: 'https://images.unsplash.com/photo-1609177225088-e482d69e7a7f?w=500&h=300&fit=crop',
-    experienceTypes: ['Temple Tours', 'Waterfall Hikes', 'Train Journey', 'Hill Country Views']
+  // Eastern
+  'trincomalee': { 
+    image: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=600&h=400&fit=crop',
+    highlights: ['Nilaveli Beach', 'Hot Springs', 'Natural Harbor'],
+    bestTime: 'Apr - Sep'
   },
-  {
-    name: 'Ratnapura',
-    slug: 'ratnapura',
-    province: 'Sabaragamuwa Province',
-    description: 'City of gems known for precious stone mining, waterfalls, and gateway to Sinharaja rainforest.',
-    highlights: ['Gem Museum', 'Bopath Ella Falls', 'Gem Mining Tours'],
-    population: '52,000+',
-    image: 'https://images.unsplash.com/photo-1602407294553-6ac9170b3ed0?w=500&h=300&fit=crop',
-    experienceTypes: ['Gem Tours', 'Waterfall Visits', 'Rainforest Access', 'Museum Exploration']
+  'arugam-bay': { 
+    image: 'https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=600&h=400&fit=crop',
+    highlights: ['World-Class Surf', 'Beach Vibes', 'Lagoon Safari'],
+    bestTime: 'Apr - Oct'
   },
-  {
-    name: 'Puttalam',
-    slug: 'puttalam',
-    province: 'North Western Province',
-    description: 'Coastal area famous for salt production, lagoons, and migratory bird watching opportunities.',
-    highlights: ['Puttalam Lagoon', 'Salt Pans', 'Mangrove Forests'],
-    population: '45,000+',
-    image: 'https://images.unsplash.com/photo-1577640128125-85d724d47ce2?w=500&h=300&fit=crop',
-    experienceTypes: ['Bird Watching', 'Lagoon Tours', 'Eco Tourism', 'Salt Pan Visits']
+  'batticaloa': { 
+    image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600&h=400&fit=crop',
+    highlights: ['Singing Fish', 'Lagoon', 'Peaceful Beaches'],
+    bestTime: 'Apr - Sep'
   },
-  {
-    name: 'Hambantota',
-    slug: 'hambantota',
-    province: 'Southern Province',
-    description: 'Emerging coastal city with modern port facilities, beaches, and gateway to southern parks.',
-    highlights: ['Port Area', 'Dry Zone Garden', 'Safari Access'],
-    population: '12,000+',
-    image: 'https://images.unsplash.com/photo-1619537903549-0981a665b60b?w=500&h=300&fit=crop',
-    experienceTypes: ['Port Tours', 'Beach Activities', 'Safari Planning', 'Development Tours']
+  // Western
+  'colombo': { 
+    image: 'https://images.unsplash.com/photo-1577717903315-1691ae25ab3f?w=600&h=400&fit=crop',
+    highlights: ['Galle Face', 'Shopping', 'Fine Dining'],
+    bestTime: 'Year Round'
   },
-  {
-    name: 'Vavuniya',
-    slug: 'vavuniya',
-    province: 'Northern Province',
-    description: 'Northern gateway city connecting central and northern regions with rich Tamil culture.',
-    highlights: ['Vavuniya Museum', 'Local Markets', 'Hindu Temples'],
-    population: '100,000+',
-    image: 'https://images.unsplash.com/photo-1624719573151-83bb9c88a6f1?w=500&h=300&fit=crop',
-    experienceTypes: ['Cultural Tours', 'Market Visits', 'Temple Tours', 'Transit Hub']
+  'negombo': { 
+    image: 'https://images.unsplash.com/photo-1597660952261-aa0aaccd46d1?w=600&h=400&fit=crop',
+    highlights: ['Beach Gateway', 'Fish Market', 'Dutch Canal'],
+    bestTime: 'Nov - Apr'
   },
-  {
-    name: 'Kurunegala',
-    slug: 'kurunegala',
-    province: 'North Western Province',
-    description: 'Central hub city known for Elephant Rock, scenic views, and Cultural Triangle access.',
-    highlights: ['Elephant Rock', 'Kurunegala Lake', 'Ridi Viharaya'],
-    population: '30,000+',
-    image: 'https://images.unsplash.com/photo-1606820246174-bc6c7f7c2f28?w=500&h=300&fit=crop',
-    experienceTypes: ['Rock Hiking', 'Lake Views', 'Temple Visits', 'Cultural Triangle']
+  'wadduwa': { 
+    image: 'https://images.unsplash.com/photo-1540202404-a2f29016b523?w=600&h=400&fit=crop',
+    highlights: ['Ayurveda', 'Golden Beach', 'Relaxation'],
+    bestTime: 'Nov - Apr'
   },
-  {
-    name: 'Batticaloa',
-    slug: 'batticaloa',
-    province: 'Eastern Province',
-    description: 'Peaceful east coast town with tranquil beaches, singing fish lagoon, and friendly locals.',
-    highlights: ['Batticaloa Lighthouse', 'Kallady Bridge', 'Singing Fish Lagoon'],
-    population: '90,000+',
-    image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=500&h=300&fit=crop',
-    experienceTypes: ['Lagoon Tours', 'Beach Relaxation', 'Lighthouse Visits', 'Local Culture']
+  'kalpitiya': { 
+    image: 'https://images.unsplash.com/photo-1530053969600-caed2596d242?w=600&h=400&fit=crop',
+    highlights: ['Kitesurfing', 'Dolphins', 'Lagoon Safari'],
+    bestTime: 'May - Oct'
+  },
+  'puttalam': { 
+    image: 'https://images.unsplash.com/photo-1577640128125-85d724d47ce2?w=600&h=400&fit=crop',
+    highlights: ['Bird Watching', 'Salt Pans', 'Lagoons'],
+    bestTime: 'Year Round'
   }
-]
+}
+
+const regionIcons: Record<string, React.ReactNode> = {
+  northern: <Compass className="w-5 h-5" />,
+  central: <Mountain className="w-5 h-5" />,
+  southern: <Waves className="w-5 h-5" />,
+  eastern: <Sun className="w-5 h-5" />,
+  western: <Building2 className="w-5 h-5" />
+}
+
+const regionColors: Record<string, { bg: string; text: string; gradient: string; border: string }> = {
+  northern: { 
+    bg: 'from-amber-500 to-orange-500', 
+    text: 'text-amber-700', 
+    gradient: 'from-amber-50 to-orange-50',
+    border: 'border-amber-200'
+  },
+  central: { 
+    bg: 'from-emerald-500 to-green-600', 
+    text: 'text-emerald-700', 
+    gradient: 'from-emerald-50 to-green-50',
+    border: 'border-emerald-200'
+  },
+  southern: { 
+    bg: 'from-blue-500 to-cyan-500', 
+    text: 'text-blue-700', 
+    gradient: 'from-blue-50 to-cyan-50',
+    border: 'border-blue-200'
+  },
+  eastern: { 
+    bg: 'from-purple-500 to-indigo-500', 
+    text: 'text-purple-700', 
+    gradient: 'from-purple-50 to-indigo-50',
+    border: 'border-purple-200'
+  },
+  western: { 
+    bg: 'from-rose-500 to-pink-500', 
+    text: 'text-rose-700', 
+    gradient: 'from-rose-50 to-pink-50',
+    border: 'border-rose-200'
+  }
+}
+
+const regionDescriptions: Record<string, string> = {
+  northern: 'Explore the cultural heart of Tamil Sri Lanka with ancient temples, unique cuisine, and untouched islands',
+  central: 'Discover misty mountains, ancient kingdoms, sacred temples, and world-famous tea plantations',
+  southern: 'Golden beaches, historic forts, whale watching, and the best of Sri Lankan coastal life',
+  eastern: 'Pristine beaches, world-class surf breaks, and tranquil lagoons await on the sunrise coast',
+  western: 'Modern capital city vibes, beach gateways, and convenient airport connections'
+}
 
 const Destinations = () => {
+  const [activeRegion, setActiveRegion] = useState<string>('northern')
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedProvince, setSelectedProvince] = useState('')
-  const [destinations, setDestinations] = useState<FeaturedDestination[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    const loadDestinations = async () => {
-      try {
-        setIsLoading(true)
-        setError(null)
-        const data = await cmsService.featuredDestinations.getAll()
-        setDestinations(data)
-      } catch (err: any) {
-        console.error('Failed to load destinations:', err)
-        setError('Failed to load destinations')
-      } finally {
-        setIsLoading(false)
-      }
-    }
+  const regions = Object.entries(destinationsByRegion)
+  const totalDestinations = Object.values(destinationsByRegion).reduce(
+    (acc, region) => acc + region.destinations.length, 0
+  )
 
-    loadDestinations()
-  }, [])
-
-  // Filter cities
-  const filteredDestinations = destinations.filter(destination => {
-    const search = searchTerm.toLowerCase()
-    const matchesSearch =
-      destination.name.toLowerCase().includes(search) ||
-      (destination.title || '').toLowerCase().includes(search) ||
-      (destination.description || '').toLowerCase().includes(search) ||
-      (destination.category || '').toLowerCase().includes(search)
-    
-    const matchesProvince = !selectedProvince || destination.category === selectedProvince
-    
-    return matchesSearch && matchesProvince
-  })
-
-  // Get unique provinces
-  const provinces = Array.from(
-    new Set(
-      destinations
-        .map(destination => destination.category)
-        .filter(Boolean)
+  // Filter destinations based on search
+  const getFilteredDestinations = (regionKey: string) => {
+    const region = destinationsByRegion[regionKey as keyof typeof destinationsByRegion]
+    if (!searchTerm) return region.destinations
+    return region.destinations.filter(dest => 
+      dest.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      dest.description.toLowerCase().includes(searchTerm.toLowerCase())
     )
-  ) as string[]
-
-  const handleClearFilters = () => {
-    setSearchTerm('')
-    setSelectedProvince('')
   }
 
-  const handleDestinationExplore = (link: string) => {
-    if (!link) return
-    if (link.startsWith('http')) {
-      window.location.href = link
-    } else {
-      window.location.href = link
-    }
+  // Get slug from href
+  const getSlug = (href: string) => {
+    const parts = href.split('/')
+    return parts[parts.length - 1]
   }
+
   return (
     <>
       <Helmet>
-        <title>Discover Sri Lanka's Top Cities – Restaurants, Activities & Bookings | Recharge Travels</title>
+        <title>Explore All Destinations in Sri Lanka | Recharge Travels</title>
         <meta
           name="description"
-          content="Discover Sri Lanka's Top Cities—dine, explore, play & book your own way. From Colombo's dining scene to Kandy's temples, explore and book individual experiences without bundling into fixed tour packages."
+          content="Discover Sri Lanka's top destinations by region - Northern, Central, Southern, Eastern & Western. Plan your perfect trip with our comprehensive destination guide."
         />
-        <meta
-          property="og:title"
-          content="Discover Sri Lanka's Top Cities – Restaurants, Activities & Bookings"
-        />
-        <meta
-          property="og:description"
-          content="Discover Sri Lanka's Top Cities—dine, explore, play & book your own way. Book restaurants, experiences, hotels."
-        />
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "TouristDestination",
-            "name": "Sri Lanka Cities Directory",
-            "description": "Explore Sri Lanka's top cities and book individual experiences",
-            "url": "https://preview--rechargetravels.lovable.app/destinations",
-          })}
-        </script>
+        <meta property="og:title" content="Explore All Destinations in Sri Lanka | Recharge Travels" />
+        <meta property="og:description" content="Discover Sri Lanka's top destinations by region. From Jaffna's Tamil heritage to Galle's colonial charm." />
+        <link rel="canonical" href="https://www.rechargetravels.com/destinations" />
       </Helmet>
 
       <Header />
 
-      <div className="min-h-screen rt-section-bg flex flex-col">
-        <main className="flex-1">
-          <section className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pt-8 pb-10 space-y-8">
-            {/* Hero + search / filters */}
-            <div className="grid gap-8 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1.1fr)] items-start">
-              <div className="space-y-6">
-                <div className="inline-flex items-center gap-2 rounded-full bg-slate-900 text-amber-200 px-3.5 py-1.5 text-[11px] font-medium shadow-md shadow-slate-900/40">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                  <span>Handpicked destinations across Sri Lanka</span>
-                </div>
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50">
+        {/* Hero Section */}
+        <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 pt-24 pb-16">
+          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1586861635167-e5223aadc9fe?w=1920&h=600&fit=crop')] bg-cover bg-center opacity-20"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-slate-900/50"></div>
+          
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 px-4 py-2 text-sm text-amber-300 mb-6">
+                <MapPin className="w-4 h-4" />
+                <span>{totalDestinations}+ Handpicked Destinations Across Sri Lanka</span>
+              </div>
+              
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
+                Discover Sri Lanka
+                <span className="block mt-2 bg-gradient-to-r from-amber-400 via-orange-400 to-rose-400 bg-clip-text text-transparent">
+                  One Region at a Time
+                </span>
+              </h1>
+              
+              <p className="text-lg text-gray-300 max-w-2xl mx-auto mb-8">
+                From the cultural treasures of the North to the golden beaches of the South, 
+                explore every corner of this island paradise
+              </p>
 
-                <div className="space-y-3">
-                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-slate-900 tracking-tight">
-                    Discover Sri Lanka,
-                    <span className="inline-block bg-gradient-to-r from-orange-500 via-amber-400 to-emerald-500 bg-clip-text text-transparent ml-1">
-                      one destination at a time
-                    </span>
-                  </h1>
-                  <p className="text-sm sm:text-base text-slate-600 max-w-xl leading-relaxed">
-                    From misty tea hills to golden beaches and wildlife-rich national parks, explore Sri
-                    Lanka through curated regions, styles, and travel moods—designed for slow, meaningful
-                    journeys.
+              {/* Search Bar */}
+              <div className="max-w-xl mx-auto">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search destinations..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full px-6 py-4 pl-14 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400/50 focus:border-amber-400/50"
+                  />
+                  <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Region Tabs */}
+        <section className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex overflow-x-auto scrollbar-hide py-4 gap-2 sm:gap-3 justify-start sm:justify-center">
+              {regions.map(([key, region]) => (
+                <button
+                  key={key}
+                  onClick={() => setActiveRegion(key)}
+                  className={`flex items-center gap-2 px-4 sm:px-6 py-3 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-300 ${
+                    activeRegion === key
+                      ? `bg-gradient-to-r ${regionColors[key].bg} text-white shadow-lg scale-105`
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {regionIcons[key]}
+                  <span className="hidden sm:inline">{region.title}</span>
+                  <span className="sm:hidden">{key.charAt(0).toUpperCase() + key.slice(1)}</span>
+                  <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${
+                    activeRegion === key 
+                      ? 'bg-white/20' 
+                      : 'bg-gray-200'
+                  }`}>
+                    {region.destinations.length}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Active Region Content */}
+        <section className="py-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Region Header */}
+            <div className={`rounded-2xl p-6 sm:p-8 mb-8 bg-gradient-to-r ${regionColors[activeRegion].gradient} border ${regionColors[activeRegion].border}`}>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className={`p-2 rounded-xl bg-gradient-to-r ${regionColors[activeRegion].bg} text-white`}>
+                      {regionIcons[activeRegion]}
+                    </div>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                      {destinationsByRegion[activeRegion as keyof typeof destinationsByRegion].title}
+                    </h2>
+                  </div>
+                  <p className="text-gray-600 max-w-2xl">
+                    {regionDescriptions[activeRegion]}
                   </p>
                 </div>
-
-                {/* Search / primary filters */}
-                <div className="rt-card p-4 sm:p-5 flex flex-col gap-4">
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-center gap-2 text-xs text-slate-600">
-                      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-amber-100 text-[11px] text-amber-800">
-                        🔍
-                      </span>
-                      <span>Search by destination, vibe, or region</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-[11px] text-slate-500">
-                      <span className="inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                      <span>Live availability with instant confirmation</span>
-                    </div>
-                  </div>
-
-                  <div className="grid gap-3 sm:grid-cols-[minmax(0,1.8fr)_minmax(0,1.1fr)]">
-                    <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3.5 py-2.5">
-                      <span className="text-slate-400 text-sm">Search</span>
-                      <input
-                        type="text"
-                        placeholder={'Try Ella hikes or South Coast beaches'}
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="flex-1 border-none bg-transparent text-xs sm:text-[13px] text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-0"
-                      />
-                    </div>
-                    <div className="flex gap-2">
-                      <button className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-2 text-[11px] font-medium text-slate-700">
-                        <span className="text-xs">☀️</span>
-                        Travel month
-                      </button>
-                      <button className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-2 text-[11px] font-medium text-slate-700">
-                        <span className="text-xs">👨‍👩‍👧</span>
-                        Trip style
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Quick pills */}
-                  <div className="flex flex-wrap gap-2 pt-1">
-                    <button
-                      className={`rt-tag px-3 py-1 text-[11px] font-medium flex items-center gap-1.5 ${
-                        !selectedProvince ? 'rt-tag--active' : ''
-                      }`}
-                      onClick={handleClearFilters}
-                    >
-                      <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-                      All destinations
-                    </button>
-                    {provinces.slice(0, 5).map((province) => (
-                      <button
-                        key={province}
-                        className={`rt-tag px-3 py-1 text-[11px] text-slate-600 ${
-                          selectedProvince === province ? 'rt-tag--active' : ''
-                        }`}
-                        onClick={() =>
-                          setSelectedProvince((prev) => (prev === province ? '' : province))
-                        }
-                      >
-                        {province}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Mini stats */}
-                <div className="flex flex-wrap gap-4 text-xs text-slate-600">
-                  <div className="flex items-center gap-2">
-                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-[13px] text-emerald-800">
-                      ★
+                <div className="flex items-center gap-4 text-sm">
+                  <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm">
+                    <MapPin className="w-4 h-4 text-gray-500" />
+                    <span className="font-semibold text-gray-900">
+                      {getFilteredDestinations(activeRegion).length} Destinations
                     </span>
-                    <span>
-                      4.9 / 5 traveller rating
-                      <span className="text-slate-400"> · Sri Lanka DMC</span>
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-orange-100 text-[13px] text-orange-800">
-                      ⏱
-                    </span>
-                    <span>Average trip length: 10–14 nights</span>
                   </div>
                 </div>
               </div>
-
-              {/* Highlight / summary panel */}
-              <aside className="space-y-4 lg:space-y-5">
-                <div className="rt-card p-4 sm:p-5 flex flex-col gap-4 relative overflow-hidden">
-                  <div className="absolute -right-10 -bottom-10 h-40 w-40 rounded-full bg-gradient-to-tr from-orange-400/10 via-amber-300/10 to-emerald-400/10" />
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-amber-700">
-                        Curated overview
-                      </p>
-                      <h2 className="mt-1 text-base font-semibold text-slate-900">
-                        {(destinations?.length || 18) + '+'} handpicked destinations across Sri Lanka
-                      </h2>
-                    </div>
-                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-2xl bg-slate-900 text-[15px] text-amber-200 shadow-md shadow-slate-900/40">
-                      🌏
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-600 leading-relaxed">
-                    Explore tea-covered hills, UNESCO heritage cities, surf-ready beaches and
-                    wildlife-rich national parks—each destination paired with stays, experiences and
-                    transfer suggestions.
-                  </p>
-                  <div className="grid grid-cols-3 gap-3 text-[11px] text-slate-600">
-                    <div className="space-y-1">
-                      <p className="text-[10px] uppercase tracking-[0.16em] text-slate-400">
-                        Hill country
-                      </p>
-                      <p className="text-sm font-semibold text-slate-900">Ella · Nuwara Eliya</p>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-[10px] uppercase tracking-[0.16em] text-slate-400">
-                        South &amp; west
-                      </p>
-                      <p className="text-sm font-semibold text-slate-900">Galle · Mirissa</p>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-[10px] uppercase tracking-[0.16em] text-slate-400">
-                        Wildlife
-                      </p>
-                      <p className="text-sm font-semibold text-slate-900">Yala · Wilpattu</p>
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
-                    <div className="flex -space-x-2">
-                      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-[11px] text-white ring-2 ring-amber-50">
-                        T
-                      </span>
-                      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-amber-400 text-[11px] text-slate-900 ring-2 ring-amber-50">
-                        S
-                      </span>
-                      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-900 text-[11px] text-amber-200 ring-2 ring-amber-50">
-                        L
-                      </span>
-                    </div>
-                    <button className="rt-blur-panel inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium text-slate-800">
-                      Build route from map
-                      <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-slate-900 text-[10px] text-amber-200">
-                        ↗
-                      </span>
-                    </button>
-                  </div>
-                </div>
-              </aside>
             </div>
 
-            {/* Destinations grid */}
-            <section className="space-y-4 mt-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="space-y-1">
-                  <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-slate-500">
-                    Browse destinations
-                  </p>
-                  <div className="flex items-center gap-2 text-sm text-slate-700">
-                    <span className="font-semibold text-slate-900">Featured regions &amp; stays</span>
-                    <span className="inline-flex h-1 w-1 rounded-full bg-slate-300" />
-                    <span className="text-xs text-slate-500">
-                      Tap into a card to view suggested routes
-                    </span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 text-[11px] text-slate-600">
-                  <button className="rt-tag px-3 py-1 flex items-center gap-1.5">
-                    <span className="text-xs">⇅</span>
-                    Sort by popularity
-                  </button>
-                  <button className="rt-tag px-3 py-1 flex items-center gap-1.5">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                    Ideal for first-timers
-                  </button>
-                </div>
-              </div>
+            {/* Destination Cards Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {getFilteredDestinations(activeRegion).map((destination) => {
+                const slug = getSlug(destination.href)
+                const imageData = destinationImages[slug] || {
+                  image: 'https://images.unsplash.com/photo-1586861635167-e5223aadc9fe?w=600&h=400&fit=crop',
+                  highlights: ['Explore', 'Discover', 'Experience'],
+                  bestTime: 'Year Round'
+                }
 
-              {isLoading && (
-                <div className="py-10">
-                  <LoadingSpinner
-                    fullScreen={false}
-                    message="Loading destinations..."
-                    variant="travel"
-                  />
-                </div>
-              )}
-
-              {!isLoading && error && (
-                <div className="text-sm text-red-600">{error}</div>
-              )}
-
-              {filteredDestinations.length === 0 && !isLoading && !error && (
-                <div className="text-center py-16">
-                  <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
-                    <MapPin className="h-12 w-12 text-gray-400" />
-                  </div>
-                  <h3 className="text-2xl font-poppins font-semibold text-gray-900 mb-4">
-                    No cities found
-                  </h3>
-                  <p className="text-gray-600 text-lg mb-6 max-w-md mx-auto">
-                    We couldn't find any cities matching your criteria. Try adjusting your search.
-                  </p>
-                  <Button onClick={handleClearFilters} className="btn-primary">
-                    Clear All Filters
-                  </Button>
-                </div>
-              )}
-
-              <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                {filteredDestinations.map((destination) => (
-                  <article key={destination.id} className="rt-card overflow-hidden flex flex-col">
-                    <div className="relative h-44 sm:h-48 overflow-hidden">
+                return (
+                  <Link
+                    key={destination.href}
+                    to={destination.href}
+                    className="group relative bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
+                  >
+                    {/* Image */}
+                    <div className="relative h-48 overflow-hidden">
                       <img
-                        src={destination.image}
-                        alt={destination.name}
-                        className="h-full w-full object-cover"
+                        src={imageData.image}
+                        alt={destination.title}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/15 to-transparent" />
-                      <div className="absolute left-3 right-3 bottom-3 flex items-end justify-between gap-3">
-                        <div>
-                          {destination.category && (
-                            <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-amber-200">
-                              {destination.category}
-                            </p>
-                          )}
-                          <h3 className="text-sm sm:text-base font-semibold text-white">
-                            {destination.name}
-                          </h3>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+                      
+                      {/* Best Time Badge */}
+                      <div className="absolute top-3 right-3">
+                        <div className="flex items-center gap-1 px-2 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-medium text-gray-700">
+                          <Clock className="w-3 h-3" />
+                          {imageData.bestTime}
                         </div>
-                        {destination.popularActivities && destination.popularActivities.length > 0 && (
-                          <div className="rt-chip-badge px-2.5 py-1 text-[11px] font-medium flex items-center gap-1.5">
-                            <span className="text-[12px]">🌿</span>
-                            {destination.popularActivities[0]}
-                          </div>
-                        )}
+                      </div>
+
+                      {/* Region Badge */}
+                      <div className="absolute top-3 left-3">
+                        <div className={`px-2 py-1 rounded-full text-xs font-semibold text-white bg-gradient-to-r ${regionColors[activeRegion].bg}`}>
+                          {activeRegion.charAt(0).toUpperCase() + activeRegion.slice(1)}
+                        </div>
+                      </div>
+
+                      {/* Title Overlay */}
+                      <div className="absolute bottom-0 left-0 right-0 p-4">
+                        <h3 className="text-xl font-bold text-white mb-1 group-hover:text-amber-300 transition-colors">
+                          {destination.title}
+                        </h3>
                       </div>
                     </div>
-                    <div className="p-4 sm:p-4.5 flex-1 flex flex-col gap-3">
-                      <p className="text-xs text-slate-600 leading-relaxed">
+
+                    {/* Content */}
+                    <div className="p-4">
+                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">
                         {destination.description}
                       </p>
-                      <div className="flex flex-wrap items-center justify-between gap-3 text-[11px] text-slate-600">
-                        <div className="flex flex-wrap gap-1.5">
-                          {destination.duration && (
-                            <span className="rt-badge-soft px-2 py-1">{destination.duration}</span>
-                          )}
-                          {destination.features &&
-                            destination.features.slice(0, 2).map((feature) => (
-                              <span key={feature} className="rt-badge-soft px-2 py-1">
-                                {feature}
-                              </span>
-                            ))}
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-[11px] text-emerald-700">
-                            ★
+
+                      {/* Highlights */}
+                      <div className="flex flex-wrap gap-1.5 mb-4">
+                        {imageData.highlights.map((highlight, idx) => (
+                          <span
+                            key={idx}
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${regionColors[activeRegion].text} bg-gradient-to-r ${regionColors[activeRegion].gradient}`}
+                          >
+                            {highlight}
                           </span>
-                          <span>{destination.rating ? destination.rating.toFixed(1) : '4.8'}</span>
-                        </div>
+                        ))}
                       </div>
-                      <div className="mt-1 flex items-center justify-between gap-3 text-[11px] text-slate-700">
-                        <span>
-                          {destination.bestTimeToVisit ||
-                            'Great year-round with seasonal highlights'}
-                        </span>
-                        <button
-                          className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-amber-700"
-                          onClick={() => handleDestinationExplore(destination.link)}
-                        >
-                          View details
-                          <span className="text-[12px]">↗</span>
-                        </button>
+
+                      {/* CTA */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1 text-sm text-gray-500">
+                          <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
+                          <span>4.8</span>
+                          <span className="text-gray-300">•</span>
+                          <Users className="w-4 h-4" />
+                          <span>Popular</span>
+                        </div>
+                        <div className={`flex items-center gap-1 text-sm font-semibold ${regionColors[activeRegion].text} group-hover:gap-2 transition-all`}>
+                          Explore
+                          <ArrowRight className="w-4 h-4" />
+                        </div>
                       </div>
                     </div>
-                  </article>
-                ))}
-              </div>
-            </section>
+                  </Link>
+                )
+              })}
+            </div>
 
-            {/* CTA strip */}
-            <section className="mt-8 mb-3">
-              <div className="rt-card px-4 sm:px-6 py-4 sm:py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="space-y-1">
-                  <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-amber-700">
-                    Not sure where to start?
-                  </p>
-                  <p className="text-sm text-slate-700">
-                    Share your dates and travel style—we'll map 2–3 routes that connect these destinations
-                    into one balanced Sri Lanka trip.
-                  </p>
+            {/* No Results */}
+            {getFilteredDestinations(activeRegion).length === 0 && (
+              <div className="text-center py-16">
+                <div className="mx-auto w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                  <MapPin className="w-10 h-10 text-gray-400" />
                 </div>
-                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                  <button
-                    className="inline-flex items-center justify-center gap-1.5 rt-gradient-pill px-4 py-2 text-xs font-semibold text-slate-900 shadow-md shadow-orange-400/40"
-                    onClick={() => {
-                      window.location.href = '/book-now'
-                    }}
-                  >
-                    Talk to a Sri Lanka specialist
-                    <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-slate-900/10 text-[10px]">
-                      →
-                    </span>
-                  </button>
-                  <button
-                    className="inline-flex items-center justify-center gap-1.5 rounded-full rt-tag px-3.5 py-2 text-[11px] font-medium text-slate-700"
-                    onClick={() => {
-                      window.location.href = '/travel-guide'
-                    }}
-                  >
-                    Download sample itineraries
-                  </button>
-                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">No destinations found</h3>
+                <p className="text-gray-600">Try adjusting your search term</p>
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="mt-4 px-6 py-2 bg-amber-500 text-white rounded-full font-medium hover:bg-amber-600 transition-colors"
+                >
+                  Clear Search
+                </button>
               </div>
-            </section>
-          </section>
-        </main>
+            )}
+          </div>
+        </section>
+
+        {/* All Regions Overview */}
+        <section className="py-12 bg-gradient-to-b from-white to-slate-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-10">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">Explore All Regions</h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                Click on any region to discover its unique destinations
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+              {regions.map(([key, region]) => (
+                <button
+                  key={key}
+                  onClick={() => {
+                    setActiveRegion(key)
+                    window.scrollTo({ top: 400, behavior: 'smooth' })
+                  }}
+                  className={`group p-6 rounded-2xl border-2 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${
+                    activeRegion === key 
+                      ? `${regionColors[key].border} bg-gradient-to-br ${regionColors[key].gradient}` 
+                      : 'border-gray-200 bg-white hover:border-gray-300'
+                  }`}
+                >
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 bg-gradient-to-r ${regionColors[key].bg} text-white`}>
+                    {regionIcons[key]}
+                  </div>
+                  <h3 className="font-bold text-gray-900 mb-1">{region.title}</h3>
+                  <p className="text-sm text-gray-600 mb-3">{region.destinations.length} destinations</p>
+                  <div className="flex flex-wrap gap-1">
+                    {region.destinations.slice(0, 3).map((d, i) => (
+                      <span key={i} className="text-xs text-gray-500">{d.title}{i < 2 ? ',' : ''}</span>
+                    ))}
+                    {region.destinations.length > 3 && (
+                      <span className="text-xs text-gray-400">+{region.destinations.length - 3} more</span>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="py-16 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 className="text-3xl font-bold text-white mb-4">
+              Not sure where to start?
+            </h2>
+            <p className="text-gray-300 mb-8 max-w-2xl mx-auto">
+              Let our Sri Lanka travel experts help you plan the perfect itinerary 
+              connecting these amazing destinations into one unforgettable journey.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                to="/book-now"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-full hover:shadow-lg hover:shadow-amber-500/30 transition-all hover:-translate-y-1"
+              >
+                Plan My Trip
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+              <Link
+                to="/tours"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 border border-white/20 text-white font-semibold rounded-full hover:bg-white/20 transition-all"
+              >
+                Browse Tour Packages
+              </Link>
+            </div>
+          </div>
+        </section>
 
         <Footer />
       </div>

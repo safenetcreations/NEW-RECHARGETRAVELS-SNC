@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Car, ChevronDown, Star, Shield, Headphones, Map, Bus, Train, Crown, Building2, CalendarCheck } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Car, ChevronDown, Star, Shield, Headphones, Map, Bus, Train, Crown, Building2, CalendarCheck, Sparkles, Calendar, Users, Compass, ArrowRight, Plus, Minus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TransferBookingForm from '@/modules/transfers/components/TransferBookingForm';
@@ -15,21 +15,65 @@ interface LuxuryHeroSectionProps {
 }
 
 const LuxuryHeroSection = ({ hoveredRegion, onLocationsChange }: LuxuryHeroSectionProps) => {
+  const navigate = useNavigate();
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [currentSlide, setCurrentSlide] = useState<HeroSlide>(DEFAULT_SLIDES[0]);
   const [loading, setLoading] = useState(true);
+
+  // AI Planner state
+  const [tripDays, setTripDays] = useState(7);
+  const [adults, setAdults] = useState(2);
+  const [children, setChildren] = useState(0);
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+
+  const interestOptions = [
+    { id: 'cultural', label: 'Cultural', icon: '🏛️' },
+    { id: 'wildlife', label: 'Wildlife', icon: '🐆' },
+    { id: 'beach', label: 'Beach', icon: '🏖️' },
+    { id: 'adventure', label: 'Adventure', icon: '🥾' },
+    { id: 'nature', label: 'Nature', icon: '🍃' },
+    { id: 'train', label: 'Train Rides', icon: '🚂' },
+  ];
+
+  const toggleInterest = (id: string) => {
+    setSelectedInterests(prev =>
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
+  const handleAIPlannerContinue = () => {
+    // Navigate to full AI planner with pre-filled data
+    const params = new URLSearchParams({
+      days: tripDays.toString(),
+      adults: adults.toString(),
+      children: children.toString(),
+      interests: selectedInterests.join(','),
+    });
+    navigate(`/ai-trip-planner?${params.toString()}`);
+  };
 
   useEffect(() => {
     const updateSlideBasedOnHour = async () => {
       try {
         const slides = await getHeroSlides();
-        if (slides && slides.length > 0) {
-          const hour = new Date().getHours();
-          const index = hour % slides.length;
-          setCurrentSlide(slides[index]);
+        // Filter out slides with empty or invalid image URLs
+        const validSlides = slides?.filter(slide => slide.image && slide.image.trim() !== '') || [];
+
+        const hour = new Date().getHours();
+        if (validSlides.length > 0) {
+          const index = hour % validSlides.length;
+          setCurrentSlide(validSlides[index]);
+        } else {
+          // Use default slides if no valid slides from Firebase
+          const index = hour % DEFAULT_SLIDES.length;
+          setCurrentSlide(DEFAULT_SLIDES[index]);
         }
       } catch (error) {
         console.error('Failed to update slide:', error);
+        // Use default slide on error
+        const hour = new Date().getHours();
+        const index = hour % DEFAULT_SLIDES.length;
+        setCurrentSlide(DEFAULT_SLIDES[index]);
       } finally {
         setLoading(false);
       }
@@ -60,7 +104,10 @@ const LuxuryHeroSection = ({ hoveredRegion, onLocationsChange }: LuxuryHeroSecti
       height: '100vh',
       width: '100%',
       overflow: 'hidden',
-      backgroundColor: '#000'
+      backgroundColor: '#1a1a2e',
+      backgroundImage: `url('https://i.imgur.com/AEnBWJf.jpeg')`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center'
     }}>
       {/* Background Image */}
       <div style={{
@@ -284,8 +331,11 @@ const LuxuryHeroSection = ({ hoveredRegion, onLocationsChange }: LuxuryHeroSecti
                 </div>
 
                 <div className="p-4 bg-gray-50">
-                  <Tabs defaultValue="transfer" className="w-full">
-                    <TabsList className="grid w-full grid-cols-4 mb-4">
+                  <Tabs defaultValue="ai-planner" className="w-full">
+                    <TabsList className="grid w-full grid-cols-5 mb-4">
+                      <TabsTrigger value="ai-planner" className="flex items-center gap-2 bg-gradient-to-r from-purple-500/10 to-teal-500/10 data-[state=active]:from-purple-500 data-[state=active]:to-teal-500 data-[state=active]:text-white">
+                        <Sparkles className="w-4 h-4" /> AI Plan
+                      </TabsTrigger>
                       <TabsTrigger value="transfer" className="flex items-center gap-2">
                         <Car className="w-4 h-4" /> Transfers
                       </TabsTrigger>
@@ -301,6 +351,129 @@ const LuxuryHeroSection = ({ hoveredRegion, onLocationsChange }: LuxuryHeroSecti
                     </TabsList>
 
                     <div className="max-h-[60vh] overflow-y-auto pr-2">
+                      <TabsContent value="ai-planner">
+                        <div className="p-4 bg-gradient-to-br from-purple-50 to-teal-50 rounded-xl">
+                          <div className="text-center mb-4">
+                            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-500 to-teal-500 text-white px-4 py-1.5 rounded-full text-sm font-medium mb-2">
+                              <Sparkles className="w-4 h-4" />
+                              AI-Powered Trip Planning
+                            </div>
+                            <h3 className="text-lg font-bold text-gray-800">Create Your Perfect Itinerary</h3>
+                          </div>
+
+                          {/* Quick Setup */}
+                          <div className="space-y-4">
+                            {/* Trip Duration */}
+                            <div className="bg-white rounded-xl p-4 shadow-sm">
+                              <label className="text-sm font-medium text-gray-700 mb-2 block flex items-center gap-2">
+                                <Calendar className="w-4 h-4 text-purple-500" />
+                                Trip Duration
+                              </label>
+                              <div className="flex gap-2 flex-wrap">
+                                {[5, 7, 10, 14].map((days) => (
+                                  <button
+                                    key={days}
+                                    onClick={() => setTripDays(days)}
+                                    className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                                      tripDays === days
+                                        ? 'bg-gradient-to-r from-purple-500 to-teal-500 text-white shadow-md'
+                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    }`}
+                                  >
+                                    {days} Days
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Travelers */}
+                            <div className="bg-white rounded-xl p-4 shadow-sm">
+                              <label className="text-sm font-medium text-gray-700 mb-3 block flex items-center gap-2">
+                                <Users className="w-4 h-4 text-purple-500" />
+                                Travelers
+                              </label>
+                              <div className="grid grid-cols-2 gap-4">
+                                {/* Adults */}
+                                <div className="bg-gray-50 rounded-xl p-3">
+                                  <span className="text-sm text-gray-600 block mb-2">Adults (12+)</span>
+                                  <div className="flex items-center justify-between">
+                                    <button
+                                      onClick={() => setAdults(Math.max(1, adults - 1))}
+                                      className="w-10 h-10 rounded-xl bg-purple-100 hover:bg-purple-200 flex items-center justify-center text-purple-700 font-bold text-xl transition-colors"
+                                    >
+                                      −
+                                    </button>
+                                    <span className="font-bold text-2xl text-gray-900 w-10 text-center">{adults}</span>
+                                    <button
+                                      onClick={() => setAdults(adults + 1)}
+                                      className="w-10 h-10 rounded-xl bg-purple-100 hover:bg-purple-200 flex items-center justify-center text-purple-700 font-bold text-xl transition-colors"
+                                    >
+                                      +
+                                    </button>
+                                  </div>
+                                </div>
+                                {/* Children */}
+                                <div className="bg-gray-50 rounded-xl p-3">
+                                  <span className="text-sm text-gray-600 block mb-2">Children (2-11)</span>
+                                  <div className="flex items-center justify-between">
+                                    <button
+                                      onClick={() => setChildren(Math.max(0, children - 1))}
+                                      className="w-10 h-10 rounded-xl bg-teal-100 hover:bg-teal-200 flex items-center justify-center text-teal-700 font-bold text-xl transition-colors"
+                                    >
+                                      −
+                                    </button>
+                                    <span className="font-bold text-2xl text-gray-900 w-10 text-center">{children}</span>
+                                    <button
+                                      onClick={() => setChildren(children + 1)}
+                                      className="w-10 h-10 rounded-xl bg-teal-100 hover:bg-teal-200 flex items-center justify-center text-teal-700 font-bold text-xl transition-colors"
+                                    >
+                                      +
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Interests */}
+                            <div className="bg-white rounded-xl p-4 shadow-sm">
+                              <label className="text-sm font-medium text-gray-700 mb-2 block flex items-center gap-2">
+                                <Compass className="w-4 h-4 text-purple-500" />
+                                What interests you?
+                              </label>
+                              <div className="grid grid-cols-3 gap-2">
+                                {interestOptions.map((interest) => (
+                                  <button
+                                    key={interest.id}
+                                    onClick={() => toggleInterest(interest.id)}
+                                    className={`p-2 rounded-lg text-sm font-medium transition-all flex flex-col items-center gap-1 ${
+                                      selectedInterests.includes(interest.id)
+                                        ? 'bg-gradient-to-r from-purple-500 to-teal-500 text-white shadow-md'
+                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    }`}
+                                  >
+                                    <span className="text-lg">{interest.icon}</span>
+                                    <span className="text-xs">{interest.label}</span>
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Generate Button */}
+                            <Button
+                              onClick={handleAIPlannerContinue}
+                              className="w-full bg-gradient-to-r from-purple-500 to-teal-500 hover:from-purple-600 hover:to-teal-600 text-white py-6 text-lg font-semibold rounded-xl shadow-lg"
+                            >
+                              <Sparkles className="w-5 h-5 mr-2" />
+                              Generate My Itinerary
+                              <ArrowRight className="w-5 h-5 ml-2" />
+                            </Button>
+
+                            <p className="text-xs text-center text-gray-500">
+                              Get a personalized day-by-day itinerary with activities, hotels & pricing
+                            </p>
+                          </div>
+                        </div>
+                      </TabsContent>
                       <TabsContent value="transfer">
                         <TransferBookingForm />
                       </TabsContent>

@@ -26,6 +26,7 @@ import CustomExperienceSection from '@/components/admin/panel/CustomExperienceSe
 import CustomExperienceSubmissions from '@/components/admin/panel/CustomExperienceSubmissions';
 import TrainJourneysSection from '@/components/admin/panel/TrainJourneysSection';
 import AIContentTools from '@/components/admin/AIContentTools';
+import { ExperienceContentManager } from '@/components/cms/ExperienceContentManager';
 
 const AdminPanel: React.FC = () => {
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -52,6 +53,8 @@ const AdminPanel: React.FC = () => {
         return <ContentSection />;
       case 'cms':
         return <ContentSection />;
+      case 'experiences':
+        return <ExperienceContentManager />;
       case 'about-sri-lanka':
         return <AboutSriLankaAdmin />;
       case 'custom-experience':

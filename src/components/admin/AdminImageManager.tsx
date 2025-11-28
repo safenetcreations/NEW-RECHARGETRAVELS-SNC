@@ -107,8 +107,8 @@ const AdminImageManager: React.FC = () => {
         setSiteImages(siteDoc.data() as SiteImages);
       } else {
         setSiteImages({
-          logo: 'https://i.imgur.com/kzqjJ57.png',
-          favicon: 'https://i.imgur.com/kzqjJ57.png'
+          logo: '/logo-v2.png',
+          favicon: '/logo-v2.png'
         });
       }
 
@@ -326,7 +326,7 @@ const AdminImageManager: React.FC = () => {
                       <Input
                         value={siteImages.logo}
                         onChange={(e) => setSiteImages({...siteImages, logo: e.target.value})}
-                        placeholder="https://i.imgur.com/kzqjJ57.png"
+                        placeholder="/logo-v2.png"
                       />
                     </div>
                     {siteImages.logo && (
@@ -355,7 +355,7 @@ const AdminImageManager: React.FC = () => {
                       <Input
                         value={siteImages.favicon}
                         onChange={(e) => setSiteImages({...siteImages, favicon: e.target.value})}
-                        placeholder="https://i.imgur.com/kzqjJ57.png"
+                        placeholder="/logo-v2.png"
                       />
                     </div>
                     {siteImages.favicon && (

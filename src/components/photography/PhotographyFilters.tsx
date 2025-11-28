@@ -68,12 +68,17 @@ const PhotographyFilters = ({ filters, onFiltersChange }: PhotographyFiltersProp
         {/* Genre Filter */}
         <div className="space-y-2">
           <Label htmlFor="genre">Photography Genre</Label>
-          <Select value={filters.genre} onValueChange={(value) => onFiltersChange({ ...filters, genre: value })}>
+          <Select
+            value={filters.genre || 'all_genres'}
+            onValueChange={(value) =>
+              onFiltersChange({ ...filters, genre: value === 'all_genres' ? '' : value })
+            }
+          >
             <SelectTrigger id="genre">
               <SelectValue placeholder="All genres" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All genres</SelectItem>
+              <SelectItem value="all_genres">All genres</SelectItem>
               {genres.map((genre) => (
                 <SelectItem key={genre.value} value={genre.value}>
                   {genre.label}
@@ -86,12 +91,17 @@ const PhotographyFilters = ({ filters, onFiltersChange }: PhotographyFiltersProp
         {/* Skill Level Filter */}
         <div className="space-y-2">
           <Label htmlFor="skill-level">Skill Level</Label>
-          <Select value={filters.skillLevel} onValueChange={(value) => onFiltersChange({ ...filters, skillLevel: value })}>
+          <Select
+            value={filters.skillLevel || 'all_levels'}
+            onValueChange={(value) =>
+              onFiltersChange({ ...filters, skillLevel: value === 'all_levels' ? '' : value })
+            }
+          >
             <SelectTrigger id="skill-level">
               <SelectValue placeholder="All levels" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All levels</SelectItem>
+              <SelectItem value="all_levels">All levels</SelectItem>
               {skillLevels.map((level) => (
                 <SelectItem key={level.value} value={level.value}>
                   {level.label}
@@ -104,12 +114,17 @@ const PhotographyFilters = ({ filters, onFiltersChange }: PhotographyFiltersProp
         {/* Duration Filter */}
         <div className="space-y-2">
           <Label htmlFor="duration">Duration</Label>
-          <Select value={filters.durationType} onValueChange={(value) => onFiltersChange({ ...filters, durationType: value })}>
+          <Select
+            value={filters.durationType || 'any_duration'}
+            onValueChange={(value) =>
+              onFiltersChange({ ...filters, durationType: value === 'any_duration' ? '' : value })
+            }
+          >
             <SelectTrigger id="duration">
               <SelectValue placeholder="Any duration" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Any duration</SelectItem>
+              <SelectItem value="any_duration">Any duration</SelectItem>
               {durations.map((duration) => (
                 <SelectItem key={duration.value} value={duration.value}>
                   {duration.label}

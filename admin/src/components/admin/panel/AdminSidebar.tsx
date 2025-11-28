@@ -1,5 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import {
   Home,
   FileText,
@@ -31,7 +33,10 @@ import {
   Clock,
   X,
   Menu,
-  BookOpen
+  BookOpen,
+  Share2,
+  Bus,
+  Shield
 } from 'lucide-react';
 
 interface AdminSidebarProps {
@@ -57,10 +62,34 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [pinnedItems, setPinnedItems] = useState<string[]>([]);
   const [recentItems, setRecentItems] = useState<string[]>([]);
+  const [destinations, setDestinations] = useState<{ id: string; name: string; slug: string }[]>([]);
+
+  useEffect(() => {
+    const fetchDestinations = async () => {
+      try {
+        const q = query(collection(db, 'destinations'), orderBy('name'));
+        const snapshot = await getDocs(q);
+        const data = snapshot.docs.map(doc => ({
+          id: doc.id,
+          name: doc.data().name,
+          slug: doc.data().slug,
+        }));
+        setDestinations(data);
+      } catch (error) {
+        console.error('Error fetching destinations for sidebar:', error);
+      }
+    };
+
+    fetchDestinations();
+  }, []);
 
   // Close mobile menu when section changes
-  const handleSectionChange = (section: string) => {
-    onSectionChange(section);
+  const handleSectionChange = (section: string, path?: string) => {
+    if (path) {
+      window.location.href = `/admin${path}`;
+    } else {
+      onSectionChange(section);
+    }
     if (onMobileMenuClose) {
       onMobileMenuClose();
     }
@@ -113,6 +142,12 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
       items: [
         { id: 'hero-section', label: 'Hero Section', icon: Layers },
         { id: 'featured-destinations', label: 'Featured Destinations', icon: Compass },
+        ...destinations.map(dest => ({
+          id: `destination-${dest.slug}`,
+          label: dest.name,
+          icon: MapPin,
+          section: `/destinations?destination=${dest.slug}`
+        })),
         { id: 'luxury-experiences', label: 'Luxury Experiences', icon: Sparkles },
         { id: 'travel-packages', label: 'Travel Packages', icon: Sparkles },
         { id: 'testimonials', label: 'Testimonials', icon: MessageCircle },
@@ -133,9 +168,12 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
     {
       title: 'Content',
       items: [
+        { id: 'content-dashboard', label: 'Content Dashboard', icon: FileText },
         { id: 'pages', label: 'Pages', icon: FileText },
         { id: 'posts', label: 'Legacy Posts', icon: FileText },
         { id: 'media', label: 'Media Library', icon: Camera },
+        { id: 'social-media', label: 'Social Media', icon: Share2 },
+        { id: 'trip-builder', label: 'Trip Builder', icon: Map },
       ]
     },
     {
@@ -145,12 +183,14 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
         { id: 'tours', label: 'Tours & Packages', icon: MapPin },
         { id: 'activities', label: 'Activities', icon: Zap },
         { id: 'drivers', label: 'Drivers', icon: Car },
+        { id: 'driver-verification', label: 'Driver Verification', icon: Shield },
       ]
     },
     {
       title: 'Management',
       items: [
         { id: 'bookings', label: 'Bookings', icon: Calendar },
+        { id: 'group-transport-bookings', label: 'Group Transport Bookings', icon: Bus },
         { id: 'reviews', label: 'Reviews', icon: Star },
         { id: 'users', label: 'User Management', icon: Users },
       ]
@@ -251,13 +291,13 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                       <button
                         onClick={() => handleSectionChange(item.id)}
                         className={`w-full flex items-center px-4 py-3 text-left text-sm rounded-xl transition-all duration-300 transform group relative ${activeSection === item.id
-                            ? 'bg-gradient-to-r from-white to-purple-50 text-indigo-700 font-semibold shadow-lg scale-105 border border-white/20'
-                            : 'text-white hover:bg-white/15 hover:backdrop-blur-sm hover:scale-102 hover:shadow-md border border-transparent'
+                          ? 'bg-gradient-to-r from-white to-purple-50 text-indigo-700 font-semibold shadow-lg scale-105 border border-white/20'
+                          : 'text-white hover:bg-white/15 hover:backdrop-blur-sm hover:scale-102 hover:shadow-md border border-transparent'
                           }`}
                       >
                         <div className={`p-1.5 rounded-lg mr-3 flex-shrink-0 transition-all duration-300 ${activeSection === item.id
-                            ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-md'
-                            : 'bg-white/10 text-white group-hover:bg-white/20 group-hover:scale-110'
+                          ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-md'
+                          : 'bg-white/10 text-white group-hover:bg-white/20 group-hover:scale-110'
                           }`}>
                           <IconComponent className="w-4 h-4" />
                         </div>
@@ -291,13 +331,13 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                       <button
                         onClick={() => handleSectionChange(item.id)}
                         className={`w-full flex items-center px-4 py-3 text-left text-sm rounded-xl transition-all duration-300 transform group ${activeSection === item.id
-                            ? 'bg-gradient-to-r from-white to-purple-50 text-indigo-700 font-semibold shadow-lg scale-105 border border-white/20'
-                            : 'text-white hover:bg-white/15 hover:backdrop-blur-sm hover:scale-102 hover:shadow-md border border-transparent'
+                          ? 'bg-gradient-to-r from-white to-purple-50 text-indigo-700 font-semibold shadow-lg scale-105 border border-white/20'
+                          : 'text-white hover:bg-white/15 hover:backdrop-blur-sm hover:scale-102 hover:shadow-md border border-transparent'
                           }`}
                       >
                         <div className={`p-1.5 rounded-lg mr-3 flex-shrink-0 transition-all duration-300 ${activeSection === item.id
-                            ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-md'
-                            : 'bg-white/10 text-white group-hover:bg-white/20 group-hover:scale-110'
+                          ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-md'
+                          : 'bg-white/10 text-white group-hover:bg-white/20 group-hover:scale-110'
                           }`}>
                           <IconComponent className="w-4 h-4" />
                         </div>
@@ -329,16 +369,15 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                   return (
                     <li key={item.id}>
                       <button
-                        onClick={() => handleSectionChange(item.id)}
-                        title={isCollapsed ? item.label : ''}
+                        onClick={() => handleSectionChange(item.id, item.section)}
                         className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2' : 'px-4'} py-3 text-left text-sm rounded-xl transition-all duration-300 transform group relative ${activeSection === item.id
-                            ? 'bg-gradient-to-r from-white to-purple-50 text-indigo-700 font-semibold shadow-lg scale-105 border border-white/20'
-                            : 'text-white hover:bg-white/15 hover:backdrop-blur-sm hover:scale-102 hover:shadow-md border border-transparent'
+                          ? 'bg-gradient-to-r from-white to-purple-50 text-indigo-700 font-semibold shadow-lg scale-105 border border-white/20'
+                          : 'text-white hover:bg-white/15 hover:backdrop-blur-sm hover:scale-102 hover:shadow-md border border-transparent'
                           }`}
                       >
                         <div className={`p-1.5 rounded-lg ${isCollapsed ? '' : 'mr-3'} flex-shrink-0 transition-all duration-300 ${activeSection === item.id
-                            ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-md'
-                            : 'bg-white/10 text-white group-hover:bg-white/20 group-hover:scale-110'
+                          ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-md'
+                          : 'bg-white/10 text-white group-hover:bg-white/20 group-hover:scale-110'
                           }`}>
                           <IconComponent className="w-4 h-4" />
                         </div>

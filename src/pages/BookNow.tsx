@@ -15,6 +15,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 import SEOHead from '@/components/cms/SEOHead';
+import { fetchDrivers } from '@/services/driverDirectoryService';
+import { assignDriverAndBlock } from '@/services/driverBookingService';
+import { auth } from '@/lib/firebase';
 import {
   getBookNowHeroSlides,
   getBookNowPackages,
@@ -46,6 +49,8 @@ const BookNow = () => {
     children: '0',
     message: ''
   });
+  const [drivers, setDrivers] = useState<{ id: string; full_name?: string; tier?: string }[]>([])
+  const [selectedDriver, setSelectedDriver] = useState<string>('')
 
   const tabs = [
     { id: 'transfers' as TabType, label: 'Transfers', icon: Car },
@@ -80,7 +85,12 @@ const BookNow = () => {
           getBookNowHeroSlides(),
           getBookNowPackages()
         ]);
-        if (slidesData.length > 0) setHeroSlides(slidesData);
+        // Filter out slides with empty or invalid image URLs
+        const validSlides = slidesData?.filter(slide => slide.image && slide.image.trim() !== '') || [];
+        if (validSlides.length > 0) {
+          setHeroSlides(validSlides);
+        }
+        // Keep DEFAULT_BOOK_NOW_SLIDES if no valid slides from Firebase
         if (packagesData.length > 0) setPackages(packagesData);
       } catch (error) {
         console.error('Error fetching Book Now data:', error);
@@ -99,6 +109,18 @@ const BookNow = () => {
     }, 6000);
     return () => clearInterval(interval);
   }, [heroSlides.length]);
+
+  useEffect(() => {
+    const loadDrivers = async () => {
+      try {
+        const list = await fetchDrivers({ minRating: 4 })
+        setDrivers(list)
+      } catch (err) {
+        console.error('Failed to load drivers', err)
+      }
+    }
+    loadDrivers()
+  }, [])
 
   const goToSlide = (index: number) => {
     setCurrentSlideIndex(index);
@@ -124,6 +146,27 @@ const BookNow = () => {
       description: "We'll contact you within 24 hours to confirm your booking.",
     });
 
+    if (selectedDriver && auth?.currentUser?.uid) {
+      const bookingId = `bk-${Date.now()}`
+      try {
+        await assignDriverAndBlock({
+          driverId: selectedDriver,
+          bookingId,
+          customerId: auth.currentUser.uid,
+          bookingType: 'tour',
+          startDate: formData.startDate || new Date().toISOString(),
+          endDate: formData.endDate || undefined,
+          timeSlot: 'full_day'
+        })
+        toast({
+          title: 'Driver selection recorded',
+          description: 'We blocked the driver while we confirm your booking.'
+        })
+      } catch (err) {
+        console.error('Failed to assign driver', err)
+      }
+    }
+
     setFormData({
       name: '',
       email: '',
@@ -135,6 +178,7 @@ const BookNow = () => {
       children: '0',
       message: ''
     });
+    setSelectedDriver('')
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -389,6 +433,22 @@ const BookNow = () => {
                               className="h-12 rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-teal-500 focus:ring-teal-500/20"
                             />
                           </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-gray-700">Preferred Driver (optional)</Label>
+                          <select
+                            className="w-full h-12 rounded-xl border border-gray-200 bg-gray-50 px-3"
+                            value={selectedDriver}
+                            onChange={(e) => setSelectedDriver(e.target.value)}
+                          >
+                            <option value="">No preference (best match)</option>
+                            {drivers.map((d) => (
+                              <option key={d.id} value={d.id}>
+                                {d.full_name || 'Driver'} {d.tier ? `• ${d.tier.replace(/_/g, ' ')}` : ''}
+                              </option>
+                            ))}
+                          </select>
+                          <p className="text-xs text-gray-500">If you are logged in, we’ll hold this driver’s calendar while we confirm.</p>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
