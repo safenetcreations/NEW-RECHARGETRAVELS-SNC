@@ -97,7 +97,7 @@ const Index = () => {
       <Header />
 
       <div className="w-full overflow-x-hidden">
-        {/* Hero Section with Booking Widget */}
+        {/* Hero Section with 4 Booking Tabs */}
         <LuxuryHeroSection />
 
         {/* Interactive Trip Builder */}
@@ -121,8 +121,8 @@ const Index = () => {
         {/* Featured Experiences Strip */}
         <FeaturedExperiencesStrip />
 
-  {/* About Sri Lanka - Enhanced Section */}
-  <AboutSriLanka />
+        {/* About Sri Lanka - Enhanced Section */}
+        <AboutSriLanka />
 
         {/* Travel Guide */}
         <TravelGuide />

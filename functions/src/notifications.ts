@@ -509,6 +509,277 @@ const emailTemplates = {
     text: `New Blog Post: ${data.title}\n\nBy ${data.author}\n\n${data.excerpt || data.content?.substring(0, 200)}...\n\nRead more: https://recharge-travels-73e76.web.app/blog/${data.slug || data.id}`
   }),
 
+  // Driver Onboarding Templates
+  driverApplicationSubmitted: (data: any) => ({
+    subject: 'Application Received - Recharge Travels Driver Partner',
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+          <div style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); padding: 30px; text-align: center;">
+            <h1 style="color: #ffffff; margin: 0; font-size: 28px;">🚗 Application Received!</h1>
+            <p style="color: #fed7aa; margin: 10px 0 0;">Recharge Travels Driver Partner Program</p>
+          </div>
+
+          <div style="padding: 40px 30px;">
+            <h2 style="color: #333; margin-top: 0;">Hello ${data.driverName}! 👋</h2>
+            <p style="color: #666; font-size: 16px; line-height: 1.6;">
+              Thank you for applying to become a Recharge Travels Driver Partner! We have received your application and our verification team is reviewing your documents.
+            </p>
+
+            <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 25px; margin: 25px 0; border-left: 4px solid #f97316;">
+              <h3 style="color: #92400e; margin-top: 0; font-size: 18px;">📋 Application Details</h3>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; color: #78350f;">Driver Tier:</td>
+                  <td style="padding: 8px 0; color: #92400e; font-weight: bold; text-align: right;">${data.tier}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #78350f;">Vehicle:</td>
+                  <td style="padding: 8px 0; color: #92400e; text-align: right;">${data.vehicleInfo || 'Not specified'}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #78350f;">Submitted:</td>
+                  <td style="padding: 8px 0; color: #92400e; text-align: right;">${data.submittedAt}</td>
+                </tr>
+              </table>
+            </div>
+
+            <div style="background-color: #f0fdf4; border-radius: 8px; padding: 20px; margin: 20px 0;">
+              <h4 style="color: #166534; margin-top: 0;">What happens next?</h4>
+              <ul style="color: #15803d; padding-left: 20px; line-height: 2;">
+                <li>Our team will review your documents within 24-48 hours</li>
+                <li>You'll receive an email when your application is approved</li>
+                <li>Once verified, you can start receiving bookings</li>
+              </ul>
+            </div>
+
+            <p style="color: #666; font-size: 16px; line-height: 1.6;">
+              If you have any questions, feel free to contact our driver support team.
+            </p>
+          </div>
+
+          <div style="background-color: #f8f9fa; padding: 25px 30px; text-align: center;">
+            <p style="color: #666; margin: 0 0 10px; font-size: 14px;">Driver Support:</p>
+            <p style="color: #333; margin: 0;">
+              📧 <a href="mailto:drivers@rechargetravels.com" style="color: #f97316; text-decoration: none;">drivers@rechargetravels.com</a>
+              &nbsp;|&nbsp;
+              📞 <a href="tel:+94771234567" style="color: #f97316; text-decoration: none;">+94 77 123 4567</a>
+            </p>
+          </div>
+
+          <div style="background-color: #333; padding: 20px 30px; text-align: center;">
+            <p style="color: #999; margin: 0; font-size: 12px;">
+              © ${new Date().getFullYear()} Recharge Travels. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+    text: `Application Received - Recharge Travels\n\nHello ${data.driverName},\n\nThank you for applying! Your ${data.tier} application has been received and is under review.\n\nWe'll notify you within 24-48 hours.\n\nDriver Support: drivers@rechargetravels.com`
+  }),
+
+  driverApplicationApproved: (data: any) => ({
+    subject: '🎉 Congratulations! Your Driver Application is Approved',
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+          <div style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); padding: 30px; text-align: center;">
+            <h1 style="color: #ffffff; margin: 0; font-size: 28px;">🎉 You're Approved!</h1>
+            <p style="color: #bbf7d0; margin: 10px 0 0;">Welcome to the Recharge Travels Family</p>
+          </div>
+
+          <div style="padding: 40px 30px;">
+            <h2 style="color: #333; margin-top: 0;">Congratulations ${data.driverName}! 🚗</h2>
+            <p style="color: #666; font-size: 16px; line-height: 1.6;">
+              Great news! Your driver application has been <strong style="color: #16a34a;">approved</strong> and you are now a verified Recharge Travels Driver Partner.
+            </p>
+
+            <div style="background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); border-radius: 12px; padding: 25px; margin: 25px 0; border-left: 4px solid #22c55e;">
+              <h3 style="color: #166534; margin-top: 0; font-size: 18px;">✅ Verification Details</h3>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; color: #166534;">Status:</td>
+                  <td style="padding: 8px 0; color: #15803d; font-weight: bold; text-align: right;">VERIFIED ✓</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #166534;">Verification Level:</td>
+                  <td style="padding: 8px 0; color: #15803d; font-weight: bold; text-align: right;">Level ${data.verificationLevel}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #166534;">Driver Tier:</td>
+                  <td style="padding: 8px 0; color: #15803d; text-align: right;">${data.tier}</td>
+                </tr>
+                ${data.isSltdaApproved ? `
+                <tr>
+                  <td style="padding: 8px 0; color: #166534;">SLTDA Status:</td>
+                  <td style="padding: 8px 0; color: #15803d; font-weight: bold; text-align: right;">APPROVED 🏆</td>
+                </tr>
+                ` : ''}
+              </table>
+            </div>
+
+            <div style="background-color: #eff6ff; border-radius: 8px; padding: 20px; margin: 20px 0;">
+              <h4 style="color: #1e40af; margin-top: 0;">🚀 Getting Started</h4>
+              <ul style="color: #1d4ed8; padding-left: 20px; line-height: 2;">
+                <li>Log in to your <a href="https://recharge-travels-73e76.web.app/driver/dashboard" style="color: #f97316;">Driver Dashboard</a></li>
+                <li>Complete your profile with a professional photo</li>
+                <li>Set your availability calendar</li>
+                <li>Start receiving booking requests!</li>
+              </ul>
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="https://recharge-travels-73e76.web.app/driver/dashboard"
+                 style="display: inline-block; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: #ffffff;
+                        text-decoration: none; padding: 15px 35px; border-radius: 30px; font-weight: bold; font-size: 16px;">
+                Go to Dashboard
+              </a>
+            </div>
+          </div>
+
+          <div style="background-color: #333; padding: 20px 30px; text-align: center;">
+            <p style="color: #999; margin: 0; font-size: 12px;">
+              © ${new Date().getFullYear()} Recharge Travels. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+    text: `Congratulations ${data.driverName}!\n\nYour driver application has been APPROVED!\n\nVerification Level: ${data.verificationLevel}\nTier: ${data.tier}\n\nLog in to your dashboard to start receiving bookings:\nhttps://recharge-travels-73e76.web.app/driver/dashboard`
+  }),
+
+  driverApplicationRejected: (data: any) => ({
+    subject: 'Update on Your Driver Application - Recharge Travels',
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+          <div style="background: linear-gradient(135deg, #64748b 0%, #475569 100%); padding: 30px; text-align: center;">
+            <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Application Update</h1>
+            <p style="color: #cbd5e1; margin: 10px 0 0;">Recharge Travels Driver Partner Program</p>
+          </div>
+
+          <div style="padding: 40px 30px;">
+            <h2 style="color: #333; margin-top: 0;">Hello ${data.driverName},</h2>
+            <p style="color: #666; font-size: 16px; line-height: 1.6;">
+              Thank you for your interest in becoming a Recharge Travels Driver Partner. After reviewing your application, we regret to inform you that we are unable to approve it at this time.
+            </p>
+
+            <div style="background-color: #fef2f2; border-radius: 12px; padding: 25px; margin: 25px 0; border-left: 4px solid #ef4444;">
+              <h3 style="color: #991b1b; margin-top: 0; font-size: 18px;">📋 Reason</h3>
+              <p style="color: #b91c1c; margin: 0;">${data.rejectionReason || 'Documents could not be verified. Please ensure all documents are clear, valid, and not expired.'}</p>
+            </div>
+
+            <div style="background-color: #fefce8; border-radius: 8px; padding: 20px; margin: 20px 0;">
+              <h4 style="color: #854d0e; margin-top: 0;">📝 How to Reapply</h4>
+              <ul style="color: #a16207; padding-left: 20px; line-height: 2;">
+                <li>Review the rejection reason above</li>
+                <li>Ensure all documents are clear and valid</li>
+                <li>Update your profile with correct information</li>
+                <li>Resubmit your application</li>
+              </ul>
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="https://recharge-travels-73e76.web.app/join-with-us"
+                 style="display: inline-block; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: #ffffff;
+                        text-decoration: none; padding: 15px 35px; border-radius: 30px; font-weight: bold; font-size: 16px;">
+                Update & Reapply
+              </a>
+            </div>
+
+            <p style="color: #666; font-size: 16px; line-height: 1.6;">
+              If you believe this decision was made in error or need clarification, please contact our driver support team.
+            </p>
+          </div>
+
+          <div style="background-color: #f8f9fa; padding: 25px 30px; text-align: center;">
+            <p style="color: #666; margin: 0 0 10px; font-size: 14px;">Driver Support:</p>
+            <p style="color: #333; margin: 0;">
+              📧 <a href="mailto:drivers@rechargetravels.com" style="color: #f97316; text-decoration: none;">drivers@rechargetravels.com</a>
+            </p>
+          </div>
+
+          <div style="background-color: #333; padding: 20px 30px; text-align: center;">
+            <p style="color: #999; margin: 0; font-size: 12px;">
+              © ${new Date().getFullYear()} Recharge Travels. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+    text: `Hello ${data.driverName},\n\nWe regret to inform you that your driver application could not be approved.\n\nReason: ${data.rejectionReason || 'Documents could not be verified.'}\n\nYou may update your documents and reapply at:\nhttps://recharge-travels-73e76.web.app/join-with-us\n\nContact: drivers@rechargetravels.com`
+  }),
+
+  driverDocumentExpiring: (data: any) => ({
+    subject: `⚠️ Document Expiring Soon - ${data.documentType}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+          <div style="background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%); padding: 30px; text-align: center;">
+            <h1 style="color: #ffffff; margin: 0; font-size: 28px;">⚠️ Document Expiring</h1>
+          </div>
+
+          <div style="padding: 40px 30px;">
+            <h2 style="color: #333; margin-top: 0;">Hello ${data.driverName},</h2>
+            <p style="color: #666; font-size: 16px; line-height: 1.6;">
+              Your <strong>${data.documentType}</strong> is expiring on <strong style="color: #ca8a04;">${data.expiryDate}</strong>.
+              Please upload a renewed document to maintain your verified status.
+            </p>
+
+            <div style="background-color: #fef9c3; border-radius: 12px; padding: 25px; margin: 25px 0; border-left: 4px solid #eab308;">
+              <p style="color: #854d0e; margin: 0; font-size: 16px;">
+                <strong>Days remaining:</strong> ${data.daysRemaining} days
+              </p>
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="https://recharge-travels-73e76.web.app/driver/dashboard"
+                 style="display: inline-block; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: #ffffff;
+                        text-decoration: none; padding: 15px 35px; border-radius: 30px; font-weight: bold; font-size: 16px;">
+                Update Document
+              </a>
+            </div>
+          </div>
+
+          <div style="background-color: #333; padding: 20px 30px; text-align: center;">
+            <p style="color: #999; margin: 0; font-size: 12px;">
+              © ${new Date().getFullYear()} Recharge Travels. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+    text: `Hello ${data.driverName},\n\nYour ${data.documentType} is expiring on ${data.expiryDate} (${data.daysRemaining} days remaining).\n\nPlease upload a renewed document at:\nhttps://recharge-travels-73e76.web.app/driver/dashboard`
+  }),
+
   bookingReminder: (data: any) => ({
     subject: `Reminder: Your Trip to ${data.destination} is Coming Up! 🗓️`,
     html: `
@@ -1151,6 +1422,315 @@ export const getNewsletterStats = functions.https.onCall(async (data, context) =
     };
   } catch (error: any) {
     console.error('Get newsletter stats error:', error);
+    throw new functions.https.HttpsError('internal', error.message);
+  }
+});
+
+// ===== DRIVER ONBOARDING NOTIFICATIONS =====
+
+// Helper to format tier names
+const formatTierName = (tier: string) => {
+  const tierNames: Record<string, string> = {
+    chauffeur_guide: 'Chauffeur Tourist Guide (SLTDA)',
+    national_guide: 'National Tourist Guide',
+    tourist_driver: 'SLITHM Tourist Driver',
+    freelance_driver: 'Freelance Driver'
+  };
+  return tierNames[tier] || tier?.replace(/_/g, ' ') || 'Driver';
+};
+
+// Trigger: Send notification when new driver application is submitted
+export const onDriverApplicationSubmitted = functions.firestore
+  .document('drivers/{driverId}')
+  .onCreate(async (snap, context) => {
+    const driver = snap.data();
+    const driverId = context.params.driverId;
+
+    try {
+      if (!driver.email) {
+        console.log('No email for driver:', driverId);
+        return;
+      }
+
+      // Send confirmation to driver
+      const driverTemplate = emailTemplates.driverApplicationSubmitted({
+        driverName: driver.full_name || 'Driver',
+        tier: formatTierName(driver.tier),
+        vehicleInfo: driver.vehicle_make_model || driver.vehicle_type || '',
+        submittedAt: new Date().toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        })
+      });
+
+      await sgMail.send({
+        to: driver.email,
+        from: { email: FROM_EMAIL, name: FROM_NAME },
+        replyTo: 'drivers@rechargetravels.com',
+        subject: driverTemplate.subject,
+        html: driverTemplate.html,
+        text: driverTemplate.text
+      });
+
+      // Send admin notification
+      const adminTemplate = emailTemplates.adminNotification({
+        type: 'Driver Application',
+        customerName: driver.full_name || 'New Driver',
+        customerEmail: driver.email,
+        phone: driver.phone,
+        details: `
+          <p><strong>Driver ID:</strong> ${driverId}</p>
+          <p><strong>Tier:</strong> ${formatTierName(driver.tier)}</p>
+          <p><strong>Experience:</strong> ${driver.years_experience || 0} years</p>
+          <p><strong>Vehicle:</strong> ${driver.vehicle_make_model || 'Not specified'}</p>
+          <p><strong>SLTDA:</strong> ${driver.sltda_license_number || 'N/A'}</p>
+          <p><strong>Status:</strong> ${driver.current_status}</p>
+        `,
+        adminUrl: `https://recharge-travels-admin.web.app/drivers/${driverId}`
+      });
+
+      await sgMail.send({
+        to: ADMIN_EMAIL,
+        from: { email: FROM_EMAIL, name: FROM_NAME },
+        subject: adminTemplate.subject,
+        html: adminTemplate.html,
+        text: adminTemplate.text
+      });
+
+      // Log to application history
+      await db.collection('driver_application_history').add({
+        driver_id: driverId,
+        status: 'submitted',
+        previous_status: null,
+        changed_by: 'system',
+        notes: 'Application submitted',
+        created_at: admin.firestore.FieldValue.serverTimestamp()
+      });
+
+      console.log('Driver application notification sent for:', driverId);
+    } catch (error) {
+      console.error('Error sending driver application notification:', error);
+    }
+  });
+
+// Trigger: Send notification when driver status changes
+export const onDriverStatusChange = functions.firestore
+  .document('drivers/{driverId}')
+  .onUpdate(async (change, context) => {
+    const before = change.before.data();
+    const after = change.after.data();
+    const driverId = context.params.driverId;
+
+    // Check if status changed
+    if (before.current_status === after.current_status) {
+      return;
+    }
+
+    try {
+      if (!after.email) {
+        console.log('No email for driver:', driverId);
+        return;
+      }
+
+      // Log status change to history
+      await db.collection('driver_application_history').add({
+        driver_id: driverId,
+        status: after.current_status,
+        previous_status: before.current_status,
+        changed_by: after.verified_by_admin_id || 'system',
+        notes: after.rejection_reason || after.suspension_reason || `Status changed to ${after.current_status}`,
+        verification_level: after.verified_level,
+        created_at: admin.firestore.FieldValue.serverTimestamp()
+      });
+
+      // Handle approval
+      if (after.current_status === 'verified' && before.current_status !== 'verified') {
+        const approvedTemplate = emailTemplates.driverApplicationApproved({
+          driverName: after.full_name || 'Driver',
+          tier: formatTierName(after.tier),
+          verificationLevel: after.verified_level || 1,
+          isSltdaApproved: after.is_sltda_approved || false
+        });
+
+        await sgMail.send({
+          to: after.email,
+          from: { email: FROM_EMAIL, name: FROM_NAME },
+          replyTo: 'drivers@rechargetravels.com',
+          subject: approvedTemplate.subject,
+          html: approvedTemplate.html,
+          text: approvedTemplate.text
+        });
+
+        console.log('Driver approval notification sent for:', driverId);
+      }
+
+      // Handle rejection/suspension
+      if ((after.current_status === 'suspended' || after.current_status === 'inactive') &&
+          before.current_status !== 'suspended' && before.current_status !== 'inactive') {
+        const rejectedTemplate = emailTemplates.driverApplicationRejected({
+          driverName: after.full_name || 'Driver',
+          rejectionReason: after.rejection_reason || after.suspension_reason || 'Application could not be verified'
+        });
+
+        await sgMail.send({
+          to: after.email,
+          from: { email: FROM_EMAIL, name: FROM_NAME },
+          replyTo: 'drivers@rechargetravels.com',
+          subject: rejectedTemplate.subject,
+          html: rejectedTemplate.html,
+          text: rejectedTemplate.text
+        });
+
+        console.log('Driver rejection notification sent for:', driverId);
+      }
+    } catch (error) {
+      console.error('Error sending driver status change notification:', error);
+    }
+  });
+
+// Scheduled: Check for expiring driver documents and send reminders
+export const checkDriverDocumentExpiry = functions.pubsub
+  .schedule('every day 08:00')
+  .timeZone('Asia/Colombo')
+  .onRun(async () => {
+    try {
+      const driversRef = db.collection('drivers');
+      const verifiedDrivers = await driversRef
+        .where('current_status', '==', 'verified')
+        .get();
+
+      const now = new Date();
+      const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+      const documentFields = [
+        { field: 'sltda_license_expiry', name: 'SLTDA License' },
+        { field: 'police_clearance_expiry', name: 'Police Clearance' },
+        { field: 'medical_report_expiry', name: 'Medical Report' }
+      ];
+
+      for (const driverDoc of verifiedDrivers.docs) {
+        const driver = driverDoc.data();
+
+        if (!driver.email) continue;
+
+        for (const docType of documentFields) {
+          const expiryDate = driver[docType.field];
+          if (!expiryDate) continue;
+
+          const expiry = new Date(expiryDate);
+          const daysRemaining = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+
+          // Send reminder if expiring within 30 days and not already reminded this week
+          if (expiry <= thirtyDaysFromNow && expiry > now) {
+            // Check if reminder was already sent this week
+            const reminderKey = `expiry_reminder_${driverDoc.id}_${docType.field}`;
+            const lastReminder = await db.collection('email_reminders').doc(reminderKey).get();
+
+            if (lastReminder.exists) {
+              const lastSent = lastReminder.data()?.sent_at?.toDate();
+              if (lastSent && (now.getTime() - lastSent.getTime()) < 7 * 24 * 60 * 60 * 1000) {
+                continue; // Skip if reminded within last 7 days
+              }
+            }
+
+            const template = emailTemplates.driverDocumentExpiring({
+              driverName: driver.full_name || 'Driver',
+              documentType: docType.name,
+              expiryDate: new Date(expiryDate).toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              }),
+              daysRemaining
+            });
+
+            await sgMail.send({
+              to: driver.email,
+              from: { email: FROM_EMAIL, name: FROM_NAME },
+              replyTo: 'drivers@rechargetravels.com',
+              subject: template.subject,
+              html: template.html,
+              text: template.text
+            });
+
+            // Record that reminder was sent
+            await db.collection('email_reminders').doc(reminderKey).set({
+              driver_id: driverDoc.id,
+              document_type: docType.field,
+              sent_at: admin.firestore.FieldValue.serverTimestamp()
+            });
+
+            console.log(`Document expiry reminder sent to ${driver.email} for ${docType.name}`);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error checking driver document expiry:', error);
+    }
+  });
+
+// Callable: Manually send driver verification email (for admin panel)
+export const sendDriverVerificationEmail = functions.https.onCall(async (data) => {
+  const { driverId, templateType, customMessage } = data;
+
+  try {
+    const driverDoc = await db.collection('drivers').doc(driverId).get();
+
+    if (!driverDoc.exists) {
+      throw new functions.https.HttpsError('not-found', 'Driver not found');
+    }
+
+    const driver = driverDoc.data()!;
+
+    if (!driver.email) {
+      throw new functions.https.HttpsError('invalid-argument', 'Driver has no email address');
+    }
+
+    let template;
+    switch (templateType) {
+      case 'approved':
+        template = emailTemplates.driverApplicationApproved({
+          driverName: driver.full_name || 'Driver',
+          tier: formatTierName(driver.tier),
+          verificationLevel: driver.verified_level || 1,
+          isSltdaApproved: driver.is_sltda_approved || false
+        });
+        break;
+      case 'rejected':
+        template = emailTemplates.driverApplicationRejected({
+          driverName: driver.full_name || 'Driver',
+          rejectionReason: customMessage || driver.rejection_reason || 'Application could not be verified'
+        });
+        break;
+      default:
+        throw new functions.https.HttpsError('invalid-argument', 'Invalid template type');
+    }
+
+    await sgMail.send({
+      to: driver.email,
+      from: { email: FROM_EMAIL, name: FROM_NAME },
+      replyTo: 'drivers@rechargetravels.com',
+      subject: template.subject,
+      html: template.html,
+      text: template.text
+    });
+
+    // Log email sent
+    await db.collection('emailLogs').add({
+      to: driver.email,
+      subject: template.subject,
+      templateType: `driver_${templateType}`,
+      driver_id: driverId,
+      status: 'sent',
+      sentAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    return { success: true, message: `Email sent to ${driver.email}` };
+  } catch (error: any) {
+    console.error('Error sending driver verification email:', error);
     throw new functions.https.HttpsError('internal', error.message);
   }
 });

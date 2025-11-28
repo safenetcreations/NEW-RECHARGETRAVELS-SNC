@@ -49,6 +49,11 @@ export const aboutItems = [
     title: "Join With Us (Drivers)",
     href: "/join-with-us",
     description: "Onboard as a verified driver/guide with live capture and admin approval"
+  },
+  {
+    title: "Vendor Registration",
+    href: "/vendor/register",
+    description: "Partner with us and grow your tourism business"
   }
 ]
 

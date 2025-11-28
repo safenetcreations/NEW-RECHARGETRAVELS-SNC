@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { useToast } from '@/hooks/use-toast'
 import { auth } from '@/lib/firebase'
+import { useNavigate } from 'react-router-dom'
 import {
   addDriverDocument,
   addDriverPhoto,
@@ -14,12 +15,40 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import LiveCapture from '@/components/ui/LiveCapture'
 import LivenessRecorder from '@/components/ui/LivenessRecorder'
+import { Check, ChevronRight, Upload, Camera, User, FileText, Shield, AlertCircle, Car, Phone, Mail, MapPin, Building, CreditCard, Star, Clock, BadgeCheck } from 'lucide-react'
 
 const roleDocs: Record<DriverTier, DocumentType[]> = {
   chauffeur_guide: ['slt_da_license', 'driving_license', 'national_id', 'police_clearance', 'medical_report', 'vehicle_revenue_license', 'vehicle_insurance'],
   national_guide: ['slt_da_license', 'driving_license', 'national_id', 'police_clearance', 'medical_report'],
   tourist_driver: ['driving_license', 'national_id', 'police_clearance', 'vehicle_revenue_license', 'vehicle_insurance'],
   freelance_driver: ['driving_license', 'national_id', 'vehicle_revenue_license', 'vehicle_insurance']
+}
+
+const tierInfo: Record<DriverTier, { label: string; description: string; benefits: string[]; icon: string }> = {
+  chauffeur_guide: {
+    label: 'Chauffeur Tourist Guide (SLTDA)',
+    description: 'Premium tier for SLTDA certified guides with own vehicle',
+    benefits: ['Premium bookings', 'SLTDA verified badge', 'Higher earnings', 'Priority support', 'Featured listing'],
+    icon: '🏆'
+  },
+  national_guide: {
+    label: 'National Tourist Guide',
+    description: 'Certified national guides for cultural and heritage tours',
+    benefits: ['Certified guide badge', 'Cultural tour access', 'Multi-language support', 'Training programs'],
+    icon: '🎯'
+  },
+  tourist_driver: {
+    label: 'SLITHM Tourist Driver',
+    description: 'SLITHM certified drivers for tourist transportation',
+    benefits: ['Tourist-ready badge', 'Airport transfer priority', 'Hotel partnerships', 'Insurance coverage'],
+    icon: '🚗'
+  },
+  freelance_driver: {
+    label: 'Freelance / Standard Driver',
+    description: 'Independent drivers for local and short trips',
+    benefits: ['Flexible schedule', 'Quick approval', 'Local bookings', 'Basic support'],
+    icon: '🚙'
+  }
 }
 
 const prettyDoc: Record<DocumentType, string> = {
@@ -41,15 +70,33 @@ interface FileMap {
   [key: string]: File | null
 }
 
+interface ValidationErrors {
+  [key: string]: string
+}
+
+const steps = [
+  { id: 1, title: 'Profile', icon: User, description: 'Personal & vehicle info' },
+  { id: 2, title: 'Documents', icon: FileText, description: 'Upload required docs' },
+  { id: 3, title: 'Live Capture', icon: Camera, description: 'Photos & verification' },
+  { id: 4, title: 'Review', icon: Shield, description: 'Confirm & submit' }
+]
+
 const JoinUsDrivers: React.FC = () => {
   const { toast } = useToast()
+  const navigate = useNavigate()
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
+  const [errors, setErrors] = useState<ValidationErrors>({})
+  const [agreedToTerms, setAgreedToTerms] = useState(false)
 
+  // Profile fields
   const [tier, setTier] = useState<DriverTier>('freelance_driver')
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
+  const [whatsapp, setWhatsapp] = useState('')
+  const [address, setAddress] = useState('')
+  const [city, setCity] = useState('')
   const [bio, setBio] = useState('')
   const [languages, setLanguages] = useState('English, Sinhala')
   const [experience, setExperience] = useState<number>(3)
@@ -62,11 +109,25 @@ const JoinUsDrivers: React.FC = () => {
   const [socialInsta, setSocialInsta] = useState('')
   const [socialFacebook, setSocialFacebook] = useState('')
 
+  // Emergency Contact
+  const [emergencyName, setEmergencyName] = useState('')
+  const [emergencyPhone, setEmergencyPhone] = useState('')
+  const [emergencyRelation, setEmergencyRelation] = useState('')
+
+  // Bank Details
+  const [bankName, setBankName] = useState('')
+  const [bankAccount, setBankAccount] = useState('')
+  const [bankBranch, setBankBranch] = useState('')
+  const [accountHolder, setAccountHolder] = useState('')
+
   const [vehicle, setVehicle] = useState({
     type: 'suv',
     registration: '',
     makeModelYear: '',
-    seats: 4
+    seats: 4,
+    color: '',
+    ac: true,
+    wifi: false
   })
 
   const [docs, setDocs] = useState<FileMap>({})
@@ -77,25 +138,119 @@ const JoinUsDrivers: React.FC = () => {
   const handleFile = (setter: React.Dispatch<React.SetStateAction<FileMap>>, key: string, fileList: FileList | null) => {
     if (!fileList || fileList.length === 0) return
     const file = fileList[0]
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast({ title: 'File too large', description: 'Maximum file size is 10MB', variant: 'destructive' })
+      return
+    }
     setter((prev) => ({ ...prev, [key]: file }))
   }
 
-  const nextStep = () => setStep((s) => Math.min(s + 1, 4))
+  const validateStep1 = (): boolean => {
+    const newErrors: ValidationErrors = {}
+
+    if (!fullName.trim()) newErrors.fullName = 'Full name is required'
+    if (!email.trim()) newErrors.email = 'Email is required'
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) newErrors.email = 'Invalid email format'
+    if (!phone.trim()) newErrors.phone = 'Phone is required'
+    else if (!/^\+?[0-9]{10,15}$/.test(phone.replace(/\s/g, ''))) newErrors.phone = 'Invalid phone number'
+    if (!vehicle.registration.trim()) newErrors.vehicleReg = 'Vehicle registration is required'
+    if (!vehicle.makeModelYear.trim()) newErrors.vehicleMake = 'Vehicle make/model is required'
+    if (experience < 0) newErrors.experience = 'Experience cannot be negative'
+    if ((tier === 'chauffeur_guide' || tier === 'national_guide') && !sltdaNumber.trim()) {
+      newErrors.sltda = 'SLTDA license number is required for this tier'
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const validateStep2 = (): boolean => {
+    const newErrors: ValidationErrors = {}
+    const uploadedDocs = Object.keys(docs).filter(k => docs[k])
+
+    if (uploadedDocs.length < requiredDocs.length) {
+      newErrors.docs = `Please upload all ${requiredDocs.length} required documents`
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const validateStep3 = (): boolean => {
+    const newErrors: ValidationErrors = {}
+    const requiredPhotos = ['selfie_with_id', 'vehicle_front']
+    const uploadedPhotos = Object.keys(photos).filter(k => photos[k])
+
+    for (const p of requiredPhotos) {
+      if (!uploadedPhotos.includes(p)) {
+        newErrors.photos = 'Please capture selfie with ID and vehicle front photo'
+        break
+      }
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const nextStep = () => {
+    let valid = true
+    if (step === 1) valid = validateStep1()
+    else if (step === 2) valid = validateStep2()
+    else if (step === 3) valid = validateStep3()
+
+    if (valid) {
+      setStep((s) => Math.min(s + 1, 4))
+      setErrors({})
+    }
+  }
+
   const prevStep = () => setStep((s) => Math.max(s - 1, 1))
 
+  const getCompletionPercentage = (): number => {
+    let total = 0
+    let completed = 0
+
+    // Profile fields (40%)
+    const profileFields = [fullName, email, phone, vehicle.registration, vehicle.makeModelYear]
+    total += profileFields.length
+    completed += profileFields.filter(f => f.trim()).length
+
+    // Documents (30%)
+    total += requiredDocs.length
+    completed += Object.values(docs).filter(Boolean).length
+
+    // Photos (30%)
+    const requiredPhotos = ['selfie_with_id', 'vehicle_front']
+    total += requiredPhotos.length
+    completed += requiredPhotos.filter(p => photos[p]).length
+
+    return Math.round((completed / total) * 100)
+  }
+
   const submit = async () => {
+    if (!agreedToTerms) {
+      toast({ title: 'Terms Required', description: 'Please agree to the terms and conditions.', variant: 'destructive' })
+      return
+    }
+
     const userId = auth?.currentUser?.uid
     if (!userId) {
       toast({ title: 'Please sign in', description: 'You need to be logged in to submit your profile.', variant: 'destructive' })
+      navigate('/login')
       return
     }
 
     setLoading(true)
     try {
+      // Create driver profile with all fields
       await createOrUpdateDriverProfile(userId, {
         full_name: fullName,
         email,
         phone,
+        whatsapp: whatsapp || phone,
+        address,
+        city,
         tier,
         biography: bio,
         specialty_languages: languages.split(',').map((l) => l.trim()),
@@ -103,16 +258,32 @@ const JoinUsDrivers: React.FC = () => {
         hourly_rate: hourlyRate || undefined,
         daily_rate: dailyRate || undefined,
         vehicle_preference: 'own_vehicle',
+        vehicle_type: vehicle.type as any,
+        vehicle_registration: vehicle.registration,
+        vehicle_make_model: vehicle.makeModelYear,
+        vehicle_capacity: vehicle.seats,
+        vehicle_color: vehicle.color,
+        vehicle_ac: vehicle.ac,
+        vehicle_wifi: vehicle.wifi,
         sltda_license_number: sltdaNumber || undefined,
         sltda_license_expiry: sltdaExpiry || undefined,
         police_clearance_expiry: policeExpiry || undefined,
         medical_report_expiry: medicalExpiry || undefined,
         social_insta: socialInsta || undefined,
         social_facebook: socialFacebook || undefined,
+        emergency_contact_name: emergencyName || undefined,
+        emergency_contact_phone: emergencyPhone || undefined,
+        emergency_contact_relation: emergencyRelation || undefined,
+        bank_name: bankName || undefined,
+        bank_account_number: bankAccount || undefined,
+        bank_branch: bankBranch || undefined,
+        bank_account_holder: accountHolder || undefined,
         current_status: 'pending_verification',
-        verified_level: 1
+        verified_level: 1,
+        application_submitted_at: new Date().toISOString()
       })
 
+      // Initialize wallet
       await initializeDriverWallet(userId, 'LKR')
 
       // Upload docs
@@ -134,15 +305,22 @@ const JoinUsDrivers: React.FC = () => {
         }
       }
 
-      toast({ title: 'Submitted for verification', description: 'Our team will review your documents and notify you.' })
-      setStep(1)
+      toast({
+        title: 'Application Submitted!',
+        description: 'Our team will review your documents within 24-48 hours. You will receive an email notification.'
+      })
+
+      // Redirect to dashboard
+      navigate('/driver/dashboard')
     } catch (err) {
       console.error(err)
-      toast({ title: 'Submission failed', description: 'Please check files and try again.', variant: 'destructive' })
+      toast({ title: 'Submission failed', description: 'Please check your files and try again.', variant: 'destructive' })
     } finally {
       setLoading(false)
     }
   }
+
+  const completionPercent = getCompletionPercentage()
 
   return (
     <div className="bg-gradient-to-br from-amber-50 via-white to-cyan-50 min-h-screen">
@@ -151,240 +329,888 @@ const JoinUsDrivers: React.FC = () => {
         <meta name="description" content="Become a verified driver or guide with Recharge Travels. Secure onboarding with live capture, SLTDA compliance, and manual admin approval." />
       </Helmet>
 
-      <div className="max-w-5xl mx-auto px-4 py-12">
-        <div className="mb-10 text-center">
-          <p className="text-sm font-semibold text-orange-600 tracking-wide uppercase">Join With Us</p>
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mt-2">Driver & Guide Onboarding</h1>
-          <p className="text-lg text-gray-600 mt-3">Mobile-shot only capture, SLTDA-ready verification, and manual admin approval.</p>
+      <div className="max-w-6xl mx-auto px-4 py-8 md:py-12">
+        {/* Hero Section */}
+        <div className="mb-8 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-100 text-orange-700 rounded-full text-sm font-medium mb-4">
+            <Car className="w-4 h-4" />
+            Join Our Driver Network
+          </div>
+          <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-3">
+            Become a <span className="text-orange-600">Verified Partner</span>
+          </h1>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Join Sri Lanka's premier travel platform. Get verified, receive bookings, and earn with flexibility.
+          </p>
         </div>
 
-        <div className="bg-white shadow-xl rounded-2xl p-6 space-y-6 border border-orange-100">
-          <div className="flex items-center justify-between text-sm font-medium">
-            <span className={step === 1 ? 'text-orange-600' : 'text-gray-500'}>Step 1 · Profile</span>
-            <span className={step === 2 ? 'text-orange-600' : 'text-gray-500'}>Step 2 · Documents</span>
-            <span className={step === 3 ? 'text-orange-600' : 'text-gray-500'}>Step 3 · Live Capture</span>
-            <span className={step === 4 ? 'text-orange-600' : 'text-gray-500'}>Step 4 · Confirm</span>
-          </div>
-
-          {step === 1 && (
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-semibold text-gray-700">Role / Tier</label>
-                <select
-                  className="w-full mt-1 rounded-lg border border-gray-300 px-3 py-2"
-                  value={tier}
-                  onChange={(e) => setTier(e.target.value as DriverTier)}
-                >
-                  <option value="chauffeur_guide">Chauffeur Tourist Guide (SLTDA)</option>
-                  <option value="national_guide">National Tourist Guide</option>
-                  <option value="tourist_driver">SLITHM Tourist Driver</option>
-                  <option value="freelance_driver">Freelance / Standard Driver</option>
-                </select>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-semibold text-gray-700">Full Name</label>
-                  <Input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="As per ID / license" />
-                </div>
-                <div>
-                  <label className="text-sm font-semibold text-gray-700">Phone (OTP required)</label>
-                  <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+94 7X XXX XXXX" />
-                </div>
-                <div>
-                  <label className="text-sm font-semibold text-gray-700">Email</label>
-                  <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
-                </div>
-                <div>
-                  <label className="text-sm font-semibold text-gray-700">Languages</label>
-                  <Input value={languages} onChange={(e) => setLanguages(e.target.value)} placeholder="English, Sinhala, Tamil" />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="text-sm font-semibold text-gray-700">Years of Experience</label>
-                  <Input type="number" min={0} value={experience} onChange={(e) => setExperience(Number(e.target.value))} />
-                </div>
-                <div>
-                  <label className="text-sm font-semibold text-gray-700">Hourly Rate (LKR)</label>
-                  <Input type="number" min={0} value={hourlyRate} onChange={(e) => setHourlyRate(Number(e.target.value))} />
-                </div>
-                <div>
-                  <label className="text-sm font-semibold text-gray-700">Daily Rate (LKR)</label>
-                  <Input type="number" min={0} value={dailyRate} onChange={(e) => setDailyRate(Number(e.target.value))} />
-                </div>
-              </div>
-              <div>
-                <label className="text-sm font-semibold text-gray-700">Short Bio</label>
-                <Textarea value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Professional intro for customers" />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="text-sm font-semibold text-gray-700">Vehicle Type</label>
-                  <select
-                    className="w-full mt-1 rounded-lg border border-gray-300 px-3 py-2"
-                    value={vehicle.type}
-                    onChange={(e) => setVehicle({ ...vehicle, type: e.target.value })}
-                  >
-                    <option value="sedan">Sedan</option>
-                    <option value="suv">SUV</option>
-                    <option value="van">Van</option>
-                    <option value="mini_coach">Mini Coach</option>
-                    <option value="luxury">Luxury</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-sm font-semibold text-gray-700">Registration Number</label>
-                  <Input value={vehicle.registration} onChange={(e) => setVehicle({ ...vehicle, registration: e.target.value })} placeholder="XX-1234" />
-                </div>
-                <div>
-                  <label className="text-sm font-semibold text-gray-700">Make / Model / Year</label>
-                  <Input value={vehicle.makeModelYear} onChange={(e) => setVehicle({ ...vehicle, makeModelYear: e.target.value })} placeholder="Toyota KDH 2018" />
-                </div>
-                <div>
-                  <label className="text-sm font-semibold text-gray-700">Seat Capacity</label>
-                  <Input type="number" min={2} value={vehicle.seats} onChange={(e) => setVehicle({ ...vehicle, seats: Number(e.target.value) })} />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="text-sm font-semibold text-gray-700">SLTDA License No.</label>
-                  <Input value={sltdaNumber} onChange={(e) => setSltdaNumber(e.target.value)} placeholder="C-XXXX / N-XXXX" />
-                </div>
-                <div>
-                  <label className="text-sm font-semibold text-gray-700">SLTDA License Expiry</label>
-                  <Input type="date" value={sltdaExpiry} onChange={(e) => setSltdaExpiry(e.target.value)} />
-                </div>
-                <div>
-                  <label className="text-sm font-semibold text-gray-700">Police Clearance Expiry</label>
-                  <Input type="date" value={policeExpiry} onChange={(e) => setPoliceExpiry(e.target.value)} />
-                </div>
-                <div>
-                  <label className="text-sm font-semibold text-gray-700">Medical Report Expiry</label>
-                  <Input type="date" value={medicalExpiry} onChange={(e) => setMedicalExpiry(e.target.value)} />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-semibold text-gray-700">Instagram Handle</label>
-                  <Input value={socialInsta} onChange={(e) => setSocialInsta(e.target.value)} placeholder="@driver_handle" />
-                </div>
-                <div>
-                  <label className="text-sm font-semibold text-gray-700">Facebook Page URL</label>
-                  <Input value={socialFacebook} onChange={(e) => setSocialFacebook(e.target.value)} placeholder="https://facebook.com/..." />
-                </div>
-              </div>
+        {/* Stats Bar */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          {[
+            { icon: Star, label: 'Avg Rating', value: '4.9/5' },
+            { icon: User, label: 'Active Drivers', value: '500+' },
+            { icon: Clock, label: 'Approval Time', value: '24-48h' },
+            { icon: BadgeCheck, label: 'Verified Partners', value: '100%' }
+          ].map((stat, i) => (
+            <div key={i} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center">
+              <stat.icon className="w-6 h-6 mx-auto text-orange-500 mb-2" />
+              <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+              <p className="text-xs text-gray-500">{stat.label}</p>
             </div>
-          )}
+          ))}
+        </div>
 
-          {step === 2 && (
-            <div className="space-y-4">
-              <p className="text-sm text-gray-600">Upload clear, live captures. Use the rear camera (capture="environment").</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {requiredDocs.map((d) => (
-                  <div key={d} className="border rounded-lg p-3 border-dashed border-orange-200 bg-orange-50/50">
-                    <label className="text-sm font-semibold text-gray-800">{prettyDoc[d]}</label>
-                    <input
-                      type="file"
-                      accept="image/*,application/pdf"
-                      capture="environment"
-                      className="mt-2 block w-full text-sm"
-                      onChange={(e) => handleFile(setDocs, d, e.target.files)}
-                    />
-                    {docs[d] && <p className="text-xs text-green-600 mt-1">{docs[d]?.name}</p>}
-                  </div>
+        {/* Progress Steps */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 mb-6 overflow-hidden">
+          <div className="p-4 md:p-6 border-b border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                {steps.map((s, i) => (
+                  <React.Fragment key={s.id}>
+                    <button
+                      onClick={() => s.id < step && setStep(s.id)}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
+                        step === s.id
+                          ? 'bg-orange-100 text-orange-700'
+                          : step > s.id
+                            ? 'bg-green-100 text-green-700 cursor-pointer hover:bg-green-200'
+                            : 'bg-gray-100 text-gray-400'
+                      }`}
+                      disabled={s.id > step}
+                    >
+                      {step > s.id ? (
+                        <Check className="w-5 h-5" />
+                      ) : (
+                        <s.icon className="w-5 h-5" />
+                      )}
+                      <span className="hidden md:inline font-medium">{s.title}</span>
+                    </button>
+                    {i < steps.length - 1 && (
+                      <ChevronRight className="w-4 h-4 text-gray-300 hidden md:block" />
+                    )}
+                  </React.Fragment>
                 ))}
               </div>
-            </div>
-          )}
-
-          {step === 3 && (
-            <div className="space-y-4">
-              <p className="text-sm text-gray-600">Live capture only. Follow the liveness prompt, no gallery uploads.</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="border rounded-lg p-3 border-dashed border-cyan-200 bg-cyan-50/50">
-                  <LiveCapture
-                    label="Selfie with ID (front camera, blink/turn)"
-                    facingMode="user"
-                    filename="selfie_with_id.jpg"
-                    onCapture={(file) => setPhotos((prev) => ({ ...prev, selfie_with_id: file }))}
+              <div className="flex items-center gap-2">
+                <div className="text-sm font-medium text-gray-600">{completionPercent}%</div>
+                <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-orange-500 to-amber-500 transition-all duration-500"
+                    style={{ width: `${completionPercent}%` }}
                   />
-                  {photos['selfie_with_id'] && <p className="text-xs text-green-600 mt-1">{photos['selfie_with_id']?.name}</p>}
-                </div>
-                <div className="border rounded-lg p-3 border-dashed border-cyan-200 bg-cyan-50/50">
-                  <LiveCapture
-                    label="Vehicle Front (rear camera)"
-                    facingMode="environment"
-                    filename="vehicle_front.jpg"
-                    onCapture={(file) => setPhotos((prev) => ({ ...prev, vehicle_front: file }))}
-                  />
-                  {photos['vehicle_front'] && <p className="text-xs text-green-600 mt-1">{photos['vehicle_front']?.name}</p>}
-                </div>
-                <div className="border rounded-lg p-3 border-dashed border-cyan-200 bg-cyan-50/50">
-                  <LiveCapture
-                    label="Vehicle Side (rear camera)"
-                    facingMode="environment"
-                    filename="vehicle_side.jpg"
-                    onCapture={(file) => setPhotos((prev) => ({ ...prev, vehicle_side: file }))}
-                  />
-                  {photos['vehicle_side'] && <p className="text-xs text-green-600 mt-1">{photos['vehicle_side']?.name}</p>}
-                </div>
-                <div className="border rounded-lg p-3 border-dashed border-cyan-200 bg-cyan-50/50">
-                  <LiveCapture
-                    label="Vehicle Interior (rear camera)"
-                    facingMode="environment"
-                    filename="vehicle_interior.jpg"
-                    onCapture={(file) => setPhotos((prev) => ({ ...prev, vehicle_interior: file }))}
-                  />
-                  {photos['vehicle_interior'] && <p className="text-xs text-green-600 mt-1">{photos['vehicle_interior']?.name}</p>}
-                </div>
-                <div className="border rounded-lg p-3 border-dashed border-cyan-200 bg-cyan-50/50">
-                  <label className="text-sm font-semibold text-gray-800">Vehicle Back (fallback file capture)</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    capture="environment"
-                    className="mt-2 block w-full text-sm"
-                    onChange={(e) => handleFile(setPhotos, 'vehicle_back', e.target.files)}
-                  />
-                  {photos['vehicle_back'] && <p className="text-xs text-green-600 mt-1">{photos['vehicle_back']?.name}</p>}
-                </div>
-                <div className="border rounded-lg p-3 border-dashed border-cyan-200 bg-cyan-50/50">
-                  <LivenessRecorder
-                    label="Video Intro & Liveness"
-                    onCapture={(file) => setPhotos((prev) => ({ ...prev, video_intro: file }))}
-                  />
-                  {photos['video_intro'] && <p className="text-xs text-green-600 mt-1">{photos['video_intro']?.name}</p>}
                 </div>
               </div>
             </div>
-          )}
-
-          {step === 4 && (
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900">Review & Submit</h3>
-              <ul className="text-sm text-gray-700 space-y-1 list-disc list-inside">
-                <li>Tier: {tier}</li>
-                <li>Experience: {experience} years</li>
-                <li>Languages: {languages}</li>
-                <li>Vehicle: {vehicle.makeModelYear || vehicle.type} ({vehicle.seats} seats) · Reg {vehicle.registration || 'N/A'}</li>
-                <li>Docs attached: {Object.values(docs).filter(Boolean).length}/{requiredDocs.length}</li>
-                <li>Live captures attached: {Object.values(photos).filter(Boolean).length}/{livePhotoTypes.length}</li>
-              </ul>
-              <p className="text-xs text-gray-500">After submission, our admin team performs manual verification (ID match, police, SLTDA). Expired/unclear uploads will be rejected.</p>
-            </div>
-          )}
-
-          <div className="flex justify-between pt-4">
-            <Button variant="outline" onClick={prevStep} disabled={step === 1 || loading}>Back</Button>
-            {step < 4 && (
-              <Button onClick={nextStep} disabled={loading}>Next</Button>
-            )}
-            {step === 4 && (
-              <Button onClick={submit} disabled={loading}>
-                {loading ? 'Submitting...' : 'Submit for Verification'}
-              </Button>
-            )}
+            <p className="text-sm text-gray-600">
+              <span className="font-medium">Step {step}:</span> {steps[step - 1].description}
+            </p>
           </div>
+
+          {/* Form Content */}
+          <div className="p-4 md:p-6">
+            {/* Errors Display */}
+            {Object.keys(errors).length > 0 && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-red-500 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-red-800">Please fix the following errors:</p>
+                    <ul className="list-disc list-inside text-sm text-red-600 mt-1">
+                      {Object.values(errors).map((err, i) => (
+                        <li key={i}>{err}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Step 1: Profile */}
+            {step === 1 && (
+              <div className="space-y-6">
+                {/* Tier Selection */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">Select Your Role / Tier</label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {(Object.keys(tierInfo) as DriverTier[]).map((t) => (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => setTier(t)}
+                        className={`p-4 rounded-xl border-2 text-left transition-all ${
+                          tier === t
+                            ? 'border-orange-500 bg-orange-50'
+                            : 'border-gray-200 hover:border-orange-300 hover:bg-orange-50/50'
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <span className="text-2xl">{tierInfo[t].icon}</span>
+                          <div className="flex-1">
+                            <p className="font-semibold text-gray-900">{tierInfo[t].label}</p>
+                            <p className="text-xs text-gray-500 mb-2">{tierInfo[t].description}</p>
+                            <div className="flex flex-wrap gap-1">
+                              {tierInfo[t].benefits.slice(0, 3).map((b, i) => (
+                                <span key={i} className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full">
+                                  {b}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                          {tier === t && (
+                            <Check className="w-5 h-5 text-orange-500" />
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Personal Information */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <User className="w-5 h-5 text-orange-500" />
+                    Personal Information
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Full Name <span className="text-red-500">*</span>
+                      </label>
+                      <Input
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        placeholder="As per ID / license"
+                        className={errors.fullName ? 'border-red-500' : ''}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <Phone className="w-4 h-4 inline mr-1" />
+                        Phone <span className="text-red-500">*</span>
+                      </label>
+                      <Input
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="+94 7X XXX XXXX"
+                        className={errors.phone ? 'border-red-500' : ''}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <Mail className="w-4 h-4 inline mr-1" />
+                        Email <span className="text-red-500">*</span>
+                      </label>
+                      <Input
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="you@example.com"
+                        type="email"
+                        className={errors.email ? 'border-red-500' : ''}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp (if different)</label>
+                      <Input
+                        value={whatsapp}
+                        onChange={(e) => setWhatsapp(e.target.value)}
+                        placeholder="+94 7X XXX XXXX"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <MapPin className="w-4 h-4 inline mr-1" />
+                        Address
+                      </label>
+                      <Input
+                        value={address}
+                        onChange={(e) => setAddress(e.target.value)}
+                        placeholder="Your address"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                      <Input
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
+                        placeholder="City"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Languages Spoken</label>
+                      <Input
+                        value={languages}
+                        onChange={(e) => setLanguages(e.target.value)}
+                        placeholder="English, Sinhala, Tamil"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Years of Experience</label>
+                      <Input
+                        type="number"
+                        min={0}
+                        value={experience}
+                        onChange={(e) => setExperience(Number(e.target.value))}
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Short Bio / Introduction</label>
+                    <Textarea
+                      value={bio}
+                      onChange={(e) => setBio(e.target.value)}
+                      placeholder="Tell tourists about yourself, your experience, specialties..."
+                      rows={3}
+                    />
+                  </div>
+                </div>
+
+                {/* Vehicle Information */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <Car className="w-5 h-5 text-orange-500" />
+                    Vehicle Information
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label htmlFor="vehicleType" className="block text-sm font-medium text-gray-700 mb-1">Vehicle Type</label>
+                      <select
+                        id="vehicleType"
+                        title="Select vehicle type"
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2 bg-white"
+                        value={vehicle.type}
+                        onChange={(e) => setVehicle({ ...vehicle, type: e.target.value })}
+                      >
+                        <option value="sedan">Sedan</option>
+                        <option value="suv">SUV</option>
+                        <option value="van">Van</option>
+                        <option value="mini_coach">Mini Coach</option>
+                        <option value="luxury">Luxury</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Registration Number <span className="text-red-500">*</span>
+                      </label>
+                      <Input
+                        value={vehicle.registration}
+                        onChange={(e) => setVehicle({ ...vehicle, registration: e.target.value })}
+                        placeholder="XX-1234"
+                        className={errors.vehicleReg ? 'border-red-500' : ''}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Make / Model / Year <span className="text-red-500">*</span>
+                      </label>
+                      <Input
+                        value={vehicle.makeModelYear}
+                        onChange={(e) => setVehicle({ ...vehicle, makeModelYear: e.target.value })}
+                        placeholder="Toyota KDH 2018"
+                        className={errors.vehicleMake ? 'border-red-500' : ''}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Seat Capacity</label>
+                      <Input
+                        type="number"
+                        min={2}
+                        value={vehicle.seats}
+                        onChange={(e) => setVehicle({ ...vehicle, seats: Number(e.target.value) })}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Vehicle Color</label>
+                      <Input
+                        value={vehicle.color}
+                        onChange={(e) => setVehicle({ ...vehicle, color: e.target.value })}
+                        placeholder="White / Silver"
+                      />
+                    </div>
+                    <div className="flex items-center gap-6 pt-6">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={vehicle.ac}
+                          onChange={(e) => setVehicle({ ...vehicle, ac: e.target.checked })}
+                          className="w-4 h-4 text-orange-500 rounded"
+                        />
+                        <span className="text-sm">Air Conditioning</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={vehicle.wifi}
+                          onChange={(e) => setVehicle({ ...vehicle, wifi: e.target.checked })}
+                          className="w-4 h-4 text-orange-500 rounded"
+                        />
+                        <span className="text-sm">WiFi Available</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                {/* License & Rates */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <Shield className="w-5 h-5 text-orange-500" />
+                    Licenses & Rates
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        SLTDA License No. {(tier === 'chauffeur_guide' || tier === 'national_guide') && <span className="text-red-500">*</span>}
+                      </label>
+                      <Input
+                        value={sltdaNumber}
+                        onChange={(e) => setSltdaNumber(e.target.value)}
+                        placeholder="C-XXXX / N-XXXX"
+                        className={errors.sltda ? 'border-red-500' : ''}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">SLTDA License Expiry</label>
+                      <Input
+                        type="date"
+                        value={sltdaExpiry}
+                        onChange={(e) => setSltdaExpiry(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Police Clearance Expiry</label>
+                      <Input
+                        type="date"
+                        value={policeExpiry}
+                        onChange={(e) => setPoliceExpiry(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Medical Report Expiry</label>
+                      <Input
+                        type="date"
+                        value={medicalExpiry}
+                        onChange={(e) => setMedicalExpiry(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Hourly Rate (LKR)</label>
+                      <Input
+                        type="number"
+                        min={0}
+                        value={hourlyRate}
+                        onChange={(e) => setHourlyRate(Number(e.target.value))}
+                        placeholder="0"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Daily Rate (LKR)</label>
+                      <Input
+                        type="number"
+                        min={0}
+                        value={dailyRate}
+                        onChange={(e) => setDailyRate(Number(e.target.value))}
+                        placeholder="0"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Emergency Contact */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <Phone className="w-5 h-5 text-orange-500" />
+                    Emergency Contact
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Contact Name</label>
+                      <Input
+                        value={emergencyName}
+                        onChange={(e) => setEmergencyName(e.target.value)}
+                        placeholder="Emergency contact name"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Contact Phone</label>
+                      <Input
+                        value={emergencyPhone}
+                        onChange={(e) => setEmergencyPhone(e.target.value)}
+                        placeholder="+94 7X XXX XXXX"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Relationship</label>
+                      <Input
+                        value={emergencyRelation}
+                        onChange={(e) => setEmergencyRelation(e.target.value)}
+                        placeholder="Spouse, Parent, etc."
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bank Details */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <CreditCard className="w-5 h-5 text-orange-500" />
+                    Bank Details (for payments)
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <Building className="w-4 h-4 inline mr-1" />
+                        Bank Name
+                      </label>
+                      <Input
+                        value={bankName}
+                        onChange={(e) => setBankName(e.target.value)}
+                        placeholder="Bank of Ceylon, Commercial Bank, etc."
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Account Number</label>
+                      <Input
+                        value={bankAccount}
+                        onChange={(e) => setBankAccount(e.target.value)}
+                        placeholder="XXXX XXXX XXXX"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Branch</label>
+                      <Input
+                        value={bankBranch}
+                        onChange={(e) => setBankBranch(e.target.value)}
+                        placeholder="Branch name"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Account Holder Name</label>
+                      <Input
+                        value={accountHolder}
+                        onChange={(e) => setAccountHolder(e.target.value)}
+                        placeholder="Name as per bank account"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Social Media */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Social Media (Optional)</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Instagram Handle</label>
+                      <Input
+                        value={socialInsta}
+                        onChange={(e) => setSocialInsta(e.target.value)}
+                        placeholder="@your_handle"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Facebook Page URL</label>
+                      <Input
+                        value={socialFacebook}
+                        onChange={(e) => setSocialFacebook(e.target.value)}
+                        placeholder="https://facebook.com/..."
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Step 2: Documents */}
+            {step === 2 && (
+              <div className="space-y-6">
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                  <div className="flex items-start gap-3">
+                    <Upload className="w-5 h-5 text-amber-600 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-amber-800">Document Upload Guidelines</p>
+                      <ul className="text-sm text-amber-700 mt-1 list-disc list-inside">
+                        <li>Upload clear, readable copies of all documents</li>
+                        <li>Accepted formats: JPG, PNG, PDF (max 10MB each)</li>
+                        <li>Ensure all text is visible and not blurred</li>
+                        <li>Documents must be valid and not expired</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {requiredDocs.map((d) => (
+                    <div
+                      key={d}
+                      className={`border-2 rounded-xl p-4 transition-all ${
+                        docs[d]
+                          ? 'border-green-400 bg-green-50'
+                          : 'border-dashed border-gray-300 hover:border-orange-300 hover:bg-orange-50/50'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div>
+                          <label className="text-sm font-semibold text-gray-800">{prettyDoc[d]}</label>
+                          <p className="text-xs text-gray-500">Required document</p>
+                        </div>
+                        {docs[d] && <Check className="w-5 h-5 text-green-500" />}
+                      </div>
+                      <label className="block">
+                        <input
+                          type="file"
+                          accept="image/*,application/pdf"
+                          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 cursor-pointer"
+                          onChange={(e) => handleFile(setDocs, d, e.target.files)}
+                          title={`Upload ${prettyDoc[d]}`}
+                        />
+                      </label>
+                      {docs[d] && (
+                        <p className="text-xs text-green-600 mt-2 flex items-center gap-1">
+                          <Check className="w-3 h-3" />
+                          {docs[d]?.name}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                  <div>
+                    <p className="font-medium text-gray-900">Documents Uploaded</p>
+                    <p className="text-sm text-gray-600">
+                      {Object.values(docs).filter(Boolean).length} of {requiredDocs.length} required
+                    </p>
+                  </div>
+                  <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-green-500 transition-all duration-300"
+                      style={{ width: `${(Object.values(docs).filter(Boolean).length / requiredDocs.length) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Step 3: Live Capture */}
+            {step === 3 && (
+              <div className="space-y-6">
+                <div className="bg-cyan-50 border border-cyan-200 rounded-xl p-4">
+                  <div className="flex items-start gap-3">
+                    <Camera className="w-5 h-5 text-cyan-600 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-cyan-800">Live Capture Verification</p>
+                      <ul className="text-sm text-cyan-700 mt-1 list-disc list-inside">
+                        <li>Use a well-lit environment for clear photos</li>
+                        <li>Selfie: Hold your ID next to your face</li>
+                        <li>Vehicle photos: Capture all angles clearly</li>
+                        <li>Video: 10-15 second introduction</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Selfie with ID */}
+                  <div className={`border-2 rounded-xl p-4 ${photos['selfie_with_id'] ? 'border-green-400 bg-green-50' : 'border-dashed border-cyan-300 bg-cyan-50/50'}`}>
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <p className="font-semibold text-gray-800">Selfie with ID</p>
+                        <p className="text-xs text-gray-500">Required - Front camera</p>
+                      </div>
+                      {photos['selfie_with_id'] && <Check className="w-5 h-5 text-green-500" />}
+                    </div>
+                    <LiveCapture
+                      label="Hold ID next to face, blink/turn"
+                      facingMode="user"
+                      filename="selfie_with_id.jpg"
+                      onCapture={(file) => setPhotos((prev) => ({ ...prev, selfie_with_id: file }))}
+                    />
+                    {photos['selfie_with_id'] && (
+                      <p className="text-xs text-green-600 mt-2 flex items-center gap-1">
+                        <Check className="w-3 h-3" />
+                        {photos['selfie_with_id']?.name}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Vehicle Front */}
+                  <div className={`border-2 rounded-xl p-4 ${photos['vehicle_front'] ? 'border-green-400 bg-green-50' : 'border-dashed border-cyan-300 bg-cyan-50/50'}`}>
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <p className="font-semibold text-gray-800">Vehicle Front</p>
+                        <p className="text-xs text-gray-500">Required - Rear camera</p>
+                      </div>
+                      {photos['vehicle_front'] && <Check className="w-5 h-5 text-green-500" />}
+                    </div>
+                    <LiveCapture
+                      label="Capture front view with plate visible"
+                      facingMode="environment"
+                      filename="vehicle_front.jpg"
+                      onCapture={(file) => setPhotos((prev) => ({ ...prev, vehicle_front: file }))}
+                    />
+                    {photos['vehicle_front'] && (
+                      <p className="text-xs text-green-600 mt-2 flex items-center gap-1">
+                        <Check className="w-3 h-3" />
+                        {photos['vehicle_front']?.name}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Vehicle Side */}
+                  <div className={`border-2 rounded-xl p-4 ${photos['vehicle_side'] ? 'border-green-400 bg-green-50' : 'border-dashed border-gray-300'}`}>
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <p className="font-semibold text-gray-800">Vehicle Side</p>
+                        <p className="text-xs text-gray-500">Optional - Full profile view</p>
+                      </div>
+                      {photos['vehicle_side'] && <Check className="w-5 h-5 text-green-500" />}
+                    </div>
+                    <LiveCapture
+                      label="Capture side profile"
+                      facingMode="environment"
+                      filename="vehicle_side.jpg"
+                      onCapture={(file) => setPhotos((prev) => ({ ...prev, vehicle_side: file }))}
+                    />
+                  </div>
+
+                  {/* Vehicle Interior */}
+                  <div className={`border-2 rounded-xl p-4 ${photos['vehicle_interior'] ? 'border-green-400 bg-green-50' : 'border-dashed border-gray-300'}`}>
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <p className="font-semibold text-gray-800">Vehicle Interior</p>
+                        <p className="text-xs text-gray-500">Optional - Show seating</p>
+                      </div>
+                      {photos['vehicle_interior'] && <Check className="w-5 h-5 text-green-500" />}
+                    </div>
+                    <LiveCapture
+                      label="Capture interior view"
+                      facingMode="environment"
+                      filename="vehicle_interior.jpg"
+                      onCapture={(file) => setPhotos((prev) => ({ ...prev, vehicle_interior: file }))}
+                    />
+                  </div>
+
+                  {/* Vehicle Back */}
+                  <div className={`border-2 rounded-xl p-4 ${photos['vehicle_back'] ? 'border-green-400 bg-green-50' : 'border-dashed border-gray-300'}`}>
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <p className="font-semibold text-gray-800">Vehicle Back</p>
+                        <p className="text-xs text-gray-500">Optional</p>
+                      </div>
+                      {photos['vehicle_back'] && <Check className="w-5 h-5 text-green-500" />}
+                    </div>
+                    <label className="block">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-cyan-50 file:text-cyan-700 hover:file:bg-cyan-100 cursor-pointer"
+                        onChange={(e) => handleFile(setPhotos, 'vehicle_back', e.target.files)}
+                        title="Upload vehicle back photo"
+                      />
+                    </label>
+                  </div>
+
+                  {/* Video Intro */}
+                  <div className={`border-2 rounded-xl p-4 ${photos['video_intro'] ? 'border-green-400 bg-green-50' : 'border-dashed border-gray-300'}`}>
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <p className="font-semibold text-gray-800">Video Introduction</p>
+                        <p className="text-xs text-gray-500">Optional - 10-15 seconds</p>
+                      </div>
+                      {photos['video_intro'] && <Check className="w-5 h-5 text-green-500" />}
+                    </div>
+                    <LivenessRecorder
+                      label="Record your intro"
+                      onCapture={(file) => setPhotos((prev) => ({ ...prev, video_intro: file }))}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Step 4: Review */}
+            {step === 4 && (
+              <div className="space-y-6">
+                <div className="bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-xl p-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <Shield className="w-6 h-6 text-orange-500" />
+                    Application Summary
+                  </h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Profile Summary */}
+                    <div className="bg-white rounded-lg p-4 shadow-sm">
+                      <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                        <User className="w-4 h-4 text-orange-500" />
+                        Profile Details
+                      </h4>
+                      <dl className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <dt className="text-gray-500">Name:</dt>
+                          <dd className="font-medium">{fullName || 'Not provided'}</dd>
+                        </div>
+                        <div className="flex justify-between">
+                          <dt className="text-gray-500">Tier:</dt>
+                          <dd className="font-medium">{tierInfo[tier].label}</dd>
+                        </div>
+                        <div className="flex justify-between">
+                          <dt className="text-gray-500">Experience:</dt>
+                          <dd className="font-medium">{experience} years</dd>
+                        </div>
+                        <div className="flex justify-between">
+                          <dt className="text-gray-500">Languages:</dt>
+                          <dd className="font-medium">{languages}</dd>
+                        </div>
+                        <div className="flex justify-between">
+                          <dt className="text-gray-500">Phone:</dt>
+                          <dd className="font-medium">{phone || 'Not provided'}</dd>
+                        </div>
+                        <div className="flex justify-between">
+                          <dt className="text-gray-500">Email:</dt>
+                          <dd className="font-medium text-xs">{email || 'Not provided'}</dd>
+                        </div>
+                      </dl>
+                    </div>
+
+                    {/* Vehicle Summary */}
+                    <div className="bg-white rounded-lg p-4 shadow-sm">
+                      <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                        <Car className="w-4 h-4 text-orange-500" />
+                        Vehicle Details
+                      </h4>
+                      <dl className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <dt className="text-gray-500">Type:</dt>
+                          <dd className="font-medium capitalize">{vehicle.type}</dd>
+                        </div>
+                        <div className="flex justify-between">
+                          <dt className="text-gray-500">Make/Model:</dt>
+                          <dd className="font-medium">{vehicle.makeModelYear || 'Not provided'}</dd>
+                        </div>
+                        <div className="flex justify-between">
+                          <dt className="text-gray-500">Registration:</dt>
+                          <dd className="font-medium">{vehicle.registration || 'Not provided'}</dd>
+                        </div>
+                        <div className="flex justify-between">
+                          <dt className="text-gray-500">Seats:</dt>
+                          <dd className="font-medium">{vehicle.seats}</dd>
+                        </div>
+                        <div className="flex justify-between">
+                          <dt className="text-gray-500">Features:</dt>
+                          <dd className="font-medium">
+                            {[vehicle.ac && 'A/C', vehicle.wifi && 'WiFi'].filter(Boolean).join(', ') || 'None'}
+                          </dd>
+                        </div>
+                      </dl>
+                    </div>
+                  </div>
+
+                  {/* Documents & Photos Summary */}
+                  <div className="grid grid-cols-2 gap-4 mt-4">
+                    <div className="bg-white rounded-lg p-4 shadow-sm">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-gray-700">Documents Uploaded</span>
+                        <span className={`text-lg font-bold ${Object.values(docs).filter(Boolean).length === requiredDocs.length ? 'text-green-600' : 'text-orange-600'}`}>
+                          {Object.values(docs).filter(Boolean).length}/{requiredDocs.length}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="bg-white rounded-lg p-4 shadow-sm">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-gray-700">Photos Captured</span>
+                        <span className="text-lg font-bold text-green-600">
+                          {Object.values(photos).filter(Boolean).length}/{livePhotoTypes.length}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Terms & Conditions */}
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={agreedToTerms}
+                      onChange={(e) => setAgreedToTerms(e.target.checked)}
+                      className="w-5 h-5 mt-0.5 text-orange-500 rounded border-gray-300"
+                    />
+                    <div className="text-sm text-gray-700">
+                      I confirm that all information provided is accurate and I agree to the{' '}
+                      <a href="/terms" className="text-orange-600 underline">Terms of Service</a>,{' '}
+                      <a href="/privacy" className="text-orange-600 underline">Privacy Policy</a>, and{' '}
+                      <a href="/driver-agreement" className="text-orange-600 underline">Driver Partner Agreement</a>.
+                      I understand that providing false information may result in account suspension.
+                    </div>
+                  </label>
+                </div>
+
+                {/* Important Notes */}
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                  <h4 className="font-medium text-blue-800 mb-2">What happens next?</h4>
+                  <ul className="text-sm text-blue-700 space-y-1">
+                    <li>1. Our team will review your application within 24-48 hours</li>
+                    <li>2. You'll receive email and SMS notifications about your status</li>
+                    <li>3. Once verified, you can start receiving booking requests</li>
+                    <li>4. Expired or unclear documents will require re-upload</li>
+                  </ul>
+                </div>
+              </div>
+            )}
+
+            {/* Navigation Buttons */}
+            <div className="flex items-center justify-between pt-6 border-t border-gray-200 mt-6">
+              <Button
+                variant="outline"
+                onClick={prevStep}
+                disabled={step === 1 || loading}
+                className="gap-2"
+              >
+                Back
+              </Button>
+
+              {step < 4 ? (
+                <Button
+                  onClick={nextStep}
+                  disabled={loading}
+                  className="bg-orange-600 hover:bg-orange-700 gap-2"
+                >
+                  Continue
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              ) : (
+                <Button
+                  onClick={submit}
+                  disabled={loading || !agreedToTerms}
+                  className="bg-green-600 hover:bg-green-700 gap-2"
+                >
+                  {loading ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      <Check className="w-4 h-4" />
+                      Submit Application
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Help Section */}
+        <div className="mt-8 text-center">
+          <p className="text-gray-600 text-sm">
+            Need help? Contact us at{' '}
+            <a href="mailto:drivers@rechargetravels.com" className="text-orange-600 underline">
+              drivers@rechargetravels.com
+            </a>{' '}
+            or call{' '}
+            <a href="tel:+94771234567" className="text-orange-600 underline">
+              +94 77 123 4567
+            </a>
+          </p>
         </div>
       </div>
     </div>

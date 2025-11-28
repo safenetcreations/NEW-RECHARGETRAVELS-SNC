@@ -166,7 +166,12 @@ const VehicleBrowse = lazy(() => import('@/pages/vehicle-rental/VehicleBrowse'))
 const VehicleDetail = lazy(() => import('@/pages/vehicle-rental/VehicleDetail'));
 const VehicleBooking = lazy(() => import('@/pages/vehicle-rental/VehicleBooking'));
 const OwnerDashboard = lazy(() => import('@/pages/vehicle-rental/OwnerDashboard'));
+const OwnerRegister = lazy(() => import('@/pages/vehicle-rental/OwnerRegister'));
 const ListVehicle = lazy(() => import('@/pages/vehicle-rental/ListVehicle'));
+
+// Vendor Platform
+const VendorRegistration = lazy(() => import('@/pages/vendor/VendorRegistration'));
+const VendorDashboard = lazy(() => import('@/pages/vendor/VendorDashboard'));
 
 import './App.css';
 
@@ -305,7 +310,12 @@ function App() {
                 <Route path="/vehicle-rental/vehicle/:id" element={<VehicleDetail />} />
                 <Route path="/vehicle-rental/booking/:id" element={<VehicleBooking />} />
                 <Route path="/vehicle-rental/owner-dashboard" element={<OwnerDashboard />} />
+                <Route path="/vehicle-rental/owner/register" element={<OwnerRegister />} />
                 <Route path="/vehicle-rental/list-vehicle" element={<ListVehicle />} />
+
+                {/* Vendor Platform */}
+                <Route path="/vendor/register" element={withSiteChrome(VendorRegistration)} />
+                <Route path="/vendor/dashboard" element={<VendorDashboard />} />
 
                 <Route path="/blog" element={withSiteChrome(Blog)} />
                 <Route path="/blog/:slug" element={withSiteChrome(BlogPost)} />
