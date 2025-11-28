@@ -78,7 +78,7 @@ const VehicleNotificationPreferences: React.FC = () => {
       description: 'Get instant updates on WhatsApp',
       enabled: true,
       verified: true,
-      contactInfo: '+94 77 123 4567',
+      contactInfo: '+94 77 772 1999',
     },
     {
       id: 'sms',
@@ -87,7 +87,7 @@ const VehicleNotificationPreferences: React.FC = () => {
       description: 'Text message alerts',
       enabled: false,
       verified: true,
-      contactInfo: '+94 77 123 4567',
+      contactInfo: '+94 77 772 1999',
     },
     {
       id: 'push',

@@ -186,7 +186,7 @@ const VehicleInvoice: React.FC = () => {
           name: 'Sunil Perera',
           businessName: 'Premium Auto Rentals',
           email: 'sunil@premiumauto.lk',
-          phone: '+94 77 123 4567'
+          phone: '+94 77 772 1999'
         }
       };
 

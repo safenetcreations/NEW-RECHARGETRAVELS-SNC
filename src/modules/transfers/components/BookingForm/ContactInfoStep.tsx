@@ -64,7 +64,7 @@ export const ContactInfoStep: React.FC<ContactInfoStepProps> = ({
                 message: 'Invalid phone number'
               }
             })}
-            placeholder="+94 77 123 4567"
+            placeholder="+94 77 772 1999"
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
           />
           {errors.contactPhone && (
@@ -79,7 +79,7 @@ export const ContactInfoStep: React.FC<ContactInfoStepProps> = ({
           <input
             type="tel"
             {...register('contactWhatsapp')}
-            placeholder="+94 77 123 4567"
+            placeholder="+94 77 772 1999"
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
           />
         </div>

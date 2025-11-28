@@ -158,7 +158,7 @@ const SriLankaDiscovery: React.FC<SriLankaDiscoveryProps> = ({
                   </button>
                   <button className="bg-yellow-400 text-gray-900 px-4 py-2 rounded-lg font-semibold hover:bg-yellow-300 transition-colors flex items-center space-x-2">
                     <Phone className="w-4 h-4" />
-                    <span>Call +94 777 21 999</span>
+                    <span>Call +94 77 772 1999</span>
                   </button>
                 </div>
               </div>

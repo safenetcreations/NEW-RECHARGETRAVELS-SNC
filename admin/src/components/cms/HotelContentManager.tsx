@@ -47,17 +47,24 @@ export const HotelContentManager = () => {
   });
 
   const hotelTypes = [
-    { value: 'budget', label: 'Budget' },
-    { value: 'mid-range', label: 'Mid-Range' },
-    { value: 'luxury', label: 'Luxury' },
-    { value: 'boutique', label: 'Boutique' },
-    { value: 'resort', label: 'Resort' }
+    { value: 'luxury_resort', label: 'Luxury Resort' },
+    { value: 'boutique', label: 'Boutique Hotel' },
+    { value: 'villa', label: 'Villa' },
+    { value: 'apartment', label: 'Apartment' },
+    { value: 'vacation_home', label: 'Vacation Home' },
+    { value: 'guesthouse', label: 'Guesthouse' },
+    { value: 'cabana', label: 'Cabana' },
+    { value: 'eco_lodge', label: 'Eco Lodge' },
+    { value: 'budget', label: 'Budget Hotel' },
+    { value: 'business', label: 'Business Hotel' },
+    { value: 'mid-range', label: 'Mid-Range' }
   ];
 
   const commonAmenities = [
     'WiFi', 'Pool', 'Spa', 'Restaurant', 'Bar', 'Gym', 'Room Service',
     'Airport Shuttle', 'Parking', 'Air Conditioning', 'Beach Access',
-    'Conference Rooms', 'Laundry Service', 'Concierge', 'Breakfast'
+    'Conference Rooms', 'Laundry Service', 'Concierge', 'Breakfast',
+    'Kitchen', 'Private Pool', 'Washing Machine', 'Balcony', 'Terrace'
   ];
 
   const fetchHotels = useCallback(async () => {
@@ -69,7 +76,7 @@ export const HotelContentManager = () => {
       );
       const snapshot = await getDocs(q);
       const hotelsData = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() })) as Hotel[];
-      
+
       // Fetch images for each hotel
       const hotelsWithImages = await Promise.all(
         hotelsData.map(async (hotel) => {
@@ -87,7 +94,7 @@ export const HotelContentManager = () => {
           }
         })
       );
-      
+
       setHotels(hotelsWithImages);
     } catch (error) {
       console.error('Error fetching hotels:', error);
@@ -380,7 +387,7 @@ export const HotelContentManager = () => {
         {/* Image Management for Selected Hotel */}
         {selectedHotel && !isCreating && (
           <div className="lg:col-span-2">
-            <ImageUploadSection 
+            <ImageUploadSection
               entityType="hotel"
               entityId={selectedHotel.id}
               entityName={selectedHotel.name}

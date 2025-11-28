@@ -216,7 +216,7 @@ const DriverFormDialog: React.FC<DriverFormDialogProps> = ({
                       <Input
                         value={formData.phone || ''}
                         onChange={(e) => handleChange('phone', e.target.value)}
-                        placeholder="+94 77 123 4567"
+                        placeholder="+94 77 772 1999"
                         required
                       />
                     </div>

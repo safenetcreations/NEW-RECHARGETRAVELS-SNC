@@ -252,7 +252,7 @@ const DriversSection: React.FC = () => {
                     id="phone"
                     value={formData.phone}
                     onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                    placeholder="+94 77 123 4567"
+                    placeholder="+94 77 772 1999"
                   />
                 </div>
                 <div>
@@ -261,7 +261,7 @@ const DriversSection: React.FC = () => {
                     id="whatsapp"
                     value={formData.whatsapp_number}
                     onChange={(e) => setFormData({...formData, whatsapp_number: e.target.value})}
-                    placeholder="+94 77 123 4567"
+                    placeholder="+94 77 772 1999"
                   />
                 </div>
               </div>
@@ -571,7 +571,7 @@ const DriversSection: React.FC = () => {
                   id="edit-phone"
                   value={formData.phone}
                   onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                  placeholder="+94 77 123 4567"
+                  placeholder="+94 77 772 1999"
                 />
               </div>
               <div>
@@ -580,7 +580,7 @@ const DriversSection: React.FC = () => {
                   id="edit-whatsapp"
                   value={formData.whatsapp_number}
                   onChange={(e) => setFormData({...formData, whatsapp_number: e.target.value})}
-                  placeholder="+94 77 123 4567"
+                  placeholder="+94 77 772 1999"
                 />
               </div>
             </div>

@@ -22,7 +22,7 @@ const ContactSection = ({ control }: ContactSectionProps) => {
             control={control}
             name="contactPhone"
             render={({ field }) => (
-              <FormItem><FormLabel>Mobile/WhatsApp Number</FormLabel><FormControl><Input type="tel" placeholder="+94 77 123 4567" {...field} /></FormControl><FormMessage /></FormItem>
+              <FormItem><FormLabel>Mobile/WhatsApp Number</FormLabel><FormControl><Input type="tel" placeholder="+94 77 772 1999" {...field} /></FormControl><FormMessage /></FormItem>
             )}
           />
       </div>

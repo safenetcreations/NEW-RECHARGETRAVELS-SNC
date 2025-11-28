@@ -54,6 +54,11 @@ export const aboutItems = [
     title: "Vendor Registration",
     href: "/vendor/register",
     description: "Partner with us and grow your tourism business"
+  },
+  {
+    title: "Vehicle Owner Registration",
+    href: "/vehicle-rental/owner",
+    description: "Register your car, van, or SUV to earn on Recharge vehicle rentals"
   }
 ]
 

@@ -147,8 +147,8 @@ const mockProvider: ProviderProfile = {
     }
   ],
   contact: {
-    phone: '+94 77 123 4567',
-    whatsapp: '+94 77 123 4567',
+    phone: '+94 77 772 1999',
+    whatsapp: '+94 77 772 1999',
     email: 'kenny@srilankaguide.lk'
   },
   location: 'Based in Kandy',

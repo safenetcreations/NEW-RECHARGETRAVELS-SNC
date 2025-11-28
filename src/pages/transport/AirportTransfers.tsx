@@ -1134,7 +1134,7 @@ const AirportTransfers = () => {
                 size="lg"
                 variant="outline"
                 className="border-white text-white hover:bg-white/10 px-8 py-6 text-lg"
-                onClick={() => window.open('https://wa.me/94777123456', '_blank')}
+                onClick={() => window.open('https://wa.me/94777721999', '_blank')}
               >
                 <Phone className="mr-2 w-5 h-5" /> WhatsApp Us
               </Button>

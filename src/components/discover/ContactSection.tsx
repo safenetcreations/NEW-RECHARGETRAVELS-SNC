@@ -64,7 +64,7 @@ const ContactSection: React.FC = () => {
     {
       icon: Phone,
       title: 'Call Us',
-      details: '+94 11 234 5678',
+      details: '+94 77 772 1999',
       color: 'text-green-600'
     },
     {

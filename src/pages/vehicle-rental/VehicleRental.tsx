@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { 
@@ -16,8 +16,6 @@ import {
   CreditCard,
   FileCheck,
   Smartphone,
-  TrendingUp,
-  HeartHandshake
 } from 'lucide-react';
 
 const vehicleTypes = [
@@ -75,13 +73,6 @@ const howItWorks = [
   { step: 4, title: 'Pick Up & Drive', description: 'Collect from owner or get delivered to your location', icon: MapPin },
 ];
 
-const ownerBenefits = [
-  { icon: TrendingUp, title: 'Earn Extra Income', description: 'Turn your idle vehicle into a money-making asset' },
-  { icon: Calendar, title: 'Flexible Availability', description: 'Set your own schedule. Rent when you want' },
-  { icon: Shield, title: 'Protected Rentals', description: 'Insurance coverage and verified customers' },
-  { icon: Smartphone, title: 'Easy Management', description: 'Manage bookings, earnings & calendar from your phone' },
-];
-
 const stats = [
   { value: '500+', label: 'Verified Vehicles' },
   { value: '200+', label: 'Active Owners' },
@@ -90,6 +81,28 @@ const stats = [
 ];
 
 const VehicleRental = () => {
+  const navigate = useNavigate();
+  const [vehicleType, setVehicleType] = useState('');
+  const [pickupDate, setPickupDate] = useState('');
+  const [returnDate, setReturnDate] = useState('');
+  const [pickupCity, setPickupCity] = useState('bandaranaike-airport');
+  const [withDriver, setWithDriver] = useState(false);
+  const [delivery, setDelivery] = useState(false);
+
+  const handleQuickSearch = (event: React.FormEvent) => {
+    event.preventDefault();
+    const params = new URLSearchParams();
+
+    if (vehicleType) params.set('type', vehicleType);
+    if (pickupCity) params.set('city', pickupCity);
+    if (pickupDate) params.set('start', pickupDate);
+    if (returnDate) params.set('end', returnDate);
+    if (withDriver) params.set('withDriver', 'true');
+    if (delivery) params.set('delivery', 'true');
+
+    navigate(`/vehicle-rental/browse${params.toString() ? `?${params.toString()}` : ''}`);
+  };
+
   return (
     <>
       <Helmet>
@@ -105,8 +118,8 @@ const VehicleRental = () => {
       <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50">
         {/* Hero Section */}
         <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 pt-24 pb-20">
-          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=1920&h=800&fit=crop')] bg-cover bg-center opacity-20"></div>
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-slate-900/50"></div>
+          <div className="pointer-events-none absolute inset-0 bg-[url('https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=1920&h=800&fit=crop')] bg-cover bg-center opacity-20"></div>
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-slate-900/50"></div>
           
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -159,15 +172,21 @@ const VehicleRental = () => {
               <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-white/20">
                 <h2 className="text-xl font-bold text-white mb-6">Quick Search</h2>
                 
-                <div className="space-y-4">
+                <form className="space-y-4" onSubmit={handleQuickSearch}>
                   <div>
                     <label className="block text-sm text-gray-300 mb-2">Vehicle Type</label>
-                    <select className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white focus:ring-2 focus:ring-amber-400/50">
+                    <select
+                      value={vehicleType}
+                      onChange={(e) => setVehicleType(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white focus:ring-2 focus:ring-amber-400/50"
+                    >
                       <option value="">All Types</option>
                       <option value="sedan">Sedan</option>
                       <option value="suv">SUV</option>
                       <option value="van">Van</option>
                       <option value="luxury">Luxury</option>
+                      <option value="hatchback">Hatchback</option>
+                      <option value="mini-coach">Mini Coach</option>
                     </select>
                   </div>
 
@@ -175,14 +194,18 @@ const VehicleRental = () => {
                     <div>
                       <label className="block text-sm text-gray-300 mb-2">Pickup Date</label>
                       <input 
-                        type="date" 
+                        type="date"
+                        value={pickupDate}
+                        onChange={(e) => setPickupDate(e.target.value)}
                         className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white focus:ring-2 focus:ring-amber-400/50"
                       />
                     </div>
                     <div>
                       <label className="block text-sm text-gray-300 mb-2">Return Date</label>
                       <input 
-                        type="date" 
+                        type="date"
+                        value={returnDate}
+                        onChange={(e) => setReturnDate(e.target.value)}
                         className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white focus:ring-2 focus:ring-amber-400/50"
                       />
                     </div>
@@ -190,35 +213,50 @@ const VehicleRental = () => {
 
                   <div>
                     <label className="block text-sm text-gray-300 mb-2">Pickup Location</label>
-                    <select className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white focus:ring-2 focus:ring-amber-400/50">
-                      <option value="">Select City</option>
+                    <select
+                      value={pickupCity}
+                      onChange={(e) => setPickupCity(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white focus:ring-2 focus:ring-amber-400/50"
+                    >
+                      <option value="">Select Location</option>
+                      <option value="bandaranaike-airport">Bandaranaike Airport (CMB)</option>
+                      <option value="jaffna-airport">Jaffna Airport (JAF)</option>
                       <option value="colombo">Colombo</option>
-                      <option value="kandy">Kandy</option>
-                      <option value="galle">Galle</option>
+                      <option value="jaffna">Jaffna</option>
+                      <option value="vavuniya">Vavuniya</option>
                       <option value="negombo">Negombo</option>
-                      <option value="airport">Bandaranaike Airport</option>
                     </select>
                   </div>
 
                   <div className="flex items-center gap-4">
                     <label className="flex items-center gap-2 text-sm text-white cursor-pointer">
-                      <input type="checkbox" className="w-4 h-4 rounded border-white/20 bg-white/10 text-amber-500 focus:ring-amber-400/50" />
+                      <input
+                        type="checkbox"
+                        checked={withDriver}
+                        onChange={(e) => setWithDriver(e.target.checked)}
+                        className="w-4 h-4 rounded border-white/20 bg-white/10 text-amber-500 focus:ring-amber-400/50"
+                      />
                       With Driver
                     </label>
                     <label className="flex items-center gap-2 text-sm text-white cursor-pointer">
-                      <input type="checkbox" className="w-4 h-4 rounded border-white/20 bg-white/10 text-amber-500 focus:ring-amber-400/50" />
+                      <input
+                        type="checkbox"
+                        checked={delivery}
+                        onChange={(e) => setDelivery(e.target.checked)}
+                        className="w-4 h-4 rounded border-white/20 bg-white/10 text-amber-500 focus:ring-amber-400/50"
+                      />
                       Delivery
                     </label>
                   </div>
 
-                  <Link
-                    to="/vehicle-rental/browse"
+                  <button
+                    type="submit"
                     className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-xl hover:shadow-lg transition-all"
                   >
                     Search Vehicles
                     <ArrowRight className="w-5 h-5" />
-                  </Link>
-                </div>
+                  </button>
+                </form>
               </div>
             </div>
           </div>
@@ -318,79 +356,6 @@ const VehicleRental = () => {
                   )}
                 </div>
               ))}
-            </div>
-          </div>
-        </section>
-
-        {/* For Vehicle Owners */}
-        <section className="py-16 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
-              <div>
-                <div className="inline-flex items-center gap-2 rounded-full bg-amber-500/20 border border-amber-500/30 px-4 py-2 text-sm text-amber-300 mb-6">
-                  <HeartHandshake className="w-4 h-4" />
-                  <span>Become a Vehicle Owner</span>
-                </div>
-                
-                <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
-                  Turn Your Vehicle Into
-                  <span className="block text-amber-400">A Profitable Asset</span>
-                </h2>
-                
-                <p className="text-gray-300 mb-8">
-                  Join 200+ vehicle owners earning extra income on our platform. 
-                  List your car, van, or SUV and start earning when it's not in use.
-                </p>
-
-                <div className="grid sm:grid-cols-2 gap-4 mb-8">
-                  {ownerBenefits.map((benefit, idx) => (
-                    <div key={idx} className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center flex-shrink-0">
-                        <benefit.icon className="w-5 h-5 text-amber-400" />
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-white">{benefit.title}</h4>
-                        <p className="text-sm text-gray-400">{benefit.description}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <Link
-                    to="/vehicle-rental/owner/register"
-                    className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-full hover:shadow-lg hover:shadow-amber-500/30 transition-all"
-                  >
-                    Register as Owner
-                    <ArrowRight className="w-5 h-5" />
-                  </Link>
-                  <Link
-                    to="/vehicle-rental/owner/login"
-                    className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 border border-white/20 text-white font-semibold rounded-full hover:bg-white/20 transition-all"
-                  >
-                    Owner Login
-                  </Link>
-                </div>
-              </div>
-
-              <div className="relative">
-                <img 
-                  src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=600&h=400&fit=crop"
-                  alt="Vehicle Owner"
-                  className="rounded-2xl shadow-2xl"
-                />
-                <div className="absolute -bottom-6 -left-6 bg-white rounded-xl p-4 shadow-xl">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-                      <TrendingUp className="w-6 h-6 text-green-600" />
-                    </div>
-                    <div>
-                      <div className="text-2xl font-bold text-gray-900">$280</div>
-                      <div className="text-sm text-gray-500">Avg. Monthly Earnings</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </section>

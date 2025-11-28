@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -26,6 +25,7 @@ import { CulturalContentManager } from './CulturalContentManager';
 import { MediaLibrary } from './MediaLibrary';
 import { SEOContentManager } from './SEOContentManager';
 import { BlogContentManager } from './BlogContentManager';
+import { HomepageContentManager } from './HomepageContentManager';
 import GroupTransportManagement from '../GroupTransportManagement';
 
 export { ContentManagementDashboard };
@@ -55,10 +55,14 @@ const ContentManagementDashboard = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-9 lg:grid-cols-9">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 lg:grid-cols-10 h-auto gap-2">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
               Overview
+            </TabsTrigger>
+            <TabsTrigger value="homepage" className="flex items-center gap-2">
+              <Image className="h-4 w-4" />
+              Homepage
             </TabsTrigger>
             <TabsTrigger value="blog" className="flex items-center gap-2">
               <Sparkles className="h-4 w-4" />
@@ -198,6 +202,10 @@ const ContentManagementDashboard = () => {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="homepage">
+            <HomepageContentManager />
           </TabsContent>
 
           <TabsContent value="blog">

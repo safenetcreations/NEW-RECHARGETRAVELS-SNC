@@ -81,7 +81,7 @@ const ComprehensiveSEO: React.FC<SEOProps> = ({
     },
     "contactPoint": {
       "@type": "ContactPoint",
-      "telephone": "+94-11-234-5678",
+      "telephone": "+94-77-772-1999",
       "contactType": "customer service",
       "availableLanguage": ["English", "Tamil", "Sinhala"]
     },
@@ -226,7 +226,7 @@ const ComprehensiveSEO: React.FC<SEOProps> = ({
           "logo": `${baseUrl}/logo-v2.png`,
           "contactPoint": {
             "@type": "ContactPoint",
-            "telephone": "+94-11-234-5678",
+            "telephone": "+94-77-772-1999",
             "contactType": "customer service",
             "areaServed": "LK",
             "availableLanguage": ["English", "Tamil", "Sinhala"]

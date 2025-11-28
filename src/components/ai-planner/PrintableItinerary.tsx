@@ -342,7 +342,7 @@ const PrintableItinerary = forwardRef<PrintableItineraryHandle, PrintableItinera
             </div>
           </div>
           <div className="contact-info">
-            <div>+94 77 123 4567</div>
+            <div>+94 77 772 1999</div>
             <div>info@rechargetravels.com</div>
             <div>www.rechargetravels.com</div>
           </div>
@@ -549,7 +549,7 @@ const PrintableItinerary = forwardRef<PrintableItineraryHandle, PrintableItinera
             Contact us for a confirmed quote and to book your journey.
           </div>
           <div className="footer-contact">
-            <span>📞 +94 77 123 4567</span>
+            <span>📞 +94 77 772 1999</span>
             <span>📧 info@rechargetravels.com</span>
             <span>🌐 www.rechargetravels.com</span>
           </div>

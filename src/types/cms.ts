@@ -615,3 +615,17 @@ export interface GroupTransportSettingsFormData {
   popularRoutes: string[];
   isActive: boolean;
 }
+
+// ==========================================
+// Homepage Settings Types
+// ==========================================
+
+export interface HomepageSettings {
+  id: string;
+  featuredDestinationsBackgroundImage: string;
+  updatedAt: Timestamp;
+}
+
+export interface HomepageSettingsFormData {
+  featuredDestinationsBackgroundImage: string;
+}

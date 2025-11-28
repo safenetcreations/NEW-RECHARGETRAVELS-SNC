@@ -169,7 +169,7 @@ const CookingClass = () => {
     faqs: [],
     stats: [],
     classSchedule: { morning: [], afternoon: [] },
-    contact: { phone: '+94 76 505 9595', email: 'info@rechargetravels.com', website: 'www.rechargetravels.com' }
+    contact: { phone: '+94 77 772 1999', email: 'info@rechargetravels.com', website: 'www.rechargetravels.com' }
   };
 
   const faqs = (data.faqs && data.faqs.length > 0 ? data.faqs : []) || [];
@@ -831,7 +831,7 @@ const CookingClass = () => {
                 size="lg"
                 variant="outline"
                 className="border-white text-white hover:bg-white/10 px-8 py-6 text-lg"
-                onClick={() => window.location.href = 'tel:+94765059595'}
+                onClick={() => window.open('https://wa.me/94777721999', '_blank')}
               >
                 <Phone className="mr-2 h-5 w-5" />
                 Call for Details
@@ -848,7 +848,7 @@ const CookingClass = () => {
             <div className="flex flex-col items-center">
               <Phone className="h-8 w-8 mb-3 text-orange-400" />
               <h3 className="font-semibold mb-2">Call Us</h3>
-              <p className="text-gray-300">{data.contact?.phone || '+94 76 505 9595'}</p>
+              <p className="text-gray-300">{data.contact?.phone || '+94 77 772 1999'}</p>
               <p className="text-sm text-gray-400">Available 24/7</p>
             </div>
             <div className="flex flex-col items-center">

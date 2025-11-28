@@ -343,10 +343,10 @@ const TourPackageDetail: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                <div>
-                  <div className="font-medium">Call us</div>
-                  <div className="text-gray-600">+94 77 123 4567</div>
-                </div>
+                <a href="https://wa.me/94777721999" target="_blank" rel="noopener noreferrer" className="block hover:text-green-600 transition-colors">
+                  <div className="font-medium">WhatsApp Us</div>
+                  <div className="text-gray-600">+94 77 772 1999</div>
+                </a>
                 <div>
                   <div className="font-medium">Email</div>
                   <div className="text-gray-600">info@rechargetravels.com</div>

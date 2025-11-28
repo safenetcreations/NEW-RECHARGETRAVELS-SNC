@@ -146,8 +146,8 @@ const mockBooking: BookingDetails = {
   owner: {
     id: 'o1',
     name: 'Nuwan Perera',
-    phone: '+94 77 123 4567',
-    whatsapp: '+94 77 123 4567',
+    phone: '+94 77 772 1999',
+    whatsapp: '+94 77 772 1999',
     email: 'nuwan@email.com',
     rating: 4.9,
     responseTime: 'Usually responds within 1 hour'
@@ -619,11 +619,13 @@ const VehicleBookingConfirmation: React.FC = () => {
               <div className="bg-gray-50 rounded-xl border p-4 text-center print:hidden">
                 <h3 className="font-semibold text-gray-900 mb-2">Need Help?</h3>
                 <p className="text-sm text-gray-600 mb-3">Our support team is available 24/7</p>
-                <a 
-                  href="tel:+94112345678"
+                <a
+                  href="https://wa.me/94777721999"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="text-primary font-medium text-sm hover:underline"
                 >
-                  +94 11 234 5678
+                  +94 77 772 1999
                 </a>
               </div>
             </div>

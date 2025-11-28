@@ -12,7 +12,7 @@ const SettingsSection: React.FC = () => {
     siteName: 'Recharge Travels',
     siteDescription: 'Discover the Wonder of Sri Lanka',
     contactEmail: 'info@rechargetravels.com',
-    contactPhone: '+94 11 234 5678',
+    contactPhone: '+94 77 772 1999',
     maintenanceMode: false,
     allowRegistration: true,
     emailNotifications: true,

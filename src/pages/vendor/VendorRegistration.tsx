@@ -578,7 +578,7 @@ Book with confidence - we're committed to providing unforgettable experiences in
                                         name="phone"
                                         value={formData.phone}
                                         onChange={handleInputChange}
-                                        placeholder="+94 77 123 4567"
+                                        placeholder="+94 77 772 1999"
                                         className="h-12 pl-11"
                                     />
                                 </div>
@@ -595,7 +595,7 @@ Book with confidence - we're committed to providing unforgettable experiences in
                                         name="whatsapp"
                                         value={formData.whatsapp}
                                         onChange={handleInputChange}
-                                        placeholder="+94 77 123 4567"
+                                        placeholder="+94 77 772 1999"
                                         className="h-12 pl-11"
                                     />
                                 </div>

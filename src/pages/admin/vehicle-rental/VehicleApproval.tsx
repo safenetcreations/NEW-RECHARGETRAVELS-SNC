@@ -95,7 +95,7 @@ const mockVehicles: VehicleSubmission[] = [
     ownerId: 'o1',
     ownerName: 'Nuwan Perera',
     ownerEmail: 'nuwan@email.com',
-    ownerPhone: '+94 77 123 4567',
+    ownerPhone: '+94 77 772 1999',
     ownerVerified: true,
     make: 'Toyota',
     model: 'Prius',

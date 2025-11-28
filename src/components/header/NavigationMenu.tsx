@@ -2,15 +2,13 @@ import { cn } from "@/lib/utils"
 import {
   NavigationMenu,
   NavigationMenuList,
-  NavigationMenuItem,
-  NavigationMenuLink,
 } from "@/components/ui/navigation-menu"
-import { Link } from "react-router-dom"
 import ToursDropdown from './navigation/ToursDropdown'
 import DestinationsDropdown from './navigation/DestinationsDropdown'
 import TransportDropdown from './navigation/TransportDropdown'
 import ExperiencesDropdown from './navigation/ExperiencesDropdown'
 import AboutDropdown from './navigation/AboutDropdown'
+import BookNowDropdown from './navigation/BookNowDropdown'
 
 interface NavigationMenuProps {
   animatingItem: string | null
@@ -54,22 +52,6 @@ const HeaderNavigationMenu = ({
             isScrolled={isScrolled}
           />
 
-          <NavigationMenuItem>
-            <NavigationMenuLink asChild>
-              <Link
-                to="/hotels"
-                className={cn(
-                  "group inline-flex h-10 w-max items-center justify-center rounded-full px-4 py-2 text-[0.7rem] font-semibold uppercase tracking-[0.14em] transition-all duration-300 hover:scale-[1.02] focus:outline-none disabled:pointer-events-none disabled:opacity-50",
-                  isScrolled
-                    ? "text-slate-800 hover:bg-slate-900/5"
-                    : "text-white/90 hover:bg-white/12"
-                )}
-              >
-                Hotels
-              </Link>
-            </NavigationMenuLink>
-          </NavigationMenuItem>
-
           <ExperiencesDropdown
             animatingItem={animatingItem}
             onMenuClick={onMenuClick}
@@ -77,6 +59,12 @@ const HeaderNavigationMenu = ({
           />
 
           <TransportDropdown
+            animatingItem={animatingItem}
+            onMenuClick={onMenuClick}
+            isScrolled={isScrolled}
+          />
+
+          <BookNowDropdown
             animatingItem={animatingItem}
             onMenuClick={onMenuClick}
             isScrolled={isScrolled}

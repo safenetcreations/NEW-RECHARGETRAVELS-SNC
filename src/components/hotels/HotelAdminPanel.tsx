@@ -89,10 +89,10 @@ const HotelAdminPanel: React.FC<HotelAdminPanelProps> = ({
 
   const filteredHotels = hotels.filter(hotel => {
     const matchesSearch = hotel.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         hotel.city?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+      hotel.city?.name?.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = filterStatus === 'all' ||
-                         (filterStatus === 'active' && hotel.is_active) ||
-                         (filterStatus === 'inactive' && !hotel.is_active)
+      (filterStatus === 'active' && hotel.is_active) ||
+      (filterStatus === 'inactive' && !hotel.is_active)
     return matchesSearch && matchesStatus
   })
 
@@ -604,6 +604,29 @@ const HotelAdminPanel: React.FC<HotelAdminPanelProps> = ({
                           {num} Star{num !== 1 ? 's' : ''}
                         </SelectItem>
                       ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="hotel_type">Property Type</Label>
+                  <Select
+                    value={formData.hotel_type}
+                    onValueChange={(value) => handleInputChange('hotel_type', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="luxury_resort">Luxury Resort</SelectItem>
+                      <SelectItem value="boutique">Boutique Hotel</SelectItem>
+                      <SelectItem value="villa">Villa</SelectItem>
+                      <SelectItem value="apartment">Apartment</SelectItem>
+                      <SelectItem value="vacation_home">Vacation Home</SelectItem>
+                      <SelectItem value="guesthouse">Guesthouse</SelectItem>
+                      <SelectItem value="cabana">Cabana</SelectItem>
+                      <SelectItem value="eco_lodge">Eco Lodge</SelectItem>
+                      <SelectItem value="budget">Budget Hotel</SelectItem>
+                      <SelectItem value="business">Business Hotel</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

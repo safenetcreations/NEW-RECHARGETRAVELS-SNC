@@ -220,5 +220,60 @@
     "files": [
       "scripts/seedTripAdvisorTours.ts"
     ]
+  },
+  {
+    "timestamp": "2025-11-29T00:00:00Z",
+    "summary": "Fixed vehicle rental quick search so inputs drive browse results.",
+    "details": [
+      "Bound quick search inputs on the vehicle rental landing page to state and navigate with query params (type, city, dates, withDriver, delivery) into vehicle browse.",
+      "Replaced static link with a form submit handler and aligned vehicle type options to VehicleBrowse filters."
+    ],
+    "files": [
+      "src/pages/vehicle-rental/VehicleRental.tsx"
+    ]
+  },
+  {
+    "timestamp": "2025-11-28T12:55:09Z",
+    "summary": "Unblocked quick search inputs on Vehicle Rental hero.",
+    "details": [
+      "Made hero background layers non-interactive (pointer-events-none) so the Vehicle Type and other quick search fields are clickable/typable."
+    ],
+    "files": [
+      "src/pages/vehicle-rental/VehicleRental.tsx"
+    ]
+  },
+  {
+    "timestamp": "2025-11-28T12:57:10Z",
+    "summary": "Constrained pickup locations to requested airports/cities and set default.",
+    "details": [
+      "Updated pickup location select to only list Bandaranaike Airport (CMB), Jaffna Airport (JAF), Colombo, Jaffna, Vavuniya, and Negombo; defaulted to Bandaranaike Airport."
+    ],
+    "files": [
+      "src/pages/vehicle-rental/VehicleRental.tsx"
+    ]
+  },
+  {
+    "timestamp": "2025-11-28T13:01:39Z",
+    "summary": "Split vehicle owner marketing into its own landing page and removed from rental page.",
+    "details": [
+      "Removed owner marketing block from vehicle rental landing to avoid duplication.",
+      "Added dedicated owner landing page with provided messaging and CTAs, and routed at /vehicle-rental/owner."
+    ],
+    "files": [
+      "src/pages/vehicle-rental/VehicleRental.tsx",
+      "src/pages/vehicle-rental/OwnerLanding.tsx",
+      "src/App.tsx"
+    ]
+  },
+  {
+    "timestamp": "2025-11-28T13:13:20Z",
+    "summary": "Added Vehicle Owner Registration to About/Partners menu.",
+    "details": [
+      "Inserted the vehicle owner registration link into the About dropdown (Partners cluster) pointing to /vehicle-rental/owner."
+    ],
+    "files": [
+      "src/components/header/navigation/menuData.ts",
+      "src/components/header/navigation/AboutDropdown.tsx"
+    ]
   }
 ]

@@ -3,13 +3,15 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { MapPin, Clock, Users, Star, Calendar, Sparkles, Badge, Heart } from 'lucide-react'
+import { MapPin, Clock, Users, Star, Calendar, Sparkles, Badge, Heart, ArrowUpRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useTours } from '@/hooks/useTours'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import BookingModal from '@/components/BookingModal'
 import { SEOMetaTags } from '@/components/seo/SEOMetaTags'
 import { SEOSchema } from '@/components/seo/SEOSchema'
+import Header from '@/components/Header'
+import Footer from '@/components/Footer'
 
 const Tours = () => {
   const [searchTerm, setSearchTerm] = useState('')
@@ -59,6 +61,8 @@ const Tours = () => {
 
   return (
     <>
+      <Header />
+
       {/* SEO Meta Tags */}
       <SEOMetaTags
         title="Sri Lanka Tours & Travel Packages - Best Deals 2025"
@@ -227,10 +231,29 @@ const Tours = () => {
                   <CardTitle className="text-xl font-bold text-gray-900 group-hover:text-green-600 transition-colors">
                     {tour.title}
                   </CardTitle>
+
+                  {/* Rating */}
+                  {(tour as any).rating && (
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`w-4 h-4 ${i < Math.floor((tour as any).rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
+                          />
+                        ))}
+                      </div>
+                      <span className="font-semibold text-gray-800">{(tour as any).rating}</span>
+                      {(tour as any).reviews && (
+                        <span className="text-gray-500 text-sm">({(tour as any).reviews} reviews)</span>
+                      )}
+                    </div>
+                  )}
+
                   <div className="flex items-center space-x-4 text-sm text-gray-600">
                     <div className="flex items-center space-x-1 bg-gray-100 px-2 py-1 rounded-lg">
                       <Clock className="h-4 w-4 text-blue-600" />
-                      <span className="font-medium">{tour.duration_days} days</span>
+                      <span className="font-medium">{tour.duration_days} {tour.duration_days === 1 ? 'day' : 'days'}</span>
                     </div>
                     <div className="flex items-center space-x-1 bg-gray-100 px-2 py-1 rounded-lg">
                       <Users className="h-4 w-4 text-purple-600" />
@@ -311,6 +334,79 @@ const Tours = () => {
         </div>
       </section>
 
+      {/* TripAdvisor Tours Section */}
+      <section className="py-16 bg-gradient-to-br from-emerald-900 via-emerald-800 to-teal-900">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full mb-6">
+              <img
+                src="https://static.tacdn.com/img2/brand_refresh/Tripadvisor_logoset_solid_green.svg"
+                alt="TripAdvisor"
+                className="h-5 w-5"
+              />
+              <span className="text-white font-semibold text-sm">Verified Reviews</span>
+            </div>
+
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+              Book on TripAdvisor
+            </h2>
+            <p className="text-lg text-emerald-100 mb-8 max-w-2xl mx-auto">
+              See all our tours with verified reviews, real ratings, and secure booking directly on TripAdvisor. USD pricing available.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to="/tours/tripadvisor">
+                <Button
+                  size="lg"
+                  className="bg-white text-emerald-900 hover:bg-emerald-50 px-8 py-4 rounded-xl text-lg font-semibold shadow-xl"
+                >
+                  <img
+                    src="https://static.tacdn.com/img2/brand_refresh/Tripadvisor_logoset_solid_green.svg"
+                    alt=""
+                    className="h-5 w-5 mr-2"
+                  />
+                  View TripAdvisor Tours
+                  <ArrowUpRight className="w-5 h-5 ml-2" />
+                </Button>
+              </Link>
+              <a
+                href="https://www.tripadvisor.com/Attraction_Review-g293962-d10049587-Reviews-Recharge_Travels_And_Tours-Colombo_Western_Province.html"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="border-2 border-white text-white hover:bg-white/10 px-8 py-4 rounded-xl text-lg font-semibold"
+                >
+                  Visit Our TripAdvisor Profile
+                  <ArrowUpRight className="w-5 h-5 ml-2" />
+                </Button>
+              </a>
+            </div>
+
+            <div className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                <div className="text-2xl font-bold text-white">23+</div>
+                <div className="text-sm text-emerald-200">Tours Listed</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                <div className="text-2xl font-bold text-white">4.7★</div>
+                <div className="text-sm text-emerald-200">Average Rating</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                <div className="text-2xl font-bold text-white">USD</div>
+                <div className="text-sm text-emerald-200">Currency</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                <div className="text-2xl font-bold text-white">Secure</div>
+                <div className="text-sm text-emerald-200">Booking</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Booking Modal */}
       <BookingModal
         isOpen={isBookingModalOpen}
@@ -320,6 +416,8 @@ const Tours = () => {
         itemId={selectedTour?.id}
         price={selectedTour?.price_per_person}
       />
+
+      <Footer />
     </>
   )
 }

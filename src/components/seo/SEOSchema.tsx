@@ -48,7 +48,7 @@ export const SEOSchema: React.FC<SEOSchemaProps> = ({ type, data }) => {
                     name: 'Recharge Travels',
                     image: `${baseUrl}/logo-v2.png`,
                     description: data.description,
-                    telephone: '+94-11-XXXXXXX', // Update with real phone
+                    telephone: '+94-77-772-1999',
                     email: 'info@rechargetravels.com',
                     address: {
                         '@type': 'PostalAddress',

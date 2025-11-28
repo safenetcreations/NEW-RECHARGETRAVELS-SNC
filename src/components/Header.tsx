@@ -6,6 +6,7 @@ import {
   Phone,
   Mail,
   User,
+  Users,
   LogOut,
   Crown,
   Home,
@@ -17,7 +18,8 @@ import {
   Star,
   MessageCircle,
   ChevronRight,
-  Info
+  Info,
+  Key
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { useAuth } from "@/hooks/useAuth"
@@ -39,6 +41,34 @@ type SecondaryLink = {
   href: string
   description: string
 }
+
+// Book Now items - displayed in their own section
+const bookNowItems: NavigationItem[] = [
+  {
+    name: "Hotels",
+    href: "/hotels",
+    description: "Luxury accommodations and boutique hotel bookings.",
+    icon: Home,
+    gradient: "from-orange-500/20 via-orange-500/5 to-transparent",
+    iconBg: "bg-orange-500/90"
+  },
+  {
+    name: "Find Drivers",
+    href: "/drivers",
+    description: "Browse verified drivers and guides by rating and language.",
+    icon: Users,
+    gradient: "from-cyan-500/20 via-cyan-500/5 to-transparent",
+    iconBg: "bg-cyan-500/90"
+  },
+  {
+    name: "Vehicle Rental",
+    href: "/vehicle-rental",
+    description: "Rent verified cars, SUVs, and vans across Sri Lanka.",
+    icon: Key,
+    gradient: "from-indigo-500/20 via-indigo-500/5 to-transparent",
+    iconBg: "bg-indigo-500/90"
+  }
+]
 
 const navigationItems: NavigationItem[] = [
   {
@@ -80,14 +110,6 @@ const navigationItems: NavigationItem[] = [
     icon: Car,
     gradient: "from-blue-600/20 via-blue-600/5 to-transparent",
     iconBg: "bg-blue-600/90"
-  },
-  {
-    name: "Hotels",
-    href: "/hotels",
-    description: "Luxury accommodations and boutique hotel bookings.",
-    icon: Home,
-    gradient: "from-orange-500/20 via-orange-500/5 to-transparent",
-    iconBg: "bg-orange-500/90"
   },
   {
     name: "Experiences",
@@ -367,6 +389,41 @@ const Header = () => {
                 </p>
                 <div className="mt-4 space-y-4">
                   {navigationItems.map((item) => {
+                    const Icon = item.icon
+                    return (
+                      <Link
+                        key={item.name}
+                        to={item.href}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className={`relative block overflow-hidden rounded-2xl border border-slate-200/70 bg-white shadow-[0_18px_36px_rgba(15,23,42,0.08)] transition-transform hover:-translate-y-1 ${isActiveRoute(item.href) ? "ring-2 ring-slate-900/20" : ""
+                          }`}
+                      >
+                        <div
+                          className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${item.gradient}`}
+                        />
+                        <div className="relative flex items-start gap-4 p-4">
+                          <div
+                            className={`flex h-12 w-12 items-center justify-center rounded-2xl ${item.iconBg} text-white shadow-lg`}
+                          >
+                            <Icon className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <p className="text-base font-semibold text-slate-900">{item.name}</p>
+                            <p className="mt-1 text-sm text-slate-600">{item.description}</p>
+                          </div>
+                        </div>
+                      </Link>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+                  Book Now
+                </p>
+                <div className="mt-4 space-y-4">
+                  {bookNowItems.map((item) => {
                     const Icon = item.icon
                     return (
                       <Link

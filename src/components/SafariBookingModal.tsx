@@ -172,7 +172,7 @@ const SafariBookingModal = ({
                   required
                   value={formData.phone}
                   onChange={handleInputChange}
-                  placeholder="+94 77 123 4567"
+                  placeholder="+94 77 772 1999"
                 />
               </div>
 

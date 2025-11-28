@@ -499,7 +499,8 @@ const emailTemplates = {
       </head>
       <body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
         <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
-          <div style="background: linear-gradient(135deg, #0066cc 0%, #004d99 100%); padding: 30px; text-align: center;">
+          <div style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); padding: 30px; text-align: center;">
+            <img src="https://www.rechargetravels.com/logo-v2.png" alt="Recharge Travels" style="height: 40px; margin-bottom: 10px;">
             <h1 style="color: #ffffff; margin: 0; font-size: 24px;">New From Our Blog 📖</h1>
           </div>
 
@@ -521,8 +522,8 @@ const emailTemplates = {
             </p>
 
             <div style="text-align: center; margin: 35px 0;">
-              <a href="https://recharge-travels-73e76.web.app/blog/${data.slug || data.id}"
-                 style="display: inline-block; background: linear-gradient(135deg, #0066cc 0%, #004d99 100%); color: #ffffff;
+              <a href="https://www.rechargetravels.com/blog/${data.slug || data.id}"
+                 style="display: inline-block; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: #ffffff;
                         text-decoration: none; padding: 14px 35px; border-radius: 30px; font-weight: bold; font-size: 15px;">
                 Read Full Article
               </a>
@@ -532,14 +533,14 @@ const emailTemplates = {
           <div style="background-color: #333; padding: 20px 30px; text-align: center;">
             <p style="color: #999; margin: 0; font-size: 11px;">
               You received this because you subscribed to blog updates.<br>
-              <a href="https://recharge-travels-73e76.web.app/unsubscribe?email=${data.email}" style="color: #0066cc;">Unsubscribe</a>
+              <a href="https://www.rechargetravels.com/unsubscribe?email=${data.email}" style="color: #f97316;">Unsubscribe</a>
             </p>
           </div>
         </div>
       </body>
       </html>
     `,
-    text: `New Blog Post: ${data.title}\n\nBy ${data.author}\n\n${data.excerpt || data.content?.substring(0, 200)}...\n\nRead more: https://recharge-travels-73e76.web.app/blog/${data.slug || data.id}`
+    text: `New Blog Post: ${data.title}\n\nBy ${data.author}\n\n${data.excerpt || data.content?.substring(0, 200)}...\n\nRead more: https://www.rechargetravels.com/blog/${data.slug || data.id}`
   }),
 
   // Driver Onboarding Templates
@@ -834,17 +835,18 @@ const emailTemplates = {
       </head>
       <body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
         <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
-          <div style="background: linear-gradient(135deg, #0066cc 0%, #004d99 100%); padding: 30px; text-align: center;">
-            <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Trip Reminder!</h1>
+          <div style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); padding: 30px; text-align: center;">
+            <img src="https://www.rechargetravels.com/logo-v2.png" alt="Recharge Travels" style="height: 50px; margin-bottom: 10px;">
+            <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Trip Reminder! 🎒</h1>
           </div>
 
           <div style="padding: 40px 30px;">
-            <h2 style="color: #333; margin-top: 0;">Hi ${data.customerName}! 🎒</h2>
+            <h2 style="color: #333; margin-top: 0;">Hi ${data.customerName}! 🌴</h2>
             <p style="color: #666; font-size: 16px; line-height: 1.6;">
-              Your adventure to <strong>${data.destination}</strong> is just <strong>${data.daysUntil} days away</strong>!
+              Your adventure to <strong style="color: #f97316;">${data.destination}</strong> is just <strong style="color: #f97316;">${data.daysUntil} days away</strong>!
             </p>
 
-            <div style="background-color: #f8f9fa; border-radius: 12px; padding: 25px; margin: 25px 0; border-left: 4px solid #0066cc;">
+            <div style="background-color: #fff7ed; border-radius: 12px; padding: 25px; margin: 25px 0; border-left: 4px solid #f97316;">
               <h3 style="color: #333; margin-top: 0;">📋 Quick Checklist</h3>
               <ul style="color: #666; padding-left: 20px; line-height: 2;">
                 <li>Valid passport (check expiry date)</li>
@@ -858,18 +860,38 @@ const emailTemplates = {
             <p style="color: #666; font-size: 16px; line-height: 1.6;">
               If you have any questions, don't hesitate to reach out to us!
             </p>
+
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="https://www.rechargetravels.com/my-bookings"
+                 style="display: inline-block; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: #ffffff;
+                        text-decoration: none; padding: 15px 35px; border-radius: 30px; font-weight: bold; font-size: 16px;">
+                View My Booking
+              </a>
+            </div>
+          </div>
+
+          <!-- Contact Info -->
+          <div style="background-color: #fff7ed; padding: 25px 30px; text-align: center;">
+            <p style="color: #666; margin: 0 0 10px; font-size: 14px;">Need to make changes?</p>
+            <p style="color: #333; margin: 0;">
+              📧 <a href="mailto:info@rechargetravels.com" style="color: #f97316; text-decoration: none;">info@rechargetravels.com</a>
+            </p>
+            <p style="color: #333; margin: 10px 0 0;">
+              <a href="https://wa.me/94777721999" style="color: #25D366; text-decoration: none;">📱 WhatsApp: +94 77 772 1999</a>
+            </p>
           </div>
 
           <div style="background-color: #333; padding: 20px 30px; text-align: center;">
             <p style="color: #999; margin: 0; font-size: 12px;">
-              © ${new Date().getFullYear()} Recharge Travels. All rights reserved.
+              © ${new Date().getFullYear()} Recharge Travels. All rights reserved.<br>
+              <a href="https://www.rechargetravels.com" style="color: #f97316; text-decoration: none;">www.rechargetravels.com</a>
             </p>
           </div>
         </div>
       </body>
       </html>
     `,
-    text: `Trip Reminder! Your adventure to ${data.destination} is ${data.daysUntil} days away!`
+    text: `Trip Reminder! Your adventure to ${data.destination} is ${data.daysUntil} days away!\n\nContact: info@rechargetravels.com | WhatsApp: +94 77 772 1999`
   }),
 
   // ==========================================

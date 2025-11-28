@@ -58,6 +58,8 @@ import {
   GroupTransportBenefitFormData,
   GroupTransportSettings,
   GroupTransportSettingsFormData,
+  HomepageSettings,
+  HomepageSettingsFormData,
 } from '@/types/cms';
 
 // ==========================================
@@ -1275,6 +1277,43 @@ export const groupTransportSettingsService = {
   },
 };
 
+// ==========================================
+// Homepage Settings CRUD Operations
+// ==========================================
+
+export const homepageSettingsService = {
+  async getActive(): Promise<HomepageSettings | null> {
+    try {
+      const docRef = doc(db, 'page-content', 'homepage-settings');
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        return { id: docSnap.id, ...docSnap.data() } as HomepageSettings;
+      }
+      return null;
+    } catch (error) {
+      console.error('Error fetching homepage settings:', error);
+      throw error;
+    }
+  },
+
+  async update(data: Partial<HomepageSettingsFormData>): Promise<CMSResponse<HomepageSettings>> {
+    try {
+      const docRef = doc(db, 'page-content', 'homepage-settings');
+      const timestamp = Timestamp.now();
+      const updateData = {
+        ...data,
+        updatedAt: timestamp,
+      };
+      await setDoc(docRef, updateData, { merge: true });
+      const updated = await this.getActive();
+      return { success: true, data: updated || undefined };
+    } catch (error) {
+      console.error('Error updating homepage settings:', error);
+      return { success: false, error: (error as Error).message };
+    }
+  },
+};
+
 // Export all services
 export const cmsService = {
   heroSlides: heroSlidesService,
@@ -1291,4 +1330,5 @@ export const cmsService = {
   groupTransportFeatures: groupTransportFeaturesService,
   groupTransportBenefits: groupTransportBenefitsService,
   groupTransportSettings: groupTransportSettingsService,
+  homepageSettings: homepageSettingsService,
 };

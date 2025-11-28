@@ -34,7 +34,7 @@ const mockVehicle = {
   id: '1',
   ownerId: 'owner1',
   ownerName: 'Nuwan Perera',
-  ownerPhone: '+94 77 123 4567',
+  ownerPhone: '+94 77 772 1999',
   ownerRating: 4.9,
   ownerBookings: 145,
   registrationNumber: 'CAB-1234',

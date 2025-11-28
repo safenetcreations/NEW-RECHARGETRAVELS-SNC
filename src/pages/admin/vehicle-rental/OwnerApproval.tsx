@@ -129,8 +129,8 @@ const mockOwners: OwnerSubmission[] = [
     firstName: 'Nuwan',
     lastName: 'Perera',
     email: 'nuwan.perera@email.com',
-    phone: '+94 77 123 4567',
-    whatsapp: '+94 77 123 4567',
+    phone: '+94 77 772 1999',
+    whatsapp: '+94 77 772 1999',
     profilePhoto: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200',
     address: {
       line1: '45 Galle Road',

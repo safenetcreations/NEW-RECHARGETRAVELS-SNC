@@ -32,7 +32,7 @@ const Contact = () => {
     <>
       <Helmet>
         <title>Contact Us - Recharge Travels Sri Lanka | Get Free Travel Quote</title>
-        <meta name="description" content="Contact Recharge Travels for expert Sri Lanka travel planning. Get free quotes, custom itineraries, and 24/7 support. Call +94 77 123 4567 or email us today." />
+        <meta name="description" content="Contact Recharge Travels for expert Sri Lanka travel planning. Get free quotes, custom itineraries, and 24/7 support. Call +94 77 772 1999 or email us today." />
         <meta name="keywords" content="contact recharge travels, sri lanka travel agency, book sri lanka tour, travel consultation, custom itinerary sri lanka" />
         <link rel="canonical" href="https://recharge-travels-73e76.web.app/contact" />
         <meta property="og:title" content="Contact Recharge Travels - Sri Lanka Tour Experts" />

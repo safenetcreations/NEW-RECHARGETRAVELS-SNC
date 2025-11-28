@@ -201,14 +201,14 @@ const DriverRegistration = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="phone">Phone Number *</Label>
-                    <Input {...form.register('phone')} placeholder="+94 77 123 4567" />
+                    <Input {...form.register('phone')} placeholder="+94 77 772 1999" />
                     {form.formState.errors.phone && (
                       <p className="text-sm text-red-500">{form.formState.errors.phone.message}</p>
                     )}
                   </div>
                   <div>
                     <Label htmlFor="whatsapp_number">WhatsApp Number *</Label>
-                    <Input {...form.register('whatsapp_number')} placeholder="+94 77 123 4567" />
+                    <Input {...form.register('whatsapp_number')} placeholder="+94 77 772 1999" />
                     {form.formState.errors.whatsapp_number && (
                       <p className="text-sm text-red-500">{form.formState.errors.whatsapp_number.message}</p>
                     )}

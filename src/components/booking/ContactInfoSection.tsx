@@ -62,7 +62,7 @@ const ContactInfoSection = ({ formData, onInputChange, user, type }: ContactInfo
             value={formData.phone}
             onChange={onInputChange}
             required
-            placeholder="+94 77 123 4567"
+            placeholder="+94 77 772 1999"
           />
         </div>
         <div>

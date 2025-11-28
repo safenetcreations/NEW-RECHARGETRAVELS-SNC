@@ -33,7 +33,6 @@ const aboutCategories = {
   planning: {
     title: "Plan & Book Your Trip",
     items: [
-      aboutItemsByHref['/vehicle-rental'],
       aboutItemsByHref['/travel-guide'],
       aboutItemsByHref['/book-now'],
       aboutItemsByHref['/faq'],
@@ -47,10 +46,10 @@ const aboutCategories = {
     ].filter(Boolean)
   },
   drivers: {
-    title: "Drivers & Partners",
+    title: "Partners",
     items: [
-      aboutItemsByHref['/drivers'],
       aboutItemsByHref['/join-with-us'],
+      aboutItemsByHref['/vehicle-rental/owner'],
       aboutItemsByHref['/vendor/register'],
     ].filter(Boolean)
   }

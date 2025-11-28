@@ -65,10 +65,6 @@ const TripAdvisorTours = () => {
   const lowPrice = prices.length ? Math.min(...prices) : 0
   const highPrice = prices.length ? Math.max(...prices) : 0
 
-  if (isLoading) {
-    return <LoadingSpinner fullScreen message="Loading TripAdvisor tours..." />
-  }
-
   const filteredTours = useMemo(() => {
     const range = priceRanges[priceRange]
     const filtered = baseTours.filter((tour) => {
@@ -83,6 +79,10 @@ const TripAdvisorTours = () => {
 
     return sortTourList(filtered, sortBy)
   }, [baseTours, priceRange, region, search, sortBy])
+
+  if (isLoading) {
+    return <LoadingSpinner fullScreen message="Loading TripAdvisor tours..." />
+  }
 
   return (
     <>

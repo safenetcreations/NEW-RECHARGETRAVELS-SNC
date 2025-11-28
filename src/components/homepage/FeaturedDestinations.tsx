@@ -106,25 +106,35 @@ const FeaturedDestinations = () => {
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
 
-  // Fetch destinations from CMS
+  const [backgroundImage, setBackgroundImage] = useState<string>(
+    'https://images.unsplash.com/photo-1588598198321-9735fd52045b?w=1920&auto=format&fit=crop&q=80'
+  );
+
+  // Fetch destinations and settings from CMS
   useEffect(() => {
-    const fetchDestinations = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const data = await cmsService.featuredDestinations.getAll();
-        if (data && data.length > 0) {
-          // Shuffle the CMS data and override initial fallback
-          setDestinations(shuffleArray(data as FeaturedDestination[]));
+
+        // Fetch destinations
+        const destinationsData = await cmsService.featuredDestinations.getAll();
+        if (destinationsData && destinationsData.length > 0) {
+          setDestinations(shuffleArray(destinationsData as FeaturedDestination[]));
+        }
+
+        // Fetch settings
+        const settings = await cmsService.homepageSettings.getActive();
+        if (settings?.featuredDestinationsBackgroundImage) {
+          setBackgroundImage(settings.featuredDestinationsBackgroundImage);
         }
       } catch (error) {
-        console.error('Error fetching featured destinations:', error);
-        // Keep already-seeded fallback destinations on error
+        console.error('Error fetching CMS data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchDestinations();
+    fetchData();
   }, []);
 
   // Pagination
@@ -162,8 +172,7 @@ const FeaturedDestinations = () => {
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage:
-              "url('https://images.unsplash.com/photo-1588598198321-9735fd52045b?w=1920&auto=format&fit=crop&q=80')",
+            backgroundImage: `url('${backgroundImage}')`,
           }}
         />
         {/* Dark overlay for text readability */}
@@ -188,7 +197,7 @@ const FeaturedDestinations = () => {
 
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-black mb-6">
             <span className="block text-white mb-2 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Explore Sri Lanka</span>
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] pb-2">Featured Destinations</span>
+            <span className="block text-yellow-300 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Featured Destinations</span>
           </h2>
 
           <p className="text-lg md:text-xl text-white max-w-3xl mx-auto font-medium" style={{ textShadow: '1px 1px 4px #000' }}>
@@ -309,8 +318,8 @@ const FeaturedDestinations = () => {
                   key={idx}
                   onClick={() => setCurrentPage(idx)}
                   className={`h-3 rounded-full transition-all duration-300 ${currentPage === idx
-                      ? 'w-10 bg-orange-400'
-                      : 'w-3 bg-white/30 hover:bg-white/50'
+                    ? 'w-10 bg-orange-400'
+                    : 'w-3 bg-white/30 hover:bg-white/50'
                     }`}
                   aria-label={`Go to page ${idx + 1}`}
                 />

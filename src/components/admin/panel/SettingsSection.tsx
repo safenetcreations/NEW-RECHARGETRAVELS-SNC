@@ -370,7 +370,7 @@ const SettingsSection: React.FC = () => {
                   <Input
                     value={settings.contact.phone}
                     onChange={(e) => updateSettings('contact', 'phone', e.target.value)}
-                    placeholder="+94 11 234 5678"
+                    placeholder="+94 77 772 1999"
                   />
                 </div>
               </div>
@@ -391,7 +391,7 @@ const SettingsSection: React.FC = () => {
                   <Input
                     value={settings.contact.whatsapp}
                     onChange={(e) => updateSettings('contact', 'whatsapp', e.target.value)}
-                    placeholder="+94 77 123 4567"
+                    placeholder="+94 77 772 1999"
                   />
                 </div>
                 <div>

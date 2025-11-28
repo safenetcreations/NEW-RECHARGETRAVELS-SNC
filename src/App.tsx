@@ -154,6 +154,7 @@ const Belihuloya = lazy(() => import('@/pages/scenic/BelihuloyaRiver'));
 const RavanaFalls = lazy(() => import('@/pages/scenic/RavanaFalls'));
 const NineArchBridge = lazy(() => import('@/pages/scenic/NineArchBridge'));
 const Hotels = lazy(() => import('@/pages/Hotels'));
+const ListProperty = lazy(() => import('@/pages/hotels/ListProperty'));
 const HotelDetail = lazy(() => import('@/pages/HotelDetail'));
 const ContentUpdater = lazy(() => import('@/pages/ContentUpdater'));
 const BookNow = lazy(() => import('@/pages/BookNow'));
@@ -170,6 +171,7 @@ const VehicleBookingConfirmation = lazy(() => import('@/pages/vehicle-rental/Veh
 const VehicleAvailabilityCalendar = lazy(() => import('@/pages/vehicle-rental/VehicleAvailabilityCalendar'));
 const OwnerDashboard = lazy(() => import('@/pages/vehicle-rental/OwnerDashboard'));
 const OwnerRegister = lazy(() => import('@/pages/vehicle-rental/OwnerRegister'));
+const OwnerLanding = lazy(() => import('@/pages/vehicle-rental/OwnerLanding'));
 const OwnerDocuments = lazy(() => import('@/pages/vehicle-rental/OwnerDocuments'));
 const MyBookings = lazy(() => import('@/pages/vehicle-rental/MyBookings'));
 const ListVehicle = lazy(() => import('@/pages/vehicle-rental/ListVehicle'));
@@ -344,11 +346,12 @@ function App() {
                 <Route path="/vehicle-rental/booking-confirmation/:bookingId" element={<VehicleBookingConfirmation />} />
                 <Route path="/vehicle-rental/availability/:vehicleId" element={<VehicleAvailabilityCalendar />} />
                 <Route path="/vehicle-rental/owner-dashboard" element={<OwnerDashboard />} />
+                <Route path="/vehicle-rental/owner" element={<OwnerLanding />} />
                 <Route path="/vehicle-rental/owner/register" element={<OwnerRegister />} />
                 <Route path="/vehicle-rental/owner/documents" element={<OwnerDocuments />} />
                 <Route path="/vehicle-rental/my-bookings" element={<MyBookings />} />
                 <Route path="/vehicle-rental/list-vehicle" element={<ListVehicle />} />
-                
+
                 {/* Phase 2: Payment & Payout System */}
                 <Route path="/vehicle-rental/payment/:bookingId" element={<VehiclePayment />} />
                 <Route path="/vehicle-rental/owner/payouts" element={<OwnerPayouts />} />

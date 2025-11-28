@@ -673,8 +673,8 @@ const VehiclePayment: React.FC = () => {
               {/* Need Help */}
               <div className="text-center">
                 <p className="text-sm text-gray-600 mb-2">Need help with your booking?</p>
-                <a href="tel:+94112345678" className="text-primary font-medium text-sm hover:underline">
-                  +94 11 234 5678
+                <a href="https://wa.me/94777721999" target="_blank" rel="noopener noreferrer" className="text-primary font-medium text-sm hover:underline">
+                  +94 77 772 1999
                 </a>
               </div>
             </div>

@@ -13,9 +13,10 @@ import BookingConfirmation from '@/components/hotels/BookingConfirmation'
 import BookingSuccess from '@/components/hotels/BookingSuccess'
 import HotelAdminPanel from '@/components/hotels/HotelAdminPanel'
 import { Button } from '@/components/ui/button'
-import { Search, Sparkles, MapPin, Calendar, Users, Star, Crown, Settings } from 'lucide-react'
+import { Search, Sparkles, MapPin, Calendar, Users, Star, Crown, Settings, Building } from 'lucide-react'
 import { Hotel } from '@/types/hotel'
 import { googlePlacesService } from '@/services/googlePlacesService'
+import { firebaseHotelService } from '@/services/firebaseHotelService'
 
 const Hotels = () => {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -503,9 +504,47 @@ const Hotels = () => {
         }],
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
+      },
+      // Vacation Homes
+      {
+        id: '16',
+        name: 'Serene Lake House',
+        description: 'A beautiful vacation home overlooking Koggala Lake, perfect for families.',
+        star_rating: 4,
+        hotel_type: 'vacation_home',
+        base_price_per_night: 200,
+        address: 'Koggala Lake, Galle, Sri Lanka',
+        city: { id: '8', name: 'Galle', country: 'Sri Lanka' },
+        amenities: ['Lake View', 'Private Garden', 'Kitchen', 'BBQ Facilities', 'WiFi'],
+        is_active: true,
+        average_rating: 4.8,
+        review_count: 45,
+        images: [{
+          id: '16',
+          hotel_id: '16',
+          image_url: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b91d?w=800&h=600&fit=crop',
+          is_primary: true,
+          sort_order: 1
+        }],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       }
     ]
-    setHotels(mockHotels)
+    const fetchHotels = async () => {
+      try {
+        const firebaseData = await firebaseHotelService.getAllHotels()
+        if (firebaseData && firebaseData.length > 0) {
+          setHotels(firebaseData)
+        } else {
+          setHotels(mockHotels)
+        }
+      } catch (error) {
+        console.error('Error fetching hotels from Firebase:', error)
+        setHotels(mockHotels)
+      }
+    }
+
+    fetchHotels()
   }, [])
 
   const handleHotelSelect = (hotel: Hotel) => {
@@ -738,6 +777,41 @@ const Hotels = () => {
               </div>
             </div>
 
+            {/* Quick Select by Property Type */}
+            <div className="flex justify-center mb-12">
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 relative z-20">
+                <h3 className="text-white text-lg font-semibold mb-4 text-center">Browse by Property Type</h3>
+                <div className="flex flex-wrap gap-4 justify-center">
+                  {[
+                    { type: 'vacation_home', label: 'Vacation Homes', icon: Building },
+                    { type: 'apartment', label: 'Apartments', icon: Building },
+                    { type: 'villa', label: 'Villas', icon: Crown },
+                    { type: 'luxury_resort', label: 'Resorts', icon: Sparkles }
+                  ].map((item) => (
+                    <button
+                      key={item.type}
+                      onClick={() => {
+                        const isSelected = searchFilters.hotelType.includes(item.type);
+                        setSearchFilters(prev => ({
+                          ...prev,
+                          hotelType: isSelected
+                            ? prev.hotelType.filter(t => t !== item.type)
+                            : [...prev.hotelType, item.type]
+                        }))
+                      }}
+                      className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-300 ${searchFilters.hotelType.includes(item.type)
+                        ? 'bg-white text-teal-800 shadow-lg transform scale-105'
+                        : 'bg-white/20 text-white hover:bg-white/30 hover:scale-105'
+                        }`}
+                    >
+                      <item.icon className="h-4 w-4" />
+                      <span className="font-semibold">{item.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
             {/* Enhanced Search Bar */}
             <div className="max-w-6xl mx-auto">
               <div className="bg-white rounded-3xl shadow-2xl p-8 backdrop-blur-sm relative z-20">
@@ -775,7 +849,7 @@ const Hotels = () => {
                             setShowHeroSuggestions(false)
                           }
                         }}
-                        className="w-full px-4 py-4 pl-12 text-lg border-2 border-gray-200 rounded-xl focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all duration-300"
+                        className="w-full px-4 py-4 pl-12 text-lg text-gray-900 bg-white border-2 border-gray-200 rounded-xl focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all duration-300"
                       />
                       <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                       {heroSearch.location && (

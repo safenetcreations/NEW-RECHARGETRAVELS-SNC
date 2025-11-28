@@ -418,10 +418,10 @@ const CulturalHeritageTours = () => {
                     <MapPin className="text-[#C65D00]" size={20} />
                     <strong>Office:</strong> Galle Road, Colombo, Sri Lanka
                   </p>
-                  <p className="flex items-center justify-center gap-2">
+                  <a href="https://wa.me/94777721999" className="flex items-center justify-center gap-2 hover:text-[#25D366]">
                     <Phone className="text-[#C65D00]" size={20} />
-                    <strong>Phone:</strong> +94 11 234 5678
-                  </p>
+                    <strong>Phone/WhatsApp:</strong> +94 77 772 1999
+                  </a>
                   <p className="flex items-center justify-center gap-2">
                     <Mail className="text-[#C65D00]" size={20} />
                     <strong>Email:</strong> info@rechargetravels.com

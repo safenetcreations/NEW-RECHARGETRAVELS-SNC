@@ -22,7 +22,7 @@ const HomepageSchema = () => {
     },
     "contactPoint": {
       "@type": "ContactPoint",
-      "telephone": "+94-11-234-5678",
+      "telephone": "+94-77-772-1999",
       "contactType": "customer service",
       "areaServed": "LK",
       "availableLanguage": ["English", "Sinhala", "Tamil"]

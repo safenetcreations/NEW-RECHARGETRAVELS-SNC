@@ -102,7 +102,7 @@ const mockBookings: VehicleBooking[] = [
     vehicleType: 'sedan',
     registrationNumber: 'CAB-1234',
     ownerName: 'Nuwan Perera',
-    ownerPhone: '+94 77 123 4567',
+    ownerPhone: '+94 77 772 1999',
     ownerRating: 4.8,
     startDate: new Date('2025-12-01'),
     endDate: new Date('2025-12-05'),

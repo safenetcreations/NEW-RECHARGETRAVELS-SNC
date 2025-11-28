@@ -218,7 +218,7 @@ const PhotographyBookingWidget = ({ tour }: PhotographyBookingWidgetProps) => {
         {/* Contact Info */}
         <div className="text-center pt-4 border-t border-border">
           <p className="text-sm text-muted-foreground mb-2">Need help booking?</p>
-          <p className="text-sm font-medium text-foreground">Call +94 77 123 4567</p>
+          <p className="text-sm font-medium text-foreground">Call +94 77 772 1999</p>
         </div>
       </CardContent>
     </Card>
