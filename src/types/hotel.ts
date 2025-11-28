@@ -41,6 +41,14 @@ export interface Hotel {
   hotel_style?: HotelStyle
   hotel_category?: HotelCategory
   rooms?: HotelRoom[]
+  vendorId?: string
+  hostProfile?: {
+    name: string
+    avatar?: string
+    responseRate?: number
+    joinedDate?: string
+    isVerified?: boolean
+  }
   room_types?: RoomType[]
 }
 

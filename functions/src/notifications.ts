@@ -14,7 +14,7 @@ if (SENDGRID_API_KEY && SENDGRID_API_KEY.startsWith('SG.')) {
 }
 
 // Company email configuration
-const FROM_EMAIL = 'noreply@rechargetravels.com';
+const FROM_EMAIL = 'info@rechargetravels.com';
 const FROM_NAME = 'Recharge Travels';
 const ADMIN_EMAIL = 'nanthan77@gmail.com';
 const REPLY_TO_EMAIL = 'info@rechargetravels.com';

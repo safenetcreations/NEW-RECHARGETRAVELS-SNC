@@ -174,6 +174,12 @@ const OwnerDocuments = lazy(() => import('@/pages/vehicle-rental/OwnerDocuments'
 const MyBookings = lazy(() => import('@/pages/vehicle-rental/MyBookings'));
 const ListVehicle = lazy(() => import('@/pages/vehicle-rental/ListVehicle'));
 
+// Phase 2: Payment & Payout System
+const VehiclePayment = lazy(() => import('@/pages/vehicle-rental/VehiclePayment'));
+const OwnerPayouts = lazy(() => import('@/pages/vehicle-rental/OwnerPayouts'));
+const VehicleInvoice = lazy(() => import('@/pages/vehicle-rental/VehicleInvoice'));
+const SecurityDepositManagement = lazy(() => import('@/pages/vehicle-rental/SecurityDepositManagement'));
+
 // Vehicle Rental Admin Pages
 const VehicleApproval = lazy(() => import('@/pages/admin/vehicle-rental/VehicleApproval'));
 const OwnerApproval = lazy(() => import('@/pages/admin/vehicle-rental/OwnerApproval'));
@@ -326,6 +332,12 @@ function App() {
                 <Route path="/vehicle-rental/owner/documents" element={<OwnerDocuments />} />
                 <Route path="/vehicle-rental/my-bookings" element={<MyBookings />} />
                 <Route path="/vehicle-rental/list-vehicle" element={<ListVehicle />} />
+                
+                {/* Phase 2: Payment & Payout System */}
+                <Route path="/vehicle-rental/payment/:bookingId" element={<VehiclePayment />} />
+                <Route path="/vehicle-rental/owner/payouts" element={<OwnerPayouts />} />
+                <Route path="/vehicle-rental/invoice/:bookingId" element={<VehicleInvoice />} />
+                <Route path="/vehicle-rental/owner/deposits" element={<SecurityDepositManagement />} />
 
                 {/* Vendor Platform */}
                 <Route path="/vendor/register" element={withSiteChrome(VendorRegistration)} />

@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet-async'
 import {
   Star, MapPin, Wifi, Car, Utensils, Waves, Dumbbell, Shield,
   Award, Heart, Share2, ChevronLeft, ChevronRight, Users, Calendar,
-  CheckCircle, X, Phone, Mail, Globe, Clock
+  CheckCircle, X, Phone, Mail, Globe, Clock, User, Check
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -88,9 +88,29 @@ const HotelDetailPage: React.FC<HotelDetailPageProps> = ({ hotel, onBookNow }) =
   ]
 
   const amenities = hotel.amenities || [
-    'Free WiFi', 'Swimming Pool', 'Fitness Center', 'Restaurant',
     'Room Service', '24/7 Front Desk', 'Airport Shuttle', 'Spa'
   ]
+
+  const host = hotel.hostProfile || {
+    name: 'Recharge Partner',
+    avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop',
+    responseRate: 98,
+    joinedDate: '2023',
+    isVerified: true
+  }
+
+  const [selectedTours, setSelectedTours] = useState<string[]>([])
+
+  const suggestedTours = [
+    { id: 't1', name: 'City Tour', price: 45 },
+    { id: 't2', name: 'Airport Transfer', price: 30 }
+  ]
+
+  const toggleTour = (tourId: string) => {
+    setSelectedTours(prev =>
+      prev.includes(tourId) ? prev.filter(id => id !== tourId) : [...prev, tourId]
+    )
+  }
 
   const getAmenityIcon = (amenity: string) => {
     const amenityLower = amenity.toLowerCase()
@@ -114,7 +134,12 @@ const HotelDetailPage: React.FC<HotelDetailPageProps> = ({ hotel, onBookNow }) =
   const calculateTotalPrice = () => {
     if (!selectedRoom || !checkIn || !checkOut) return 0
     const nights = Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24))
-    return selectedRoom.discountedPrice * nights * guests.rooms
+    const roomTotal = selectedRoom.discountedPrice * nights * guests.rooms
+    const toursTotal = selectedTours.reduce((acc, tourId) => {
+      const tour = suggestedTours.find(t => t.id === tourId)
+      return acc + (tour ? tour.price * guests.adults : 0) // Assuming tour price is per adult
+    }, 0)
+    return roomTotal + toursTotal
   }
 
   return (
@@ -170,9 +195,8 @@ const HotelDetailPage: React.FC<HotelDetailPageProps> = ({ hotel, onBookNow }) =
                 <button
                   key={index}
                   onClick={() => setSelectedImageIndex(index)}
-                  className={`w-2 h-2 rounded-full transition-colors ${
-                    index === selectedImageIndex ? 'bg-white' : 'bg-white/50'
-                  }`}
+                  className={`w-2 h-2 rounded-full transition-colors ${index === selectedImageIndex ? 'bg-white' : 'bg-white/50'
+                    }`}
                 />
               ))}
             </div>
@@ -201,9 +225,8 @@ const HotelDetailPage: React.FC<HotelDetailPageProps> = ({ hotel, onBookNow }) =
                   <button
                     key={index}
                     onClick={() => setSelectedImageIndex(index)}
-                    className={`flex-shrink-0 w-20 h-16 rounded-lg overflow-hidden border-2 transition-colors ${
-                      index === selectedImageIndex ? 'border-blue-500' : 'border-gray-200'
-                    }`}
+                    className={`flex-shrink-0 w-20 h-16 rounded-lg overflow-hidden border-2 transition-colors ${index === selectedImageIndex ? 'border-blue-500' : 'border-gray-200'
+                      }`}
                   >
                     <img src={image} alt="" className="w-full h-full object-cover" />
                   </button>
@@ -277,6 +300,39 @@ const HotelDetailPage: React.FC<HotelDetailPageProps> = ({ hotel, onBookNow }) =
                 </CardContent>
               </Card>
 
+              {/* Meet Your Host */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <User className="h-5 w-5 mr-2" />
+                    Meet Your Host
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center space-x-4">
+                    <img
+                      src={host.avatar}
+                      alt={host.name}
+                      className="w-16 h-16 rounded-full object-cover border-2 border-gray-100"
+                    />
+                    <div>
+                      <div className="flex items-center">
+                        <h3 className="text-lg font-semibold mr-2">{host.name}</h3>
+                        {host.isVerified && (
+                          <Badge variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-100">
+                            <Check className="h-3 w-3 mr-1" /> Verified
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-gray-600 text-sm">Joined in {host.joinedDate} • {host.responseRate}% Response Rate</p>
+                    </div>
+                  </div>
+                  <div className="mt-4 p-4 bg-gray-50 rounded-lg text-sm text-gray-600">
+                    <p>"Hi! I'm dedicated to providing you with the best Sri Lankan hospitality experience. Feel free to ask me anything about the local area or the property."</p>
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* Room Types */}
               <Card>
                 <CardHeader>
@@ -286,11 +342,10 @@ const HotelDetailPage: React.FC<HotelDetailPageProps> = ({ hotel, onBookNow }) =
                   {mockRoomTypes.map((room) => (
                     <div
                       key={room.id}
-                      className={`border rounded-lg p-6 cursor-pointer transition-all ${
-                        selectedRoom?.id === room.id
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
+                      className={`border rounded-lg p-6 cursor-pointer transition-all ${selectedRoom?.id === room.id
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                        }`}
                       onClick={() => setSelectedRoom(room)}
                     >
                       <div className="flex flex-col md:flex-row gap-6">
@@ -459,6 +514,26 @@ const HotelDetailPage: React.FC<HotelDetailPageProps> = ({ hotel, onBookNow }) =
                     </div>
                   )}
 
+                  {/* Tour Add-ons */}
+                  {selectedRoom && (
+                    <div className="border-t pt-4">
+                      <h4 className="font-medium text-sm mb-3">Enhance your stay</h4>
+                      <div className="space-y-2">
+                        {suggestedTours.map(tour => (
+                          <div key={tour.id} className="flex items-center justify-between p-2 border rounded-lg hover:bg-gray-50 cursor-pointer" onClick={() => toggleTour(tour.id)}>
+                            <div className="flex items-center">
+                              <div className={`w-4 h-4 rounded border mr-3 flex items-center justify-center ${selectedTours.includes(tour.id) ? 'bg-blue-600 border-blue-600' : 'border-gray-300'}`}>
+                                {selectedTours.includes(tour.id) && <Check className="w-3 h-3 text-white" />}
+                              </div>
+                              <span className="text-sm">{tour.name}</span>
+                            </div>
+                            <span className="text-sm font-medium">+${tour.price}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Price Summary */}
                   {checkIn && checkOut && selectedRoom && (
                     <div className="border-t pt-4">
@@ -519,7 +594,7 @@ const HotelDetailPage: React.FC<HotelDetailPageProps> = ({ hotel, onBookNow }) =
             </div>
           </div>
         </div>
-      </div>
+      </div >
 
       <Footer />
 

@@ -30,6 +30,8 @@ export {
 // Import Google Places API handler
 export { googlePlacesApiHandler } from './google-places-api-handler';
 
+export { getTripAdvisorTours } from './tripadvisor-tours';
+
 // Import bulk operations
 export {
   bulkImportHotels,
