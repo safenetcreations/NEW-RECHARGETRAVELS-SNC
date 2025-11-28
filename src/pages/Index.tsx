@@ -7,6 +7,7 @@ import LuxuryHeroSection from "@/components/homepage/LuxuryHeroSection";
 // import ModernHeroSection from "@/components/homepage/ModernHeroSection";
 import FeaturedDestinations from "@/components/homepage/FeaturedDestinations";
 import LuxuryExperiences from "@/components/homepage/LuxuryExperiences";
+import TripAdvisorHighlights from "@/components/homepage/TripAdvisorHighlights";
 // import EnhancedLuxuryExperiences from "@/components/homepage/EnhancedLuxuryExperiences";
 // import TravelPackages from "@/components/homepage/TravelPackages"; // Removed - Best Value Deals section
 import EcotourismPromo from "@/components/homepage/EcotourismPromo";
@@ -108,6 +109,9 @@ const Index = () => {
 
         {/* Featured Destinations */}
         <FeaturedDestinations />
+
+        {/* TripAdvisor tours showcase */}
+        <TripAdvisorHighlights />
 
         {/* Luxury Experiences */}
         <LuxuryExperiences />

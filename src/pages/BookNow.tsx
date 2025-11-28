@@ -15,8 +15,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 import SEOHead from '@/components/cms/SEOHead';
-import { fetchDrivers } from '@/services/driverDirectoryService';
 import { assignDriverAndBlock } from '@/services/driverBookingService';
+import DriverSelection from '@/components/booking/DriverSelection';
 import { auth } from '@/lib/firebase';
 import {
   getBookNowHeroSlides,
@@ -49,7 +49,6 @@ const BookNow = () => {
     children: '0',
     message: ''
   });
-  const [drivers, setDrivers] = useState<{ id: string; full_name?: string; tier?: string }[]>([])
   const [selectedDriver, setSelectedDriver] = useState<string>('')
 
   const tabs = [
@@ -109,18 +108,6 @@ const BookNow = () => {
     }, 6000);
     return () => clearInterval(interval);
   }, [heroSlides.length]);
-
-  useEffect(() => {
-    const loadDrivers = async () => {
-      try {
-        const list = await fetchDrivers({ minRating: 4 })
-        setDrivers(list)
-      } catch (err) {
-        console.error('Failed to load drivers', err)
-      }
-    }
-    loadDrivers()
-  }, [])
 
   const goToSlide = (index: number) => {
     setCurrentSlideIndex(index);
@@ -434,21 +421,16 @@ const BookNow = () => {
                             />
                           </div>
                         </div>
-                        <div className="space-y-2">
-                          <Label className="text-sm font-medium text-gray-700">Preferred Driver (optional)</Label>
-                          <select
-                            className="w-full h-12 rounded-xl border border-gray-200 bg-gray-50 px-3"
-                            value={selectedDriver}
-                            onChange={(e) => setSelectedDriver(e.target.value)}
-                          >
-                            <option value="">No preference (best match)</option>
-                            {drivers.map((d) => (
-                              <option key={d.id} value={d.id}>
-                                {d.full_name || 'Driver'} {d.tier ? `• ${d.tier.replace(/_/g, ' ')}` : ''}
-                              </option>
-                            ))}
-                          </select>
-                          <p className="text-xs text-gray-500">If you are logged in, we’ll hold this driver’s calendar while we confirm.</p>
+                        {/* Enhanced Driver Selection */}
+                        <div className="border-t pt-4">
+                          <DriverSelection
+                            selectedDriverId={selectedDriver}
+                            onSelect={setSelectedDriver}
+                            tripDate={formData.startDate}
+                          />
+                          <p className="text-xs text-gray-500 mt-2">
+                            If you are logged in, we'll hold this driver's calendar while we confirm your booking.
+                          </p>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">

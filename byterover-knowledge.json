@@ -166,5 +166,34 @@
       "src/lib/sitemap-generator.ts",
       "public/robots.txt"
     ]
+  },
+  {
+    "timestamp": "2025-11-28T06:02:20Z",
+    "summary": "Added TripAdvisor tours catalog page and homepage showcase.",
+    "details": [
+      "Created TripAdvisor-linked tour dataset with USD pricing and metadata in src/data/tripAdvisorTours.ts.",
+      "Built TripAdvisorTours page with filters, sorting, ratings, and direct booking links plus SEO metadata at src/pages/TripAdvisorTours.tsx.",
+      "Added two-row TripAdvisor tours highlight section to the homepage and routing to /tours/tripadvisor via src/components/homepage/TripAdvisorHighlights.tsx, src/pages/Index.tsx, and src/App.tsx."
+    ],
+    "files": [
+      "src/data/tripAdvisorTours.ts",
+      "src/pages/TripAdvisorTours.tsx",
+      "src/components/homepage/TripAdvisorHighlights.tsx",
+      "src/pages/Index.tsx",
+      "src/App.tsx"
+    ]
+  },
+  {
+    "timestamp": "2025-11-28T06:13:03Z",
+    "summary": "Limited TripAdvisor showcases to Recharge-operated listings.",
+    "details": [
+      "Tagged TripAdvisor tour data with the Recharge operator profile URL so only our listings surface.",
+      "Filtered TripAdvisorTours page and homepage highlights to the Recharge profile and pointed CTAs to the operator review URL."
+    ],
+    "files": [
+      "src/data/tripAdvisorTours.ts",
+      "src/pages/TripAdvisorTours.tsx",
+      "src/components/homepage/TripAdvisorHighlights.tsx"
+    ]
   }
 ]

@@ -54,6 +54,10 @@ const ContentManagementDashboard = lazy(
   () => import('@/components/cms/ContentManagementDashboard'),
 );
 const TripBuilderManager = lazy(() => import('@/components/admin/panel/TripBuilderManager'));
+const VendorApprovals = lazy(() => import('@/components/admin/panel/VendorApprovals'));
+const CommissionSettingsPanel = lazy(() => import('@/components/admin/panel/CommissionSettingsPanel'));
+const PaymentSettlementsPanel = lazy(() => import('@/components/admin/panel/PaymentSettlementsPanel'));
+const DriverAnalyticsDashboard = lazy(() => import('@/components/admin/panel/DriverAnalyticsDashboard'));
 
 const AdminPanel: React.FC = () => {
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -110,6 +114,9 @@ const AdminPanel: React.FC = () => {
           return <DriversManagement />;
         case 'driver-verification':
           return <DriverVerificationQueue />;
+        case 'vendor-approvals':
+          return <VendorApprovals />;
+        case 'bookings':
         case 'bookings':
           return <BookingsManagement />;
         case 'reviews':
@@ -158,6 +165,15 @@ const AdminPanel: React.FC = () => {
         // Trip Builder
         case 'trip-builder':
           return <TripBuilderManager />;
+        // Finance
+        case 'commission-settings':
+          return <CommissionSettingsPanel />;
+        case 'payment-settlements':
+          return <PaymentSettlementsPanel />;
+        case 'driver-wallets':
+          return <div className="p-6"><h2 className="text-2xl font-bold">Driver Wallets - Coming Soon</h2><p className="text-gray-600 mt-2">View and manage driver wallet balances</p></div>;
+        case 'driver-analytics':
+          return <DriverAnalyticsDashboard />;
         default:
           return <DashboardSection />;
       }

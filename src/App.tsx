@@ -110,6 +110,7 @@ const SeedData = lazy(() => import('@/pages/SeedData'));
 const BookingConfirmation = lazy(() => import('@/pages/BookingConfirmation'));
 const TravelGuide = lazy(() => import('@/pages/TravelGuide'));
 const Tours = lazy(() => import('@/pages/Tours'));
+const TripAdvisorTours = lazy(() => import('@/pages/TripAdvisorTours'));
 const Signup = lazy(() => import('@/pages/Signup'));
 const TrainJourneys = lazy(() => import('@/pages/experiences/TrainJourneys'));
 const TeaTrails = lazy(() => import('@/pages/experiences/TeaTrails'));
@@ -167,7 +168,12 @@ const VehicleDetail = lazy(() => import('@/pages/vehicle-rental/VehicleDetail'))
 const VehicleBooking = lazy(() => import('@/pages/vehicle-rental/VehicleBooking'));
 const OwnerDashboard = lazy(() => import('@/pages/vehicle-rental/OwnerDashboard'));
 const OwnerRegister = lazy(() => import('@/pages/vehicle-rental/OwnerRegister'));
+const OwnerDocuments = lazy(() => import('@/pages/vehicle-rental/OwnerDocuments'));
+const MyBookings = lazy(() => import('@/pages/vehicle-rental/MyBookings'));
 const ListVehicle = lazy(() => import('@/pages/vehicle-rental/ListVehicle'));
+
+// Vehicle Rental Admin Pages
+const VehicleApproval = lazy(() => import('@/pages/admin/vehicle-rental/VehicleApproval'));
 
 // Vendor Platform
 const VendorRegistration = lazy(() => import('@/pages/vendor/VendorRegistration'));
@@ -197,6 +203,7 @@ function App() {
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/tours" element={withSiteChrome(Tours)} />
+                <Route path="/tours/tripadvisor" element={withSiteChrome(TripAdvisorTours)} />
                 <Route path="/tours/cultural" element={<CulturalTours />} />
                 <Route path="/tours/wildtours" element={<WildTours />} />
                 <Route path="/wildtours" element={<WildTours />} /> {/* Alias route */}
@@ -311,6 +318,8 @@ function App() {
                 <Route path="/vehicle-rental/booking/:id" element={<VehicleBooking />} />
                 <Route path="/vehicle-rental/owner-dashboard" element={<OwnerDashboard />} />
                 <Route path="/vehicle-rental/owner/register" element={<OwnerRegister />} />
+                <Route path="/vehicle-rental/owner/documents" element={<OwnerDocuments />} />
+                <Route path="/vehicle-rental/my-bookings" element={<MyBookings />} />
                 <Route path="/vehicle-rental/list-vehicle" element={<ListVehicle />} />
 
                 {/* Vendor Platform */}
@@ -336,6 +345,7 @@ function App() {
                 <Route path="/signup" element={withSiteChrome(Signup)} />
                 <Route path="/driver/dashboard" element={withSiteChrome(DriverDashboard)} />
                 <Route path="/admin/custom-trips" element={<CustomTripRequestsAdmin />} />
+                <Route path="/admin/vehicle-rental/vehicles" element={<VehicleApproval />} />
                 {/* Admin panel is now at: https://recharge-travels-admin.web.app */}
                 <Route path="/admin" element={<AdminRedirect />} />
                 <Route path="/admin-panel" element={<AdminRedirect />} />

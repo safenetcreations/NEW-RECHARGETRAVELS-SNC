@@ -37,8 +37,21 @@ const steps = [
     { id: 9, title: 'Review', icon: CheckCircle },
 ];
 
+import { db, storage } from '@/lib/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+
 const VendorRegistration = () => {
     const [currentStep, setCurrentStep] = useState(1);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [files, setFiles] = useState<{
+        idDocument?: File;
+        businessRegistration?: File;
+        photos: File[];
+    }>({
+        photos: []
+    });
+
     const [formData, setFormData] = useState({
         // Step 1: Basic Info
         firstName: '',
@@ -68,8 +81,6 @@ const VendorRegistration = () => {
 
         // Step 6: Availability
         availabilityType: 'daily',
-
-        // Step 7 & 8 are file uploads (handled separately in real impl)
     });
 
     const { toast } = useToast();
@@ -81,6 +92,16 @@ const VendorRegistration = () => {
 
     const handleSelectChange = (name: string, value: string) => {
         setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'idDocument' | 'businessRegistration' | 'photos') => {
+        if (e.target.files && e.target.files.length > 0) {
+            if (type === 'photos') {
+                setFiles(prev => ({ ...prev, photos: [...prev.photos, ...Array.from(e.target.files!)] }));
+            } else {
+                setFiles(prev => ({ ...prev, [type]: e.target.files![0] }));
+            }
+        }
     };
 
     const nextStep = () => {
@@ -99,14 +120,72 @@ const VendorRegistration = () => {
         }
     };
 
-    const handleSubmit = () => {
-        // In a real implementation, this would send data to Firebase
-        console.log('Submitting form data:', formData);
-        toast({
-            title: "Registration Submitted!",
-            description: "Your vendor application has been received. We will review it shortly.",
-        });
-        // Redirect or show success state
+    const uploadFile = async (file: File, path: string) => {
+        if (!storage) throw new Error("Storage not initialized");
+        const storageRef = ref(storage, `${path}/${Date.now()}_${file.name}`);
+        await uploadBytes(storageRef, file);
+        return await getDownloadURL(storageRef);
+    };
+
+    const handleSubmit = async () => {
+        if (!db) {
+            toast({
+                title: "Error",
+                description: "Database connection failed. Please try again later.",
+                variant: "destructive"
+            });
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            // 1. Upload files
+            let idDocumentUrl = '';
+            let businessRegistrationUrl = '';
+            const photoUrls: string[] = [];
+
+            if (files.idDocument) {
+                idDocumentUrl = await uploadFile(files.idDocument, 'vendor_docs/id');
+            }
+
+            if (files.businessRegistration) {
+                businessRegistrationUrl = await uploadFile(files.businessRegistration, 'vendor_docs/business');
+            }
+
+            for (const photo of files.photos) {
+                const url = await uploadFile(photo, 'vendor_photos');
+                photoUrls.push(url);
+            }
+
+            // 2. Save to Firestore
+            await addDoc(collection(db, 'vendors'), {
+                ...formData,
+                idDocumentUrl,
+                businessRegistrationUrl,
+                photoUrls,
+                status: 'pending',
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp(),
+            });
+
+            toast({
+                title: "Registration Submitted!",
+                description: "Your vendor application has been received. We will review it shortly.",
+            });
+
+            // Reset form or redirect
+            // window.location.href = '/vendor/dashboard'; // Optionally redirect
+
+        } catch (error) {
+            console.error("Error submitting registration:", error);
+            toast({
+                title: "Submission Failed",
+                description: "There was an error submitting your application. Please try again.",
+                variant: "destructive"
+            });
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const renderStepContent = () => {
@@ -160,12 +239,10 @@ const VendorRegistration = () => {
                             <Label htmlFor="idNumber">ID Number</Label>
                             <Input id="idNumber" name="idNumber" value={formData.idNumber} onChange={handleInputChange} placeholder="Enter ID Number" />
                         </div>
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:bg-gray-50 transition-colors cursor-pointer">
-                            <div className="mx-auto w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                                <ImageIcon className="w-6 h-6 text-blue-600" />
-                            </div>
-                            <p className="text-sm font-medium text-gray-900">Upload ID Document</p>
-                            <p className="text-xs text-gray-500 mt-1">Drag and drop or click to upload</p>
+                        <div className="space-y-2">
+                            <Label>Upload ID Document</Label>
+                            <Input type="file" onChange={(e) => handleFileChange(e, 'idDocument')} />
+                            <p className="text-xs text-gray-500">Upload a clear copy of your ID (PDF or Image)</p>
                         </div>
                     </div>
                 );
@@ -197,7 +274,105 @@ const VendorRegistration = () => {
                         </div>
                     </div>
                 );
-            // ... Add other steps similarly
+            case 4:
+                return (
+                    <div className="space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="serviceName">Service Name</Label>
+                            <Input id="serviceName" name="serviceName" value={formData.serviceName} onChange={handleInputChange} placeholder="e.g., Colombo City Tour" />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="serviceDescription">Description</Label>
+                            <Textarea id="serviceDescription" name="serviceDescription" value={formData.serviceDescription} onChange={handleInputChange} placeholder="Describe your service..." />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="location">Location</Label>
+                            <Input id="location" name="location" value={formData.location} onChange={handleInputChange} placeholder="e.g., Colombo" />
+                        </div>
+                    </div>
+                );
+            case 5:
+                return (
+                    <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="basePrice">Base Price</Label>
+                                <Input id="basePrice" name="basePrice" type="number" value={formData.basePrice} onChange={handleInputChange} placeholder="0.00" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="currency">Currency</Label>
+                                <Select onValueChange={(value) => handleSelectChange('currency', value)} defaultValue={formData.currency}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select Currency" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="USD">USD</SelectItem>
+                                        <SelectItem value="LKR">LKR</SelectItem>
+                                        <SelectItem value="EUR">EUR</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                    </div>
+                );
+            case 6:
+                return (
+                    <div className="space-y-4">
+                        <Label>Availability Type</Label>
+                        <Select onValueChange={(value) => handleSelectChange('availabilityType', value)} defaultValue={formData.availabilityType}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select Availability" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="daily">Daily</SelectItem>
+                                <SelectItem value="weekdays">Weekdays Only</SelectItem>
+                                <SelectItem value="weekends">Weekends Only</SelectItem>
+                                <SelectItem value="custom">Custom</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                );
+            case 7:
+                return (
+                    <div className="space-y-4">
+                        <div className="space-y-2">
+                            <Label>Business Registration Document</Label>
+                            <Input type="file" onChange={(e) => handleFileChange(e, 'businessRegistration')} />
+                            <p className="text-xs text-gray-500">Upload your business registration certificate (PDF or Image)</p>
+                        </div>
+                    </div>
+                );
+            case 8:
+                return (
+                    <div className="space-y-4">
+                        <div className="space-y-2">
+                            <Label>Service Photos</Label>
+                            <Input type="file" multiple onChange={(e) => handleFileChange(e, 'photos')} />
+                            <p className="text-xs text-gray-500">Upload high-quality photos of your service (Max 5)</p>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2 mt-4">
+                            {files.photos.map((file, index) => (
+                                <div key={index} className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                                    <img src={URL.createObjectURL(file)} alt="Preview" className="w-full h-full object-cover" />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                );
+            case 9:
+                return (
+                    <div className="space-y-4">
+                        <h3 className="font-semibold text-lg">Review Your Information</h3>
+                        <div className="bg-gray-50 p-4 rounded-lg space-y-2 text-sm">
+                            <p><strong>Name:</strong> {formData.firstName} {formData.lastName}</p>
+                            <p><strong>Email:</strong> {formData.email}</p>
+                            <p><strong>Business:</strong> {formData.businessName}</p>
+                            <p><strong>Service:</strong> {formData.serviceName}</p>
+                            <p><strong>Price:</strong> {formData.basePrice} {formData.currency}</p>
+                        </div>
+                        <p className="text-sm text-gray-500">By clicking Submit, you agree to our Vendor Terms & Conditions.</p>
+                    </div>
+                );
             default:
                 return (
                     <div className="text-center py-8">

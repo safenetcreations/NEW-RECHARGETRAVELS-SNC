@@ -36,7 +36,10 @@ import {
   BookOpen,
   Share2,
   Bus,
-  Shield
+  Shield,
+  CreditCard,
+  Percent,
+  Wallet
 } from 'lucide-react';
 
 interface AdminSidebarProps {
@@ -184,6 +187,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
         { id: 'activities', label: 'Activities', icon: Zap },
         { id: 'drivers', label: 'Drivers', icon: Car },
         { id: 'driver-verification', label: 'Driver Verification', icon: Shield },
+        { id: 'vendor-approvals', label: 'Vendor Approvals', icon: CheckCircle },
       ]
     },
     {
@@ -193,6 +197,15 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
         { id: 'group-transport-bookings', label: 'Group Transport Bookings', icon: Bus },
         { id: 'reviews', label: 'Reviews', icon: Star },
         { id: 'users', label: 'User Management', icon: Users },
+      ]
+    },
+    {
+      title: 'Finance',
+      items: [
+        { id: 'driver-analytics', label: 'Driver Analytics', icon: BarChart3 },
+        { id: 'commission-settings', label: 'Commission Settings', icon: Percent },
+        { id: 'payment-settlements', label: 'Payment Settlements', icon: CreditCard },
+        { id: 'driver-wallets', label: 'Driver Wallets', icon: Wallet },
       ]
     },
     {

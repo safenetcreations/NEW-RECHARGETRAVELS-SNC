@@ -294,6 +294,67 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // ==========================================
+    // DRIVER BADGES & SOCIAL PROFILES
+    // ==========================================
+
+    // Driver Badges - Public read, admin/system write
+    match /driver_badges/{badgeId} {
+      allow read: if true;
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Driver Achievements - Public read, admin write
+    match /driver_achievements/{achievementId} {
+      allow read: if true;
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Driver Social Profiles - Public read, owner/admin write
+    match /driver_social_profiles/{driverId} {
+      allow read: if true;
+
+      allow create: if isAuthenticated()
+                    && driverId == request.auth.uid;
+
+      allow update: if isAdmin()
+                    || (isAuthenticated() && driverId == request.auth.uid);
+
+      allow delete: if isAdmin();
+    }
+
+    // ==========================================
+    // DRIVER BATCH OPERATIONS & ANALYTICS
+    // ==========================================
+
+    // Driver Batch Operations - Driver read own, admin full
+    match /driver_batch_operations/{opId} {
+      allow read: if isAdmin()
+                  || (isAuthenticated() && resource.data.driver_id == request.auth.uid);
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ==========================================
+    // DRIVER PAYMENT SETTLEMENTS
+    // ==========================================
+
+    // Driver Payment Settlements - Driver read own, admin manage
+    match /driver_payment_settlements/{settlementId} {
+      allow read: if isAdmin()
+                  || (isAuthenticated() && resource.data.driver_id == request.auth.uid);
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Commission Settings - Admin only
+    match /settings/commission_settings {
+      allow read: if isAdmin() || isAuthenticated();
+      allow write: if isAdmin();
+    }
+
     // Default rule - Deny all access to any other collections
     match /{document=**} {
       allow read, write: if false;
