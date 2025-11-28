@@ -11,6 +11,8 @@ import {
 } from '@/data/tripAdvisorTours'
 import { SEOMetaTags } from '@/components/seo/SEOMetaTags'
 import { SEOSchema } from '@/components/seo/SEOSchema'
+import LoadingSpinner from '@/components/LoadingSpinner'
+import { useTripAdvisorTours } from '@/hooks/useTripAdvisorTours'
 
 type PriceRangeId = 'all' | '0-100' | '100-300' | '300-500' | '500+'
 type SortOption = 'rating' | 'price-asc' | 'price-desc' | 'reviews'
@@ -51,15 +53,21 @@ const TripAdvisorTours = () => {
   const [region, setRegion] = useState<TripAdvisorRegion | ''>('')
   const [priceRange, setPriceRange] = useState<PriceRangeId>('all')
   const [sortBy, setSortBy] = useState<SortOption>('rating')
+  const { tours, isLoading, error } = useTripAdvisorTours()
 
-  const operatorTours = useMemo(
-    () => tripAdvisorTours.filter((tour) => tour.operatorProfileUrl === RECHARGE_TRIPADVISOR_URL),
-    []
-  )
-  const baseTours = operatorTours
+  const baseTours = useMemo(() => {
+    if (tours.length) return tours
+    const operatorTours = tripAdvisorTours.filter((tour) => tour.operatorProfileUrl === RECHARGE_TRIPADVISOR_URL)
+    return operatorTours.length ? operatorTours : tripAdvisorTours
+  }, [tours])
+
   const prices = baseTours.map((tour) => tour.priceUsd)
   const lowPrice = prices.length ? Math.min(...prices) : 0
   const highPrice = prices.length ? Math.max(...prices) : 0
+
+  if (isLoading) {
+    return <LoadingSpinner fullScreen message="Loading TripAdvisor tours..." />
+  }
 
   const filteredTours = useMemo(() => {
     const range = priceRanges[priceRange]
@@ -74,7 +82,7 @@ const TripAdvisorTours = () => {
     })
 
     return sortTourList(filtered, sortBy)
-  }, [priceRange, region, search, sortBy])
+  }, [baseTours, priceRange, region, search, sortBy])
 
   return (
     <>
@@ -257,6 +265,9 @@ const TripAdvisorTours = () => {
               <p className="text-sm text-gray-600">
                 {filteredTours.length} of {baseTours.length}+ Recharge tours • Click any card to book on TripAdvisor
               </p>
+              {error && (
+                <p className="text-xs text-amber-700">Showing fallback data because Firestore could not be reached.</p>
+              )}
             </div>
             <Badge className="bg-emerald-100 text-emerald-700">USD</Badge>
           </div>

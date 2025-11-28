@@ -11,7 +11,7 @@ interface OptimizedImageProps {
   onLoad?: () => void;
 }
 
-// Generate optimized Unsplash URLs with different sizes
+// Generate optimized URLs with different sizes
 const getOptimizedUrl = (url: string, width: number = 800): string => {
   if (!url) return '';
 
@@ -19,6 +19,17 @@ const getOptimizedUrl = (url: string, width: number = 800): string => {
   if (url.includes('unsplash.com')) {
     const baseUrl = url.split('?')[0];
     return `${baseUrl}?w=${width}&q=75&auto=format&fit=crop`;
+  }
+
+  // For Cloudinary images
+  if (url.includes('cloudinary.com')) {
+    return url.replace('/upload/', `/upload/w_${width},q_75,f_auto/`);
+  }
+
+  // For Firebase Storage, add token if present
+  if (url.includes('firebasestorage.googleapis.com')) {
+    // Firebase Storage URLs are already optimized, just return as-is
+    return url;
   }
 
   return url;

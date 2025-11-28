@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { RECHARGE_TRIPADVISOR_URL, tripAdvisorTours } from '@/data/tripAdvisorTours'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { useTripAdvisorTours } from '@/hooks/useTripAdvisorTours'
 
 const renderStars = (rating: number) => {
   const stars = []
@@ -21,8 +22,22 @@ const renderStars = (rating: number) => {
 }
 
 const TripAdvisorHighlights = () => {
-  const rechargeTours = tripAdvisorTours.filter((tour) => tour.operatorProfileUrl === RECHARGE_TRIPADVISOR_URL)
-  const highlights = rechargeTours.slice(0, 6)
+  const { tours, isLoading } = useTripAdvisorTours()
+  const rechargeTours = (tours.length ? tours : tripAdvisorTours).filter(
+    (tour) => tour.operatorProfileUrl === RECHARGE_TRIPADVISOR_URL
+  )
+  const highlights = (rechargeTours.length ? rechargeTours : tripAdvisorTours).slice(0, 6)
+
+  if (isLoading && highlights.length === 0) {
+    return (
+      <section className="bg-gradient-to-b from-emerald-50 via-white to-white">
+        <div className="mx-auto max-w-6xl px-4 py-12">
+          <div className="h-6 w-48 rounded bg-emerald-100" />
+          <div className="mt-4 h-4 w-64 rounded bg-emerald-50" />
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section className="bg-gradient-to-b from-emerald-50 via-white to-white">

@@ -195,5 +195,19 @@
       "src/pages/TripAdvisorTours.tsx",
       "src/components/homepage/TripAdvisorHighlights.tsx"
     ]
+  },
+  {
+    "timestamp": "2025-11-28T10:03:01Z",
+    "summary": "Wired TripAdvisor tours to Firestore with Recharge-only filtering.",
+    "details": [
+      "Added useTripAdvisorTours hook to pull tours from the Firestore collection tours_tripadvisor with Recharge operator defaults and graceful static fallback.",
+      "Updated TripAdvisorTours page to consume Firestore data, show loading/error states, and keep USD pricing counts accurate.",
+      "Updated homepage TripAdvisorHighlights to surface Firestore data when available while keeping Recharge-only filtering."
+    ],
+    "files": [
+      "src/hooks/useTripAdvisorTours.ts",
+      "src/pages/TripAdvisorTours.tsx",
+      "src/components/homepage/TripAdvisorHighlights.tsx"
+    ]
   }
 ]

@@ -22,11 +22,11 @@ export default defineConfig(({ mode }) => ({
   build: {
     // Optimize for production
     minify: 'esbuild',
-    sourcemap: true,
-    // Keep console for debugging
-    // esbuild: {
-    //   drop: ['console', 'debugger'],
-    // },
+    sourcemap: mode !== 'production',
+    // Remove console.logs in production for cleaner output
+    esbuild: mode === 'production' ? {
+      drop: ['console', 'debugger'],
+    } : {},
     // Increase chunk size warning limit
     chunkSizeWarningLimit: 1000,
     // Enable CSS code splitting

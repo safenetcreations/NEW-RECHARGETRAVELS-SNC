@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { MapPin, Phone, Mail, Clock, MessageCircle, Calendar, Star, Sparkles, Users, Shield } from 'lucide-react'
 import { useState } from 'react'
+import { Helmet } from 'react-helmet-async'
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -29,6 +30,16 @@ const Contact = () => {
 
   return (
     <>
+      <Helmet>
+        <title>Contact Us - Recharge Travels Sri Lanka | Get Free Travel Quote</title>
+        <meta name="description" content="Contact Recharge Travels for expert Sri Lanka travel planning. Get free quotes, custom itineraries, and 24/7 support. Call +94 77 123 4567 or email us today." />
+        <meta name="keywords" content="contact recharge travels, sri lanka travel agency, book sri lanka tour, travel consultation, custom itinerary sri lanka" />
+        <link rel="canonical" href="https://recharge-travels-73e76.web.app/contact" />
+        <meta property="og:title" content="Contact Recharge Travels - Sri Lanka Tour Experts" />
+        <meta property="og:description" content="Get in touch for personalized Sri Lanka travel planning. Free consultations, expert advice, and best price guarantee." />
+        <meta property="og:type" content="website" />
+      </Helmet>
+
       {/* Enhanced Hero Section */}
       <section className="relative gradient-sri-lanka text-white py-24 overflow-hidden">
         {/* Background Elements */}

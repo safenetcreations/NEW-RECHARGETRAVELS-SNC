@@ -5,7 +5,7 @@ import { saveApiKey, getApiKey } from './src/api';
 import bodyParser from 'body-parser';
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     {
@@ -51,9 +51,13 @@ export default defineConfig({
   base: '/',
   build: {
     outDir: 'dist',
-    sourcemap: false,
+    sourcemap: mode !== 'production',
     minify: 'esbuild',
     cssMinify: true,
+    // Remove console.logs in production
+    esbuild: mode === 'production' ? {
+      drop: ['console', 'debugger'],
+    } : {},
     rollupOptions: {
       input: {
         main: path.resolve(__dirname, 'index.html')
@@ -90,4 +94,4 @@ export default defineConfig({
     port: 5174,
     host: true
   }
-})
+}))

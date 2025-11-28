@@ -31,6 +31,7 @@ interface HotelListingProps {
   onHotelSelect?: (hotel: Hotel) => void
   selectedHotels?: Hotel[]
   showComparison?: boolean
+  onFilterChange?: (filters: HotelSearchFilters) => void
 }
 
 const HotelListing: React.FC<HotelListingProps> = ({
@@ -39,7 +40,8 @@ const HotelListing: React.FC<HotelListingProps> = ({
   filters,
   onHotelSelect,
   selectedHotels = [],
-  showComparison = false
+  showComparison = false,
+  onFilterChange
 }) => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [favorites, setFavorites] = useState<Set<string>>(new Set())
@@ -49,8 +51,8 @@ const HotelListing: React.FC<HotelListingProps> = ({
     const filtered = hotels.filter(hotel => {
       // Location filter
       if (filters.location && !hotel.name?.toLowerCase().includes(filters.location.toLowerCase()) &&
-          !hotel.city?.name?.toLowerCase().includes(filters.location.toLowerCase()) &&
-          !hotel.address?.toLowerCase().includes(filters.location.toLowerCase())) {
+        !hotel.city?.name?.toLowerCase().includes(filters.location.toLowerCase()) &&
+        !hotel.address?.toLowerCase().includes(filters.location.toLowerCase())) {
         return false
       }
 
@@ -132,9 +134,8 @@ const HotelListing: React.FC<HotelListingProps> = ({
       'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop'
 
     return (
-      <Card className={`group relative overflow-hidden transition-all duration-300 hover:shadow-xl ${
-        isSelected ? 'ring-2 ring-blue-500 shadow-lg' : ''
-      }`}>
+      <Card className={`group relative overflow-hidden transition-all duration-300 hover:shadow-xl ${isSelected ? 'ring-2 ring-blue-500 shadow-lg' : ''
+        }`}>
         {showComparison && (
           <div className="absolute top-3 left-3 z-10">
             <Checkbox
@@ -308,7 +309,7 @@ const HotelListing: React.FC<HotelListingProps> = ({
           </div>
 
           {/* Sort Dropdown */}
-          <Select value={filters.sortBy} onValueChange={() => {}}>
+          <Select value={filters.sortBy} onValueChange={(value) => onFilterChange?.({ ...filters, sortBy: value })}>
             <SelectTrigger className="w-48">
               <SelectValue />
             </SelectTrigger>

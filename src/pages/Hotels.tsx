@@ -93,7 +93,7 @@ const Hotels = () => {
       }) as any
 
       if (response?.status === 'OK' && response?.predictions) {
-        const suggestions = response.predictions.slice(0, 5).map((prediction: any) => 
+        const suggestions = response.predictions.slice(0, 5).map((prediction: any) =>
           prediction.description
         )
         setHeroGoogleSuggestions(suggestions)
@@ -118,10 +118,10 @@ const Hotels = () => {
         location.toLowerCase().includes(value.toLowerCase())
       )
       setHeroLocalSuggestions(filtered.slice(0, 5))
-      
+
       // Search Google Places
       searchHeroGooglePlaces(value)
-      
+
       setShowHeroSuggestions(true)
     } else {
       setHeroLocalSuggestions(POPULAR_HOTEL_LOCATIONS.slice(0, 8))
@@ -675,7 +675,7 @@ const Hotels = () => {
         {/* Enhanced Hero Section with Search */}
         <div className="relative bg-gradient-to-br from-teal-600 via-blue-700 to-indigo-800 text-white overflow-hidden">
           {/* Background Elements */}
-          <div className="absolute inset-0">
+          <div className="absolute inset-0 pointer-events-none">
             <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-yellow-400/20 to-orange-600/20 rounded-full blur-3xl animate-pulse"></div>
             <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-tr from-purple-400/10 to-pink-600/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
           </div>
@@ -702,24 +702,28 @@ const Hotels = () => {
 
             {/* Quick Star Rating Selection */}
             <div className="flex justify-center mb-8">
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 relative z-20">
                 <h3 className="text-white text-lg font-semibold mb-4 text-center">Quick Select by Star Rating</h3>
                 <div className="flex gap-4 justify-center">
                   {[3, 4, 5].map((rating) => (
                     <button
                       key={rating}
                       onClick={() => {
-                        setSelectedStarRating(rating)
-                        setSearchFilters(prev => ({
-                          ...prev,
-                          starRating: [rating]
-                        }))
+                        if (selectedStarRating === rating) {
+                          setSelectedStarRating(null)
+                          setSearchFilters(prev => ({ ...prev, starRating: [] }))
+                        } else {
+                          setSelectedStarRating(rating)
+                          setSearchFilters(prev => ({
+                            ...prev,
+                            starRating: [rating]
+                          }))
+                        }
                       }}
-                      className={`flex flex-col items-center px-6 py-4 rounded-xl transition-all duration-300 ${
-                        selectedStarRating === rating
-                          ? 'bg-white text-teal-800 shadow-lg transform scale-105'
-                          : 'bg-white/20 text-white hover:bg-white/30 hover:scale-105'
-                      }`}
+                      className={`flex flex-col items-center px-6 py-4 rounded-xl transition-all duration-300 ${selectedStarRating === rating
+                        ? 'bg-white text-teal-800 shadow-lg transform scale-105'
+                        : 'bg-white/20 text-white hover:bg-white/30 hover:scale-105'
+                        }`}
                     >
                       <div className="flex items-center mb-2">
                         {[...Array(rating)].map((_, i) => (
@@ -736,7 +740,7 @@ const Hotels = () => {
 
             {/* Enhanced Search Bar */}
             <div className="max-w-6xl mx-auto">
-              <div className="bg-white rounded-3xl shadow-2xl p-8 backdrop-blur-sm">
+              <div className="bg-white rounded-3xl shadow-2xl p-8 backdrop-blur-sm relative z-20">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                   {/* Location/Hotel Search */}
                   <div className="md:col-span-2">
@@ -758,6 +762,18 @@ const Hotels = () => {
                         }}
                         onBlur={() => {
                           setTimeout(() => setShowHeroSuggestions(false), 200)
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            setSearchFilters(prev => ({
+                              ...prev,
+                              location: heroSearch.location,
+                              checkIn: heroSearch.checkIn,
+                              checkOut: heroSearch.checkOut,
+                              guests: heroSearch.guests
+                            }))
+                            setShowHeroSuggestions(false)
+                          }
                         }}
                         className="w-full px-4 py-4 pl-12 text-lg border-2 border-gray-200 rounded-xl focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all duration-300"
                       />
@@ -966,6 +982,7 @@ const Hotels = () => {
           onHotelSelect={handleHotelSelect}
           selectedHotels={comparedHotels}
           showComparison={true}
+          onFilterChange={setSearchFilters}
         />
 
         {/* Comparison Bar */}

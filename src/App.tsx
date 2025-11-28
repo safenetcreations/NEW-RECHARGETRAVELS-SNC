@@ -180,6 +180,11 @@ const OwnerPayouts = lazy(() => import('@/pages/vehicle-rental/OwnerPayouts'));
 const VehicleInvoice = lazy(() => import('@/pages/vehicle-rental/VehicleInvoice'));
 const SecurityDepositManagement = lazy(() => import('@/pages/vehicle-rental/SecurityDepositManagement'));
 
+// Phase 3: Communication & Notifications
+const VehicleChat = lazy(() => import('@/pages/vehicle-rental/VehicleChat'));
+const NotificationCenter = lazy(() => import('@/pages/vehicle-rental/NotificationCenter'));
+const VehicleNotificationPreferences = lazy(() => import('@/pages/vehicle-rental/VehicleNotificationPreferences'));
+
 // Vehicle Rental Admin Pages
 const VehicleApproval = lazy(() => import('@/pages/admin/vehicle-rental/VehicleApproval'));
 const OwnerApproval = lazy(() => import('@/pages/admin/vehicle-rental/OwnerApproval'));
@@ -338,6 +343,12 @@ function App() {
                 <Route path="/vehicle-rental/owner/payouts" element={<OwnerPayouts />} />
                 <Route path="/vehicle-rental/invoice/:bookingId" element={<VehicleInvoice />} />
                 <Route path="/vehicle-rental/owner/deposits" element={<SecurityDepositManagement />} />
+
+                {/* Phase 3: Communication & Notifications */}
+                <Route path="/vehicle-rental/messages" element={<VehicleChat />} />
+                <Route path="/vehicle-rental/messages/:conversationId" element={<VehicleChat />} />
+                <Route path="/vehicle-rental/notifications" element={<NotificationCenter />} />
+                <Route path="/vehicle-rental/notification-preferences" element={<VehicleNotificationPreferences />} />
 
                 {/* Vendor Platform */}
                 <Route path="/vendor/register" element={withSiteChrome(VendorRegistration)} />
