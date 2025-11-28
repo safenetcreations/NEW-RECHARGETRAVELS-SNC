@@ -56,7 +56,7 @@ const TripAdvisorTours = () => {
     () => tripAdvisorTours.filter((tour) => tour.operatorProfileUrl === RECHARGE_TRIPADVISOR_URL),
     []
   )
-  const baseTours = operatorTours.length ? operatorTours : tripAdvisorTours
+  const baseTours = operatorTours
   const prices = baseTours.map((tour) => tour.priceUsd)
   const lowPrice = prices.length ? Math.min(...prices) : 0
   const highPrice = prices.length ? Math.max(...prices) : 0

@@ -204,12 +204,14 @@ const Drivers = () => {
             </Button>
             <div className="flex items-center space-x-4 text-white/90">
               <div className="flex items-center">
-                <Phone className="h-4 w-4 mr-1" />
-                <span>+94 7777 21 999</span>
+                <a href="https://wa.me/94777721999" className="flex items-center hover:text-white">
+                  <Phone className="h-4 w-4 mr-1" />
+                  <span>+94 77 772 1999</span>
+                </a>
               </div>
               <div className="flex items-center">
                 <Mail className="h-4 w-4 mr-1" />
-                <span>drivers@rechargetravels.com</span>
+                <span>info@rechargetravels.com</span>
               </div>
             </div>
           </div>

@@ -98,9 +98,9 @@ const SettingsSection: React.FC = () => {
     },
     contact: {
       email: 'info@rechargetravels.com',
-      phone: '+94 11 234 5678',
+      phone: '+94 77 772 1999',
       address: '123 Travel Street, Colombo 01, Sri Lanka',
-      whatsapp: '+94 77 123 4567',
+      whatsapp: '+94 77 772 1999',
       facebook: 'rechargetravels',
       instagram: 'rechargetravels'
     },

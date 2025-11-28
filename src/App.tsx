@@ -166,6 +166,8 @@ const VehicleRental = lazy(() => import('@/pages/vehicle-rental/VehicleRental'))
 const VehicleBrowse = lazy(() => import('@/pages/vehicle-rental/VehicleBrowse'));
 const VehicleDetail = lazy(() => import('@/pages/vehicle-rental/VehicleDetail'));
 const VehicleBooking = lazy(() => import('@/pages/vehicle-rental/VehicleBooking'));
+const VehicleBookingConfirmation = lazy(() => import('@/pages/vehicle-rental/VehicleBookingConfirmation'));
+const VehicleAvailabilityCalendar = lazy(() => import('@/pages/vehicle-rental/VehicleAvailabilityCalendar'));
 const OwnerDashboard = lazy(() => import('@/pages/vehicle-rental/OwnerDashboard'));
 const OwnerRegister = lazy(() => import('@/pages/vehicle-rental/OwnerRegister'));
 const OwnerDocuments = lazy(() => import('@/pages/vehicle-rental/OwnerDocuments'));
@@ -174,6 +176,7 @@ const ListVehicle = lazy(() => import('@/pages/vehicle-rental/ListVehicle'));
 
 // Vehicle Rental Admin Pages
 const VehicleApproval = lazy(() => import('@/pages/admin/vehicle-rental/VehicleApproval'));
+const OwnerApproval = lazy(() => import('@/pages/admin/vehicle-rental/OwnerApproval'));
 
 // Vendor Platform
 const VendorRegistration = lazy(() => import('@/pages/vendor/VendorRegistration'));
@@ -316,6 +319,8 @@ function App() {
                 <Route path="/vehicle-rental/browse" element={<VehicleBrowse />} />
                 <Route path="/vehicle-rental/vehicle/:id" element={<VehicleDetail />} />
                 <Route path="/vehicle-rental/booking/:id" element={<VehicleBooking />} />
+                <Route path="/vehicle-rental/booking-confirmation/:bookingId" element={<VehicleBookingConfirmation />} />
+                <Route path="/vehicle-rental/availability/:vehicleId" element={<VehicleAvailabilityCalendar />} />
                 <Route path="/vehicle-rental/owner-dashboard" element={<OwnerDashboard />} />
                 <Route path="/vehicle-rental/owner/register" element={<OwnerRegister />} />
                 <Route path="/vehicle-rental/owner/documents" element={<OwnerDocuments />} />
@@ -346,6 +351,7 @@ function App() {
                 <Route path="/driver/dashboard" element={withSiteChrome(DriverDashboard)} />
                 <Route path="/admin/custom-trips" element={<CustomTripRequestsAdmin />} />
                 <Route path="/admin/vehicle-rental/vehicles" element={<VehicleApproval />} />
+                <Route path="/admin/vehicle-rental/owners" element={<OwnerApproval />} />
                 {/* Admin panel is now at: https://recharge-travels-admin.web.app */}
                 <Route path="/admin" element={<AdminRedirect />} />
                 <Route path="/admin-panel" element={<AdminRedirect />} />

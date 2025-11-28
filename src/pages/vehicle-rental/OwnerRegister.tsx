@@ -936,12 +936,12 @@ const OwnerRegister: React.FC = () => {
             <div className="mt-8 text-center">
               <p className="text-gray-500 text-sm">
                 Need help? Contact us at{' '}
-                <a href="mailto:owners@rechargetravels.com" className="text-purple-600 underline">
-                  owners@rechargetravels.com
+                <a href="mailto:info@rechargetravels.com" className="text-purple-600 underline">
+                  info@rechargetravels.com
                 </a>{' '}
                 or WhatsApp{' '}
-                <a href="https://wa.me/94771234567" className="text-purple-600 underline">
-                  +94 77 123 4567
+                <a href="https://wa.me/94777721999" className="text-purple-600 underline">
+                  +94 77 772 1999
                 </a>
               </p>
             </div>

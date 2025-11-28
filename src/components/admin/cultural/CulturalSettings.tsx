@@ -14,9 +14,9 @@ const CulturalSettings: React.FC<CulturalSettingsProps> = ({ onSave }) => {
   const [settings, setSettings] = useState({
     companyName: 'Recharge Travels',
     tagline: 'Your Gateway to Sri Lanka\'s Cultural Heritage',
-    phone: '+94 11 234 5678',
-    email: 'info@rechargetravels.lk',
-    whatsapp: '+94 77 123 4567',
+    phone: '+94 77 772 1999',
+    email: 'info@rechargetravels.com',
+    whatsapp: '+94 77 772 1999',
     address: 'Galle Road, Colombo, Sri Lanka',
     mission: 'To provide our valued customers with a courteous, comfortable, safe and memorable tour service all around Sri Lanka, on an affordable budget'
   });

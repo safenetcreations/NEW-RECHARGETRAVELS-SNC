@@ -22,7 +22,7 @@ const renderStars = (rating: number) => {
 
 const TripAdvisorHighlights = () => {
   const rechargeTours = tripAdvisorTours.filter((tour) => tour.operatorProfileUrl === RECHARGE_TRIPADVISOR_URL)
-  const highlights = (rechargeTours.length ? rechargeTours : tripAdvisorTours).slice(0, 6)
+  const highlights = rechargeTours.slice(0, 6)
 
   return (
     <section className="bg-gradient-to-b from-emerald-50 via-white to-white">

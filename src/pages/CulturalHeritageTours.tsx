@@ -424,11 +424,13 @@ const CulturalHeritageTours = () => {
                   </p>
                   <p className="flex items-center justify-center gap-2">
                     <Mail className="text-[#C65D00]" size={20} />
-                    <strong>Email:</strong> info@rechargetravels.lk
+                    <strong>Email:</strong> info@rechargetravels.com
                   </p>
                   <p className="flex items-center justify-center gap-2">
-                    <Globe className="text-[#C65D00]" size={20} />
-                    <strong>WhatsApp:</strong> +94 77 123 4567
+                    <a href="https://wa.me/94777721999" className="flex items-center justify-center gap-2 hover:text-[#25D366]">
+                      <Globe className="text-[#C65D00]" size={20} />
+                      <strong>WhatsApp:</strong> +94 77 772 1999
+                    </a>
                   </p>
                   <p className="flex items-center justify-center gap-2">
                     <Clock className="text-[#C65D00]" size={20} />

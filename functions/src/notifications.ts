@@ -567,9 +567,13 @@ const emailTemplates = {
           <div style="background-color: #f8f9fa; padding: 25px 30px; text-align: center;">
             <p style="color: #666; margin: 0 0 10px; font-size: 14px;">Driver Support:</p>
             <p style="color: #333; margin: 0;">
-              📧 <a href="mailto:drivers@rechargetravels.com" style="color: #f97316; text-decoration: none;">drivers@rechargetravels.com</a>
-              &nbsp;|&nbsp;
-              📞 <a href="tel:+94771234567" style="color: #f97316; text-decoration: none;">+94 77 123 4567</a>
+              📧 <a href="mailto:info@rechargetravels.com" style="color: #f97316; text-decoration: none;">info@rechargetravels.com</a>
+            </p>
+            <p style="color: #333; margin: 10px 0 0;">
+              <a href="https://wa.me/94777721999" style="color: #25D366; text-decoration: none; display: inline-flex; align-items: center;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;">
+                +94 77 772 1999
+              </a>
             </p>
           </div>
 
@@ -582,7 +586,7 @@ const emailTemplates = {
       </body>
       </html>
     `,
-    text: `Application Received - Recharge Travels\n\nHello ${data.driverName},\n\nThank you for applying! Your ${data.tier} application has been received and is under review.\n\nWe'll notify you within 24-48 hours.\n\nDriver Support: drivers@rechargetravels.com`
+    text: `Application Received - Recharge Travels\n\nHello ${data.driverName},\n\nThank you for applying! Your ${data.tier} application has been received and is under review.\n\nWe'll notify you within 24-48 hours.\n\nDriver Support: info@rechargetravels.com | WhatsApp: +94 77 772 1999`
   }),
 
   driverApplicationApproved: (data: any) => ({
@@ -715,7 +719,13 @@ const emailTemplates = {
           <div style="background-color: #f8f9fa; padding: 25px 30px; text-align: center;">
             <p style="color: #666; margin: 0 0 10px; font-size: 14px;">Driver Support:</p>
             <p style="color: #333; margin: 0;">
-              📧 <a href="mailto:drivers@rechargetravels.com" style="color: #f97316; text-decoration: none;">drivers@rechargetravels.com</a>
+              📧 <a href="mailto:info@rechargetravels.com" style="color: #f97316; text-decoration: none;">info@rechargetravels.com</a>
+            </p>
+            <p style="color: #333; margin: 10px 0 0;">
+              <a href="https://wa.me/94777721999" style="color: #25D366; text-decoration: none; display: inline-flex; align-items: center;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;">
+                +94 77 772 1999
+              </a>
             </p>
           </div>
 
@@ -728,7 +738,7 @@ const emailTemplates = {
       </body>
       </html>
     `,
-    text: `Hello ${data.driverName},\n\nWe regret to inform you that your driver application could not be approved.\n\nReason: ${data.rejectionReason || 'Documents could not be verified.'}\n\nYou may update your documents and reapply at:\nhttps://recharge-travels-73e76.web.app/join-with-us\n\nContact: drivers@rechargetravels.com`
+    text: `Hello ${data.driverName},\n\nWe regret to inform you that your driver application could not be approved.\n\nReason: ${data.rejectionReason || 'Documents could not be verified.'}\n\nYou may update your documents and reapply at:\nhttps://recharge-travels-73e76.web.app/join-with-us\n\nContact: info@rechargetravels.com | WhatsApp: +94 77 772 1999`
   }),
 
   driverDocumentExpiring: (data: any) => ({
@@ -1468,7 +1478,7 @@ export const onDriverApplicationSubmitted = functions.firestore
       await sgMail.send({
         to: driver.email,
         from: { email: FROM_EMAIL, name: FROM_NAME },
-        replyTo: 'drivers@rechargetravels.com',
+        replyTo: 'info@rechargetravels.com',
         subject: driverTemplate.subject,
         html: driverTemplate.html,
         text: driverTemplate.text
@@ -1557,7 +1567,7 @@ export const onDriverStatusChange = functions.firestore
         await sgMail.send({
           to: after.email,
           from: { email: FROM_EMAIL, name: FROM_NAME },
-          replyTo: 'drivers@rechargetravels.com',
+          replyTo: 'info@rechargetravels.com',
           subject: approvedTemplate.subject,
           html: approvedTemplate.html,
           text: approvedTemplate.text
@@ -1577,7 +1587,7 @@ export const onDriverStatusChange = functions.firestore
         await sgMail.send({
           to: after.email,
           from: { email: FROM_EMAIL, name: FROM_NAME },
-          replyTo: 'drivers@rechargetravels.com',
+          replyTo: 'info@rechargetravels.com',
           subject: rejectedTemplate.subject,
           html: rejectedTemplate.html,
           text: rejectedTemplate.text
@@ -1650,7 +1660,7 @@ export const checkDriverDocumentExpiry = functions.pubsub
             await sgMail.send({
               to: driver.email,
               from: { email: FROM_EMAIL, name: FROM_NAME },
-              replyTo: 'drivers@rechargetravels.com',
+              replyTo: 'info@rechargetravels.com',
               subject: template.subject,
               html: template.html,
               text: template.text
@@ -1712,7 +1722,7 @@ export const sendDriverVerificationEmail = functions.https.onCall(async (data) =
     await sgMail.send({
       to: driver.email,
       from: { email: FROM_EMAIL, name: FROM_NAME },
-      replyTo: 'drivers@rechargetravels.com',
+      replyTo: 'info@rechargetravels.com',
       subject: template.subject,
       html: template.html,
       text: template.text

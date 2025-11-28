@@ -153,7 +153,7 @@ export const generateLocalBusinessData = () => {
     name: 'Recharge Travels',
     description: 'Premium airport transfers and private transportation services across Sri Lanka',
     url: baseUrl,
-    telephone: '+94771234567',
+    telephone: '+94777721999',
     email: 'info@rechargetravels.com',
     address: {
       '@type': 'PostalAddress',
