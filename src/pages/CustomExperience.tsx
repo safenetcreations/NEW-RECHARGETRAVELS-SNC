@@ -424,6 +424,32 @@ const CustomExperience = () => {
                     </div>
                   </div>
 
+                  {/* Quick Sri Lanka Facts */}
+                  <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-amber-200">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                      <Globe className="w-5 h-5 text-amber-600" />
+                      Why Sri Lanka?
+                    </h3>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                      <div>
+                        <div className="text-2xl font-bold text-amber-600">8</div>
+                        <div className="text-xs text-gray-600">UNESCO Sites</div>
+                      </div>
+                      <div>
+                        <div className="text-2xl font-bold text-blue-600">103</div>
+                        <div className="text-xs text-gray-600">National Parks</div>
+                      </div>
+                      <div>
+                        <div className="text-2xl font-bold text-green-600">1,340km</div>
+                        <div className="text-xs text-gray-600">Coastline</div>
+                      </div>
+                      <div>
+                        <div className="text-2xl font-bold text-purple-600">2,500+</div>
+                        <div className="text-xs text-gray-600">Years History</div>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* CTA Buttons */}
                   <div className="flex flex-col sm:flex-row gap-4">
                     <Button
@@ -520,28 +546,27 @@ const CustomExperience = () => {
                     </CardContent>
                   </Card>
 
-                  {/* Popular Experiences Preview */}
+                  {/* Popular Destinations Preview */}
                   <Card className="border-2 border-purple-200 bg-white shadow-xl">
                     <CardContent className="p-6">
                       <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                         <MapPin className="w-5 h-5 text-purple-600" />
-                        Popular Experiences
+                        Popular Destinations
                       </h3>
                       <div className="space-y-3">
                         {[
-                          { name: 'Wildlife Safari', duration: '3-5 Days', price: 'From $450' },
-                          { name: 'Cultural Triangle', duration: '4-6 Days', price: 'From $650' },
-                          { name: 'Beach Paradise', duration: '5-7 Days', price: 'From $750' },
-                          { name: 'Tea Country Tour', duration: '3-4 Days', price: 'From $350' }
-                        ].map((experience, index) => (
+                          { name: 'Sigiriya', description: 'Ancient Rock Fortress', duration: '1-2 Days' },
+                          { name: 'Kandy', description: 'Cultural Capital', duration: '1-2 Days' },
+                          { name: 'Galle', description: 'Colonial Fort City', duration: '1 Day' },
+                          { name: 'Yala', description: 'Wildlife Safari', duration: '2-3 Days' }
+                        ].map((destination, index) => (
                           <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                             <div>
-                              <div className="font-semibold text-gray-900">{experience.name}</div>
-                              <div className="text-sm text-gray-600">{experience.duration}</div>
+                              <div className="font-semibold text-gray-900">{destination.name}</div>
+                              <div className="text-sm text-gray-600">{destination.description}</div>
                             </div>
                             <div className="text-right">
-                              <div className="font-bold text-purple-600">{experience.price}</div>
-                              <div className="text-xs text-gray-500">per person</div>
+                              <div className="text-sm font-medium text-purple-600">{destination.duration}</div>
                             </div>
                           </div>
                         ))}
@@ -549,29 +574,52 @@ const CustomExperience = () => {
                       <Button
                         variant="outline"
                         className="w-full mt-4 border-2 border-purple-500 text-purple-700 hover:bg-purple-50"
-                        onClick={() => navigate('/experiences')}
+                        onClick={() => navigate('/destinations')}
                       >
-                        View All Experiences
+                        Explore All Destinations
                         <ArrowRight className="ml-2 w-4 h-4" />
                       </Button>
                     </CardContent>
                   </Card>
 
-                  {/* Quick Stats */}
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="text-center p-4 bg-white rounded-lg shadow-md border-2 border-gray-100">
-                      <div className="text-2xl font-bold text-amber-600">15+</div>
-                      <div className="text-sm text-gray-600">Years Experience</div>
-                    </div>
-                    <div className="text-center p-4 bg-white rounded-lg shadow-md border-2 border-gray-100">
-                      <div className="text-2xl font-bold text-blue-600">500+</div>
-                      <div className="text-sm text-gray-600">Custom Trips</div>
-                    </div>
-                    <div className="text-center p-4 bg-white rounded-lg shadow-md border-2 border-gray-100">
-                      <div className="text-2xl font-bold text-green-600">98%</div>
-                      <div className="text-sm text-gray-600">Satisfaction</div>
-                    </div>
-                  </div>
+                  {/* Travel Tips */}
+                  <Card className="border-2 border-green-200 bg-white shadow-xl">
+                    <CardContent className="p-6">
+                      <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <Heart className="w-5 h-5 text-green-600" />
+                        Travel Tips
+                      </h3>
+                      <div className="space-y-3">
+                        <div className="flex items-start gap-3">
+                          <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center mt-0.5">
+                            <CheckCircle className="w-4 h-4 text-white" />
+                          </div>
+                          <div>
+                            <div className="font-medium text-gray-900 text-sm">Best Time to Visit</div>
+                            <div className="text-xs text-gray-600">December to March (Dry season)</div>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center mt-0.5">
+                            <CheckCircle className="w-4 h-4 text-white" />
+                          </div>
+                          <div>
+                            <div className="font-medium text-gray-900 text-sm">Currency</div>
+                            <div className="text-xs text-gray-600">Sri Lankan Rupee (LKR)</div>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center mt-0.5">
+                            <CheckCircle className="w-4 h-4 text-white" />
+                          </div>
+                          <div>
+                            <div className="font-medium text-gray-900 text-sm">Language</div>
+                            <div className="text-xs text-gray-600">Sinhala, Tamil, English</div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </motion.div>
               </div>
             </div>

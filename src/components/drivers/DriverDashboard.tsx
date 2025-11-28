@@ -2,7 +2,8 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { dbService, authService, storageService } from '@/lib/firebase-services'
+import { collection, doc, getDoc, getDocs, query, where, orderBy } from 'firebase/firestore'
+import { db, auth } from '@/lib/firebase'
 import { useAuth } from '@/hooks/useAuth'
 import type { DriverBooking } from '@/types/driver-booking'
 import DriverStatsCards from './DriverStatsCards'
@@ -43,14 +44,14 @@ const DriverDashboard = () => {
 
   const fetchDriverData = async () => {
     try {
-      const { data, error } = await supabase
-        .from('drivers')
-        .select('*')
-        .eq('email', user?.email)
-        .single()
-
-      if (error) throw error
-      setDriverData(data)
+      if (!auth.currentUser?.uid) return
+      
+      const driverRef = doc(db, 'drivers', auth.currentUser.uid)
+      const driverSnap = await getDoc(driverRef)
+      
+      if (driverSnap.exists()) {
+        setDriverData({ id: driverSnap.id, ...driverSnap.data() })
+      }
     } catch (error) {
       console.error('Error fetching driver data:', error)
     }
@@ -58,32 +59,42 @@ const DriverDashboard = () => {
 
   const fetchBookings = async () => {
     try {
-      const { data: driverRecord } = await supabase
-        .from('drivers')
-        .select('id, rating, overall_verification_status')
-        .eq('email', user?.email)
-        .single()
+      if (!auth.currentUser?.uid) {
+        setLoading(false)
+        return
+      }
 
-      if (!driverRecord) return
+      // Get driver document
+      const driverRef = doc(db, 'drivers', auth.currentUser.uid)
+      const driverSnap = await getDoc(driverRef)
 
-      const { data, error } = await supabase
-        .from('driver_bookings')
-        .select(`
-          *,
-          customers:customer_id(first_name, last_name, phone_number)
-        `)
-        .eq('driver_id', driverRecord.id)
-        .order('created_at', { ascending: false })
+      if (!driverSnap.exists()) {
+        setLoading(false)
+        return
+      }
 
-      if (error) throw error
+      const driverRecord = { id: driverSnap.id, ...driverSnap.data() } as any
 
-      setBookings(data || [])
+      // Get driver bookings
+      const bookingsQuery = query(
+        collection(db, 'driver_bookings'),
+        where('driver_id', '==', auth.currentUser.uid),
+        orderBy('created_at', 'desc')
+      )
+      const bookingsSnap = await getDocs(bookingsQuery)
+      
+      const bookingsData = bookingsSnap.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as DriverBooking[]
+
+      setBookings(bookingsData)
       
       // Calculate stats
-      const total = data?.length || 0
-      const completed = data?.filter(b => b.booking_status === 'completed').length || 0
-      const pending = data?.filter(b => b.booking_status === 'pending').length || 0
-      const earnings = data?.reduce((sum, b) => sum + (b.final_price || 0), 0) || 0
+      const total = bookingsData.length
+      const completed = bookingsData.filter(b => b.booking_status === 'completed').length
+      const pending = bookingsData.filter(b => b.booking_status === 'pending').length
+      const earnings = bookingsData.reduce((sum, b) => sum + (b.final_price || 0), 0)
 
       setStats({
         totalBookings: total,

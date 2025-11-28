@@ -6,8 +6,12 @@ import Redis from 'ioredis';
 const db = admin.firestore();
 
 // SendGrid API Key - Set via: firebase functions:config:set sendgrid.apikey="YOUR_API_KEY"
-const SENDGRID_API_KEY = functions.config().sendgrid?.apikey || '';
-sgMail.setApiKey(SENDGRID_API_KEY);
+const SENDGRID_API_KEY = functions.config().sendgrid?.apikey || process.env.SENDGRID_API_KEY || '';
+if (SENDGRID_API_KEY && SENDGRID_API_KEY.startsWith('SG.')) {
+  sgMail.setApiKey(SENDGRID_API_KEY);
+} else {
+  console.warn('SendGrid API key not set or invalid; email sending will be disabled until a valid key is configured.');
+}
 
 // Company email configuration
 const FROM_EMAIL = 'noreply@rechargetravels.com';
@@ -18,14 +22,19 @@ const REPLY_TO_EMAIL = 'info@rechargetravels.com';
 // Redis setup (optional). Configure via: firebase functions:config:set redis.url="redis://:password@host:port"
 const REDIS_URL = functions.config().redis?.url || process.env.REDIS_URL || '';
 let redis: Redis | null = null;
-if (REDIS_URL) {
+if (REDIS_URL && !REDIS_URL.includes('HOST:PORT')) {
   try {
     redis = new Redis(REDIS_URL);
+    redis.on('error', (err: any) => {
+      console.warn('Redis client error (ignored for rate-limiting):', err?.message || err);
+    });
     console.log('Redis client initialized for newsletter rate-limiting');
   } catch (err: any) {
     console.warn('Failed to initialize Redis client for rate-limiting:', err?.message || err);
     redis = null;
   }
+} else if (REDIS_URL) {
+  console.warn('REDIS_URL appears to be a placeholder; skipping Redis initialization.');
 }
 
 // Email templates

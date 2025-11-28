@@ -88,6 +88,7 @@ const DriverGuideProfile = lazy(() => import('@/pages/DriverGuideProfile'));
 const WalletTransactions = lazy(() => import('@/pages/WalletTransactions'));
 const AdminLogin = lazy(() => import('@/pages/AdminLogin'));
 const CustomTripRequestsAdmin = lazy(() => import('@/pages/admin/CustomTripRequests'));
+const DriverDashboard = lazy(() => import('@/pages/DriverDashboard'));
 
 // Redirect component for admin panel
 const AdminRedirect = () => {
