@@ -107,38 +107,68 @@ export const getCtaContent = async (): Promise<CtaContent | null> => {
 // Get Active Retreats
 export const getRetreats = async (): Promise<Retreat[]> => {
   try {
+    // Try compound query first (requires index)
     const q = query(
       collection(db, 'ayurveda_retreats'),
       where('isActive', '==', true),
       orderBy('order', 'asc')
     );
     const querySnapshot = await getDocs(q);
+    console.log('✅ Retreats fetched:', querySnapshot.docs.length);
     return querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     })) as Retreat[];
-  } catch (error) {
-    console.error('Error fetching retreats:', error);
-    return [];
+  } catch (error: any) {
+    console.error('Error fetching retreats with compound query:', error);
+    // Fallback: fetch all and filter/sort in memory (works without index)
+    try {
+      console.log('⚠️ Falling back to simple query for retreats...');
+      const simpleQuery = await getDocs(collection(db, 'ayurveda_retreats'));
+      const retreats = simpleQuery.docs
+        .map(doc => ({ id: doc.id, ...doc.data() } as Retreat))
+        .filter(r => r.isActive)
+        .sort((a, b) => (a.order || 0) - (b.order || 0));
+      console.log('✅ Retreats fetched (fallback):', retreats.length);
+      return retreats;
+    } catch (fallbackError) {
+      console.error('Fallback also failed:', fallbackError);
+      return [];
+    }
   }
 };
 
 // Get Active Treatments
 export const getTreatments = async (): Promise<Treatment[]> => {
   try {
+    // Try compound query first (requires index)
     const q = query(
       collection(db, 'ayurveda_treatments'),
       where('isActive', '==', true),
       orderBy('order', 'asc')
     );
     const querySnapshot = await getDocs(q);
+    console.log('✅ Treatments fetched:', querySnapshot.docs.length);
     return querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     })) as Treatment[];
-  } catch (error) {
-    console.error('Error fetching treatments:', error);
-    return [];
+  } catch (error: any) {
+    console.error('Error fetching treatments with compound query:', error);
+    // Fallback: fetch all and filter/sort in memory (works without index)
+    try {
+      console.log('⚠️ Falling back to simple query for treatments...');
+      const simpleQuery = await getDocs(collection(db, 'ayurveda_treatments'));
+      const treatments = simpleQuery.docs
+        .map(doc => ({ id: doc.id, ...doc.data() } as Treatment))
+        .filter(t => t.isActive)
+        .sort((a, b) => (a.order || 0) - (b.order || 0));
+      console.log('✅ Treatments fetched (fallback):', treatments.length);
+      return treatments;
+    } catch (fallbackError) {
+      console.error('Fallback also failed:', fallbackError);
+      return [];
+    }
   }
 };
 
@@ -150,18 +180,32 @@ export const getTestimonials = async (): Promise<Testimonial[]> => {
       where('isActive', '==', true)
     );
     const querySnapshot = await getDocs(q);
+    console.log('✅ Testimonials fetched:', querySnapshot.docs.length);
     return querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     })) as Testimonial[];
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching testimonials:', error);
-    return [];
+    // Fallback: fetch all and filter in memory
+    try {
+      console.log('⚠️ Falling back to simple query for testimonials...');
+      const simpleQuery = await getDocs(collection(db, 'ayurveda_testimonials'));
+      const testimonials = simpleQuery.docs
+        .map(doc => ({ id: doc.id, ...doc.data() } as Testimonial))
+        .filter(t => t.isActive);
+      console.log('✅ Testimonials fetched (fallback):', testimonials.length);
+      return testimonials;
+    } catch (fallbackError) {
+      console.error('Fallback also failed:', fallbackError);
+      return [];
+    }
   }
 };
 
 // Get All Ayurveda Page Data
 export const getAyurvedaPageData = async () => {
+  console.log('🔄 Loading Ayurveda page data...');
   const [hero, philosophy, cta, retreats, treatments, testimonials] = await Promise.all([
     getHeroContent(),
     getPhilosophyContent(),
@@ -170,6 +214,15 @@ export const getAyurvedaPageData = async () => {
     getTreatments(),
     getTestimonials()
   ]);
+
+  console.log('📊 Ayurveda data loaded:', {
+    hero: !!hero,
+    philosophy: !!philosophy,
+    cta: !!cta,
+    retreatsCount: retreats.length,
+    treatmentsCount: treatments.length,
+    testimonialsCount: testimonials.length
+  });
 
   return {
     hero,

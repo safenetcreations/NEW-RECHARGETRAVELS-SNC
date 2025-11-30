@@ -19,9 +19,124 @@ import {
     Search,
     Eye,
     EyeOff,
+    RotateCcw
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import ImageUpload from '@/components/ui/image-upload';
+
+// Initial data for seeding (same as in InteractiveTripBuilder)
+const INITIAL_DESTINATIONS = [
+    {
+        id: 'mirissa',
+        name: 'Mirissa',
+        lat: 5.9483,
+        lng: 80.4716,
+        description: 'Whale Watching Paradise',
+        image: 'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=400&h=300&fit=crop',
+        category: 'beach',
+        icon: '🏖️',
+        attractions: [
+            { id: 'whale-watching', name: 'Whale Watching Tour', price: 45, duration: 240, description: 'See majestic blue whales and dolphins', category: 'Wildlife' },
+            { id: 'mirissa-beach', name: 'Mirissa Beach Relaxation', price: 0, duration: 180, description: 'Enjoy golden sands and sunsets', category: 'Relaxation' },
+            { id: 'coconut-tree-hill', name: 'Coconut Tree Hill', price: 0, duration: 45, description: 'Iconic photo spot with palm trees', category: 'Nature' },
+            { id: 'secret-beach', name: 'Secret Beach', price: 0, duration: 120, description: 'Hidden gem with calm waters', category: 'Nature' },
+        ]
+    },
+    {
+        id: 'unawatuna',
+        name: 'Unawatuna',
+        lat: 6.0174,
+        lng: 80.2497,
+        description: 'Best Beach in Sri Lanka',
+        image: 'https://images.unsplash.com/photo-1586375300773-8384e3e4916f?w=400&h=300&fit=crop',
+        category: 'beach',
+        icon: '🌴',
+        attractions: [
+            { id: 'unawatuna-beach', name: 'Unawatuna Beach', price: 0, duration: 180, description: 'Crystal clear waters and coral reefs', category: 'Relaxation' },
+            { id: 'japanese-peace-pagoda', name: 'Japanese Peace Pagoda', price: 0, duration: 60, description: 'Beautiful white temple with ocean views', category: 'Culture' },
+            { id: 'jungle-beach', name: 'Jungle Beach', price: 0, duration: 120, description: 'Secluded beach surrounded by jungle', category: 'Nature' },
+        ]
+    },
+    {
+        id: 'sigiriya',
+        name: 'Sigiriya',
+        lat: 7.9570,
+        lng: 80.7603,
+        description: 'Ancient Lion Rock Fortress',
+        image: 'https://images.unsplash.com/photo-1586613835341-99f93b93809c?w=400&h=300&fit=crop',
+        category: 'culture',
+        icon: '🦁',
+        attractions: [
+            { id: 'lion-rock', name: 'Sigiriya Lion Rock', price: 30, duration: 180, description: 'UNESCO World Heritage ancient fortress', category: 'Culture' },
+            { id: 'pidurangala', name: 'Pidurangala Rock', price: 5, duration: 120, description: 'Best sunrise view of Sigiriya', category: 'Adventure' },
+            { id: 'sigiriya-museum', name: 'Sigiriya Museum', price: 5, duration: 45, description: 'Learn about ancient history', category: 'Culture' },
+        ]
+    },
+    {
+        id: 'kandy',
+        name: 'Kandy',
+        lat: 7.2906,
+        lng: 80.6337,
+        description: 'Cultural Capital of Sri Lanka',
+        image: 'https://images.unsplash.com/photo-1588598198321-4c8c6d733293?w=400&h=300&fit=crop',
+        category: 'culture',
+        icon: '🏛️',
+        attractions: [
+            { id: 'temple-tooth', name: 'Temple of the Tooth', price: 15, duration: 90, description: 'Sacred Buddhist temple with Buddha\'s tooth relic', category: 'Culture' },
+            { id: 'botanical-gardens', name: 'Royal Botanical Gardens', price: 10, duration: 120, description: 'Beautiful orchid collection and giant trees', category: 'Nature' },
+            { id: 'kandy-lake', name: 'Kandy Lake Walk', price: 0, duration: 45, description: 'Scenic walk around the lake', category: 'Relaxation' },
+            { id: 'cultural-show', name: 'Kandyan Dance Show', price: 15, duration: 90, description: 'Traditional Sri Lankan dance performance', category: 'Culture' },
+        ]
+    },
+    {
+        id: 'ella',
+        name: 'Ella',
+        lat: 6.8667,
+        lng: 81.0466,
+        description: 'Scenic Mountain Village',
+        image: 'https://images.unsplash.com/photo-1571296251827-6e6ce8929b48?w=400&h=300&fit=crop',
+        category: 'mountain',
+        icon: '⛰️',
+        attractions: [
+            { id: 'nine-arch', name: 'Nine Arch Bridge', price: 0, duration: 60, description: 'Iconic colonial-era railway bridge', category: 'Culture' },
+            { id: 'little-adams-peak', name: 'Little Adam\'s Peak', price: 0, duration: 90, description: 'Easy hike with stunning views', category: 'Adventure' },
+            { id: 'ravana-falls', name: 'Ravana Falls', price: 0, duration: 30, description: 'Beautiful waterfall by the road', category: 'Nature' },
+            { id: 'ella-rock', name: 'Ella Rock Hike', price: 0, duration: 180, description: 'Challenging hike with panoramic views', category: 'Adventure' },
+            { id: 'train-ride', name: 'Scenic Train Ride', price: 5, duration: 180, description: 'Most beautiful train journey in the world', category: 'Adventure' },
+        ]
+    },
+    {
+        id: 'yala',
+        name: 'Yala',
+        lat: 6.3716,
+        lng: 81.5168,
+        description: 'Best Leopard Spotting',
+        image: 'https://images.unsplash.com/photo-1574870111867-089730e5a72b?w=400&h=300&fit=crop',
+        category: 'wildlife',
+        icon: '🐆',
+        attractions: [
+            { id: 'yala-safari', name: 'Yala Safari (Half Day)', price: 60, duration: 240, description: 'See leopards, elephants, and more', category: 'Wildlife' },
+            { id: 'yala-full-safari', name: 'Yala Safari (Full Day)', price: 100, duration: 480, description: 'Full day wildlife adventure', category: 'Wildlife' },
+        ]
+    },
+    {
+        id: 'colombo',
+        name: 'Colombo',
+        lat: 6.9271,
+        lng: 79.8612,
+        description: 'Vibrant Capital City',
+        image: 'https://images.unsplash.com/photo-1578469550956-0e16b69c6a3d?w=400&h=300&fit=crop',
+        category: 'city',
+        icon: '🏙️',
+        attractions: [
+            { id: 'gangaramaya', name: 'Gangaramaya Temple', price: 5, duration: 60, description: 'Famous Buddhist temple', category: 'Culture' },
+            { id: 'lotus-tower', name: 'Lotus Tower', price: 20, duration: 90, description: 'Tallest tower in South Asia', category: 'Adventure' },
+            { id: 'national-museum', name: 'National Museum', price: 10, duration: 120, description: 'Sri Lanka\'s history and art', category: 'Culture' },
+            { id: 'galle-face', name: 'Galle Face Green', price: 0, duration: 60, description: 'Ocean-side promenade', category: 'Relaxation' },
+        ]
+    }
+];
 
 interface Attraction {
     id: string;
@@ -115,6 +230,32 @@ const TripBuilderManager: React.FC = () => {
         } catch (error) {
             console.error('Error loading data:', error);
             toast.error('Failed to load data');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSeedData = async () => {
+        if (!confirm('This will add default destinations to your database. Continue?')) return;
+
+        setLoading(true);
+        try {
+            for (const dest of INITIAL_DESTINATIONS) {
+                // Check if already exists by ID or Name to avoid duplicates
+                const exists = destinations.some(d => d.id === dest.id || d.name === dest.name);
+                if (!exists) {
+                    await addDoc(collection(db, 'trip_destinations'), {
+                        ...dest,
+                        enabled: true,
+                        createdAt: Timestamp.now(),
+                    });
+                }
+            }
+            toast.success(`Default destinations added`);
+            loadData();
+        } catch (error) {
+            console.error('Error seeding data:', error);
+            toast.error('Failed to seed data');
         } finally {
             setLoading(false);
         }
@@ -264,12 +405,20 @@ const TripBuilderManager: React.FC = () => {
                     <h2 className="text-3xl font-bold text-gray-900">Trip Builder Management</h2>
                     <p className="text-gray-600 mt-1">Manage destinations, attractions, and booking requests</p>
                 </div>
-                {activeTab === 'destinations' && (
-                    <Button onClick={() => openEditModal()} className="bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add Destination
-                    </Button>
-                )}
+                <div className="flex gap-2">
+                    {activeTab === 'destinations' && (
+                        <>
+                            <Button onClick={handleSeedData} variant="outline" className="gap-2">
+                                <RotateCcw className="w-4 h-4" />
+                                Seed Default Data
+                            </Button>
+                            <Button onClick={() => openEditModal()} className="bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700">
+                                <Plus className="h-4 w-4 mr-2" />
+                                Add Destination
+                            </Button>
+                        </>
+                    )}
+                </div>
             </div>
 
             {/* Tabs */}
@@ -277,8 +426,8 @@ const TripBuilderManager: React.FC = () => {
                 <button
                     onClick={() => setActiveTab('destinations')}
                     className={`px-6 py-3 font-medium transition-all ${activeTab === 'destinations'
-                            ? 'text-teal-600 border-b-2 border-teal-600'
-                            : 'text-gray-500 hover:text-gray-700'
+                        ? 'text-teal-600 border-b-2 border-teal-600'
+                        : 'text-gray-500 hover:text-gray-700'
                         }`}
                 >
                     <Map className="inline h-5 w-5 mr-2" />
@@ -287,8 +436,8 @@ const TripBuilderManager: React.FC = () => {
                 <button
                     onClick={() => setActiveTab('bookings')}
                     className={`px-6 py-3 font-medium transition-all ${activeTab === 'bookings'
-                            ? 'text-teal-600 border-b-2 border-teal-600'
-                            : 'text-gray-500 hover:text-gray-700'
+                        ? 'text-teal-600 border-b-2 border-teal-600'
+                        : 'text-gray-500 hover:text-gray-700'
                         }`}
                 >
                     <MapPin className="inline h-5 w-5 mr-2" />
@@ -348,6 +497,13 @@ const TripBuilderManager: React.FC = () => {
                                     <CardDescription>{dest.description}</CardDescription>
                                 </CardHeader>
                                 <CardContent>
+                                    <div className="relative h-32 mb-4 rounded-md overflow-hidden">
+                                        <img
+                                            src={dest.image}
+                                            alt={dest.name}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
                                     <div className="space-y-2 text-sm">
                                         <div className="text-gray-600">
                                             📍 {dest.lat.toFixed(4)}, {dest.lng.toFixed(4)}
@@ -519,14 +675,17 @@ const TripBuilderManager: React.FC = () => {
                                         placeholder="🏖️"
                                     />
                                 </div>
-                                <div>
-                                    <Label>Image URL</Label>
-                                    <Input
-                                        value={editingDestination.image}
-                                        onChange={(e) => setEditingDestination({ ...editingDestination, image: e.target.value })}
-                                        placeholder="https://..."
-                                    />
-                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label>Image</Label>
+                                <ImageUpload
+                                    value={editingDestination.image}
+                                    onChange={(url) => setEditingDestination({ ...editingDestination, image: url })}
+                                    onRemove={() => setEditingDestination({ ...editingDestination, image: '' })}
+                                    folder="trip-destinations"
+                                    helperText="Recommended: 400x300px (4:3 aspect ratio)"
+                                />
                             </div>
 
                             <div>

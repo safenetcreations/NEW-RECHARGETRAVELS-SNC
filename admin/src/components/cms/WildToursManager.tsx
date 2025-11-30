@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import {
-    Plus, Edit, Trash2, Save, X, Church, DollarSign, Clock,
+    Plus, Edit, Trash2, Save, X, Compass, DollarSign, Clock,
     Users, MapPin, Star, Image, Upload, Eye, EyeOff, Award, Calendar, Search
 } from 'lucide-react';
 import {
@@ -34,8 +34,6 @@ interface WildToursTour {
     difficulty: string;
     maxGroupSize: number;
     included: string[];
-    menu?: string[];
-    chef?: string;
     featured?: boolean;
     videoUrl?: string;
     gallery?: string[];
@@ -43,6 +41,9 @@ interface WildToursTour {
     is_active: boolean;
     created_at?: any;
     updated_at?: any;
+    startLocation?: string;
+    transportNote?: string;
+    importantInfo?: string[];
 }
 
 interface Booking {
@@ -82,30 +83,32 @@ export const WildToursToursManager = () => {
         image: '',
         rating: 4.5,
         reviews: 0,
-        category: 'cooking-class',
+        category: 'wildlife-spotting',
         highlights: [],
         difficulty: 'Easy',
         maxGroupSize: 10,
         included: [],
-        menu: [],
-        chef: '',
         featured: false,
         videoUrl: '',
         gallery: [],
         availability: 'Available',
         is_active: true,
+        startLocation: '',
+        transportNote: '',
+        importantInfo: [],
     });
 
     const [highlightInput, setHighlightInput] = useState('');
     const [includedInput, setIncludedInput] = useState('');
-    const [menuInput, setMenuInput] = useState('');
+    const [importantInfoInput, setImportantInfoInput] = useState('');
 
     const categories = [
-        { value: 'cooking-class', label: 'Cooking Class' },
-        { value: 'street-food', label: 'Street Food Tour' },
-        { value: 'fine-dining', label: 'Fine Dining' },
-        { value: 'spice-garden', label: 'Spice Garden' },
-        { value: 'tea-experience', label: 'Tea Experience' },
+        { value: 'wildlife-spotting', label: 'Wildlife Spotting' },
+        { value: 'jeep-adventure', label: 'Jeep Adventure' },
+        { value: 'jungle-trek', label: 'Jungle Trek' },
+        { value: 'family-safari', label: 'Family Safari' },
+        { value: 'birding', label: 'Birding Cruise' },
+        { value: 'multi-day', label: 'Multi-day Expedition' },
     ];
 
     const difficulties = [
@@ -122,10 +125,16 @@ export const WildToursToursManager = () => {
             const q = query(toursRef, orderBy('created_at', 'desc'));
             const snapshot = await getDocs(q);
 
-            const toursData = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            } as WildToursTour));
+            const toursData = snapshot.docs.map(doc => {
+                const data = doc.data() as WildToursTour;
+                return {
+                    id: doc.id,
+                    ...data,
+                    startLocation: data.startLocation || '',
+                    transportNote: data.transportNote || '',
+                    importantInfo: data.importantInfo || [],
+                };
+            });
 
             setTours(toursData);
         } catch (error) {
@@ -228,14 +237,14 @@ export const WildToursToursManager = () => {
 
                 toast({
                     title: "Success",
-                    description: "Hill Country tour created successfully"
+                    description: "Wild tour created successfully"
                 });
             } else if (selectedTour?.id) {
                 await updateDoc(doc(db, 'wildtours_tours', selectedTour.id), tourData);
 
                 toast({
                     title: "Success",
-                    description: "Hill Country tour updated successfully"
+                    description: "Wild tour updated successfully"
                 });
             }
 
@@ -307,30 +316,36 @@ export const WildToursToursManager = () => {
             image: '',
             rating: 4.5,
             reviews: 0,
-            category: 'cooking-class',
+            category: 'wildlife-spotting',
             highlights: [],
             difficulty: 'Easy',
             maxGroupSize: 10,
             included: [],
-            menu: [],
-            chef: '',
             featured: false,
             videoUrl: '',
             gallery: [],
             availability: 'Available',
             is_active: true,
+            startLocation: '',
+            transportNote: '',
+            importantInfo: [],
         });
         setSelectedTour(null);
         setIsEditing(false);
         setIsCreating(false);
         setHighlightInput('');
         setIncludedInput('');
-        setMenuInput('');
+        setImportantInfoInput('');
     };
 
     const startEdit = (tour: WildToursTour) => {
         setSelectedTour(tour);
-        setFormData(tour);
+        setFormData({
+            ...tour,
+            startLocation: tour.startLocation || '',
+            transportNote: tour.transportNote || '',
+            importantInfo: tour.importantInfo || [],
+        });
         setIsEditing(true);
         setIsCreating(false);
     };
@@ -341,7 +356,7 @@ export const WildToursToursManager = () => {
         setIsEditing(true);
     };
 
-    const addArrayItem = (field: 'highlights' | 'included' | 'menu', value: string) => {
+    const addArrayItem = (field: 'highlights' | 'included' | 'importantInfo', value: string) => {
         if (!value.trim()) return;
 
         setFormData(prev => ({
@@ -352,10 +367,10 @@ export const WildToursToursManager = () => {
         // Reset input
         if (field === 'highlights') setHighlightInput('');
         if (field === 'included') setIncludedInput('');
-        if (field === 'menu') setMenuInput('');
+        if (field === 'importantInfo') setImportantInfoInput('');
     };
 
-    const removeArrayItem = (field: 'highlights' | 'included' | 'menu' | 'gallery', index: number) => {
+    const removeArrayItem = (field: 'highlights' | 'included' | 'importantInfo' | 'gallery', index: number) => {
         setFormData(prev => ({
             ...prev,
             [field]: (prev[field] || []).filter((_, i) => i !== index)
@@ -383,10 +398,10 @@ export const WildToursToursManager = () => {
             <div className="flex justify-between items-center">
                 <div>
                     <h2 className="text-3xl font-bold flex items-center gap-2">
-                        <Church className="h-8 w-8 text-orange-600" />
-                        Hill Country Tours Management
+                        <Compass className="h-8 w-8 text-green-600" />
+                        Wild Tours Management
                     </h2>
-                    <p className="text-muted-foreground">Manage wildtours experiences and bookings</p>
+                    <p className="text-muted-foreground">Manage safari, trekking, and wildlife experiences plus bookings</p>
                 </div>
 
                 <Button
@@ -650,28 +665,42 @@ export const WildToursToursManager = () => {
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="chef">Chef Name</Label>
-                                            <Input
-                                                id="chef"
-                                                value={formData.chef}
-                                                onChange={(e) => setFormData(prev => ({ ...prev, chef: e.target.value }))}
-                                                placeholder="e.g., Chef Kumari"
-                                            />
-                                        </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="startLocation">Departure hub / start location</Label>
+                                                <Input
+                                                    id="startLocation"
+                                                    placeholder="e.g., Yala Main Gate / Tissamaharama"
+                                                    value={formData.startLocation || ''}
+                                                    onChange={(e) => setFormData(prev => ({ ...prev, startLocation: e.target.value }))}
+                                                />
+                                            </div>
 
-                                        <div className="space-y-2">
-                                            <Label htmlFor="rating">Rating</Label>
-                                            <Input
-                                                id="rating"
-                                                type="number"
-                                                step="0.1"
-                                                min="0"
-                                                max="5"
-                                                value={formData.rating}
-                                                onChange={(e) => setFormData(prev => ({ ...prev, rating: parseFloat(e.target.value) || 4.5 }))}
-                                            />
-                                        </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="rating">Rating</Label>
+                                                <Input
+                                                    id="rating"
+                                                    type="number"
+                                                    step="0.1"
+                                                    min="0"
+                                                    max="5"
+                                                    value={formData.rating}
+                                                    onChange={(e) => setFormData(prev => ({ ...prev, rating: parseFloat(e.target.value) || 4.5 }))}
+                                                />
+                                            </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="transportNote">Transport note</Label>
+                                        <Textarea
+                                            id="transportNote"
+                                            rows={2}
+                                            placeholder="Explain where pickup begins and how additional transfers are billed..."
+                                            value={formData.transportNote || ''}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, transportNote: e.target.value }))}
+                                        />
+                                        <p className="text-xs text-muted-foreground">
+                                            Displayed inside the booking dialog so travellers understand when extra transport fees apply.
+                                        </p>
                                     </div>
 
                                     {/* Image Upload */}
@@ -763,6 +792,41 @@ export const WildToursToursManager = () => {
                                         </div>
                                     </div>
 
+                                    {/* Important Notes */}
+                                    <div className="space-y-2">
+                                        <Label>Important Notes</Label>
+                                        <div className="flex gap-2">
+                                            <Input
+                                                value={importantInfoInput}
+                                                onChange={(e) => setImportantInfoInput(e.target.value)}
+                                                placeholder="Add arrival requirements, permit reminders..."
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter') {
+                                                        e.preventDefault();
+                                                        addArrayItem('importantInfo', importantInfoInput);
+                                                    }
+                                                }}
+                                            />
+                                            <Button
+                                                type="button"
+                                                onClick={() => addArrayItem('importantInfo', importantInfoInput)}
+                                            >
+                                                <Plus className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                        <div className="flex flex-wrap gap-2 mt-2">
+                                            {(formData.importantInfo || []).map((item, idx) => (
+                                                <Badge key={idx} variant="secondary" className="flex items-center gap-1">
+                                                    {item}
+                                                    <X
+                                                        className="h-3 w-3 cursor-pointer"
+                                                        onClick={() => removeArrayItem('importantInfo', idx)}
+                                                    />
+                                                </Badge>
+                                            ))}
+                                        </div>
+                                    </div>
+
                                     {/* Toggles */}
                                     <div className="flex items-center gap-4">
                                         <label className="flex items-center gap-2 cursor-pointer">
@@ -810,8 +874,8 @@ export const WildToursToursManager = () => {
                 <TabsContent value="bookings" className="space-y-4">
                     <Card>
                         <CardHeader>
-                            <CardTitle>Hill Country Tour Bookings</CardTitle>
-                            <CardDescription>Manage customer bookings and reservations</CardDescription>
+                            <CardTitle>Wild Tour Bookings</CardTitle>
+                            <CardDescription>Manage reservation requests and status updates</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             {filteredBookings.map((booking) => (

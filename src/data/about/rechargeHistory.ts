@@ -9,6 +9,7 @@ export interface TimelineEvent {
   highlights: string[]
   galleryPlaceholders: string[]
   location?: string
+  images?: string[]
 }
 
 export interface CompanyStat {
@@ -84,6 +85,7 @@ export const timelineEvents: TimelineEvent[] = [
     ],
     galleryPlaceholders: ['First Office Photo', 'Founding Team'],
     location: 'Colombo, Sri Lanka',
+    images: [],
   },
   {
     id: 'expansion-2015',
@@ -98,6 +100,39 @@ export const timelineEvents: TimelineEvent[] = [
     ],
     galleryPlaceholders: ['Tourism Board Certificate', 'Bambalapitiya Office'],
     location: 'Bambalapitiya, Colombo',
+    images: [],
+  },
+  {
+    id: 'growth-2016',
+    yearRange: '2016',
+    title: 'Growing Reputation',
+    description:
+      'Building a strong reputation across Sri Lanka with consistent quality service and expanding customer base.',
+    type: 'success',
+    highlights: [
+      'Customer base grows significantly',
+      'Positive reviews across platforms',
+      'Team expansion',
+    ],
+    galleryPlaceholders: ['Team Photo', 'Happy Customers'],
+    location: 'Colombo, Sri Lanka',
+    images: [],
+  },
+  {
+    id: 'awards-2017',
+    yearRange: '2017',
+    title: 'Award-Winning Service',
+    description:
+      'TripAdvisor Certificate of Excellence awarded, recognizing consistent high-quality service and customer satisfaction.',
+    type: 'success',
+    highlights: [
+      'First TripAdvisor Certificate of Excellence',
+      'Growing international clientele',
+      'Enhanced fleet quality',
+    ],
+    galleryPlaceholders: ['TripAdvisor Award', 'Fleet Upgrade'],
+    location: 'Colombo, Sri Lanka',
+    images: [],
   },
   {
     id: 'katunayake-2018',
@@ -118,21 +153,7 @@ export const timelineEvents: TimelineEvent[] = [
       'Operations Center',
     ],
     location: 'Katunayake, Sri Lanka',
-  },
-  {
-    id: 'awards-2017-2019',
-    yearRange: '2017-19',
-    title: 'Excellence Recognized',
-    description:
-      'TripAdvisor Certificates of Excellence awarded three years running while Recharge Travels launches a northern hub in Jaffna and secures global platform partnerships.',
-    type: 'success',
-    highlights: [
-      'TripAdvisor Certificates of Excellence (2017, 2018, 2019)',
-      'Jaffna branch opens at Cargills Square',
-      'Partnerships with GetTransfer and Booking.com',
-    ],
-    galleryPlaceholders: ['TripAdvisor Awards', 'Jaffna Branch'],
-    location: 'Colombo & Jaffna',
+    images: [],
   },
   {
     id: 'resilience-2019',
@@ -145,52 +166,107 @@ export const timelineEvents: TimelineEvent[] = [
       'Tourism demand collapses post-April attacks',
       'Rapid recovery through community support operations',
       'Logistics for 15,000 travellers delivered successfully',
+      'Jaffna branch opens at Cargills Square',
     ],
     galleryPlaceholders: ['Bohra Event Fleet', 'Community Service'],
     location: 'Island-wide operations',
+    images: [],
   },
   {
-    id: 'pandemic-2020-2022',
-    yearRange: '2020-22',
-    title: 'Pandemic Challenges',
+    id: 'pandemic-2020',
+    yearRange: '2020',
+    title: 'Pandemic Begins',
     description:
-      'Extended airport closures halt tourism. Fleet losses and vandalism test the company, but the team perseveres and begins rebuilding as borders reopen in 2022.',
+      'COVID-19 pandemic hits Sri Lanka. Airport closures halt tourism operations but the team remains committed.',
     type: 'crisis',
     highlights: [
-      'Airport closed for an extended period',
-      'Six months of curfew and asset losses',
-      'Gradual relaunch as tourism restarts in 2022',
+      'Airport closed for extended period',
+      'Tourism industry shutdown',
+      'Team remains committed through uncertainty',
     ],
-    galleryPlaceholders: ['Empty Airport', 'Team During Crisis'],
+    galleryPlaceholders: ['Empty Airport', 'Team Unity'],
     location: 'Sri Lanka',
+    images: [],
   },
   {
-    id: 'economic-downturn-2022-2024',
-    yearRange: '2022-24',
-    title: 'Economic Challenges',
+    id: 'perseverance-2021',
+    yearRange: '2021',
+    title: 'Perseverance Through Crisis',
     description:
-      "Sri Lanka's worst economic crisis pressures operations and fleet financing. Recharge Travels retains its core team and maintains customer commitments.",
+      'Extended lockdowns and curfews test the company. Fleet faces challenges but the core team perseveres.',
+    type: 'crisis',
+    highlights: [
+      'Six months of curfew',
+      'Maintaining fleet during closures',
+      'Planning for recovery',
+    ],
+    galleryPlaceholders: ['Team During Crisis', 'Hope for Future'],
+    location: 'Sri Lanka',
+    images: [],
+  },
+  {
+    id: 'restart-2022',
+    yearRange: '2022',
+    title: 'Economic Challenges & Restart',
+    description:
+      'Sri Lanka faces its worst economic crisis. As borders reopen, Recharge Travels begins rebuilding operations.',
     type: 'crisis',
     highlights: [
       'Economic instability increases operating costs',
-      'Core operations protected despite pressure',
+      'Borders reopen for tourism',
+      'Gradual relaunch of services',
     ],
-    galleryPlaceholders: ['Team Resilience', 'Adaptation Strategies'],
+    galleryPlaceholders: ['Reopening', 'Recovery Begins'],
     location: 'Sri Lanka',
+    images: [],
+  },
+  {
+    id: 'rebuilding-2023',
+    yearRange: '2023',
+    title: 'Rebuilding Momentum',
+    description:
+      'Tourism slowly returns to Sri Lanka. Recharge Travels retains its core team and maintains customer commitments.',
+    type: 'milestone',
+    highlights: [
+      'Core operations protected',
+      'Customer trust maintained',
+      'Partnerships renewed',
+    ],
+    galleryPlaceholders: ['Team Resilience', 'Customer Service'],
+    location: 'Sri Lanka',
+    images: [],
+  },
+  {
+    id: 'strengthening-2024',
+    yearRange: '2024',
+    title: 'Strengthening Position',
+    description:
+      'Recovery continues with renewed focus on quality service and customer experience excellence.',
+    type: 'success',
+    highlights: [
+      'Fleet modernization begins',
+      'Enhanced customer service',
+      'Digital booking improvements',
+    ],
+    galleryPlaceholders: ['New Fleet', 'Digital Transformation'],
+    location: 'Sri Lanka',
+    images: [],
   },
   {
     id: 'comeback-2025',
     yearRange: '2025',
     title: 'The Phoenix Rises',
     description:
-      'Recharge Travels returns to growth with renewed energy, repositioning as Sri Lanka’s premier tourist transport and experience operator.',
+      "Recharge Travels returns to growth with renewed energy, repositioning as Sri Lanka's premier tourist transport and experience operator.",
     type: 'success',
     highlights: [
       'Fleet revitalisation plan underway',
       'New concierge-driven guest experience',
+      'Expanded luxury services',
     ],
     galleryPlaceholders: ['New Beginning', 'Future Vision'],
     location: 'Sri Lanka',
+    images: [],
   },
 ]
 

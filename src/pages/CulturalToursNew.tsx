@@ -7,19 +7,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-    Mountain, Clock, Users, Star, Calendar, MapPin, Heart, Share2,
-    Filter, Search, Play, X, Check, Award, TreePine, Coffee, Train,
-    Crown, Home, Leaf, Camera, TrendingUp, MessageCircle
+    Mountain, Clock, Users, Star, MapPin, Heart,
+    Filter, Search, Play, Award, TreePine, Coffee, Train,
+    Crown, Home, Leaf, TrendingUp, MessageCircle
 } from 'lucide-react';
-import { collection, getDocs, query, where, orderBy, addDoc, updateDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { BookingWizard } from '@/components/booking/BookingWizard';
 
 interface CulturalTour {
     id: string;
@@ -42,6 +40,7 @@ interface CulturalTour {
     videoUrl?: string;
     gallery?: string[];
     bestSeason?: string;
+    pickupOptions?: { id: string; label: string; time: string; additionalCost: number }[];
 }
 
 interface Review {
@@ -55,17 +54,6 @@ interface Review {
     helpful: number;
 }
 
-interface Booking {
-    tourId: string;
-    tourTitle: string;
-    date: string;
-    guests: number;
-    specialRequests?: string;
-    contactName: string;
-    contactEmail: string;
-    contactPhone: string;
-}
-
 const CulturalToursNew = () => {
     const [tours, setTours] = useState<CulturalTour[]>([]);
     const [filteredTours, setFilteredTours] = useState<CulturalTour[]>([]);
@@ -75,7 +63,6 @@ const CulturalToursNew = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [priceFilter, setPriceFilter] = useState('all');
     const [selectedTour, setSelectedTour] = useState<CulturalTour | null>(null);
-    const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
     const [wishlist, setWishlist] = useState<string[]>([]);
 
     const { user } = useAuth();
@@ -167,42 +154,6 @@ const CulturalToursNew = () => {
         }
 
         setFilteredTours(filtered);
-    };
-
-    const handleBooking = async (bookingData: Booking) => {
-        try {
-            if (!user) {
-                toast({
-                    title: "Login Required",
-                    description: "Please login to book a hill country experience",
-                    variant: "destructive",
-                });
-                navigate('/login');
-                return;
-            }
-
-            const bookingsRef = collection(db, 'cultural_bookings');
-            await addDoc(bookingsRef, {
-                ...bookingData,
-                userId: user.uid,
-                status: 'pending',
-                createdAt: new Date().toISOString(),
-            });
-
-            toast({
-                title: "Booking Submitted!",
-                description: "Your hill country experience has been booked. We'll contact you soon.",
-            });
-
-            setBookingDialogOpen(false);
-        } catch (error) {
-            console.error('Error creating booking:', error);
-            toast({
-                title: "Error",
-                description: "Failed to submit booking. Please try again.",
-                variant: "destructive",
-            });
-        }
     };
 
     const toggleWishlist = (tourId: string) => {
@@ -358,7 +309,7 @@ const CulturalToursNew = () => {
                                         <Filter className="w-4 h-4 mr-2" />
                                         <SelectValue placeholder="Category" />
                                     </SelectTrigger>
-                                    <SelectContent>
+                                    <SelectContent className="bg-white">
                                         <SelectItem value="all">All Experiences</SelectItem>
                                         <SelectItem value="temple-tour">Tea Tastings</SelectItem>
                                         <SelectItem value="heritage-stay">Estate Stays</SelectItem>
@@ -372,7 +323,7 @@ const CulturalToursNew = () => {
                                     <SelectTrigger className="w-[160px] rounded-full border-2 border-green-200 bg-white shadow-sm">
                                         <SelectValue placeholder="Price Range" />
                                     </SelectTrigger>
-                                    <SelectContent>
+                                    <SelectContent className="bg-white">
                                         <SelectItem value="all">All Prices</SelectItem>
                                         <SelectItem value="budget">Under $200</SelectItem>
                                         <SelectItem value="mid">$200 - $500</SelectItem>
@@ -530,11 +481,9 @@ const CulturalToursNew = () => {
             <Footer />
 
             {selectedTour && (
-                <BookingDialog
+                <BookingWizard
                     tour={selectedTour}
-                    open={bookingDialogOpen}
-                    onOpenChange={setBookingDialogOpen}
-                    onBook={handleBooking}
+                    onClose={() => setSelectedTour(null)}
                 />
             )}
         </>
@@ -629,17 +578,12 @@ const TourGrid = ({ tours, onSelectTour, wishlist, onToggleWishlist }: any) => {
                                 ${tour.price}
                                 <span className="text-sm font-normal text-gray-500">/person</span>
                             </div>
-                            <Dialog>
-                                <DialogTrigger asChild>
-                                    <Button
-                                        className="bg-gradient-to-r from-green-600 to-amber-600 hover:from-green-700 hover:to-amber-700 text-white rounded-full px-6 shadow-lg transform hover:scale-105 transition-all duration-300"
-                                        onClick={() => onSelectTour(tour)}
-                                    >
-                                        Reserve Now
-                                    </Button>
-                                </DialogTrigger>
-                                <BookingDialogContent tour={tour} />
-                            </Dialog>
+                            <Button
+                                className="bg-gradient-to-r from-green-600 to-amber-600 hover:from-green-700 hover:to-amber-700 text-white rounded-full px-6 shadow-lg transform hover:scale-105 transition-all duration-300"
+                                onClick={() => onSelectTour(tour)}
+                            >
+                                Reserve Now
+                            </Button>
                         </div>
                     </CardContent>
                 </Card>
@@ -648,289 +592,105 @@ const TourGrid = ({ tours, onSelectTour, wishlist, onToggleWishlist }: any) => {
     );
 };
 
-// Booking Dialog Component
-const BookingDialogContent = ({ tour }: { tour: CulturalTour }) => {
-    const [bookingData, setBookingData] = useState({
-        date: '',
-        guests: 1,
-        contactName: '',
-        contactEmail: '',
-        contactPhone: '',
-        specialRequests: '',
-    });
-
-    return (
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-                <DialogTitle className="text-2xl font-serif">{tour.title}</DialogTitle>
-                <DialogDescription>
-                    Complete your booking for this hill country experience
-                </DialogDescription>
-            </DialogHeader>
-
-            <div className="space-y-6 py-4">
-                <div className="bg-green-50 rounded-lg p-4 border border-green-200">
-                    <div className="flex justify-between items-start mb-3">
-                        <div>
-                            <div className="font-semibold text-gray-900">{tour.location}</div>
-                            <div className="text-sm text-gray-600">{tour.duration}</div>
-                        </div>
-                        <div className="text-right">
-                            <div className="text-2xl font-bold text-green-600">${tour.price}</div>
-                            <div className="text-sm text-gray-600">per person</div>
-                        </div>
-                    </div>
-
-                    {tour.highlights && (
-                        <div className="flex flex-wrap gap-2 mt-3">
-                            {tour.highlights.slice(0, 4).map((highlight, i) => (
-                                <Badge key={i} className="bg-green-100 text-green-800 text-xs">
-                                    <Check className="w-3 h-3 mr-1" />
-                                    {highlight}
-                                </Badge>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Date</label>
-                            <Input
-                                type="date"
-                                value={bookingData.date}
-                                onChange={(e) => setBookingData({ ...bookingData, date: e.target.value })}
-                                className="border-green-200 focus:border-green-500"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Number of Guests</label>
-                            <Input
-                                type="number"
-                                min="1"
-                                max={tour.maxGroupSize}
-                                value={bookingData.guests}
-                                onChange={(e) => setBookingData({ ...bookingData, guests: parseInt(e.target.value) })}
-                                className="border-green-200 focus:border-green-500"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium">Full Name</label>
-                        <Input
-                            placeholder="Your full name"
-                            value={bookingData.contactName}
-                            onChange={(e) => setBookingData({ ...bookingData, contactName: e.target.value })}
-                            className="border-green-200 focus:border-green-500"
-                        />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Email</label>
-                            <Input
-                                type="email"
-                                placeholder="your@email.com"
-                                value={bookingData.contactEmail}
-                                onChange={(e) => setBookingData({ ...bookingData, contactEmail: e.target.value })}
-                                className="border-green-200 focus:border-green-500"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Phone</label>
-                            <Input
-                                type="tel"
-                                placeholder="+94 XX XXX XXXX"
-                                value={bookingData.contactPhone}
-                                onChange={(e) => setBookingData({ ...bookingData, contactPhone: e.target.value })}
-                                className="border-green-200 focus:border-green-500"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium">Special Requests (Optional)</label>
-                        <Textarea
-                            placeholder="Dietary requirements, preferences, or special requirements..."
-                            rows={3}
-                            value={bookingData.specialRequests}
-                            onChange={(e) => setBookingData({ ...bookingData, specialRequests: e.target.value })}
-                            className="border-green-200 focus:border-green-500 resize-none"
-                        />
-                    </div>
-                </div>
-
-                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                    <div className="flex justify-between items-center mb-2">
-                        <span className="text-gray-600">Price per person</span>
-                        <span className="font-semibold">${tour.price}</span>
-                    </div>
-                    <div className="flex justify-between items-center mb-2">
-                        <span className="text-gray-600">Number of guests</span>
-                        <span className="font-semibold">× {bookingData.guests}</span>
-                    </div>
-                    <div className="border-t border-gray-300 pt-2 mt-2">
-                        <div className="flex justify-between items-center">
-                            <span className="text-lg font-bold">Total</span>
-                            <span className="text-2xl font-bold text-green-600">
-                                ${tour.price * bookingData.guests}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <Button
-                    className="w-full bg-gradient-to-r from-green-600 to-amber-600 hover:from-green-700 hover:to-amber-700 text-white py-6 text-lg rounded-full shadow-lg"
-                >
-                    Confirm Booking
-                </Button>
-            </div>
-        </DialogContent>
-    );
-};
-
-const BookingDialog = ({ tour, open, onOpenChange, onBook }: any) => {
-    return null;
-};
-
 // Default data
 const defaultCulturalTours: CulturalTour[] = [
     {
         id: '1',
-        title: "Private Tea Tasting with Estate Master",
-        location: "Nuwara Eliya",
-        image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800",
-        description: "Exclusive sessions with master tea makers at century-old plantations. Experience rare Ceylon varieties in historic tea rooms.",
-        highlights: ["Estate Master Guidance", "Private Tasting Room", "Tea Blending Workshop", "Plantation History"],
-        price: 280,
+        title: 'Ceylon Tea Trails Experience',
+        description: 'Journey through the misty hills of Hatton, visiting historic tea factories and staying in colonial bungalows.',
+        location: 'Hatton, Central Highlands',
+        duration: '2 Days',
+        price: 450,
+        image: 'https://images.unsplash.com/photo-1566296314736-6eaac1ca0cb9?auto=format&fit=crop&w=800&q=80',
         rating: 4.9,
-        reviews: 87,
-        category: "temple-tour",
-        duration: "3 hours",
-        difficulty: "Easy",
+        reviews: 128,
+        category: 'heritage-stay',
+        highlights: ['Tea Factory Visit', 'Colonial Bungalow Stay', 'Tea Tasting Session', 'Scenic Train Ride'],
+        difficulty: 'Easy',
         maxGroupSize: 8,
-        included: ["Expert guide", "All tastings", "Tea samples", "Certificate"],
-        altitude: "1800m",
-        featured: true,
+        included: ['Accommodation', 'All Meals', 'Transport', 'Guide'],
+        pickupOptions: [
+            { id: 'colombo', label: 'Colombo', time: '06:00 AM', additionalCost: 0 },
+            { id: 'kandy', label: 'Kandy', time: '08:00 AM', additionalCost: 0 },
+            { id: 'negombo', label: 'Negombo', time: '05:30 AM', additionalCost: 20 }
+        ],
+        estateType: 'Premium',
+        altitude: '1200m',
+        featured: true
     },
     {
         id: '2',
-        title: "Sunrise Horton Plains Luxury Hike",
-        location: "Horton Plains",
-        image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800",
-        description: "Private guided trek to World's End with gourmet breakfast service and stunning panoramic views.",
-        highlights: ["Private Guide", "Gourmet Breakfast", "World's End Viewing", "Photography Support"],
-        price: 340,
-        rating: 4.9,
-        reviews: 124,
-        category: "pilgrimage",
-        duration: "6 hours",
-        difficulty: "Moderate",
-        maxGroupSize: 10,
-        included: ["Private guide", "Breakfast", "Transportation", "Park fees"],
-        altitude: "2100m-2300m",
-        featured: true,
+        title: 'Ella Rock & Nine Arch Bridge',
+        description: 'Explore the famous Nine Arch Bridge and hike up Ella Rock for breathtaking panoramic views.',
+        location: 'Ella, Badulla',
+        duration: '1 Day',
+        price: 85,
+        image: 'https://images.unsplash.com/photo-1588258524675-c61d334d6260?auto=format&fit=crop&w=800&q=80',
+        rating: 4.8,
+        reviews: 342,
+        category: 'pilgrimage',
+        highlights: ['Nine Arch Bridge', 'Ella Rock Hike', 'Little Adams Peak', 'Ravana Falls'],
+        difficulty: 'Moderate',
+        maxGroupSize: 12,
+        included: ['Lunch', 'Guide', 'Transport'],
+        pickupOptions: [
+            { id: 'ella', label: 'Ella Town', time: '07:00 AM', additionalCost: 0 },
+            { id: 'bandarawela', label: 'Bandarawela', time: '06:30 AM', additionalCost: 10 }
+        ],
+        altitude: '1041m',
+        featured: true
     },
     {
         id: '3',
-        title: "Luxury Vintage Train through Ella",
-        location: "Ella",
-        image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800",
-        description: "First-class heritage rail journey with fine dining and Ceylon's most scenic mountain views.",
-        highlights: ["First-Class Carriages", "Fine Dining Service", "Panoramic Windows", "Heritage Experience"],
-        price: 420,
-        rating: 4.8,
-        reviews: 156,
-        category: "ancient-city",
-        duration: "4 hours",
-        difficulty: "Easy",
-        maxGroupSize: 12,
-        included: ["First-class tickets", "Fine dining", "Refreshments", "Photo stops"],
-        featured: true,
-    },
-    {
-        id: '4',
-        title: "Heritage UNESCO Heritage Bungalow Stay",
-        location: "Nuwara Eliya",
-        image: "https://images.unsplash.com/photo-1578761537730-a6eb9c4c5e8c?w=800",
-        description: "Colonial-era bungalow experience with butler service, private tea garden, and mountain views.",
-        highlights: ["Private Tea Garden", "Butler Service", "Vintage Furnishings", "Mountain Views"],
-        price: 450,
-        rating: 4.9,
-        reviews: 67,
-        category: "heritage-stay",
-        duration: "Per night",
-        difficulty: "Easy",
-        maxGroupSize: 6,
-        included: ["Butler service", "All meals", "Tea ceremonies", "Estate tours"],
-        altitude: "1900m",
-    },
-    {
-        id: '5',
-        title: "Ella Rock Sunrise Trek & Estate Breakfast",
-        location: "Ella",
-        image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800",
-        description: "Dawn hike to Ella Rock followed by gourmet breakfast at a heritage tea estate.",
-        highlights: ["Sunrise Views", "Gourmet Breakfast", "UNESCO Heritage Tour", "Professional Guide"],
-        price: 180,
+        title: 'Nuwara Eliya Colonial Tour',
+        description: 'Step back in time in "Little England", visiting the Grand Hotel, Victoria Park, and Gregory Lake.',
+        location: 'Nuwara Eliya',
+        duration: '1 Day',
+        price: 120,
+        image: 'https://images.unsplash.com/photo-1546522589-9b626156e792?auto=format&fit=crop&w=800&q=80',
         rating: 4.7,
-        reviews: 203,
-        category: "pilgrimage",
-        duration: "5 hours",
-        difficulty: "Moderate",
-        maxGroupSize: 15,
-        included: ["Guide", "Breakfast", "Tea tasting", "Transportation"],
-        altitude: "1041m-1525m",
-    },
-    {
-        id: '6',
-        title: "4-Day Tea & Trains Luxury Odyssey",
-        location: "Cultural Heritage",
-        image: "https://images.unsplash.com/photo-1571934811356-5cc061b6821f?w=800",
-        description: "Complete hill country journey combining multiple estates and heritage railways with luxury accommodation.",
-        highlights: ["Multiple Estates", "First-Class Trains", "Colonial Hotels", "Private Guides"],
-        price: 1680,
-        rating: 4.9,
-        reviews: 45,
-        category: "multi-day",
-        duration: "4 days",
-        difficulty: "Easy",
-        maxGroupSize: 8,
-        included: ["Accommodation", "All meals", "Transportation", "Guided tours"],
-        featured: true,
-    },
+        reviews: 215,
+        category: 'temple-tour',
+        highlights: ['Grand Hotel High Tea', 'Gregory Lake Boat Ride', 'Victoria Park', 'Post Office'],
+        difficulty: 'Easy',
+        maxGroupSize: 10,
+        included: ['High Tea', 'Entrance Fees', 'Transport'],
+        pickupOptions: [
+            { id: 'nuwara-eliya', label: 'Nuwara Eliya Hotel', time: '09:00 AM', additionalCost: 0 }
+        ],
+        altitude: '1868m',
+        featured: false
+    }
 ];
 
 const defaultReviews: Review[] = [
     {
         id: '1',
         tourId: '1',
-        userName: 'Lord Harrison Pemberton',
+        userName: 'Sarah Jenkins',
         rating: 5,
-        comment: 'The most exquisite tea estate experience I\'ve encountered. The private tastings and colonial ambiance transported us to a bygone era of elegance.',
-        date: 'November 2024',
-        helpful: 34,
+        comment: 'The Tea Trails experience was absolutely magical. The bungalow was exquisite and the service impeccable.',
+        date: '2 weeks ago',
+        helpful: 12
     },
     {
         id: '2',
-        tourId: '3',
-        userName: 'Catherine Van Der Berg',
+        tourId: '1',
+        userName: 'David Chen',
         rating: 5,
-        comment: 'Our vintage train journey through Ella was absolutely magical. The service and attention to detail exceeded our highest expectations.',
-        date: 'October 2024',
-        helpful: 28,
+        comment: 'Walking through the tea plantations at sunrise was the highlight of our trip. Highly recommended!',
+        date: '1 month ago',
+        helpful: 8
     },
     {
         id: '3',
-        tourId: '4',
-        userName: 'James Morrison',
-        rating: 5,
-        comment: 'The luxury tea estate bungalow offered the perfect retreat. Waking up to mist-covered mountains and the aroma of fresh Ceylon tea was unforgettable.',
-        date: 'November 2024',
-        helpful: 42,
-    },
+        tourId: '2',
+        userName: 'Emma Wilson',
+        rating: 4,
+        comment: 'Ella is beautiful but the hike can be a bit steep. The view is worth it though!',
+        date: '3 weeks ago',
+        helpful: 15
+    }
 ];
 
 export default CulturalToursNew;

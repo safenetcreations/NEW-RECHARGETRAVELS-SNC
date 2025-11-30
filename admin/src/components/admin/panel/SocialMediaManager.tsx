@@ -18,7 +18,16 @@ import {
     Trash2,
     ExternalLink,
     RefreshCw,
+    Tv,
+    Play,
+    GripVertical,
 } from 'lucide-react';
+
+interface YouTubeTVVideo {
+    id: string;
+    url: string;
+    title: string;
+}
 
 interface SocialMediaConfig {
     youtube: {
@@ -29,7 +38,9 @@ interface SocialMediaConfig {
         livestreamDescription: string;
         livestreamUrl: string;
         subscribersCount: string;
-        featuredVideoId: string; // New field for the featured video
+        featuredVideoId: string;
+        // YouTube TV Playlist - up to 5 videos that loop on the Connect With Us page
+        tvPlaylist: YouTubeTVVideo[];
     };
     instagram: {
         enabled: boolean;
@@ -73,7 +84,10 @@ const defaultConfig: SocialMediaConfig = {
         livestreamDescription: 'Experience the beauty of Sri Lanka with us',
         livestreamUrl: 'https://www.youtube.com/watch?v=q_f-b3Cst8Q',
         subscribersCount: '10K+',
-        featuredVideoId: '92Np5UkerSQ', // Default to current Car van hire video
+        featuredVideoId: '92Np5UkerSQ',
+        tvPlaylist: [
+            { id: '1', url: 'https://www.youtube.com/watch?v=92Np5UkerSQ', title: 'Recharge Travels Promo' },
+        ],
     },
     instagram: {
         enabled: true,
@@ -154,6 +168,75 @@ const SocialMediaManager: React.FC = () => {
             [platform]: {
                 ...prev[platform],
                 [field]: value,
+            },
+        }));
+    };
+
+    // Helper function to extract video ID from YouTube URL
+    const extractVideoId = (url: string): string | null => {
+        const patterns = [
+            /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+            /^([a-zA-Z0-9_-]{11})$/,
+        ];
+        for (const pattern of patterns) {
+            const match = url.match(pattern);
+            if (match) return match[1];
+        }
+        return null;
+    };
+
+    // TV Playlist management functions
+    const addTVVideo = () => {
+        if ((config.youtube.tvPlaylist?.length || 0) >= 5) {
+            toast.error('Maximum 5 videos allowed in TV playlist');
+            return;
+        }
+        const newVideo: YouTubeTVVideo = {
+            id: Date.now().toString(),
+            url: '',
+            title: '',
+        };
+        setConfig((prev) => ({
+            ...prev,
+            youtube: {
+                ...prev.youtube,
+                tvPlaylist: [...(prev.youtube.tvPlaylist || []), newVideo],
+            },
+        }));
+    };
+
+    const updateTVVideo = (videoId: string, field: keyof YouTubeTVVideo, value: string) => {
+        setConfig((prev) => ({
+            ...prev,
+            youtube: {
+                ...prev.youtube,
+                tvPlaylist: (prev.youtube.tvPlaylist || []).map((video) =>
+                    video.id === videoId ? { ...video, [field]: value } : video
+                ),
+            },
+        }));
+    };
+
+    const removeTVVideo = (videoId: string) => {
+        setConfig((prev) => ({
+            ...prev,
+            youtube: {
+                ...prev.youtube,
+                tvPlaylist: (prev.youtube.tvPlaylist || []).filter((video) => video.id !== videoId),
+            },
+        }));
+    };
+
+    const moveTVVideo = (index: number, direction: 'up' | 'down') => {
+        const playlist = [...(config.youtube.tvPlaylist || [])];
+        const newIndex = direction === 'up' ? index - 1 : index + 1;
+        if (newIndex < 0 || newIndex >= playlist.length) return;
+        [playlist[index], playlist[newIndex]] = [playlist[newIndex], playlist[index]];
+        setConfig((prev) => ({
+            ...prev,
+            youtube: {
+                ...prev.youtube,
+                tvPlaylist: playlist,
             },
         }));
     };
@@ -265,6 +348,159 @@ const SocialMediaManager: React.FC = () => {
                             placeholder="Experience the beauty of Sri Lanka with us"
                             rows={3}
                         />
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* YouTube TV Playlist Section */}
+            <Card className="border-red-300 bg-gradient-to-br from-red-50 to-orange-50">
+                <CardHeader className="bg-gradient-to-r from-red-100 to-orange-100">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-gradient-to-br from-red-600 to-orange-500 rounded-lg">
+                                <Tv className="h-6 w-6 text-white" />
+                            </div>
+                            <div>
+                                <CardTitle className="flex items-center gap-2">
+                                    YouTube TV Display
+                                    <span className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full">HD</span>
+                                </CardTitle>
+                                <CardDescription>Add up to 5 YouTube videos to loop on the Connect With Us TV display</CardDescription>
+                            </div>
+                        </div>
+                        <Button onClick={addTVVideo} size="sm" className="bg-red-600 hover:bg-red-700" disabled={(config.youtube.tvPlaylist?.length || 0) >= 5}>
+                            <Plus className="h-4 w-4 mr-1" />
+                            Add Video
+                        </Button>
+                    </div>
+                </CardHeader>
+                <CardContent className="space-y-4 pt-6">
+                    <div className="bg-white/80 rounded-lg p-4 border border-red-200">
+                        <p className="text-sm text-gray-600 mb-2">
+                            <strong>How it works:</strong> Paste YouTube video URLs below. These videos will play in HD quality and loop continuously on the TV display on the Connect With Us page.
+                        </p>
+                        <p className="text-xs text-gray-500">
+                            Supported formats: youtube.com/watch?v=VIDEO_ID, youtu.be/VIDEO_ID, or just the video ID
+                        </p>
+                    </div>
+
+                    {(!config.youtube.tvPlaylist || config.youtube.tvPlaylist.length === 0) ? (
+                        <div className="text-center py-8 border-2 border-dashed border-red-200 rounded-lg">
+                            <Tv className="h-12 w-12 text-red-300 mx-auto mb-3" />
+                            <p className="text-gray-500">No videos added yet</p>
+                            <p className="text-sm text-gray-400">Click "Add Video" to add your first YouTube video</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {config.youtube.tvPlaylist.map((video, index) => {
+                                const videoId = extractVideoId(video.url);
+                                return (
+                                    <div key={video.id} className="bg-white rounded-lg border border-red-200 p-4 shadow-sm">
+                                        <div className="flex items-start gap-4">
+                                            {/* Reorder buttons */}
+                                            <div className="flex flex-col gap-1">
+                                                <button
+                                                    onClick={() => moveTVVideo(index, 'up')}
+                                                    disabled={index === 0}
+                                                    className="p-1 hover:bg-red-100 rounded disabled:opacity-30 disabled:cursor-not-allowed"
+                                                    title="Move up"
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                                                    </svg>
+                                                </button>
+                                                <div className="text-center text-xs font-bold text-red-600">{index + 1}</div>
+                                                <button
+                                                    onClick={() => moveTVVideo(index, 'down')}
+                                                    disabled={index === config.youtube.tvPlaylist.length - 1}
+                                                    className="p-1 hover:bg-red-100 rounded disabled:opacity-30 disabled:cursor-not-allowed"
+                                                    title="Move down"
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+
+                                            {/* Video thumbnail preview */}
+                                            <div className="w-32 h-20 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                                                {videoId ? (
+                                                    <img
+                                                        src={`https://img.youtube.com/vi/${videoId}/mqdefault.jpg`}
+                                                        alt="Video thumbnail"
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                        <Play className="h-8 w-8" />
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Video inputs */}
+                                            <div className="flex-1 space-y-2">
+                                                <div>
+                                                    <Label className="text-xs">Video URL</Label>
+                                                    <Input
+                                                        value={video.url}
+                                                        onChange={(e) => updateTVVideo(video.id, 'url', e.target.value)}
+                                                        placeholder="https://www.youtube.com/watch?v=... or video ID"
+                                                        className="h-9"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <Label className="text-xs">Title (optional)</Label>
+                                                    <Input
+                                                        value={video.title}
+                                                        onChange={(e) => updateTVVideo(video.id, 'title', e.target.value)}
+                                                        placeholder="Video title for reference"
+                                                        className="h-9"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            {/* Delete button */}
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => removeTVVideo(video.id)}
+                                                className="text-red-500 hover:text-red-700 hover:bg-red-100"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+
+                                        {/* Video preview link */}
+                                        {videoId && (
+                                            <div className="mt-2 flex items-center gap-2">
+                                                <a
+                                                    href={`https://www.youtube.com/watch?v=${videoId}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-xs text-red-600 hover:underline flex items-center gap-1"
+                                                >
+                                                    <ExternalLink className="h-3 w-3" />
+                                                    Preview on YouTube
+                                                </a>
+                                                <span className="text-xs text-gray-400">• Video ID: {videoId}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+
+                    <div className="flex items-center justify-between pt-4 border-t border-red-200">
+                        <p className="text-sm text-gray-500">
+                            {config.youtube.tvPlaylist?.length || 0} / 5 videos
+                        </p>
+                        {(config.youtube.tvPlaylist?.length || 0) > 0 && (
+                            <p className="text-sm text-green-600 flex items-center gap-1">
+                                <Play className="h-4 w-4" />
+                                Videos will play in HD and loop automatically
+                            </p>
+                        )}
                     </div>
                 </CardContent>
             </Card>

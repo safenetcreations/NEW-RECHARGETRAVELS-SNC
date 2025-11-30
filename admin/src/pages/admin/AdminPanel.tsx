@@ -1,5 +1,6 @@
-import React, { useState, Suspense, lazy } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { AdminGuard } from '@/components/admin/AdminGuard';
 import AdminSidebar from '@/components/admin/panel/AdminSidebar';
 import AdminHeader from '@/components/admin/panel/AdminHeader';
@@ -58,10 +59,42 @@ const VendorApprovals = lazy(() => import('@/components/admin/panel/VendorApprov
 const CommissionSettingsPanel = lazy(() => import('@/components/admin/panel/CommissionSettingsPanel'));
 const PaymentSettlementsPanel = lazy(() => import('@/components/admin/panel/PaymentSettlementsPanel'));
 const DriverAnalyticsDashboard = lazy(() => import('@/components/admin/panel/DriverAnalyticsDashboard'));
+const BookNowManager = lazy(() => import('@/components/admin/panel/BookNowManager'));
+const WhaleBookingManager = lazy(() => import('@/components/admin/panel/WhaleBookingManager'));
+const JungleCampingManager = lazy(() => import('@/components/admin/panel/JungleCampingManager'));
+const HotAirBalloonManager = lazy(() => import('@/components/admin/panel/HotAirBalloonManager'));
+const KalpitiyaKitesurfingManager = lazy(() => import('@/components/admin/panel/KalpitiyaKitesurfingManager'));
+const PrivateChartersManager = lazy(() => import('@/components/admin/panel/PrivateChartersManager'));
+const SeaCucumberManager = lazy(() => import('@/components/admin/panel/SeaCucumberManager'));
+const AboutSectionManager = lazy(() => import('@/components/admin/panel/AboutSectionManager'));
+const NationalParksManager = lazy(() => import('@/components/cms/NationalParksManager'));
+const AyurvedaManager = lazy(() => import('@/components/admin/panel/AyurvedaManager'));
+const TeaTrailsManager = lazy(() => import('@/components/admin/panel/TeaTrailsManager'));
+const PilgrimageManager = lazy(() => import('@/components/admin/panel/PilgrimageManager'));
 
-const AdminPanel: React.FC = () => {
-  const [activeSection, setActiveSection] = useState('dashboard');
+interface AdminPanelProps {
+  initialSection?: string;
+}
+
+const AdminPanel: React.FC<AdminPanelProps> = ({ initialSection }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [activeSection, setActiveSection] = useState(initialSection || 'dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Sync active section with URL/initialSection
+  useEffect(() => {
+    if (initialSection) {
+      setActiveSection(initialSection);
+    }
+  }, [initialSection]);
+
+  // Handle section change with URL update
+  const handleSectionChange = (section: string) => {
+    setActiveSection(section);
+    // Update URL to match section
+    navigate(`/${section}`, { replace: true });
+  };
 
   console.log('🎯 AdminPanel component rendering, activeSection:', activeSection);
 
@@ -71,14 +104,14 @@ const AdminPanel: React.FC = () => {
 
       switch (activeSection) {
         case 'dashboard':
-          return <DashboardSection />;
+          return <DashboardSection onNavigate={setActiveSection} />;
         // Landing Page CMS
         case 'hero-section':
           return <HeroSectionManager />;
         case 'testimonials':
           return <TestimonialsManager />;
         case 'about-section':
-          return <div className="p-6"><h2 className="text-2xl font-bold">About Section Manager - Coming Soon</h2></div>;
+          return <AboutSectionManager />;
         case 'about-sri-lanka':
           return <AboutSriLankaManagement />;
         case 'why-choose-us':
@@ -93,6 +126,26 @@ const AdminPanel: React.FC = () => {
           return <LuxuryExperiencesManager />;
         case 'travel-guide':
           return <TravelGuideManager />;
+        case 'book-now':
+          return <BookNowManager />;
+        case 'whale-booking':
+          return <WhaleBookingManager />;
+        case 'jungle-camping':
+          return <JungleCampingManager />;
+        case 'hot-air-balloon':
+          return <HotAirBalloonManager />;
+        case 'kalpitiya-kitesurfing':
+          return <KalpitiyaKitesurfingManager />;
+        case 'private-charters':
+          return <PrivateChartersManager />;
+        case 'sea-cucumber-farming':
+          return <SeaCucumberManager />;
+        case 'ayurveda-wellness':
+          return <AyurvedaManager />;
+        case 'tea-trails':
+          return <TeaTrailsManager />;
+        case 'pilgrimage-tours':
+          return <PilgrimageManager />;
         case 'destination-content':
           return <DestinationContentManager />;
         case 'negombo-destination':
@@ -106,6 +159,8 @@ const AdminPanel: React.FC = () => {
           return <ToursManagement />;
         case 'tours-old':
           return <ToursSection />;
+        case 'nationalparks':
+          return <NationalParksManager />;
         case 'activities':
           return <ActivitiesSection />;
         case 'experiences':
@@ -174,7 +229,7 @@ const AdminPanel: React.FC = () => {
         case 'driver-analytics':
           return <DriverAnalyticsDashboard />;
         default:
-          return <DashboardSection />;
+          return <DashboardSection onNavigate={setActiveSection} />;
       }
     } catch (error) {
       console.error('🔴 Error rendering section:', error);
@@ -199,7 +254,7 @@ const AdminPanel: React.FC = () => {
         <div className="flex min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-blue-50">
           <AdminSidebar
             activeSection={activeSection}
-            onSectionChange={setActiveSection}
+            onSectionChange={handleSectionChange}
             isMobileMenuOpen={isMobileMenuOpen}
             onMobileMenuClose={() => setIsMobileMenuOpen(false)}
           />

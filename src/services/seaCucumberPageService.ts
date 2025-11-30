@@ -1,36 +1,96 @@
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
-export interface FarmLocation {
+const COLLECTION_NAME = 'pageContent';
+const DOC_ID = 'sea-cucumber-farming';
+
+export interface SeaCucumberHeroSlide {
   id: string;
-  name: string;
-  description: string;
-  location: string;
-  specialization: string;
-  tourFeatures: string[];
-  duration: string;
-  groupSize: string;
-  accessibility: string;
+  image: string;
+  caption: string;
+  tag?: string;
 }
 
-export interface TourPackage {
+export interface SeaCucumberHighlight {
+  id: string;
+  label: string;
+  description: string;
+}
+
+export interface SeaCucumberStat {
+  id: string;
+  label: string;
+  value: string;
+  iconName: string;
+}
+
+export interface SeaCucumberFarm {
   id: string;
   name: string;
+  region: string;
+  badge: string;
+  description: string;
   duration: string;
-  price: string;
+  capacity: string;
+  focus: string;
+  highlights: string[];
+  logistics: {
+    meetingPoint: string;
+    bestSeason: string;
+    transferNote: string;
+    gear: string[];
+  };
+  image: string;
+}
+
+export interface SeaCucumberExperience {
+  id: string;
+  name: string;
+  summary: string;
+  duration: string;
+  priceLabel: string;
+  level: string;
+  iconName: string;
+  image: string;
   highlights: string[];
   included: string[];
-  iconName: string;
-  level: string;
 }
 
-export interface SeaCucumberFact {
+export interface ResearchTrack {
   id: string;
   title: string;
-  facts: string[];
+  badge: string;
+  description: string;
+  bullets: string[];
 }
 
-export interface FAQ {
+export interface BookingInfo {
+  conciergeNote: string;
+  contactPhone: string;
+  whatsapp: string;
+  email: string;
+  responseTime: string;
+  depositNote: string;
+  groupSuitability: string;
+  addOns: string[];
+}
+
+export interface PricingInfo {
+  currency: string;
+  dayRate: number;
+  labAddon: number;
+  privateCharter: number;
+  familyBundle: number;
+  extras: string[];
+}
+
+export interface GalleryImage {
+  id: string;
+  image: string;
+  caption: string;
+}
+
+export interface FAQEntry {
   id: string;
   question: string;
   answer: string;
@@ -38,37 +98,24 @@ export interface FAQ {
 
 export interface SeaCucumberPageContent {
   hero: {
+    badge: string;
     title: string;
     subtitle: string;
     ctaText: string;
-    images: Array<{ id: string; url: string; caption: string }>;
+    images: SeaCucumberHeroSlide[];
   };
   overview: {
-    title: string;
-    description: string;
+    summary: string;
+    highlights: SeaCucumberHighlight[];
   };
-  stats: Array<{
-    id: string;
-    label: string;
-    value: string;
-    iconName: string;
-  }>;
-  farmLocations: FarmLocation[];
-  tourPackages: TourPackage[];
-  facts: SeaCucumberFact[];
-  faqs: FAQ[];
-  gallery: string[];
-  cta: {
-    title: string;
-    description: string;
-    primaryButtonText: string;
-    secondaryButtonText: string;
-  };
-  contact: {
-    phone: string;
-    email: string;
-    website: string;
-  };
+  stats: SeaCucumberStat[];
+  farms: SeaCucumberFarm[];
+  experiences: SeaCucumberExperience[];
+  researchTracks: ResearchTrack[];
+  booking: BookingInfo;
+  pricing: PricingInfo;
+  gallery: GalleryImage[];
+  faqs: FAQEntry[];
   seo: {
     title: string;
     description: string;
@@ -77,248 +124,284 @@ export interface SeaCucumberPageContent {
   };
 }
 
-const COLLECTION_NAME = 'seaCucumberPage';
-const DOC_ID = 'content';
-
 const defaultContent: SeaCucumberPageContent = {
   hero: {
-    title: "Sea Cucumber Farm Tours",
-    subtitle: "Discover Sustainable Marine Aquaculture in Sri Lanka",
-    ctaText: "Book Farm Tour",
+    badge: 'Marine Lab Access',
+    title: 'Sea Cucumber Aquaculture Concierge',
+    subtitle:
+      'Walk the hatcheries of Mannar, snorkel Kalpitiya pens, and meet the biologists powering Sri Lanka\'s blue economy.',
+    ctaText: 'Plan my field visit',
     images: [
       {
-        id: '1',
-        url: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=1920&h=1080&fit=crop',
-        caption: 'Sea Cucumber Farming Facility'
+        id: 'hero-1',
+        image: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&w=2000&q=80',
+        caption: 'Juvenile sea cucumbers in nursery tanks',
+        tag: 'Hatchery lab'
       },
       {
-        id: '2',
-        url: 'https://images.unsplash.com/photo-1583212292454-1fe6229603b7?w=1920&h=1080&fit=crop',
-        caption: 'Underwater Sea Gardens'
+        id: 'hero-2',
+        image: 'https://images.unsplash.com/photo-1583212292454-1fe6229603b7?auto=format&fit=crop&w=2000&q=80',
+        caption: 'Shallow sea pens along the Mannar coast',
+        tag: 'Sea pens'
       },
       {
-        id: '3',
-        url: 'https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5?w=1920&h=1080&fit=crop',
-        caption: 'Marine Aquaculture'
+        id: 'hero-3',
+        image: 'https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5?auto=format&fit=crop&w=2000&q=80',
+        caption: 'Research teams monitoring water quality',
+        tag: 'Field notes'
       },
       {
-        id: '4',
-        url: 'https://images.unsplash.com/photo-1682687981630-cefe9cd73072?w=1920&h=1080&fit=crop',
-        caption: 'Sustainable Ocean Farming'
+        id: 'hero-4',
+        image: 'https://images.unsplash.com/photo-1682687220777-2c60708d6889?auto=format&fit=crop&w=2000&q=80',
+        caption: 'Sunset over Kalpitiya lagoons',
+        tag: 'Blue hour'
       }
     ]
   },
   overview: {
-    title: "Explore the World of Sea Cucumber Farming",
-    description: "Discover the fascinating world of sea cucumber aquaculture in Sri Lanka. Visit state-of-the-art farming facilities, learn about sustainable marine farming practices, and understand the ecological and economic importance of these remarkable creatures. Perfect for students, researchers, investors, and curious travelers."
+    summary:
+      'Our field team curates farm immersions for investors, students, and eco-travellers. You will visit hatcheries, kayak to offshore pens, and learn how Sri Lanka became South Asia\'s sea cucumber capital.',
+    highlights: [
+      {
+        id: 'hl-1',
+        label: '15+ partner farms',
+        description: 'From Mannar research bases to Kalpitiya lagoons and Batticaloa export hubs.'
+      },
+      {
+        id: 'hl-2',
+        label: 'Hands-on labs',
+        description: 'Microscope work, juvenile tagging, and night-time bioluminescence surveys.'
+      },
+      {
+        id: 'hl-3',
+        label: 'Conservation impact',
+        description: 'Every visit supports coastal cooperatives and reef restoration programs.'
+      }
+    ]
   },
   stats: [
-    { id: '1', label: "Farm Locations", value: "15+", iconName: "Shell" },
-    { id: '2', label: "Species Farmed", value: "8", iconName: "Fish" },
-    { id: '3', label: "Annual Production", value: "500+ tons", iconName: "TrendingUp" },
-    { id: '4', label: "Jobs Created", value: "2,000+", iconName: "Users" }
+    { id: 'stat-1', label: 'Farm network', value: '15+', iconName: 'Shell' },
+    { id: 'stat-2', label: 'Species profiled', value: '8', iconName: 'Fish' },
+    { id: 'stat-3', label: 'Annual output', value: '500+ tons', iconName: 'TrendingUp' },
+    { id: 'stat-4', label: 'Local jobs', value: '2,000+', iconName: 'Users' }
   ],
-  farmLocations: [
+  farms: [
     {
-      id: '1',
-      name: "Mannar Sea Cucumber Research Center",
-      description: "Leading facility for sea cucumber research and sustainable farming practices in Sri Lanka.",
-      location: "Mannar District",
-      specialization: "Research & Commercial Farming",
-      tourFeatures: ["Research lab visit", "Breeding facility tour", "Underwater observation", "Expert presentations"],
-      duration: "3 hours",
-      groupSize: "Up to 15 people",
-      accessibility: "Wheelchair accessible areas"
+      id: 'farm-1',
+      name: 'Mannar Hatchery & Research Dock',
+      region: 'Northwest coast',
+      badge: 'R&D',
+      description:
+        'Sri Lanka\'s flagship hatchery with live labs, broodstock pens, and drone-supported monitoring.',
+      duration: '3.5 hrs door-to-door',
+      capacity: 'Max 12 guests',
+      focus: 'Juvenile rearing & genetics',
+      highlights: ['Blue carbon talk with scientists', 'Plankton microscopy workshop', 'Kayak to sea pens'],
+      logistics: {
+        meetingPoint: 'Mannar jetty or private SUV pickup from Anuradhapura / Wilpattu',
+        bestSeason: 'Dec – Apr for calm seas',
+        transferNote: 'Optional seaplane or helicopter landing adjacent to the dock.',
+        gear: ['Dry bags', 'Reef-safe boots', 'Sun ponchos']
+      },
+      image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80'
     },
     {
-      id: '2',
-      name: "Jaffna Peninsula Aquaculture Farms",
-      description: "Traditional and modern sea cucumber farming techniques in the historic waters of Jaffna.",
-      location: "Jaffna Peninsula",
-      specialization: "Traditional Farming Methods",
-      tourFeatures: ["Traditional harvesting demo", "Processing facility", "Local community interaction", "Market visit"],
-      duration: "4 hours",
-      groupSize: "Up to 20 people",
-      accessibility: "Partial accessibility"
+      id: 'farm-2',
+      name: 'Kalpitiya Lagoon Co-op',
+      region: 'West coast',
+      badge: 'Community',
+      description:
+        'Snorkel above sand pens, meet the women-led cooperative, and taste sea lettuce ceviche on a floating deck.',
+      duration: 'Half-day (4 hrs)',
+      capacity: 'Max 10 guests',
+      focus: 'Sustainable sea pens & tourism',
+      highlights: ['Snorkel with guide & GoPro footage', 'Sea-to-table tasting menu', 'Mangrove restoration walk'],
+      logistics: {
+        meetingPoint: 'Kalpitiya lagoon pier or resort pickup',
+        bestSeason: 'Nov – Mar & Jun – Aug',
+        transferNote: 'Boat transfer included; kite-surf combo available in season.',
+        gear: ['Mask & snorkel', 'Rash guards', 'Towels']
+      },
+      image: 'https://images.unsplash.com/photo-1500462918059-b1a0cb512f1d?auto=format&fit=crop&w=1600&q=80'
     },
     {
-      id: '3',
-      name: "Kalpitiya Sustainable Marine Farm",
-      description: "Eco-friendly sea cucumber farming integrated with marine conservation efforts.",
-      location: "Kalpitiya",
-      specialization: "Sustainable Aquaculture",
-      tourFeatures: ["Eco-farming methods", "Snorkeling with sea cucumbers", "Conservation workshop", "Coral reef integration"],
-      duration: "Half day",
-      groupSize: "Up to 12 people",
-      accessibility: "Beach and boat access"
-    },
-    {
-      id: '4',
-      name: "Eastern Province Export Facility",
-      description: "Commercial sea cucumber farming operation with focus on international export standards.",
-      location: "Batticaloa",
-      specialization: "Export Processing",
-      tourFeatures: ["Commercial operations", "Quality control lab", "Export processing", "Business insights"],
-      duration: "2.5 hours",
-      groupSize: "Up to 10 people",
-      accessibility: "Full facility access"
+      id: 'farm-3',
+      name: 'Batticaloa Export Hub',
+      region: 'East coast',
+      badge: 'Commercial',
+      description:
+        'Walk production lines, learn about grading, and sit in on export negotiations with processors and buyers.',
+      duration: '2.5 hrs',
+      capacity: 'Max 8 guests',
+      focus: 'Processing & trade',
+      highlights: ['Quality-control lab tour', 'Investor Q&A with founders', 'Packaging & cold-chain demo'],
+      logistics: {
+        meetingPoint: 'Batticaloa city hotels or private helipad transfer',
+        bestSeason: 'May – Sep for dry weather',
+        transferNote: 'Optional charter flight from Colombo (90 mins).',
+        gear: ['Closed shoes', 'Protective lab coats (provided)']
+      },
+      image: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1600&q=80'
     }
   ],
-  tourPackages: [
+  experiences: [
     {
-      id: '1',
-      name: "Educational Farm Visit",
-      duration: "Half Day",
-      price: "$45",
-      highlights: ["Guided facility tour", "Expert presentations", "Hands-on activities", "Q&A session"],
-      included: ["Transport from hotel", "Professional guide", "Refreshments", "Educational materials", "Certificate"],
-      iconName: "Microscope",
-      level: "All levels"
+      id: 'exp-edu',
+      name: 'Educational Field Immersion',
+      summary: 'University-style module with lectures, hatchery walkthroughs, and practical sampling.',
+      duration: 'Full day',
+      priceLabel: 'USD 95 per participant',
+      level: 'All levels',
+      iconName: 'Microscope',
+      image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=80',
+      highlights: ['Lab safety & microscopy basics', 'Juvenile tagging workshop', 'Data collection with scientists'],
+      included: ['Transport from nearest city', 'Lunch & refreshments', 'Field workbook', 'Digital photo set']
     },
     {
-      id: '2',
-      name: "Marine Biologist Experience",
-      duration: "Full Day",
-      price: "$120",
-      highlights: ["Work with researchers", "Laboratory experience", "Underwater observation", "Data collection"],
-      included: ["All equipment", "Lunch included", "Research participation", "Snorkeling gear", "Professional photos"],
-      iconName: "Fish",
-      level: "Intermediate"
+      id: 'exp-investor',
+      name: 'Investor Scouting Circuit',
+      summary: 'Multi-stop tour across three provinces with business deep dives and financial modelling support.',
+      duration: '2 days / 1 night',
+      priceLabel: 'USD 680 per delegate',
+      level: 'Business focus',
+      iconName: 'TrendingUp',
+      image: 'https://images.unsplash.com/photo-1542838686-73e5371e7f6b?auto=format&fit=crop&w=1400&q=80',
+      highlights: ['Boardroom sessions with CEOs', 'Export market briefing', 'Site audits with agronomists'],
+      included: ['Chauffeured transport', 'Boutique lagoon lodge stay', 'All meals & tastings', 'Investment deck & data room access']
     },
     {
-      id: '3',
-      name: "Investor's Tour",
-      duration: "2 Days",
-      price: "$350",
-      highlights: ["Multiple farm visits", "Business presentations", "Market analysis", "Networking opportunities"],
-      included: ["Accommodation", "All meals", "Business meetings", "Market tours", "Investment guide"],
-      iconName: "TrendingUp",
-      level: "Business focused"
-    },
-    {
-      id: '4',
-      name: "Family Discovery Tour",
-      duration: "3 Hours",
-      price: "$30 per person",
-      highlights: ["Kid-friendly activities", "Touch pool experience", "Educational games", "Photo opportunities"],
-      included: ["Family guide", "Children's activities", "Snacks and drinks", "Educational booklets", "Souvenir"],
-      iconName: "Users",
-      level: "Family friendly"
+      id: 'exp-family',
+      name: 'Family Discovery Morning',
+      summary: 'Play-based learning, touch pools, and conservation crafts for young ocean lovers.',
+      duration: '3 hours',
+      priceLabel: 'USD 45 per adult · 25 per child',
+      level: 'Family friendly',
+      iconName: 'Users',
+      image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1400&q=80',
+      highlights: ['Touch tank with marine guides', 'DIY mini sea pen activity', 'Kid-friendly tasting table'],
+      included: ['Family host & educator', 'Snacks + coconut water', 'Activity kits', 'Photo gallery access']
     }
   ],
-  facts: [
+  researchTracks: [
     {
-      id: '1',
-      title: "Ecological Importance",
-      facts: ["Recycle nutrients in marine ecosystems", "Clean ocean floor sediments", "Improve water quality", "Support coral reef health"]
+      id: 'rt-1',
+      title: 'Blue Carbon & Ecology',
+      badge: 'Sustainability',
+      description: 'Measure sediment health, deploy sensors, and learn how holothurians supercharge reef recovery.',
+      bullets: ['Bioturbation experiments', 'Carbon capture modelling', 'Community-led mangrove nurseries']
     },
     {
-      id: '2',
-      title: "Economic Value",
-      facts: ["High demand in Asian markets", "Medicinal properties", "Luxury food product", "Growing global market"]
+      id: 'rt-2',
+      title: 'Value Chain & Exports',
+      badge: 'Business',
+      description: 'Understand pricing, compliance, and traceability from farm gate to premium Asian markets.',
+      bullets: ['Processing standards tour', 'Quality grading workshop', 'Meet export consortiums']
     },
     {
-      id: '3',
-      title: "Farming Benefits",
-      facts: ["Sustainable income source", "Low environmental impact", "Community employment", "Export opportunities"]
+      id: 'rt-3',
+      title: 'Innovation & Tech',
+      badge: 'R&D',
+      description: 'See IoT water-quality rigs, drone mapping, and AI yield forecasts in live deployment.',
+      bullets: ['Sensor calibration lab', 'Drone mapping mission', 'Data viz crash course']
+    }
+  ],
+  booking: {
+    conciergeNote:
+      'Tell us your learning goals, group size, and travel window. We reserve farm access permits within 12 hours and arrange transfers, translators, and insurance.',
+    contactPhone: '+94 77 772 1999',
+    whatsapp: 'https://wa.me/94777721999',
+    email: 'concierge@rechargetravels.com',
+    responseTime: 'Replies within 30 minutes · 06:00 – 22:00 GMT+5:30',
+    depositNote: '30% deposit secures permits and boats. Balance due after successful visit.',
+    groupSuitability: 'Ideal for 2–30 guests · student cohorts, impact investors, documentary crews.',
+    addOns: ['Professional photo/video crew', 'Simultaneous translation (EN/CN/JP)', 'Helicopter / seaplane transfers', 'CSR & press coordination']
+  },
+  pricing: {
+    currency: 'USD',
+    dayRate: 180,
+    labAddon: 60,
+    privateCharter: 950,
+    familyBundle: 320,
+    extras: ['Drone footage + editing', 'Chef-curated sea-to-table lunch', 'Extended Kalpitiya kite session', 'CSR donation matching']
+  },
+  gallery: [
+    {
+      id: 'gal-1',
+      image: 'https://images.unsplash.com/photo-1583212292454-1fe6229603b7?auto=format&fit=crop&w=1400&q=80',
+      caption: 'Mannar juvenile nursery'
+    },
+    {
+      id: 'gal-2',
+      image: 'https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5?auto=format&fit=crop&w=1400&q=80',
+      caption: 'Tidal pens at dusk'
+    },
+    {
+      id: 'gal-3',
+      image: 'https://images.unsplash.com/photo-1682687981630-cefe9cd73072?auto=format&fit=crop&w=1400&q=80',
+      caption: 'Research divers tagging broodstock'
+    },
+    {
+      id: 'gal-4',
+      image: 'https://images.unsplash.com/photo-1574263867128-a3d06eb5a883?auto=format&fit=crop&w=1400&q=80',
+      caption: 'Community tasting table'
     }
   ],
   faqs: [
     {
-      id: '1',
-      question: "What exactly are sea cucumbers?",
-      answer: "Sea cucumbers are marine animals that live on the ocean floor. Despite their name, they're not vegetables but echinoderms related to starfish and sea urchins. They play a crucial role in marine ecosystems and are considered a delicacy in many Asian cuisines."
+      id: 'faq-1',
+      question: 'Can we combine multiple regions in one trip?',
+      answer: 'Yes. We routinely build 2–4 day circuits covering Mannar, Kalpitiya, and Batticaloa with charter flights or chauffeured SUVs.'
     },
     {
-      id: '2',
-      question: "Is it safe to touch or handle sea cucumbers?",
-      answer: "Yes, most farmed sea cucumber species are completely safe to touch. Our guides will show you the proper handling techniques. Some species can release sticky threads when stressed, but these are harmless. We provide gloves for those who prefer them."
+      id: 'faq-2',
+      question: 'Is snorkeling experience required?',
+      answer: 'No. Walkways and boats allow dry observations; optional shallow-water snorkels are guided with flotation aids and lifeguards.'
     },
     {
-      id: '3',
-      question: "What should I wear for the farm tour?",
-      answer: "Wear comfortable, water-resistant clothing and shoes that can get wet. Sun protection is essential. For tours involving snorkeling or water activities, bring swimwear. We provide any specialized equipment needed for the tours."
+      id: 'faq-3',
+      question: 'Do you support corporate CSR visits?',
+      answer: 'Absolutely—our team arranges volunteer hours, donation matching, media coverage, and impact reporting for CSR teams.'
     },
     {
-      id: '4',
-      question: "Are the tours suitable for children?",
-      answer: "Yes! Our Family Discovery Tours are designed specifically for children aged 5 and above. The educational content is adapted to be engaging and age-appropriate. Children must be supervised at all times, especially near water areas."
-    },
-    {
-      id: '5',
-      question: "Can I purchase sea cucumbers at the farms?",
-      answer: "Some facilities have retail shops where you can purchase processed sea cucumber products. However, live specimens are not sold to tourists. We can arrange visits to local markets where dried sea cucumber products are available."
-    },
-    {
-      id: '6',
-      question: "What's the best time of year to visit?",
-      answer: "Sea cucumber farms operate year-round, but the best visiting conditions are during the dry seasons (December to March for the west coast, May to September for the east coast). This ensures calmer seas for any water-based activities."
+      id: 'faq-4',
+      question: 'What should we wear?',
+      answer: 'Lightweight sun-protective clothing, reef-safe footwear, and hats. We provide dry bags, ponchos, and lab coats where needed.'
     }
   ],
-  gallery: [
-    "https://images.unsplash.com/photo-1583212292454-1fe6229603b7?w=400&h=300&fit=crop",
-    "https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5?w=400&h=300&fit=crop",
-    "https://images.unsplash.com/photo-1682687981630-cefe9cd73072?w=400&h=300&fit=crop",
-    "https://images.unsplash.com/photo-1574482620811-1aa16ffe3c82?w=400&h=300&fit=crop",
-    "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&h=300&fit=crop",
-    "https://images.unsplash.com/photo-1682687220777-2c60708d6889?w=400&h=300&fit=crop",
-    "https://images.unsplash.com/photo-1584649054802-56f5e38a8e72?w=400&h=300&fit=crop",
-    "https://images.unsplash.com/photo-1574263867128-a3d06eb5a883?w=400&h=300&fit=crop"
-  ],
-  cta: {
-    title: "Ready to Explore Marine Aquaculture?",
-    description: "Join us for an educational journey into sustainable sea cucumber farming. Perfect for students, researchers, and eco-conscious travelers.",
-    primaryButtonText: "Book Farm Tour",
-    secondaryButtonText: "Call for Details"
-  },
-  contact: {
-    phone: "+94 76 505 9595",
-    email: "info@rechargetravels.com",
-    website: "www.rechargetravels.com"
-  },
   seo: {
-    title: "Sea Cucumber Farm Tours Sri Lanka | Marine Aquaculture Experience | Recharge Travels",
-    description: "Visit sustainable sea cucumber farms in Sri Lanka. Educational tours showcasing marine aquaculture, conservation, and traditional farming methods.",
-    keywords: ["sea cucumber farming Sri Lanka", "marine aquaculture tours", "sustainable farming", "educational tours", "Mannar sea cucumber", "aquaculture experience"],
-    ogImage: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=1200&h=630&fit=crop"
+    title: 'Sea Cucumber Farm Tours | Sri Lanka Marine Aquaculture Experiences',
+    description:
+      'Book concierge-curated sea cucumber farm tours across Mannar, Kalpitiya, and Batticaloa with scientists, investors, and coastal cooperatives.',
+    keywords: [
+      'sea cucumber farming tour',
+      'Sri Lanka aquaculture experience',
+      'Mannar hatchery visit',
+      'Kalpitiya sea pen tour',
+      'marine biology field trip'
+    ],
+    ogImage: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&w=1200&h=630&q=80'
   }
 };
 
 class SeaCucumberPageService {
-  async getPageContent(): Promise<SeaCucumberPageContent> {
+  async getContent(): Promise<SeaCucumberPageContent> {
     try {
-      const docRef = doc(db, COLLECTION_NAME, DOC_ID);
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        return docSnap.data() as SeaCucumberPageContent;
-      } else {
-        // Initialize with default content
-        await this.updatePageContent(defaultContent);
-        return defaultContent;
+      const ref = doc(db, COLLECTION_NAME, DOC_ID);
+      const snap = await getDoc(ref);
+      if (snap.exists()) {
+        return snap.data() as SeaCucumberPageContent;
       }
+      await this.saveContent(defaultContent);
+      return defaultContent;
     } catch (error) {
-      console.error('Error fetching sea cucumber page content:', error);
+      console.error('Error fetching sea cucumber content', error);
       return defaultContent;
     }
   }
 
-  async updatePageContent(content: Partial<SeaCucumberPageContent>): Promise<void> {
-    try {
-      const docRef = doc(db, COLLECTION_NAME, DOC_ID);
-      const currentContent = await this.getPageContent();
-      const updatedContent = { ...currentContent, ...content };
-
-      await setDoc(docRef, updatedContent);
-      console.log('Sea cucumber page content updated successfully');
-    } catch (error) {
-      console.error('Error updating sea cucumber page content:', error);
-      throw error;
-    }
-  }
-
-  async resetToDefault(): Promise<void> {
-    await this.updatePageContent(defaultContent);
+  async saveContent(content: SeaCucumberPageContent): Promise<void> {
+    const ref = doc(db, COLLECTION_NAME, DOC_ID);
+    await setDoc(ref, { ...content, updatedAt: serverTimestamp() });
   }
 
   getDefaultContent(): SeaCucumberPageContent {

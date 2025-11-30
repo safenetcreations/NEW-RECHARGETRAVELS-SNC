@@ -64,6 +64,33 @@ const AboutSriLanka: React.FC = () => {
     loadHeroSlides();
   }, []);
 
+  // Sync hero slides with CMS content
+useEffect(() => {
+  if (content?.heroSlides && content.heroSlides.length > 0) {
+    const customSlides = content.heroSlides
+      .filter((slide) => slide.image && slide.image.trim() !== '')
+      .map((slide, index) => ({
+        id: `cms-slide-${index}`,
+        ...slide
+      }));
+
+    if (customSlides.length > 0) {
+      setHeroSlides(customSlides);
+      return;
+    }
+  }
+
+  if (content?.heroImage) {
+    setHeroSlides([{
+      id: 'cms-hero',
+      image: content.heroImage,
+      title: content.heroTitle || 'The Pearl of the Indian Ocean',
+      subtitle: content.heroSubtitle || 'Discover Sri Lanka\'s Rich Heritage and Natural Beauty',
+      badge: 'Discover Paradise'
+    }]);
+  }
+}, [content]);
+
   // Auto-advance slides every 6 seconds
   useEffect(() => {
     const interval = setInterval(() => {
@@ -90,6 +117,24 @@ const AboutSriLanka: React.FC = () => {
     return () => clearInterval(interval);
   }, [testimonials]);
 
+  // Extract data before early returns so hooks are consistent
+  const destinations = contentAny.destinations ?? [];
+  const experiences = contentAny.experiences ?? [];
+  const gallery = contentAny.gallery ?? [];
+  const videoTours = contentAny.videoTours ?? [];
+
+  // Gallery validation effect - MUST be before early returns
+  useEffect(() => {
+    if (!gallery.length) {
+      setSelectedGalleryImage(null);
+      return;
+    }
+
+    if (selectedGalleryImage !== null && selectedGalleryImage >= gallery.length) {
+      setSelectedGalleryImage(0);
+    }
+  }, [gallery.length, selectedGalleryImage]);
+
   const currentSlide = heroSlides[currentSlideIndex];
 
   // Navigation functions
@@ -105,6 +150,7 @@ const AboutSriLanka: React.FC = () => {
     document.getElementById('explore')?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // Loading state - AFTER all hooks
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-teal-50">
@@ -122,11 +168,6 @@ const AboutSriLanka: React.FC = () => {
     { icon: Leaf, ...(content.stats?.species ?? {}) },
     { icon: Award, ...(content.stats?.unesco ?? {}) }
   ];
-
-  const destinations = contentAny.destinations ?? [];
-  const experiences = contentAny.experiences ?? [];
-  const gallery = contentAny.gallery ?? [];
-  const videoTours = contentAny.videoTours ?? [];
 
   // Navigation functions for gallery
   const nextGalleryImage = () => {
@@ -283,107 +324,148 @@ const AboutSriLanka: React.FC = () => {
       <Header />
 
       <div className="bg-white">
-        {/* Hero Section - Full Screen with Auto-Sliding Images */}
-        <section className="relative h-screen flex items-center justify-center overflow-hidden">
-          {/* Background Image with Slide Transition */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentSlideIndex}
-              className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-              style={{ backgroundImage: `url(${currentSlide?.image})` }}
-              initial={{ opacity: 0, scale: 1.1 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 1.5 }}
+        {/* ========== HERO SECTION - COMPLETELY REBUILT ========== */}
+        <section className="relative h-screen overflow-hidden">
+
+          {/* LAYER 1: Background Images from Admin Panel */}
+          {heroSlides.map((slide, index) => (
+            <div
+              key={slide.id || `slide-${index}`}
+              className="absolute inset-0 w-full h-full"
+              style={{
+                opacity: index === currentSlideIndex ? 1 : 0,
+                transition: 'opacity 1.2s ease-in-out',
+                zIndex: 1
+              }}
             >
-              <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70"></div>
-            </motion.div>
-          </AnimatePresence>
-
-          {/* Content */}
-          <div className="relative z-10 text-center text-white max-w-5xl mx-auto px-4">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentSlideIndex}
-                initial={{ opacity: 0, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -50 }}
-                transition={{ duration: 0.8 }}
-              >
-                <Badge className="mb-6 bg-white/20 backdrop-blur-sm text-white border-white/30 px-6 py-2 text-sm font-semibold">
-                  {currentSlide?.badge || "Discover Paradise"}
-                </Badge>
-                <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 font-playfair leading-tight">
-                  {currentSlide?.title}
-                </h1>
-                <p className="text-xl md:text-3xl mb-10 opacity-95 font-light tracking-wide">
-                  {currentSlide?.subtitle}
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Button
-                    size="lg"
-                    className="bg-white text-blue-600 hover:bg-blue-50 px-8 py-6 text-lg font-semibold rounded-full shadow-xl"
-                    onClick={scrollToContent}
-                  >
-                    Explore Now
-                  </Button>
-                  <Link to="/tours">
-                    <Button
-                      size="lg"
-                      variant="outline"
-                      className="border-2 border-white text-white hover:bg-white/10 px-8 py-6 text-lg font-semibold rounded-full backdrop-blur-sm"
-                    >
-                      <Play className="w-5 h-5 mr-2" />
-                      Plan Your Trip
-                    </Button>
-                  </Link>
-                </div>
-              </motion.div>
-            </AnimatePresence>
-          </div>
-
-          {/* Slide Navigation Arrows */}
-          <button
-            onClick={prevSlide}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-3 bg-white/10 backdrop-blur-sm rounded-full hover:bg-white/20 transition-all"
-          >
-            <ChevronLeft className="w-8 h-8 text-white" />
-          </button>
-          <button
-            onClick={nextSlide}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-3 bg-white/10 backdrop-blur-sm rounded-full hover:bg-white/20 transition-all"
-          >
-            <ChevronRight className="w-8 h-8 text-white" />
-          </button>
-
-          {/* Slide Indicators */}
-          <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-20 flex gap-2">
-            {heroSlides.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentSlideIndex(index)}
-                className={`w-3 h-3 rounded-full transition-all ${
-                  index === currentSlideIndex
-                    ? 'bg-white w-8'
-                    : 'bg-white/40 hover:bg-white/60'
-                }`}
+              <img
+                src={slide.image}
+                alt={slide.title || 'Sri Lanka'}
+                className="w-full h-full object-cover"
+                loading={index === 0 ? 'eager' : 'lazy'}
               />
-            ))}
+            </div>
+          ))}
+
+          {/* LAYER 2: Dark Overlay */}
+          <div
+            className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60"
+            style={{ zIndex: 2 }}
+          />
+
+          {/* LAYER 3: Static Content - Never moves, never animates */}
+          <div
+            className="absolute inset-0 flex flex-col items-center justify-center px-4"
+            style={{ zIndex: 3 }}
+          >
+            {/* Badge */}
+            <span className="inline-block bg-white/20 backdrop-blur-sm text-white border border-white/30 px-6 py-2 rounded-full text-sm font-semibold mb-6">
+              Discover Paradise
+            </span>
+
+            {/* Main Title */}
+            <h1
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white text-center mb-4 leading-tight"
+              style={{
+                fontFamily: 'Playfair Display, serif',
+                textShadow: '0 4px 20px rgba(0,0,0,0.4)'
+              }}
+            >
+              Sri Lanka
+            </h1>
+
+            {/* Subtitle */}
+            <p
+              className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-white/90 text-center mb-10 max-w-3xl font-light"
+              style={{ textShadow: '0 2px 10px rgba(0,0,0,0.3)' }}
+            >
+              The Pearl of the Indian Ocean
+            </p>
+
+            {/* STATIC BUTTONS - Absolutely no animation */}
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
+              <Link to="/destinations" className="block">
+                <button
+                  type="button"
+                  className="flex items-center justify-center gap-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-lg sm:text-xl font-bold px-8 sm:px-10 py-4 sm:py-5 rounded-full shadow-lg hover:from-orange-600 hover:to-amber-600 hover:shadow-xl transition-colors duration-200"
+                  style={{ minWidth: '200px' }}
+                >
+                  <Sparkles className="w-5 h-5 sm:w-6 sm:h-6" />
+                  Explore Now
+                </button>
+              </Link>
+
+              <Link to="/ai-trip-planner" className="block">
+                <button
+                  type="button"
+                  className="flex items-center justify-center gap-3 bg-white/15 backdrop-blur-sm text-white text-lg sm:text-xl font-bold px-8 sm:px-10 py-4 sm:py-5 rounded-full border-2 border-white hover:bg-white hover:text-gray-900 transition-colors duration-200"
+                  style={{ minWidth: '200px' }}
+                >
+                  <Calendar className="w-5 h-5 sm:w-6 sm:h-6" />
+                  Plan Your Trip
+                </button>
+              </Link>
+            </div>
           </div>
 
-          {/* Scroll Indicator */}
-          <motion.div
-            className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 cursor-pointer"
-            animate={{ y: [0, 10, 0] }}
-            transition={{ repeat: Infinity, duration: 1.5 }}
+          {/* LAYER 4: Navigation Controls */}
+          {heroSlides.length > 1 && (
+            <>
+              {/* Left Arrow */}
+              <button
+                type="button"
+                onClick={prevSlide}
+                className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center bg-black/30 hover:bg-black/50 text-white rounded-full backdrop-blur-sm transition-colors duration-200"
+                style={{ zIndex: 4 }}
+                aria-label="Previous slide"
+              >
+                <ChevronLeft className="w-6 h-6 sm:w-8 sm:h-8" />
+              </button>
+
+              {/* Right Arrow */}
+              <button
+                type="button"
+                onClick={nextSlide}
+                className="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center bg-black/30 hover:bg-black/50 text-white rounded-full backdrop-blur-sm transition-colors duration-200"
+                style={{ zIndex: 4 }}
+                aria-label="Next slide"
+              >
+                <ChevronRight className="w-6 h-6 sm:w-8 sm:h-8" />
+              </button>
+
+              {/* Slide Indicators */}
+              <div
+                className="absolute bottom-20 sm:bottom-24 left-1/2 -translate-x-1/2 flex gap-2 sm:gap-3"
+                style={{ zIndex: 4 }}
+              >
+                {heroSlides.map((_, index) => (
+                  <button
+                    key={`indicator-${index}`}
+                    type="button"
+                    onClick={() => setCurrentSlideIndex(index)}
+                    className={`h-2 sm:h-3 rounded-full transition-all duration-300 ${
+                      index === currentSlideIndex
+                        ? 'w-8 sm:w-10 bg-orange-400'
+                        : 'w-2 sm:w-3 bg-white/50 hover:bg-white/70'
+                    }`}
+                    aria-label={`Go to slide ${index + 1}`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* LAYER 5: Scroll Indicator */}
+          <div
+            className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center text-white/70 hover:text-white cursor-pointer transition-colors"
+            style={{ zIndex: 4 }}
             onClick={scrollToContent}
           >
-            <div className="flex flex-col items-center text-white/80">
-              <span className="text-sm mb-2">Scroll to explore</span>
-              <ChevronDown className="w-6 h-6" />
-            </div>
-          </motion.div>
+            <span className="text-xs sm:text-sm mb-1">Scroll to explore</span>
+            <ChevronDown className="w-5 h-5 sm:w-6 sm:h-6 animate-bounce" />
+          </div>
         </section>
+        {/* ========== END HERO SECTION ========== */}
 
         {/* Main Introduction Section */}
         <section id="explore" className="py-24 bg-gradient-to-br from-blue-50 via-white to-teal-50">
@@ -723,6 +805,59 @@ const AboutSriLanka: React.FC = () => {
           </div>
         </section>
 
+        {/* Gallery Section */}
+        {gallery.length > 0 && (
+          <section className="py-24 bg-gradient-to-b from-slate-50 to-white">
+            <div className="container mx-auto px-4 lg:px-8">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8 }}
+                className="text-center mb-16"
+              >
+                <Badge className="mb-4 bg-slate-900/90 text-white px-4 py-1">
+                  <Camera className="w-3 h-3 mr-1 inline" />
+                  Immersive Gallery
+                </Badge>
+                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 font-playfair">
+                  Real Moments from Sri Lanka
+                </h2>
+                <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                  Every image below is managed from your admin panel, so updating the gallery is as easy as uploading a photo.
+                </p>
+              </motion.div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {gallery.map((image, index) => (
+                  <motion.button
+                    key={`${image.url}-${index}`}
+                    type="button"
+                    onClick={() => setSelectedGalleryImage(index)}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: index * 0.05 }}
+                    className="group relative overflow-hidden rounded-3xl shadow-lg hover:shadow-2xl transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                  >
+                    <div className="aspect-[4/3] w-full overflow-hidden">
+                      <img
+                        src={image.url}
+                        alt={image.caption || `Sri Lanka gallery image ${index + 1}`}
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-left">
+                      <p className="text-white text-lg font-semibold">{image.caption || 'View photo'}</p>
+                    </div>
+                  </motion.button>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Enhanced Testimonials Section */}
         {testimonials && testimonials.length > 0 && testimonials[currentTestimonial] && (
           <section className="py-24 bg-gradient-to-br from-slate-900 via-gray-900 to-slate-900 text-white relative overflow-hidden">
@@ -1023,11 +1158,10 @@ const AboutSriLanka: React.FC = () => {
                       <motion.button
                         key={index}
                         onClick={() => setCurrentTestimonial(index)}
-                        className={`relative transition-all duration-500 ${
-                          index === currentTestimonial
+                        className={`relative transition-all duration-500 ${index === currentTestimonial
                             ? 'w-12 h-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full'
                             : 'w-3 h-3 bg-white/30 rounded-full hover:bg-white/50'
-                        }`}
+                          }`}
                         whileHover={{ scale: 1.2 }}
                         whileTap={{ scale: 0.9 }}
                       >
@@ -1130,6 +1264,58 @@ const AboutSriLanka: React.FC = () => {
         </section>
       </div>
 
+      {selectedGalleryImage !== null && gallery[selectedGalleryImage] && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <div
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            onClick={() => setSelectedGalleryImage(null)}
+          />
+          <div className="relative z-10 w-full max-w-5xl">
+            <div className="relative bg-slate-900 rounded-3xl p-4 md:p-8 shadow-2xl">
+              <button
+                type="button"
+                onClick={() => setSelectedGalleryImage(null)}
+                className="absolute right-4 top-4 rounded-full bg-white/20 p-2 text-white hover:bg-white/30 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="relative">
+                <img
+                  src={gallery[selectedGalleryImage].url}
+                  alt={gallery[selectedGalleryImage].caption || 'Sri Lanka gallery image'}
+                  className="w-full max-h-[70vh] object-contain rounded-2xl"
+                />
+
+                {gallery.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={prevGalleryImage}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-white/20 p-3 text-white hover:bg-white/30 transition-colors"
+                    >
+                      <ChevronLeft className="w-6 h-6" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={nextGalleryImage}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-white/20 p-3 text-white hover:bg-white/30 transition-colors"
+                    >
+                      <ChevronRight className="w-6 h-6" />
+                    </button>
+                  </>
+                )}
+              </div>
+
+              {gallery[selectedGalleryImage].caption && (
+                <p className="mt-6 text-center text-white/80 text-lg">
+                  {gallery[selectedGalleryImage].caption}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

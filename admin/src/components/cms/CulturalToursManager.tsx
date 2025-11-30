@@ -10,7 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import {
     Plus, Edit, Trash2, Save, X, Church, DollarSign, Clock,
-    Users, MapPin, Star, Image, Upload, Eye, EyeOff, Award, Calendar, Search
+    Users, MapPin, Star, Image, Upload, Eye, EyeOff, Award, Calendar, Search,
+    Mountain, Coffee, Train
 } from 'lucide-react';
 import {
     collection, getDocs, addDoc, updateDoc, deleteDoc, doc,
@@ -18,6 +19,13 @@ import {
 } from 'firebase/firestore';
 import { db, storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+
+interface PickupOption {
+    id: string;
+    label: string;
+    time: string;
+    additionalCost: number;
+}
 
 interface CulturalTour {
     id?: string;
@@ -34,8 +42,10 @@ interface CulturalTour {
     difficulty: string;
     maxGroupSize: number;
     included: string[];
-    menu?: string[];
-    chef?: string;
+    pickupOptions: PickupOption[];
+    estateType?: string;
+    altitude?: string;
+    bestSeason?: string;
     featured?: boolean;
     videoUrl?: string;
     gallery?: string[];
@@ -51,14 +61,23 @@ interface Booking {
     tourTitle: string;
     userId: string;
     date: string;
-    guests: number;
-    contactName: string;
-    contactEmail: string;
-    contactPhone: string;
+    guests: number; // mapped from adults + children
+    adults: number;
+    children: number;
+    contactName: string; // mapped from firstName + lastName
+    firstName: string;
+    lastName: string;
+    contactEmail: string; // mapped from email
+    email: string;
+    contactPhone: string; // mapped from phone
+    phone: string;
+    pickupOption?: string;
+    pickupAddress?: string;
     specialRequests?: string;
     status: 'pending' | 'confirmed' | 'cancelled';
-    createdAt: string;
+    createdAt: any;
     totalPrice: number;
+    bookingRef?: string;
 }
 
 export const CulturalToursManager = () => {
@@ -82,13 +101,15 @@ export const CulturalToursManager = () => {
         image: '',
         rating: 4.5,
         reviews: 0,
-        category: 'cooking-class',
+        category: 'heritage-stay',
         highlights: [],
         difficulty: 'Easy',
         maxGroupSize: 10,
         included: [],
-        menu: [],
-        chef: '',
+        pickupOptions: [],
+        estateType: '',
+        altitude: '',
+        bestSeason: '',
         featured: false,
         videoUrl: '',
         gallery: [],
@@ -98,14 +119,18 @@ export const CulturalToursManager = () => {
 
     const [highlightInput, setHighlightInput] = useState('');
     const [includedInput, setIncludedInput] = useState('');
-    const [menuInput, setMenuInput] = useState('');
+
+    // Pickup Option Inputs
+    const [pickupLabel, setPickupLabel] = useState('');
+    const [pickupTime, setPickupTime] = useState('');
+    const [pickupCost, setPickupCost] = useState('');
 
     const categories = [
-        { value: 'cooking-class', label: 'Cooking Class' },
-        { value: 'street-food', label: 'Street Food Tour' },
-        { value: 'fine-dining', label: 'Fine Dining' },
-        { value: 'spice-garden', label: 'Spice Garden' },
-        { value: 'tea-experience', label: 'Tea Experience' },
+        { value: 'temple-tour', label: 'Tea Tastings' },
+        { value: 'heritage-stay', label: 'Estate Stays' },
+        { value: 'ancient-city', label: 'Train Journeys' },
+        { value: 'pilgrimage', label: 'Mountain Treks' },
+        { value: 'multi-day', label: 'Multi-Day Tours' },
     ];
 
     const difficulties = [
@@ -147,10 +172,18 @@ export const CulturalToursManager = () => {
             const q = query(bookingsRef, orderBy('createdAt', 'desc'));
             const snapshot = await getDocs(q);
 
-            const bookingsData = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            } as Booking));
+            const bookingsData = snapshot.docs.map(doc => {
+                const data = doc.data();
+                return {
+                    id: doc.id,
+                    ...data,
+                    // Handle legacy data or new structure
+                    contactName: data.contactName || `${data.firstName || ''} ${data.lastName || ''}`,
+                    contactEmail: data.contactEmail || data.email,
+                    contactPhone: data.contactPhone || data.phone,
+                    guests: data.guests || ((data.adults || 0) + (data.children || 0))
+                } as Booking;
+            });
 
             setBookings(bookingsData);
         } catch (error) {
@@ -228,14 +261,14 @@ export const CulturalToursManager = () => {
 
                 toast({
                     title: "Success",
-                    description: "Hill Country tour created successfully"
+                    description: "Tour created successfully"
                 });
             } else if (selectedTour?.id) {
                 await updateDoc(doc(db, 'cultural_tours', selectedTour.id), tourData);
 
                 toast({
                     title: "Success",
-                    description: "Hill Country tour updated successfully"
+                    description: "Tour updated successfully"
                 });
             }
 
@@ -307,13 +340,15 @@ export const CulturalToursManager = () => {
             image: '',
             rating: 4.5,
             reviews: 0,
-            category: 'cooking-class',
+            category: 'heritage-stay',
             highlights: [],
             difficulty: 'Easy',
             maxGroupSize: 10,
             included: [],
-            menu: [],
-            chef: '',
+            pickupOptions: [],
+            estateType: '',
+            altitude: '',
+            bestSeason: '',
             featured: false,
             videoUrl: '',
             gallery: [],
@@ -325,7 +360,9 @@ export const CulturalToursManager = () => {
         setIsCreating(false);
         setHighlightInput('');
         setIncludedInput('');
-        setMenuInput('');
+        setPickupLabel('');
+        setPickupTime('');
+        setPickupCost('');
     };
 
     const startEdit = (tour: CulturalTour) => {
@@ -341,7 +378,7 @@ export const CulturalToursManager = () => {
         setIsEditing(true);
     };
 
-    const addArrayItem = (field: 'highlights' | 'included' | 'menu', value: string) => {
+    const addArrayItem = (field: 'highlights' | 'included', value: string) => {
         if (!value.trim()) return;
 
         setFormData(prev => ({
@@ -349,16 +386,41 @@ export const CulturalToursManager = () => {
             [field]: [...(prev[field] || []), value.trim()]
         }));
 
-        // Reset input
         if (field === 'highlights') setHighlightInput('');
         if (field === 'included') setIncludedInput('');
-        if (field === 'menu') setMenuInput('');
     };
 
-    const removeArrayItem = (field: 'highlights' | 'included' | 'menu' | 'gallery', index: number) => {
+    const removeArrayItem = (field: 'highlights' | 'included' | 'gallery', index: number) => {
         setFormData(prev => ({
             ...prev,
             [field]: (prev[field] || []).filter((_, i) => i !== index)
+        }));
+    };
+
+    const addPickupOption = () => {
+        if (!pickupLabel || !pickupTime) return;
+
+        const newOption: PickupOption = {
+            id: Date.now().toString(),
+            label: pickupLabel,
+            time: pickupTime,
+            additionalCost: parseFloat(pickupCost) || 0
+        };
+
+        setFormData(prev => ({
+            ...prev,
+            pickupOptions: [...(prev.pickupOptions || []), newOption]
+        }));
+
+        setPickupLabel('');
+        setPickupTime('');
+        setPickupCost('');
+    };
+
+    const removePickupOption = (index: number) => {
+        setFormData(prev => ({
+            ...prev,
+            pickupOptions: (prev.pickupOptions || []).filter((_, i) => i !== index)
         }));
     };
 
@@ -366,12 +428,6 @@ export const CulturalToursManager = () => {
         tour.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         tour.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
         tour.category.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-
-    const filteredBookings = bookings.filter(booking =>
-        booking.tourTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        booking.contactName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        booking.contactEmail.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     if (loading) {
@@ -383,10 +439,10 @@ export const CulturalToursManager = () => {
             <div className="flex justify-between items-center">
                 <div>
                     <h2 className="text-3xl font-bold flex items-center gap-2">
-                        <Church className="h-8 w-8 text-orange-600" />
-                        Hill Country Tours Management
+                        <Mountain className="h-8 w-8 text-orange-600" />
+                        Cultural & Hill Country Tours
                     </h2>
-                    <p className="text-muted-foreground">Manage cultural experiences and bookings</p>
+                    <p className="text-muted-foreground">Manage tea estates, heritage sites, and bookings</p>
                 </div>
 
                 <Button
@@ -510,12 +566,6 @@ export const CulturalToursManager = () => {
                                                             Inactive
                                                         </Badge>
                                                     )}
-                                                    {tour.chef && (
-                                                        <Badge variant="outline" className="text-xs">
-                                                            <Church className="h-3 w-3 mr-1" />
-                                                            {tour.chef}
-                                                        </Badge>
-                                                    )}
                                                 </div>
                                             </div>
                                         </div>
@@ -571,7 +621,7 @@ export const CulturalToursManager = () => {
                                                 id="location"
                                                 value={formData.location}
                                                 onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-                                                placeholder="e.g., Colombo"
+                                                placeholder="e.g., Nuwara Eliya"
                                             />
                                         </div>
 
@@ -581,7 +631,7 @@ export const CulturalToursManager = () => {
                                                 id="duration"
                                                 value={formData.duration}
                                                 onChange={(e) => setFormData(prev => ({ ...prev, duration: e.target.value }))}
-                                                placeholder="e.g., 4 hours"
+                                                placeholder="e.g., 2 Days"
                                             />
                                         </div>
                                     </div>
@@ -649,27 +699,32 @@ export const CulturalToursManager = () => {
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-3 gap-4">
                                         <div className="space-y-2">
-                                            <Label htmlFor="chef">Chef Name</Label>
+                                            <Label htmlFor="estateType">Estate Type</Label>
                                             <Input
-                                                id="chef"
-                                                value={formData.chef}
-                                                onChange={(e) => setFormData(prev => ({ ...prev, chef: e.target.value }))}
-                                                placeholder="e.g., Chef Kumari"
+                                                id="estateType"
+                                                value={formData.estateType}
+                                                onChange={(e) => setFormData(prev => ({ ...prev, estateType: e.target.value }))}
+                                                placeholder="e.g., Premium"
                                             />
                                         </div>
-
                                         <div className="space-y-2">
-                                            <Label htmlFor="rating">Rating</Label>
+                                            <Label htmlFor="altitude">Altitude</Label>
                                             <Input
-                                                id="rating"
-                                                type="number"
-                                                step="0.1"
-                                                min="0"
-                                                max="5"
-                                                value={formData.rating}
-                                                onChange={(e) => setFormData(prev => ({ ...prev, rating: parseFloat(e.target.value) || 4.5 }))}
+                                                id="altitude"
+                                                value={formData.altitude}
+                                                onChange={(e) => setFormData(prev => ({ ...prev, altitude: e.target.value }))}
+                                                placeholder="e.g., 1868m"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="bestSeason">Best Season</Label>
+                                            <Input
+                                                id="bestSeason"
+                                                value={formData.bestSeason}
+                                                onChange={(e) => setFormData(prev => ({ ...prev, bestSeason: e.target.value }))}
+                                                placeholder="e.g., Feb - Apr"
                                             />
                                         </div>
                                     </div>
@@ -724,6 +779,59 @@ export const CulturalToursManager = () => {
                                                         onClick={() => removeArrayItem('highlights', idx)}
                                                     />
                                                 </Badge>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Pickup Options */}
+                                    <div className="space-y-2 border p-4 rounded-lg">
+                                        <Label>Pickup Options</Label>
+                                        <div className="grid grid-cols-3 gap-2">
+                                            <Input
+                                                value={pickupLabel}
+                                                onChange={(e) => setPickupLabel(e.target.value)}
+                                                placeholder="Location (e.g. Colombo)"
+                                            />
+                                            <Input
+                                                value={pickupTime}
+                                                onChange={(e) => setPickupTime(e.target.value)}
+                                                placeholder="Time (e.g. 06:00 AM)"
+                                            />
+                                            <Input
+                                                type="number"
+                                                value={pickupCost}
+                                                onChange={(e) => setPickupCost(e.target.value)}
+                                                placeholder="Extra Cost ($)"
+                                            />
+                                        </div>
+                                        <Button
+                                            type="button"
+                                            onClick={addPickupOption}
+                                            className="w-full mt-2"
+                                            variant="outline"
+                                        >
+                                            Add Pickup Option
+                                        </Button>
+
+                                        <div className="space-y-2 mt-2">
+                                            {formData.pickupOptions?.map((opt, idx) => (
+                                                <div key={idx} className="flex justify-between items-center bg-gray-50 p-2 rounded">
+                                                    <div className="text-sm">
+                                                        <span className="font-medium">{opt.label}</span>
+                                                        <span className="text-gray-500 mx-2">|</span>
+                                                        <span>{opt.time}</span>
+                                                        {opt.additionalCost > 0 && (
+                                                            <span className="text-green-600 ml-2">(+${opt.additionalCost})</span>
+                                                        )}
+                                                    </div>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        onClick={() => removePickupOption(idx)}
+                                                    >
+                                                        <X className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
                                             ))}
                                         </div>
                                     </div>
@@ -807,95 +915,92 @@ export const CulturalToursManager = () => {
                 </TabsContent>
 
                 {/* Bookings Tab */}
-                <TabsContent value="bookings" className="space-y-4">
+                <TabsContent value="bookings">
                     <Card>
                         <CardHeader>
-                            <CardTitle>Hill Country Tour Bookings</CardTitle>
-                            <CardDescription>Manage customer bookings and reservations</CardDescription>
+                            <CardTitle>Booking Requests</CardTitle>
+                            <CardDescription>Manage incoming tour bookings</CardDescription>
                         </CardHeader>
-                        <CardContent className="space-y-4">
-                            {filteredBookings.map((booking) => (
-                                <div
-                                    key={booking.id}
-                                    className="border rounded-lg p-4 hover:bg-accent/5 transition-colors"
-                                >
-                                    <div className="flex justify-between items-start mb-3">
+                        <CardContent>
+                            <div className="space-y-4">
+                                {bookings.map((booking) => (
+                                    <div
+                                        key={booking.id}
+                                        className="border rounded-lg p-4 flex flex-col md:flex-row justify-between gap-4"
+                                    >
                                         <div>
-                                            <h3 className="font-semibold">{booking.tourTitle}</h3>
-                                            <p className="text-sm text-muted-foreground">{booking.contactName}</p>
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <h3 className="font-semibold">{booking.tourTitle}</h3>
+                                                <Badge
+                                                    variant={
+                                                        booking.status === 'confirmed' ? 'default' :
+                                                            booking.status === 'cancelled' ? 'destructive' : 'secondary'
+                                                    }
+                                                >
+                                                    {booking.status}
+                                                </Badge>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm text-muted-foreground">
+                                                <span>Ref: {booking.bookingRef || 'N/A'}</span>
+                                                <span>Date: {booking.date}</span>
+                                                <span>Guest: {booking.contactName}</span>
+                                                <span>Email: {booking.contactEmail}</span>
+                                                <span>Phone: {booking.contactPhone}</span>
+                                                <span>Travelers: {booking.guests} ({booking.adults} Ad, {booking.children} Ch)</span>
+                                                {booking.pickupOption && (
+                                                    <span className="col-span-2 text-orange-600">
+                                                        Pickup: {booking.pickupOption} {booking.pickupAddress ? `(${booking.pickupAddress})` : ''}
+                                                    </span>
+                                                )}
+                                                <span className="col-span-2 font-semibold text-black">
+                                                    Total: ${booking.totalPrice}
+                                                </span>
+                                            </div>
+                                            {booking.specialRequests && (
+                                                <div className="mt-2 text-sm bg-yellow-50 p-2 rounded border border-yellow-100">
+                                                    <strong>Note:</strong> {booking.specialRequests}
+                                                </div>
+                                            )}
                                         </div>
-                                        <Badge
-                                            variant={
-                                                booking.status === 'confirmed' ? 'default' :
-                                                    booking.status === 'pending' ? 'secondary' :
-                                                        'destructive'
-                                            }
-                                        >
-                                            {booking.status}
-                                        </Badge>
+
+                                        <div className="flex flex-col gap-2 justify-center">
+                                            {booking.status === 'pending' && (
+                                                <>
+                                                    <Button
+                                                        size="sm"
+                                                        className="bg-green-600 hover:bg-green-700"
+                                                        onClick={() => updateBookingStatus(booking.id, 'confirmed')}
+                                                    >
+                                                        Confirm
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="destructive"
+                                                        onClick={() => updateBookingStatus(booking.id, 'cancelled')}
+                                                    >
+                                                        Cancel
+                                                    </Button>
+                                                </>
+                                            )}
+                                            {booking.status === 'confirmed' && (
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={() => updateBookingStatus(booking.id, 'cancelled')}
+                                                >
+                                                    Cancel Booking
+                                                </Button>
+                                            )}
+                                        </div>
                                     </div>
+                                ))}
 
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-3">
-                                        <div>
-                                            <div className="text-muted-foreground">Date</div>
-                                            <div className="font-medium flex items-center gap-1">
-                                                <Calendar className="h-3 w-3" />
-                                                {booking.date}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div className="text-muted-foreground">Guests</div>
-                                            <div className="font-medium flex items-center gap-1">
-                                                <Users className="h-3 w-3" />
-                                                {booking.guests}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div className="text-muted-foreground">Contact</div>
-                                            <div className="font-medium">{booking.contactEmail}</div>
-                                        </div>
-                                        <div>
-                                            <div className="text-muted-foreground">Total</div>
-                                            <div className="font-medium flex items-center gap-1">
-                                                <DollarSign className="h-3 w-3" />
-                                                ${booking.totalPrice}
-                                            </div>
-                                        </div>
+                                {bookings.length === 0 && (
+                                    <div className="text-center py-8 text-muted-foreground">
+                                        No bookings found
                                     </div>
-
-                                    {booking.specialRequests && (
-                                        <div className="mb-3 p-2 bg-gray-50 rounded text-sm">
-                                            <div className="text-muted-foreground font-medium mb-1">Special Requests:</div>
-                                            <div>{booking.specialRequests}</div>
-                                        </div>
-                                    )}
-
-                                    {booking.status === 'pending' && (
-                                        <div className="flex gap-2">
-                                            <Button
-                                                size="sm"
-                                                onClick={() => updateBookingStatus(booking.id, 'confirmed')}
-                                                className="bg-green-600 hover:bg-green-700"
-                                            >
-                                                Confirm
-                                            </Button>
-                                            <Button
-                                                size="sm"
-                                                variant="destructive"
-                                                onClick={() => updateBookingStatus(booking.id, 'cancelled')}
-                                            >
-                                                Cancel
-                                            </Button>
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
-
-                            {filteredBookings.length === 0 && (
-                                <div className="text-center py-8 text-muted-foreground">
-                                    No bookings found
-                                </div>
-                            )}
+                                )}
+                            </div>
                         </CardContent>
                     </Card>
                 </TabsContent>
@@ -903,5 +1008,4 @@ export const CulturalToursManager = () => {
         </div>
     );
 };
-
 export default CulturalToursManager;

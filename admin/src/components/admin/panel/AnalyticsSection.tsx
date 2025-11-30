@@ -1,65 +1,78 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { TrendingUp, TrendingDown, Users, Eye, Clock, Globe } from 'lucide-react';
+import { TrendingUp, TrendingDown, Users, Eye, Clock, Globe, Calendar, MapPin, Hotel } from 'lucide-react';
+import { collection, getDocs, query, orderBy, limit, where } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 const AnalyticsSection: React.FC = () => {
-  const analyticsData = {
-    totalVisitors: 12543,
-    visitorGrowth: 8.2,
-    pageViews: 34567,
-    pageViewGrowth: -2.1,
-    avgSessionTime: '3m 45s',
-    sessionTimeGrowth: 12.5,
-    bounceRate: '42%',
-    bounceRateGrowth: -5.3
-  };
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalBookings: 0,
+    totalTours: 0,
+    totalHotels: 0,
+    totalRevenue: 0
+  });
+  const [recentBookings, setRecentBookings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const topPages = [
-    { path: '/tours/sri-lanka-highlights', views: 3456, title: 'Sri Lanka Highlights Tour' },
-    { path: '/destinations/sigiriya', views: 2789, title: 'Sigiriya Rock Fortress' },
-    { path: '/hotels/colombo', views: 2134, title: 'Hotels in Colombo' },
-    { path: '/about/sri-lanka', views: 1876, title: 'About Sri Lanka' },
-    { path: '/contact', views: 1543, title: 'Contact Us' }
-  ];
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        // Fetch counts (using getDocs for now as it's safer without specific count rules)
+        const usersSnapshot = await getDocs(collection(db, 'users'));
+        const bookingsSnapshot = await getDocs(collection(db, 'bookings'));
+        const toursSnapshot = await getDocs(collection(db, 'tours'));
+        const hotelsSnapshot = await getDocs(collection(db, 'hotels'));
 
-  const recentActivity = [
-    { time: '2 minutes ago', event: 'New booking received', type: 'booking' },
-    { time: '5 minutes ago', event: 'User registered from Australia', type: 'user' },
-    { time: '12 minutes ago', event: 'Page view spike detected', type: 'analytics' },
-    { time: '18 minutes ago', event: 'Contact form submitted', type: 'contact' },
-    { time: '25 minutes ago', event: 'New review posted', type: 'review' }
-  ];
+        // Calculate revenue (mock calculation if price field exists, or just count)
+        let revenue = 0;
+        bookingsSnapshot.docs.forEach(doc => {
+          const data = doc.data();
+          if (data.totalAmount) revenue += Number(data.totalAmount);
+        });
 
-  const getGrowthIcon = (growth: number) => {
-    return growth > 0 ? (
-      <TrendingUp className="w-4 h-4 text-green-500" />
-    ) : (
-      <TrendingDown className="w-4 h-4 text-red-500" />
-    );
-  };
+        setStats({
+          totalUsers: usersSnapshot.size,
+          totalBookings: bookingsSnapshot.size,
+          totalTours: toursSnapshot.size,
+          totalHotels: hotelsSnapshot.size,
+          totalRevenue: revenue
+        });
 
-  const getGrowthColor = (growth: number) => {
-    return growth > 0 ? 'text-green-600' : 'text-red-600';
-  };
+        // Fetch recent bookings
+        const recentBookingsQuery = query(
+          collection(db, 'bookings'),
+          orderBy('createdAt', 'desc'),
+          limit(5)
+        );
+        const recentBookingsSnapshot = await getDocs(recentBookingsQuery);
+        setRecentBookings(recentBookingsSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })));
 
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case 'booking': return '📅';
-      case 'user': return '👤';
-      case 'analytics': return '📊';
-      case 'contact': return '📧';
-      case 'review': return '⭐';
-      default: return '📌';
-    }
-  };
+      } catch (error) {
+        console.error("Error fetching analytics:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAnalytics();
+  }, []);
+
+  if (loading) {
+    return <div className="p-8 text-center">Loading analytics...</div>;
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Analytics</h2>
-        <Badge variant="outline" className="text-sm">
-          Last 30 days
+        <h2 className="text-2xl font-bold">Live Analytics</h2>
+        <Badge variant="outline" className="text-sm bg-green-50 text-green-700 border-green-200 animate-pulse">
+          <span className="w-2 h-2 rounded-full bg-green-500 mr-2"></span>
+          Live Data
         </Badge>
       </div>
 
@@ -67,113 +80,79 @@ const AnalyticsSection: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Visitors</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{analyticsData.totalVisitors.toLocaleString()}</div>
-            <div className="flex items-center gap-1 text-xs">
-              {getGrowthIcon(analyticsData.visitorGrowth)}
-              <span className={getGrowthColor(analyticsData.visitorGrowth)}>
-                {Math.abs(analyticsData.visitorGrowth)}% from last month
-              </span>
-            </div>
+            <div className="text-2xl font-bold">{stats.totalUsers.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">Registered accounts</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Page Views</CardTitle>
-            <Eye className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{analyticsData.pageViews.toLocaleString()}</div>
-            <div className="flex items-center gap-1 text-xs">
-              {getGrowthIcon(analyticsData.pageViewGrowth)}
-              <span className={getGrowthColor(analyticsData.pageViewGrowth)}>
-                {Math.abs(analyticsData.pageViewGrowth)}% from last month
-              </span>
-            </div>
+            <div className="text-2xl font-bold">{stats.totalBookings.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">All time bookings</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg. Session Time</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Active Tours</CardTitle>
+            <MapPin className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{analyticsData.avgSessionTime}</div>
-            <div className="flex items-center gap-1 text-xs">
-              {getGrowthIcon(analyticsData.sessionTimeGrowth)}
-              <span className={getGrowthColor(analyticsData.sessionTimeGrowth)}>
-                {Math.abs(analyticsData.sessionTimeGrowth)}% from last month
-              </span>
-            </div>
+            <div className="text-2xl font-bold">{stats.totalTours.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">Available packages</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Bounce Rate</CardTitle>
-            <Globe className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Partner Hotels</CardTitle>
+            <Hotel className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{analyticsData.bounceRate}</div>
-            <div className="flex items-center gap-1 text-xs">
-              {getGrowthIcon(analyticsData.bounceRateGrowth)}
-              <span className={getGrowthColor(analyticsData.bounceRateGrowth)}>
-                {Math.abs(analyticsData.bounceRateGrowth)}% from last month
-              </span>
-            </div>
+            <div className="text-2xl font-bold">{stats.totalHotels.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">Listed properties</p>
           </CardContent>
         </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Top Pages */}
-        <Card>
+        {/* Recent Bookings */}
+        <Card className="col-span-2">
           <CardHeader>
-            <CardTitle>Top Pages</CardTitle>
+            <CardTitle>Recent Bookings</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {topPages.map((page, index) => (
-                <div key={page.path} className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{page.title}</p>
-                    <p className="text-xs text-muted-foreground truncate">{page.path}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="text-xs">
-                      #{index + 1}
+              {recentBookings.length > 0 ? (
+                recentBookings.map((booking) => (
+                  <div key={booking.id} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                        <Calendar className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="font-medium">{booking.tourName || booking.hotelName || 'Booking'}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {booking.customerName || booking.email || 'Guest'} • {booking.createdAt?.toDate?.().toLocaleDateString() || 'Just now'}
+                        </p>
+                      </div>
+                    </div>
+                    <Badge variant={booking.status === 'confirmed' ? 'default' : 'secondary'}>
+                      {booking.status || 'Pending'}
                     </Badge>
-                    <span className="text-sm font-medium">{page.views.toLocaleString()}</span>
                   </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Recent Activity */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentActivity.map((activity, index) => (
-                <div key={index} className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-sm">
-                    {getActivityIcon(activity.type)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm">{activity.event}</p>
-                    <p className="text-xs text-muted-foreground">{activity.time}</p>
-                  </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No recent bookings found.</p>
+              )}
             </div>
           </CardContent>
         </Card>

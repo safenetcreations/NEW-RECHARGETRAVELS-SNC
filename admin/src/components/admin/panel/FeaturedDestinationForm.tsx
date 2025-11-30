@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { FeaturedDestination, FeaturedDestinationFormData } from '@/types/cms';
+import ImageUpload from '@/components/ui/image-upload';
 
 interface FeaturedDestinationFormProps {
   destination: FeaturedDestination | null;
@@ -129,8 +130,14 @@ const FeaturedDestinationForm: React.FC<FeaturedDestinationFormProps> = ({ desti
       </div>
 
       <div>
-        <Label>Image URL</Label>
-        <Input name="image" value={formData.image} onChange={handleChange} required />
+        <Label>Destination Image</Label>
+        <ImageUpload
+          value={formData.image}
+          onChange={(url) => setFormData(prev => ({ ...prev, image: url }))}
+          onRemove={() => setFormData(prev => ({ ...prev, image: '' }))}
+          folder="destinations"
+          helperText="Recommended: 800x600px. Max: 10MB. Formats: JPG, PNG, WEBP"
+        />
       </div>
 
       <div>

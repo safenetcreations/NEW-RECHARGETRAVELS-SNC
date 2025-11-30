@@ -52,6 +52,125 @@ import {
   HomepageSettingsFormData,
 } from '@/types/cms';
 
+const DEFAULT_FEATURED_DESTINATIONS: FeaturedDestinationFormData[] = [
+  {
+    name: 'Sigiriya',
+    title: 'Lion Rock Fortress',
+    category: 'UNESCO Heritage',
+    description:
+      'Ancient rock fortress rising 200m above jungle. UNESCO World Heritage site.',
+    image:
+      'https://images.unsplash.com/photo-1586523969943-2d62a1a7d4d3?w=800&q=80',
+    price: 150,
+    currency: 'USD',
+    duration: 'Full Day Trip',
+    rating: 4.9,
+    features: ['Ancient Frescoes', 'Mirror Wall', 'Lion Gate'],
+    link: '/destinations/sigiriya',
+    bestTimeToVisit: 'Year-round, best from December to April',
+    popularActivities: ['Sunrise climb', 'Fresco viewing', 'Fortress walk'],
+    isActive: true,
+    isFeatured: true,
+    order: 1,
+  },
+  {
+    name: 'Ella',
+    title: 'Hill Country Paradise',
+    category: 'Hill Country',
+    description: 'Misty mountain town famous for Nine Arch Bridge and hiking trails.',
+    image:
+      'https://images.unsplash.com/photo-1566296314736-6eaac1ca0cb9?w=800&q=80',
+    price: 180,
+    currency: 'USD',
+    duration: '2 Days / 1 Night',
+    rating: 4.8,
+    features: ['Nine Arch Bridge', 'Ella Rock', 'Tea Trails'],
+    link: '/destinations/ella',
+    bestTimeToVisit: 'February to April',
+    popularActivities: ['Scenic train ride', 'Ella Rock hike', 'Little Adam’s Peak'],
+    isActive: true,
+    isFeatured: true,
+    order: 2,
+  },
+  {
+    name: 'Kandy',
+    title: 'Temple of Sacred Tooth',
+    category: 'Cultural Heritage',
+    description: "Cultural capital housing Buddha's sacred tooth relic.",
+    image:
+      'https://images.unsplash.com/photo-1580181046391-e7e83f206c62?w=800&q=80',
+    price: 130,
+    currency: 'USD',
+    duration: 'Full Day Trip',
+    rating: 4.7,
+    features: ['Temple of Tooth', 'Kandy Lake', 'Cultural Dance'],
+    link: '/destinations/kandy',
+    bestTimeToVisit: 'July to August for Esala Perahera',
+    popularActivities: ['Temple visit', 'City walk', 'Cultural show'],
+    isActive: true,
+    isFeatured: true,
+    order: 3,
+  },
+  {
+    name: 'Galle',
+    title: 'Dutch Colonial Fort',
+    category: 'Colonial Heritage',
+    description: 'Historic fort city with colonial architecture and ocean views.',
+    image:
+      'https://images.unsplash.com/photo-1588598198321-9735fd52045b?w=800&q=80',
+    price: 140,
+    currency: 'USD',
+    duration: 'Full Day Trip',
+    rating: 4.8,
+    features: ['Galle Fort', 'Lighthouse', 'Dutch Museum'],
+    link: '/destinations/galle',
+    bestTimeToVisit: 'December to April',
+    popularActivities: ['Fort walk', 'Sunset views', 'Cafe hopping'],
+    isActive: true,
+    isFeatured: true,
+    order: 4,
+  },
+  {
+    name: 'Mirissa',
+    title: 'Whale Watching Capital',
+    category: 'Beach & Wildlife',
+    description:
+      "Pristine beach paradise and world's best blue whale destination.",
+    image:
+      'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80',
+    price: 160,
+    currency: 'USD',
+    duration: 'Full Day Trip',
+    rating: 4.9,
+    features: ['Blue Whales', 'Coconut Beach', 'Surfing'],
+    link: '/destinations/mirissa',
+    bestTimeToVisit: 'November to April',
+    popularActivities: ['Whale watching', 'Beach time', 'Surfing'],
+    isActive: true,
+    isFeatured: true,
+    order: 5,
+  },
+  {
+    name: 'Yala',
+    title: 'Leopard Kingdom',
+    category: 'Wildlife Safari',
+    description: "World's highest leopard density. Iconic safari destination.",
+    image:
+      'https://images.unsplash.com/photo-1549366021-9f761d450615?w=800&q=80',
+    price: 220,
+    currency: 'USD',
+    duration: 'Full Day Safari',
+    rating: 4.9,
+    features: ['Leopards', 'Elephants', 'Bird Watching'],
+    link: '/wild-tours',
+    bestTimeToVisit: 'February to July',
+    popularActivities: ['Jeep safari', 'Wildlife photography', 'Bird watching'],
+    isActive: true,
+    isFeatured: true,
+    order: 6,
+  },
+];
+
 // ==========================================
 // Hero Slides CRUD Operations
 // ==========================================
@@ -71,6 +190,23 @@ export const heroSlidesService = {
       return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as HeroSlide));
     } catch (error) {
       console.error('Error fetching hero slides:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get all hero slides for admin (includes active and inactive)
+   */
+  async getAllAdmin(): Promise<HeroSlide[]> {
+    try {
+      const q = query(
+        collection(db, 'heroSlides'),
+        orderBy('createdAt', 'desc')
+      );
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as HeroSlide));
+    } catch (error) {
+      console.error('Error fetching hero slides for admin:', error);
       throw error;
     }
   },
@@ -720,6 +856,37 @@ export const featuredDestinationsService = {
       return { success: true };
     } catch (error) {
       console.error('Error deleting featured destination:', error);
+      return { success: false, error: (error as Error).message };
+    }
+  },
+
+  async importDefaults(): Promise<CMSResponse<FeaturedDestination[]>> {
+    try {
+      const existingSnapshot = await getDocs(collection(db, 'featuredDestinations'));
+      if (!existingSnapshot.empty) {
+        return {
+          success: false,
+          error:
+            'Featured destinations already exist. Delete them first if you want to re-import defaults.',
+        };
+      }
+
+      const created: FeaturedDestination[] = [];
+      const timestamp = Timestamp.now();
+
+      for (const dest of DEFAULT_FEATURED_DESTINATIONS) {
+        const data = {
+          ...dest,
+          createdAt: timestamp,
+          updatedAt: timestamp,
+        };
+        const docRef = await addDoc(collection(db, 'featuredDestinations'), data);
+        created.push({ id: docRef.id, ...data } as FeaturedDestination);
+      }
+
+      return { success: true, data: created };
+    } catch (error) {
+      console.error('Error importing default featured destinations:', error);
       return { success: false, error: (error as Error).message };
     }
   },

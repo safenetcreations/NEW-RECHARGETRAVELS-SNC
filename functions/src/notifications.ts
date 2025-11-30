@@ -1272,86 +1272,116 @@ export const sendWhatsAppMessage = functions.https.onCall(async (data, context) 
   }
 });
 
+// Shared handler for booking confirmations
+const handleBookingConfirmation = async (snap: functions.firestore.QueryDocumentSnapshot, context: functions.EventContext) => {
+  const booking = snap.data();
+  const bookingId = context.params.bookingId;
+
+  try {
+    // Handle various data structures from different booking forms
+    const customerEmail = booking.personal_info?.email || booking.email || booking.contactEmail || booking.user_email;
+
+    let customerName = booking.name || booking.user_name || 'Valued Customer';
+    if (booking.personal_info) {
+      customerName = `${booking.personal_info.firstName} ${booking.personal_info.lastName}`;
+    } else if (booking.firstName && booking.lastName) {
+      customerName = `${booking.firstName} ${booking.lastName}`;
+    } else if (booking.contactName) {
+      customerName = booking.contactName;
+    }
+
+    if (!customerEmail) {
+      console.log('No customer email found for booking:', bookingId);
+      return;
+    }
+
+    // Prepare template data
+    const templateData = {
+      customerName,
+      confirmationNumber: booking.confirmation_number || booking.bookingRef || bookingId,
+      bookingType: booking.booking_type || booking.type || booking.tourTitle || 'Travel Package',
+      travelDate: booking.check_in_date || booking.tour_start_date || booking.pickup_date || booking.travel_date || booking.tourDate || booking.date || 'TBD',
+      adults: booking.adults || booking.guests || 1,
+      children: booking.children || 0,
+      totalAmount: booking.total_price || booking.amount || booking.totalPrice || 0,
+      currency: booking.currency || 'USD',
+      specialRequests: booking.special_requests || booking.specialRequests || ''
+    };
+
+    // Send customer confirmation
+    const customerTemplate = emailTemplates.bookingConfirmation(templateData);
+
+    await sgMail.send({
+      to: customerEmail,
+      from: { email: FROM_EMAIL, name: FROM_NAME },
+      replyTo: REPLY_TO_EMAIL,
+      subject: customerTemplate.subject,
+      html: customerTemplate.html,
+      text: customerTemplate.text
+    });
+
+    // Send admin notification
+    const adminTemplate = emailTemplates.adminNotification({
+      type: 'Booking',
+      customerName,
+      customerEmail,
+      phone: booking.personal_info?.phone || booking.phone || booking.contactPhone,
+      details: `
+        <p><strong>Booking ID:</strong> ${templateData.confirmationNumber}</p>
+        <p><strong>Type:</strong> ${templateData.bookingType}</p>
+        <p><strong>Date:</strong> ${templateData.travelDate}</p>
+        <p><strong>Guests:</strong> ${templateData.adults} Adults, ${templateData.children} Children</p>
+        <p><strong>Amount:</strong> ${templateData.currency} ${templateData.totalAmount}</p>
+        <p><strong>Status:</strong> ${booking.status || 'Pending'}</p>
+        <p><strong>Payment:</strong> ${booking.payment_status || booking.paymentMethod || 'Pending'}</p>
+      `,
+      adminUrl: `https://recharge-travels-73e76.web.app/admin/bookings`
+    });
+
+    await sgMail.send({
+      to: ADMIN_EMAIL,
+      from: { email: FROM_EMAIL, name: FROM_NAME },
+      subject: adminTemplate.subject,
+      html: adminTemplate.html,
+      text: adminTemplate.text
+    });
+
+    // Update booking with confirmation sent status
+    await snap.ref.update({
+      confirmationSent: true,
+      confirmationSentAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    console.log('Booking confirmation sent for:', bookingId);
+  } catch (error) {
+    console.error('Error sending booking confirmation:', error);
+  }
+};
+
 // Trigger: Send booking confirmation when new booking is created
 export const sendBookingConfirmation = functions.firestore
   .document('bookings/{bookingId}')
-  .onCreate(async (snap, context) => {
-    const booking = snap.data();
-    const bookingId = context.params.bookingId;
+  .onCreate(handleBookingConfirmation);
 
-    try {
-      const customerEmail = booking.personal_info?.email || booking.email;
-      const customerName = booking.personal_info
-        ? `${booking.personal_info.firstName} ${booking.personal_info.lastName}`
-        : booking.name;
+export const sendCulturalBookingConfirmation = functions.firestore
+  .document('cultural_bookings/{bookingId}')
+  .onCreate(handleBookingConfirmation);
 
-      if (!customerEmail) {
-        console.log('No customer email found for booking:', bookingId);
-        return;
-      }
+export const sendNationalParksBookingConfirmation = functions.firestore
+  .document('nationalparks_bookings/{bookingId}')
+  .onCreate(handleBookingConfirmation);
 
-      // Prepare template data
-      const templateData = {
-        customerName: customerName || 'Valued Customer',
-        confirmationNumber: booking.confirmation_number || bookingId,
-        bookingType: booking.booking_type || booking.type || 'Travel Package',
-        travelDate: booking.check_in_date || booking.tour_start_date || booking.pickup_date || booking.travel_date || 'TBD',
-        adults: booking.adults || booking.guests || 1,
-        children: booking.children || 0,
-        totalAmount: booking.total_price || booking.amount || 0,
-        currency: booking.currency || 'USD',
-        specialRequests: booking.special_requests || ''
-      };
+export const sendWildToursBookingConfirmation = functions.firestore
+  .document('wildtours_bookings/{bookingId}')
+  .onCreate(handleBookingConfirmation);
 
-      // Send customer confirmation
-      const customerTemplate = emailTemplates.bookingConfirmation(templateData);
+export const sendHillCountryBookingConfirmation = functions.firestore
+  .document('hillcountry_bookings/{bookingId}')
+  .onCreate(handleBookingConfirmation);
 
-      await sgMail.send({
-        to: customerEmail,
-        from: { email: FROM_EMAIL, name: FROM_NAME },
-        replyTo: REPLY_TO_EMAIL,
-        subject: customerTemplate.subject,
-        html: customerTemplate.html,
-        text: customerTemplate.text
-      });
-
-      // Send admin notification
-      const adminTemplate = emailTemplates.adminNotification({
-        type: 'Booking',
-        customerName,
-        customerEmail,
-        phone: booking.personal_info?.phone || booking.phone,
-        details: `
-          <p><strong>Booking ID:</strong> ${booking.confirmation_number || bookingId}</p>
-          <p><strong>Type:</strong> ${booking.booking_type || booking.type}</p>
-          <p><strong>Date:</strong> ${templateData.travelDate}</p>
-          <p><strong>Guests:</strong> ${templateData.adults} Adults, ${templateData.children} Children</p>
-          <p><strong>Amount:</strong> ${templateData.currency} ${templateData.totalAmount}</p>
-          <p><strong>Status:</strong> ${booking.status}</p>
-          <p><strong>Payment:</strong> ${booking.payment_status}</p>
-        `,
-        adminUrl: `https://recharge-travels-73e76.web.app/admin/bookings/${bookingId}`
-      });
-
-      await sgMail.send({
-        to: ADMIN_EMAIL,
-        from: { email: FROM_EMAIL, name: FROM_NAME },
-        subject: adminTemplate.subject,
-        html: adminTemplate.html,
-        text: adminTemplate.text
-      });
-
-      // Update booking with confirmation sent status
-      await snap.ref.update({
-        confirmationSent: true,
-        confirmationSentAt: admin.firestore.FieldValue.serverTimestamp()
-      });
-
-      console.log('Booking confirmation sent for:', bookingId);
-    } catch (error) {
-      console.error('Error sending booking confirmation:', error);
-    }
-  });
+export const sendRamayanaBookingConfirmation = functions.firestore
+  .document('ramayana_bookings/{bookingId}')
+  .onCreate(handleBookingConfirmation);
 
 // Trigger: Send notification when new inquiry is created
 export const sendBookingNotification = functions.firestore
@@ -1938,7 +1968,7 @@ export const onDriverStatusChange = functions.firestore
 
       // Handle rejection/suspension
       if ((after.current_status === 'suspended' || after.current_status === 'inactive') &&
-          before.current_status !== 'suspended' && before.current_status !== 'inactive') {
+        before.current_status !== 'suspended' && before.current_status !== 'inactive') {
         const rejectedTemplate = emailTemplates.driverApplicationRejected({
           driverName: after.full_name || 'Driver',
           rejectionReason: after.rejection_reason || after.suspension_reason || 'Application could not be verified'

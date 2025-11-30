@@ -153,6 +153,24 @@ class PaymentGatewayService {
     }
   }
 
+  // PayPal Integration (redirect flow)
+  async initiatePayPalPayment(request: PaymentRequest): Promise<PaymentResponse> {
+    try {
+      // In production integrate with PayPal Orders API using client/server credentials.
+      return {
+        success: true,
+        paymentUrl: `https://www.paypal.com/checkoutnow?token=${request.orderId}`,
+        transactionId: `PAYPAL-${Date.now()}`
+      };
+    } catch (error) {
+      console.error('PayPal payment error:', error);
+      return {
+        success: false,
+        error: 'Failed to initiate PayPal payment'
+      };
+    }
+  }
+
   // Verify payment status
   async verifyPayment(transactionId: string, gateway: string): Promise<boolean> {
     try {

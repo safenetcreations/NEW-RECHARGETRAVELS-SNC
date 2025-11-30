@@ -9,7 +9,7 @@ import {
 import { Link, useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { experiencesByCategory } from './menuData'
-import { Compass, TreePine, Landmark, Sparkles } from 'lucide-react'
+import { Compass, TreePine, Landmark, Sparkles, LucideIcon } from 'lucide-react'
 
 interface ExperiencesDropdownProps {
   animatingItem: string | null
@@ -17,11 +17,11 @@ interface ExperiencesDropdownProps {
   isScrolled: boolean;
 }
 
-const categoryIcons: Record<string, React.ReactNode> = {
-  adventure: <Compass className="w-4 h-4" />,
-  wildlife: <TreePine className="w-4 h-4" />,
-  heritage: <Landmark className="w-4 h-4" />,
-  luxury: <Sparkles className="w-4 h-4" />
+const categoryIconComponents: Record<string, LucideIcon> = {
+  adventure: Compass,
+  wildlife: TreePine,
+  heritage: Landmark,
+  luxury: Sparkles
 }
 
 const categoryColors: Record<string, string> = {
@@ -87,7 +87,9 @@ const ExperiencesDropdown = ({ animatingItem, onMenuClick, isScrolled }: Experie
               isScrolled ? "border-rose-200/50 bg-white/50" : "border-white/10 bg-white/5"
             )}>
               <div className="space-y-1">
-                {categories.map(([key, category]) => (
+                {categories.map(([key, category]) => {
+                  const IconComponent = categoryIconComponents[key]
+                  return (
                   <button
                     key={key}
                     onClick={() => setActiveCategory(key)}
@@ -103,10 +105,10 @@ const ExperiencesDropdown = ({ animatingItem, onMenuClick, isScrolled }: Experie
                           : "text-gray-300 hover:bg-white/10"
                     )}
                   >
-                    {categoryIcons[key]}
+                    {IconComponent && <IconComponent className="w-4 h-4" />}
                     <span className="truncate">{category.title}</span>
                   </button>
-                ))}
+                )})}
               </div>
               
               {/* View All Link */}

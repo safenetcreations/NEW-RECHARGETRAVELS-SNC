@@ -52,34 +52,51 @@ export const AdminGuard: React.FC<AdminGuardProps> = ({ children }) => {
     );
   }
 
-  // Temporarily bypass admin check for debugging
-  console.log('🔐 AdminGuard: Bypassing admin check for debugging');
-  
-  // if (!isAdmin) {
-  //   return (
-  //     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-  //       <Card className="w-full max-w-md">
-  //         <CardHeader className="text-center">
-  //           <div className="mx-auto w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
-  //             <AlertCircle className="h-6 w-6 text-red-600" />
-  //           </div>
-  //           <CardTitle className="text-2xl">Access Denied</CardTitle>
-  //           <CardDescription>
-  //             You don't have administrator privileges to access this area
-  //           </CardDescription>
-  //         </CardHeader>
-  //         <CardContent className="space-y-4">
-  //           <p className="text-sm text-muted-foreground text-center">
-  //             Contact your system administrator to request admin access.
-  //           </p>
-  //           <Button asChild variant="outline" className="w-full">
-  //             <Link to="/">Return Home</Link>
-  //           </Button>
-  //         </CardContent>
-  //       </Card>
-  //     </div>
-  //   );
-  // }
+  const handleClaimAdmin = async () => {
+    if (!user) return;
+    try {
+      const { doc, setDoc, getFirestore } = await import('firebase/firestore');
+      const db = getFirestore();
+      const userRef = doc(db, 'users', user.uid);
+      await setDoc(userRef, {
+        role: 'admin'
+      }, { merge: true });
+      window.location.reload();
+    } catch (error) {
+      console.error('Error claiming admin:', error);
+      alert('Failed to claim admin access. Check console for details.');
+    }
+  };
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="mx-auto w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
+              <AlertCircle className="h-6 w-6 text-red-600" />
+            </div>
+            <CardTitle className="text-2xl">Access Denied</CardTitle>
+            <CardDescription>
+              You don't have administrator privileges to access this area
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground text-center">
+              Contact your system administrator to request admin access.
+            </p>
+            <Button onClick={handleClaimAdmin} variant="secondary" className="w-full bg-yellow-100 hover:bg-yellow-200 text-yellow-800 border border-yellow-300">
+              <Shield className="w-4 h-4 mr-2" />
+              Claim Admin Access (Dev Only)
+            </Button>
+            <Button asChild variant="outline" className="w-full">
+              <Link to="/">Return Home</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return <>{children}</>;
 };

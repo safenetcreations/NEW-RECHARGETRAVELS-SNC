@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import {
@@ -39,7 +40,16 @@ import {
   Shield,
   CreditCard,
   Percent,
-  Wallet
+  Wallet,
+  Waves,
+  TreePine,
+  Wind,
+  Flame,
+  Leaf,
+  Navigation,
+  Mountain,
+  Droplets,
+  Crown
 } from 'lucide-react';
 
 interface AdminSidebarProps {
@@ -53,7 +63,7 @@ interface MenuItem {
   id: string;
   label: string;
   icon: any;
-  section?: string;
+  path?: string; // Direct URL path for routing
 }
 
 const AdminSidebar: React.FC<AdminSidebarProps> = ({
@@ -86,16 +96,17 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
     fetchDestinations();
   }, []);
 
-  // Close mobile menu when section changes
-  const handleSectionChange = (section: string, path?: string) => {
-    if (path) {
-      window.location.href = `/admin${path}`;
-    } else {
-      onSectionChange(section);
-    }
+  // Close mobile menu when section changes - now uses proper routing
+  const handleSectionChange = (section: string) => {
+    onSectionChange(section);
     if (onMobileMenuClose) {
       onMobileMenuClose();
     }
+  };
+
+  // Get the path for a menu item
+  const getItemPath = (item: MenuItem): string => {
+    return item.path || `/${item.id}`;
   };
 
   // Load pinned items from localStorage
@@ -136,84 +147,98 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
     {
       title: 'Overview',
       items: [
-        { id: 'dashboard', label: 'Dashboard', icon: Home },
-        { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+        { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/dashboard' },
+        { id: 'analytics', label: 'Analytics', icon: BarChart3, path: '/analytics' },
       ]
     },
     {
       title: 'Landing Page CMS',
       items: [
-        { id: 'hero-section', label: 'Hero Section', icon: Layers },
-        { id: 'featured-destinations', label: 'Featured Destinations', icon: Compass },
+        { id: 'hero-section', label: 'Hero Section', icon: Layers, path: '/hero-section' },
+        { id: 'featured-destinations', label: 'Featured Destinations', icon: Compass, path: '/featured-destinations' },
         ...destinations.map(dest => ({
           id: `destination-${dest.slug}`,
           label: dest.name,
           icon: MapPin,
-          section: `/destinations?destination=${dest.slug}`
+          path: `/destinations?destination=${dest.slug}`
         })),
-        { id: 'luxury-experiences', label: 'Luxury Experiences', icon: Sparkles },
-        { id: 'travel-packages', label: 'Travel Packages', icon: Sparkles },
-        { id: 'testimonials', label: 'Testimonials', icon: MessageCircle },
-        { id: 'about-section', label: 'About Section', icon: Info },
-        { id: 'about-sri-lanka', label: 'About Sri Lanka', icon: Globe },
-        { id: 'travel-guide', label: 'Travel Guide', icon: BookOpen },
-        { id: 'why-choose-us', label: 'Why Choose Us', icon: CheckCircle },
-        { id: 'homepage-stats', label: 'Homepage Stats', icon: TrendingUp },
+        { id: 'luxury-experiences', label: 'Luxury Experiences', icon: Sparkles, path: '/luxury-experiences' },
+        { id: 'travel-packages', label: 'Travel Packages', icon: Sparkles, path: '/travel-packages' },
+        { id: 'testimonials', label: 'Testimonials', icon: MessageCircle, path: '/testimonials' },
+        { id: 'about-section', label: 'About Section', icon: Info, path: '/about-section' },
+        { id: 'about-sri-lanka', label: 'About Sri Lanka', icon: Globe, path: '/about-sri-lanka' },
+        { id: 'travel-guide', label: 'Travel Guide', icon: BookOpen, path: '/travel-guide' },
+        { id: 'book-now', label: 'Book Now Page', icon: BookOpen, path: '/book-now' },
+        { id: 'whale-booking', label: 'Whale Booking Page', icon: Waves, path: '/whale-booking' },
+        { id: 'hot-air-balloon', label: 'Hot Air Balloon', icon: Navigation, path: '/hot-air-balloon' },
+        { id: 'jungle-camping', label: 'Jungle Camping', icon: Flame, path: '/jungle-camping' },
+        { id: 'kalpitiya-kitesurfing', label: 'Kalpitiya Kitesurfing', icon: Wind, path: '/kalpitiya-kitesurfing' },
+        { id: 'private-charters', label: 'Private Charters', icon: Crown, path: '/private-charters' },
+        { id: 'ramayana', label: 'Ramayana Trail', icon: BookOpen, path: '/ramayana' },
+        { id: 'cooking-class', label: 'Cooking Class', icon: Flame, path: '/cooking-class' },
+        { id: 'sea-cucumber-farming', label: 'Sea Cucumber Farming', icon: Droplets, path: '/sea-cucumber-farming' },
+        { id: 'ayurveda-wellness', label: 'Ayurveda & Wellness', icon: Leaf, path: '/ayurveda-wellness' },
+        { id: 'tea-trails', label: 'Tea Trails', icon: Leaf, path: '/tea-trails' },
+        { id: 'pilgrimage-tours', label: 'Pilgrimage Tours', icon: Mountain, path: '/pilgrimage-tours' },
+        { id: 'why-choose-us', label: 'Why Choose Us', icon: CheckCircle, path: '/why-choose-us' },
+        { id: 'homepage-stats', label: 'Homepage Stats', icon: TrendingUp, path: '/homepage-stats' },
       ]
     },
     {
       title: 'Blog System',
       items: [
-        { id: 'blog-manager', label: 'Blog Manager', icon: Edit },
-        { id: 'ai-content-generator', label: 'AI Generator', icon: Sparkles },
+        { id: 'blog-manager', label: 'Blog Manager', icon: Edit, path: '/blog-manager' },
+        { id: 'ai-content-generator', label: 'AI Generator', icon: Sparkles, path: '/ai-content-generator' },
       ]
     },
     {
       title: 'Content',
       items: [
-        { id: 'content-dashboard', label: 'Content Dashboard', icon: FileText },
-        { id: 'pages', label: 'Pages', icon: FileText },
-        { id: 'posts', label: 'Legacy Posts', icon: FileText },
-        { id: 'media', label: 'Media Library', icon: Camera },
-        { id: 'social-media', label: 'Social Media', icon: Share2 },
-        { id: 'trip-builder', label: 'Trip Builder', icon: Map },
+        { id: 'content-dashboard', label: 'Content Dashboard', icon: FileText, path: '/content-dashboard' },
+        { id: 'pages', label: 'Pages', icon: FileText, path: '/pages' },
+        { id: 'posts', label: 'Legacy Posts', icon: FileText, path: '/posts' },
+        { id: 'media', label: 'Media Library', icon: Camera, path: '/media' },
+        { id: 'social-media', label: 'Social Media', icon: Share2, path: '/social-media' },
+        { id: 'trip-builder', label: 'Trip Builder', icon: Map, path: '/trip-builder' },
       ]
     },
     {
       title: 'Services',
       items: [
-        { id: 'hotels', label: 'Hotels & Lodges', icon: Hotel },
-        { id: 'tours', label: 'Tours & Packages', icon: MapPin },
-        { id: 'activities', label: 'Activities', icon: Zap },
-        { id: 'drivers', label: 'Drivers', icon: Car },
-        { id: 'driver-verification', label: 'Driver Verification', icon: Shield },
-        { id: 'vendor-approvals', label: 'Vendor Approvals', icon: CheckCircle },
+        { id: 'hotels', label: 'Hotels & Lodges', icon: Hotel, path: '/hotels' },
+        { id: 'tours', label: 'Tours & Packages', icon: MapPin, path: '/tours' },
+        { id: 'nationalparks', label: 'National Parks', icon: TreePine, path: '/nationalparks' },
+        { id: 'cultural-tours', label: 'Cultural Tours', icon: Mountain, path: '/cultural-tours' },
+        { id: 'activities', label: 'Activities', icon: Zap, path: '/activities' },
+        { id: 'drivers', label: 'Drivers', icon: Car, path: '/drivers' },
+        { id: 'driver-verification', label: 'Driver Verification', icon: Shield, path: '/driver-verification' },
+        { id: 'vendor-approvals', label: 'Vendor Approvals', icon: CheckCircle, path: '/vendor-approvals' },
       ]
     },
     {
       title: 'Management',
       items: [
-        { id: 'bookings', label: 'Bookings', icon: Calendar },
-        { id: 'group-transport-bookings', label: 'Group Transport Bookings', icon: Bus },
-        { id: 'reviews', label: 'Reviews', icon: Star },
-        { id: 'users', label: 'User Management', icon: Users },
+        { id: 'bookings', label: 'Bookings', icon: Calendar, path: '/bookings' },
+        { id: 'group-transport-bookings', label: 'Group Transport Bookings', icon: Bus, path: '/group-transport-bookings' },
+        { id: 'reviews', label: 'Reviews', icon: Star, path: '/reviews' },
+        { id: 'users', label: 'User Management', icon: Users, path: '/users' },
       ]
     },
     {
       title: 'Finance',
       items: [
-        { id: 'driver-analytics', label: 'Driver Analytics', icon: BarChart3 },
-        { id: 'commission-settings', label: 'Commission Settings', icon: Percent },
-        { id: 'payment-settlements', label: 'Payment Settlements', icon: CreditCard },
-        { id: 'driver-wallets', label: 'Driver Wallets', icon: Wallet },
+        { id: 'driver-analytics', label: 'Driver Analytics', icon: BarChart3, path: '/driver-analytics' },
+        { id: 'commission-settings', label: 'Commission Settings', icon: Percent, path: '/commission-settings' },
+        { id: 'payment-settlements', label: 'Payment Settlements', icon: CreditCard, path: '/payment-settlements' },
+        { id: 'driver-wallets', label: 'Driver Wallets', icon: Wallet, path: '/driver-wallets' },
       ]
     },
     {
       title: 'System',
       items: [
-        { id: 'email-templates', label: 'Email Templates', icon: Mail },
-        { id: 'settings', label: 'Settings', icon: Settings },
-        { id: 'ai-test', label: 'AI Test', icon: Sparkles },
+        { id: 'email-templates', label: 'Email Templates', icon: Mail, path: '/email-templates' },
+        { id: 'settings', label: 'Settings', icon: Settings, path: '/settings' },
+        { id: 'ai-test', label: 'AI Test', icon: Sparkles, path: '/ai-test' },
       ]
     }
   ];
@@ -245,6 +270,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
         {/* Collapse Toggle Button */}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
+          aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           className="absolute -right-3 top-20 z-50 w-6 h-6 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-200 border-2 border-white"
         >
           {isCollapsed ? (
@@ -258,8 +284,8 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           {!isCollapsed ? (
             <>
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform duration-300">
-                  <span className="text-2xl">⚡</span>
+                <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform duration-300 overflow-hidden p-1">
+                  <img src="/logo.png" alt="Recharge Travels" className="w-full h-full object-contain" />
                 </div>
                 <div className="flex-1">
                   <h2 className="text-xl font-bold text-white tracking-tight">Recharge</h2>
@@ -269,6 +295,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                 {isMobileMenuOpen && (
                   <button
                     onClick={onMobileMenuClose}
+                    aria-label="Close navigation drawer"
                     className="lg:hidden p-2 rounded-lg hover:bg-white/20 transition-colors"
                   >
                     <X className="w-5 h-5 text-white" />
@@ -281,8 +308,8 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
             </>
           ) : (
             <div className="flex justify-center">
-              <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-xl">⚡</span>
+              <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg overflow-hidden p-1">
+                <img src="/logo.png" alt="Recharge" className="w-full h-full object-contain" />
               </div>
             </div>
           )}
@@ -299,9 +326,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
               <ul className="space-y-1.5">
                 {pinnedMenuItems.map((item) => {
                   const IconComponent = item.icon;
+                  const itemPath = getItemPath(item);
                   return (
                     <li key={item.id}>
-                      <button
+                      <Link
+                        to={itemPath}
                         onClick={() => handleSectionChange(item.id)}
                         className={`w-full flex items-center px-4 py-3 text-left text-sm rounded-xl transition-all duration-300 transform group relative ${activeSection === item.id
                           ? 'bg-gradient-to-r from-white to-purple-50 text-indigo-700 font-semibold shadow-lg scale-105 border border-white/20'
@@ -317,11 +346,12 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                         <span className="truncate flex-1">{item.label}</span>
                         <button
                           onClick={(e) => togglePin(item.id, e)}
+                          aria-label={pinnedItems.includes(item.id) ? `Unpin ${item.label}` : `Pin ${item.label}`}
                           className="ml-2 p-1 rounded hover:bg-white/20 transition-colors"
                         >
                           <Pin className="w-3 h-3 fill-current" />
                         </button>
-                      </button>
+                      </Link>
                     </li>
                   );
                 })}
@@ -339,9 +369,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
               <ul className="space-y-1.5">
                 {recentMenuItems.slice(0, 3).map((item) => {
                   const IconComponent = item.icon;
+                  const itemPath = getItemPath(item);
                   return (
                     <li key={item.id}>
-                      <button
+                      <Link
+                        to={itemPath}
                         onClick={() => handleSectionChange(item.id)}
                         className={`w-full flex items-center px-4 py-3 text-left text-sm rounded-xl transition-all duration-300 transform group ${activeSection === item.id
                           ? 'bg-gradient-to-r from-white to-purple-50 text-indigo-700 font-semibold shadow-lg scale-105 border border-white/20'
@@ -355,7 +387,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                           <IconComponent className="w-4 h-4" />
                         </div>
                         <span className="truncate">{item.label}</span>
-                      </button>
+                      </Link>
                     </li>
                   );
                 })}
@@ -379,10 +411,12 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                 {section.items.map((item) => {
                   const IconComponent = item.icon;
                   const isPinned = pinnedItems.includes(item.id);
+                  const itemPath = getItemPath(item);
                   return (
                     <li key={item.id}>
-                      <button
-                        onClick={() => handleSectionChange(item.id, item.section)}
+                      <Link
+                        to={itemPath}
+                        onClick={() => handleSectionChange(item.id)}
                         className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2' : 'px-4'} py-3 text-left text-sm rounded-xl transition-all duration-300 transform group relative ${activeSection === item.id
                           ? 'bg-gradient-to-r from-white to-purple-50 text-indigo-700 font-semibold shadow-lg scale-105 border border-white/20'
                           : 'text-white hover:bg-white/15 hover:backdrop-blur-sm hover:scale-102 hover:shadow-md border border-transparent'
@@ -399,6 +433,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                             <span className="truncate flex-1">{item.label}</span>
                             <button
                               onClick={(e) => togglePin(item.id, e)}
+                              aria-label={isPinned ? `Unpin ${item.label}` : `Pin ${item.label}`}
                               className={`ml-2 p-1 rounded hover:bg-white/20 transition-colors ${isPinned ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
                                 }`}
                             >
@@ -412,7 +447,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                         {activeSection === item.id && isCollapsed && (
                           <div className="absolute -right-1 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-green-400 to-emerald-500 rounded-full shadow-lg"></div>
                         )}
-                      </button>
+                      </Link>
                     </li>
                   );
                 })}

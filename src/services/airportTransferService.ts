@@ -196,6 +196,212 @@ export const ROUTE_DISTANCES: { [key: string]: number } = {
   'pasikuda': 310,
 };
 
+// ============================================
+// NEW: Preloaded Hotels with Coordinates (19)
+// ============================================
+export interface HotelLocation {
+  id: string;
+  name: string;
+  city: string;
+  area: string;
+  coordinates: { lat: number; lng: number };
+  rating: number;
+  image: string;
+}
+
+export const PRELOADED_HOTELS: HotelLocation[] = [
+  { id: 'shangri-la', name: 'Shangri-La Colombo', city: 'Colombo', area: 'Colombo', coordinates: { lat: 6.9271, lng: 79.8445 }, rating: 5, image: '🏨' },
+  { id: 'cinnamon-grand', name: 'Cinnamon Grand', city: 'Colombo', area: 'Colombo', coordinates: { lat: 6.9167, lng: 79.85 }, rating: 5, image: '🏨' },
+  { id: 'hilton-colombo', name: 'Hilton Colombo', city: 'Colombo', area: 'Colombo', coordinates: { lat: 6.9344, lng: 79.8428 }, rating: 5, image: '🏨' },
+  { id: 'jetwing-beach', name: 'Jetwing Beach', city: 'Negombo', area: 'Negombo', coordinates: { lat: 7.2354, lng: 79.8337 }, rating: 5, image: '🏖️' },
+  { id: 'heritance-negombo', name: 'Heritance Negombo', city: 'Negombo', area: 'Negombo', coordinates: { lat: 7.2167, lng: 79.8333 }, rating: 5, image: '🏖️' },
+  { id: 'earls-regency', name: "Earl's Regency", city: 'Kandy', area: 'Kandy', coordinates: { lat: 7.3008, lng: 80.673 }, rating: 5, image: '🏔️' },
+  { id: 'cinnamon-citadel', name: 'Cinnamon Citadel', city: 'Kandy', area: 'Kandy', coordinates: { lat: 7.2936, lng: 80.6417 }, rating: 4, image: '🏔️' },
+  { id: 'jetwing-vil-uyana', name: 'Jetwing Vil Uyana', city: 'Sigiriya', area: 'Sigiriya', coordinates: { lat: 7.9444, lng: 80.7497 }, rating: 5, image: '🌿' },
+  { id: 'aliya-resort', name: 'Aliya Resort & Spa', city: 'Sigiriya', area: 'Sigiriya', coordinates: { lat: 7.955, lng: 80.76 }, rating: 5, image: '🌿' },
+  { id: 'amangalla', name: 'Amangalla', city: 'Galle', area: 'Galle', coordinates: { lat: 6.0267, lng: 80.2167 }, rating: 5, image: '🏛️' },
+  { id: 'jetwing-lighthouse', name: 'Jetwing Lighthouse', city: 'Galle', area: 'Galle', coordinates: { lat: 6.0314, lng: 80.2156 }, rating: 5, image: '🏛️' },
+  { id: 'vivanta-bentota', name: 'Vivanta by Taj', city: 'Bentota', area: 'Bentota', coordinates: { lat: 6.4333, lng: 79.9833 }, rating: 5, image: '🏝️' },
+  { id: 'heritance-tea-factory', name: 'Heritance Tea Factory', city: 'Nuwara Eliya', area: 'Nuwara Eliya', coordinates: { lat: 7.0, lng: 80.7833 }, rating: 5, image: '❄️' },
+  { id: '98-acres', name: '98 Acres Resort', city: 'Ella', area: 'Ella', coordinates: { lat: 6.8667, lng: 81.05 }, rating: 5, image: '🌄' },
+  { id: 'jetwing-jaffna', name: 'Jetwing Jaffna', city: 'Jaffna', area: 'Jaffna', coordinates: { lat: 9.6667, lng: 80.0167 }, rating: 4, image: '🏛️' },
+  { id: 'trinco-blu', name: 'Trinco Blu by Cinnamon', city: 'Trincomalee', area: 'Trincomalee', coordinates: { lat: 8.5778, lng: 81.2312 }, rating: 4, image: '🏖️' },
+  { id: 'uga-bay', name: 'Uga Bay', city: 'Arugam Bay', area: 'Arugam Bay', coordinates: { lat: 6.8456, lng: 81.8312 }, rating: 5, image: '🏄' },
+  { id: 'cinnamon-wild', name: 'Cinnamon Wild Yala', city: 'Yala', area: 'Yala', coordinates: { lat: 6.2789, lng: 81.4012 }, rating: 5, image: '🦁' },
+  { id: 'chena-huts', name: 'Chena Huts by Uga', city: 'Yala', area: 'Yala', coordinates: { lat: 6.2834, lng: 81.4156 }, rating: 5, image: '🦁' },
+];
+
+// CMB Airport coordinates (Bandaranaike)
+export const CMB_AIRPORT_COORDS = { lat: 7.1808, lng: 79.8841 };
+export const JAF_AIRPORT_COORDS = { lat: 9.7922, lng: 80.0700 };
+
+// ============================================
+// NEW: Transfer Extras (8 add-ons)
+// ============================================
+export interface TransferExtra {
+  id: string;
+  name: string;
+  description: string;
+  price: number; // LKR
+  priceUSD: number;
+  icon: string;
+  isIncluded?: boolean;
+}
+
+export const TRANSFER_EXTRAS: TransferExtra[] = [
+  { id: 'meet-greet', name: 'VIP Meet & Greet', description: 'Driver waits at arrivals with name board', price: 0, priceUSD: 0, icon: 'UserCheck', isIncluded: true },
+  { id: 'child-seat', name: 'Child Seat', description: 'Baby/toddler car seat (per seat)', price: 1500, priceUSD: 5, icon: 'Baby' },
+  { id: 'wifi-device', name: 'Portable WiFi', description: 'High-speed 4G hotspot device', price: 2500, priceUSD: 8, icon: 'Wifi' },
+  { id: 'flower-welcome', name: 'Flower Welcome', description: 'Traditional garland greeting', price: 3000, priceUSD: 10, icon: 'Flower2' },
+  { id: 'cold-towels', name: 'Cold Towels & Water', description: 'Refreshing cold towels and bottled water', price: 1500, priceUSD: 5, icon: 'Droplets' },
+  { id: 'local-sim', name: 'Local SIM Card', description: 'Pre-activated SIM with 10GB data', price: 5000, priceUSD: 16, icon: 'Smartphone' },
+  { id: 'porter', name: 'Porter Service', description: 'Luggage assistance at airport', price: 1500, priceUSD: 5, icon: 'Luggage' },
+  { id: 'fast-track', name: 'Fast Track Immigration', description: 'VIP clearance service (subject to availability)', price: 15000, priceUSD: 47, icon: 'Zap' },
+];
+
+// ============================================
+// NEW: Flight Tracking Types
+// ============================================
+export interface FlightInfo {
+  flightNumber: string;
+  airline: string;
+  airlineLogo?: string;
+  origin: string;
+  originCity: string;
+  destination: string;
+  destinationCity: string;
+  scheduledArrival: string;
+  estimatedArrival?: string;
+  actualArrival?: string;
+  status: 'scheduled' | 'en-route' | 'landed' | 'delayed' | 'cancelled' | 'on-time';
+  terminal?: string;
+  gate?: string;
+  delayMinutes?: number;
+}
+
+// ============================================
+// NEW: Haversine Distance Calculation
+// ============================================
+const toRadians = (degrees: number): number => degrees * (Math.PI / 180);
+
+export const calculateHaversineDistance = (
+  coord1: { lat: number; lng: number },
+  coord2: { lat: number; lng: number }
+): number => {
+  const R = 6371; // Earth's radius in km
+  const dLat = toRadians(coord2.lat - coord1.lat);
+  const dLon = toRadians(coord2.lng - coord1.lng);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRadians(coord1.lat)) *
+      Math.cos(toRadians(coord2.lat)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const straightLineDistance = R * c;
+  // Apply road factor (roads are ~30% longer than straight line)
+  return Math.round(straightLineDistance * 1.3);
+};
+
+export const calculateDuration = (distanceKm: number): string => {
+  // Average speed of 40 km/h considering Sri Lankan road conditions
+  const hours = Math.floor(distanceKm / 40);
+  const minutes = Math.round((distanceKm % 40) * 1.5);
+  if (hours === 0) return `${minutes} min`;
+  return `${hours}h ${minutes}m`;
+};
+
+// ============================================
+// NEW: Enhanced Price Calculation with Extras
+// ============================================
+export interface PriceBreakdown {
+  basePrice: number;
+  distancePrice: number;
+  extrasPrice: number;
+  childSeatPrice: number;
+  subtotal: number;
+  roundTripDiscount: number;
+  total: number;
+  totalUSD: number;
+  currency: string;
+  distance: number;
+  duration: string;
+  vehicleName: string;
+  isRoundTrip: boolean;
+  extras: { name: string; price: number }[];
+}
+
+export const calculateTotalWithExtras = (
+  distance: number,
+  vehicleType: string,
+  selectedExtras: string[],
+  childSeatCount: number = 0,
+  isRoundTrip: boolean = false
+): PriceBreakdown => {
+  const vehicle = VEHICLE_TYPES.find(v => v.id === vehicleType) || VEHICLE_TYPES[0];
+
+  // Base calculations
+  const basePrice = vehicle.basePrice;
+  const distancePrice = distance * vehicle.pricePerKm;
+
+  // Extras calculation
+  const extrasDetails: { name: string; price: number }[] = [];
+  let extrasPrice = 0;
+  selectedExtras.forEach(extraId => {
+    const extra = TRANSFER_EXTRAS.find(e => e.id === extraId);
+    if (extra && extra.price > 0) {
+      extrasPrice += extra.price;
+      extrasDetails.push({ name: extra.name, price: extra.price });
+    }
+  });
+
+  // Child seats
+  const childSeatPrice = childSeatCount * 1500; // 1500 LKR per seat
+  if (childSeatCount > 0) {
+    extrasDetails.push({ name: `Child Seats (×${childSeatCount})`, price: childSeatPrice });
+  }
+
+  // Subtotal
+  let subtotal = basePrice + distancePrice + extrasPrice + childSeatPrice;
+
+  // Round trip discount (10% off return)
+  let roundTripDiscount = 0;
+  if (isRoundTrip) {
+    subtotal = subtotal * 2;
+    roundTripDiscount = Math.round(subtotal * 0.1);
+    subtotal = subtotal - roundTripDiscount;
+  }
+
+  return {
+    basePrice,
+    distancePrice,
+    extrasPrice,
+    childSeatPrice,
+    subtotal,
+    roundTripDiscount,
+    total: subtotal,
+    totalUSD: Math.round(subtotal / 320),
+    currency: 'LKR',
+    distance,
+    duration: calculateDuration(distance),
+    vehicleName: vehicle.name,
+    isRoundTrip,
+    extras: extrasDetails
+  };
+};
+
+// Search hotels
+export const searchHotels = (query: string): HotelLocation[] => {
+  if (!query || query.length < 2) return PRELOADED_HOTELS.slice(0, 8);
+  const lowerQuery = query.toLowerCase();
+  return PRELOADED_HOTELS.filter(
+    hotel =>
+      hotel.name.toLowerCase().includes(lowerQuery) ||
+      hotel.city.toLowerCase().includes(lowerQuery) ||
+      hotel.area.toLowerCase().includes(lowerQuery)
+  );
+};
+
 // Search airports (Sri Lanka only)
 export const searchAirports = (query: string): typeof SRI_LANKA_AIRPORTS => {
   if (!query || query.length < 1) return SRI_LANKA_AIRPORTS; // Return all airports if no query

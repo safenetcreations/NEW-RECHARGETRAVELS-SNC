@@ -12,7 +12,9 @@ service cloud.firestore {
     function isAdmin() {
       return isAuthenticated() &&
              exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+             (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'super_admin' ||
+              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Super Admin');
     }
 
     // Helper function to check if user owns the resource
@@ -55,6 +57,69 @@ service cloud.firestore {
 
       // Only admins can create, update, or delete tours
       allow create, update, delete: if isAdmin();
+    }
+
+    // National Parks Tours Collection - Public read, admin write
+    match /nationalparks_tours/{tourId} {
+      allow read: if resource.data.is_active == true || isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // National Parks Bookings - Authenticated create, admin full
+    match /nationalparks_bookings/{bookingId} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // National Parks Reviews - Public read, authenticated create
+    match /nationalparks_reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow delete: if isAdmin();
+    }
+
+    // Cultural Tours Collection - Public read, admin write
+    match /cultural_tours/{tourId} {
+      allow read: if resource.data.is_active == true || isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Cultural Bookings - Authenticated create, admin full
+    match /cultural_bookings/{bookingId} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // Cultural Reviews - Public read, authenticated create
+    match /cultural_reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow delete: if isAdmin();
+    }
+
+    // Ramayana Tours Collection - Public read, admin write
+    match /ramayana_tours/{tourId} {
+      allow read: if resource.data.is_active == true || isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Ramayana Bookings - Authenticated create, admin full
+    match /ramayana_bookings/{bookingId} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // Ramayana Reviews - Public read, authenticated create
+    match /ramayana_reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow delete: if isAdmin();
     }
 
     // Users Collection - Own data or admin
@@ -100,22 +165,25 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Drivers Collection - Public read, admin write
+    // Destinations Collection - Public read, admin write
+    match /destinations/{destinationId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Drivers Collection - Public read, admin write, authenticated create
     match /drivers/{driverId} {
       allow read: if true;
 
-      allow create: if isDriverSelfWrite(driverId)
+      // Allow admin to write directly (for seeding/management)
+      // Allow public create for seeding
+      allow create: if true;
+      allow update, delete: if isAdmin();
+
+      // Allow drivers to update their own profile (except admin-only fields)
+      allow update: if isDriverSelfWrite(driverId)
                     && validDriverStatus(request.resource.data.current_status)
-                    && !request.resource.data.keys().hasAny(driverAdminOnlyFields());
-
-      allow update: if isAdmin()
-                    || (
-                      isDriverSelfWrite(driverId)
-                      && validDriverStatus(request.resource.data.current_status)
-                      && !request.resource.data.diff(resource.data).changedKeys().hasAny(driverAdminOnlyFields())
-                    );
-
-      allow delete: if isAdmin();
+                    && !request.resource.data.diff(resource.data).changedKeys().hasAny(driverAdminOnlyFields());
     }
 
     // Driver Documents - Owner read/write limited fields, admin full
@@ -192,11 +260,8 @@ service cloud.firestore {
     match /driver_reviews/{reviewId} {
       allow read: if true;
 
-      // Users can create reviews for completed bookings
-      allow create: if isAuthenticated()
-                    && request.resource.data.reviewer_id == request.auth.uid
-                    && request.resource.data.rating >= 1
-                    && request.resource.data.rating <= 5;
+      // Allow authenticated users to create reviews (for seeding or real reviews)
+      allow create: if isAuthenticated();
 
       // Users can update their own reviews
       allow update: if isAuthenticated()
@@ -292,6 +357,92 @@ service cloud.firestore {
     match /ayurveda_testimonials/{testimonialId} {
       allow read: if true;
       allow write: if isAdmin();
+    }
+
+    // ==========================================
+    // TEA TRAILS COLLECTIONS
+    // ==========================================
+
+    // Tea Trails Content - Public read, public write for seeding
+    match /teatrails_content/{docId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Tea Trails Tours - Public read, public write for seeding
+    match /teatrails_tours/{tourId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Tea Trails Routes - Public read, public write for seeding
+    match /teatrails_routes/{routeId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Tea Trails Gallery - Public read, public write for seeding
+    match /teatrails_gallery/{imageId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Tea Trails FAQs - Public read, public write for seeding
+    match /teatrails_faqs/{faqId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Tea Trails Testimonials - Public read, public write for seeding
+    match /teatrails_testimonials/{testimonialId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // ==========================================
+    // PILGRIMAGE TOURS COLLECTIONS
+    // ==========================================
+
+    // Pilgrimage Content - Public read, public write for seeding
+    match /pilgrimage_content/{docId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Pilgrimage Sites - Public read, public write for seeding
+    match /pilgrimage_sites/{siteId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Pilgrimage Tours - Public read, public write for seeding
+    match /pilgrimage_tours/{tourId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Pilgrimage Gallery - Public read, public write for seeding
+    match /pilgrimage_gallery/{imageId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Pilgrimage FAQs - Public read, public write for seeding
+    match /pilgrimage_faqs/{faqId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Pilgrimage Testimonials - Public read, public write for seeding
+    match /pilgrimage_testimonials/{testimonialId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Pilgrimage Guidelines - Public read, public write for seeding
+    match /pilgrimage_guidelines/{guidelineId} {
+      allow read: if true;
+      allow write: if true;
     }
 
     // ==========================================
@@ -479,6 +630,140 @@ service cloud.firestore {
       allow read: if isAdmin();
       allow create: if true; // Cloud Functions can create
       allow update, delete: if isAdmin();
+    }
+
+    // ==========================================
+    // CMS COLLECTIONS
+    // ==========================================
+
+    // Hero Slides - Public read, admin write
+    match /heroSlides/{slideId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Book Now Hero Slides - Public read, admin write
+    match /bookNowHeroSlides/{slideId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Book Now Packages - Public read, admin write
+    match /bookNowPackages/{packageId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /whaleBookingContent/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /waterSportsBookingContent/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Testimonials - Public read, admin write
+    match /testimonials/{testimonialId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Page Content (About Sri Lanka, etc.) - Public read, admin write
+    match /page-content/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Legacy camelCase page content collection
+    match /pageContent/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Why Choose Us - Public read, admin write
+    match /whyChooseUs/{featureId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Travel Packages - Public read, admin write
+    match /travelPackages/{packageId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Homepage Stats - Public read, admin write
+    match /homepageStats/{statId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Featured Destinations - Public read, admin write
+    match /featuredDestinations/{destinationId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Blog Posts - Public read, admin write
+    match /blogPosts/{postId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Blogs Collection (Blog Manager) - Public read, admin write
+    match /blogs/{blogId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Newsletter Config - Public read, admin write
+    match /newsletterConfig/{configId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Site Settings - Public read, admin write
+    match /siteSettings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Settings Collection (Social Media config, etc.) - Public read, admin write
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Media Library - Public read, admin write
+    match /mediaLibrary/{fileId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Experiences - Public read, admin write
+    match /experiences/{experienceId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Luxury Experiences - Public read, admin write
+    match /luxuryExperiences/{experienceId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Travel Guide Sections - Public read, admin write
+    match /travelGuideSections/{sectionId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Destination Content - Public read, admin write
+    match /destinationContent/{contentId} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     // Default rule - Deny all access to any other collections

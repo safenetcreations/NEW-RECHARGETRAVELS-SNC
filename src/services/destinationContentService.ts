@@ -32,6 +32,9 @@ export interface Attraction {
     price: string;
     featured?: boolean;
     order?: number;
+    highlights?: string[];
+    icon?: string;
+    location?: string;
 }
 
 export interface Activity {
@@ -57,6 +60,8 @@ export interface Restaurant {
     phone?: string;
     website?: string;
     featured?: boolean;
+    specialties?: string[];
+    openHours?: string;
 }
 
 export interface Hotel {
@@ -71,6 +76,8 @@ export interface Hotel {
     phone?: string;
     website?: string;
     featured?: boolean;
+    category?: string;
+    location?: string;
 }
 
 export interface DestinationInfo {
@@ -88,14 +95,29 @@ export interface WeatherInfo {
     rainfall: string;
     season: string;
     bestMonths?: string[];
+    packingTips?: string[];
 }
 
 export interface TravelTip {
     id?: string;
     title: string;
-    content: string;
+    content?: string;
+    tips?: string[];
     icon?: string;
-    category: string;
+    category?: string;
+}
+
+export interface SignatureTour {
+    id?: string;
+    name: string;
+    duration: string;
+    priceFrom: string;
+    description: string;
+    highlights: string[];
+    image: string;
+    badge?: string;
+    includes?: string[];
+    isBestSeller?: boolean;
 }
 
 export interface DestinationContent {
@@ -112,6 +134,7 @@ export interface DestinationContent {
     destinationInfo: DestinationInfo;
     weatherInfo: WeatherInfo;
     travelTips: TravelTip[];
+    signatureTours?: SignatureTour[];
     seo: {
         title: string;
         description: string;
@@ -159,6 +182,7 @@ export const DEFAULT_DESTINATION_CONTENT: Omit<DestinationContent, 'id' | 'name'
         season: 'Tropical'
     },
     travelTips: [],
+    signatureTours: [],
     seo: {
         title: '',
         description: '',
@@ -396,6 +420,24 @@ export async function updateCTASection(
         return { success: true };
     } catch (error) {
         console.error('Error updating CTA section:', error);
+        return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+}
+
+// Update signature tours
+export async function updateSignatureTours(
+    slug: string,
+    signatureTours: SignatureTour[]
+): Promise<{ success: boolean; error?: string }> {
+    try {
+        const docRef = doc(db, COLLECTION_NAME, slug);
+        await updateDoc(docRef, {
+            signatureTours,
+            updatedAt: serverTimestamp()
+        });
+        return { success: true };
+    } catch (error) {
+        console.error('Error updating signature tours:', error);
         return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
 }

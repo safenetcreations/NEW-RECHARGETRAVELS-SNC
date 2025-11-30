@@ -1,700 +1,469 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
-  Tent,
-  Trees,
-  Camera,
-  Clock,
-  MapPin,
-  Calendar,
-  Star,
-  Users,
-  Sunrise,
-  Moon,
-  Flame,
-  Binoculars,
-  ChevronDown,
-  CheckCircle,
-  Info,
-  DollarSign,
-  Package,
-  AlertCircle,
-  ChevronRight,
-  Globe,
-  Phone,
-  Mail,
-  Shield,
-  Flashlight,
-  Eye,
-  Loader2,
-  Mountain,
-  Leaf,
-  Compass,
-  Crown,
-  Backpack,
-  Home
-} from 'lucide-react';
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger
+} from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import EnhancedBookingModal from '@/components/EnhancedBookingModal';
+import {
+  Backpack,
+  CheckCircle,
+  Clock,
+  Compass,
+  Flame,
+  Leaf,
+  Loader2,
+  MapPin,
+  MessageCircle,
+  Mountain,
+  Package,
+  Phone,
+  Shield,
+  Star,
+  Tent,
+  Trees
+} from 'lucide-react';
 import jungleCampingPageService, { JungleCampingPageContent } from '@/services/jungleCampingPageService';
 import { cachedFetch } from '@/lib/cache';
 
-// Optimized image URL generator
-const getOptimizedImageUrl = (url: string, width: number = 1200): string => {
+const getOptimizedImageUrl = (url: string, width: number = 1920): string => {
   if (!url) return '';
   if (url.includes('unsplash.com')) {
-    const baseUrl = url.split('?')[0];
-    return `${baseUrl}?w=${width}&q=80&auto=format&fit=crop`;
+    const cleanUrl = url.split('?')[0];
+    return `${cleanUrl}?w=${width}&q=80&auto=format&fit=crop`;
   }
   return url;
 };
 
-// Default fallback hero images
-const defaultHeroImages = [
-  { id: '1', url: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4', caption: 'Jungle Camping Adventure' },
-  { id: '2', url: 'https://images.unsplash.com/photo-1510312305653-8ed496efae75', caption: 'Campfire Under Stars' },
-  { id: '3', url: 'https://images.unsplash.com/photo-1445308394109-4ec2920981b1', caption: 'Safari Tent Experience' },
-  { id: '4', url: 'https://images.unsplash.com/photo-1533873984035-25970ab07461', caption: 'Wilderness Exploration' }
+const fallbackHeroSlides = [
+  {
+    id: 'fallback-1',
+    url: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4',
+    caption: 'Sunrise over leopard country',
+    tag: 'Dawn brews'
+  }
 ];
 
-// Icon mapping for dynamic icons from Firebase
-const iconMap: Record<string, React.FC<any>> = {
-  Tent, Trees, Camera, Clock, MapPin, Calendar, Star, Users, Sunrise, Moon,
-  Flame, Binoculars, Package, Globe, Phone, Mail, Shield, Flashlight, Eye,
-  Mountain, Leaf, Compass, Crown, Backpack, Home, Info, DollarSign
+const iconMap: Record<string, React.ComponentType<any>> = {
+  Tent,
+  Trees,
+  Leaf,
+  Star,
+  Shield,
+  MapPin,
+  Campfire: Flame,
+  Compass,
+  Mountain,
+  Backpack,
+  Package
 };
 
-const JungleCamping = () => {
-  const [activeTab, setActiveTab] = useState('overview');
-  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
-  const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
-  const [heroImageIndex, setHeroImageIndex] = useState(0);
-  const [pageContent, setPageContent] = useState<JungleCampingPageContent | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+const JungleCamping: React.FC = () => {
+  const [content, setContent] = useState<JungleCampingPageContent>(
+    jungleCampingPageService.getDefaultContent()
+  );
+  const [loading, setLoading] = useState(true);
+  const [heroIndex, setHeroIndex] = useState(0);
+  const [selectedCampId, setSelectedCampId] = useState<string | null>(null);
+  const bookingSectionRef = useRef<HTMLDivElement | null>(null);
+  const [formData, setFormData] = useState({
+    date: '',
+    nights: 2,
+    adults: 2,
+    teens: 0,
+    campPreference: '',
+    pickup: '',
+    contactName: '',
+    contactEmail: '',
+    contactPhone: '',
+    requests: ''
+  });
 
-  // Fetch content from Firebase with caching
   useEffect(() => {
-    const loadContent = async () => {
+    const load = async () => {
       try {
-        const content = await cachedFetch<JungleCampingPageContent>(
+        const data = await cachedFetch<JungleCampingPageContent>(
           'jungle-camping-page',
           () => jungleCampingPageService.getPageContent(),
-          10 * 60 * 1000 // Cache for 10 minutes
+          10 * 60 * 1000
         );
-        setPageContent(content);
-
-        // Preload hero images
-        if (content?.hero?.images?.length) {
-          content.hero.images.slice(0, 3).forEach((img, index) => {
-            const link = document.createElement('link');
-            link.rel = index === 0 ? 'preload' : 'prefetch';
-            link.as = 'image';
-            link.href = getOptimizedImageUrl(img.url, 1920);
-            document.head.appendChild(link);
-          });
+        setContent(data);
+        if (data.campingPackages.length > 0) {
+          setSelectedCampId(data.campingPackages[0].id);
+          setFormData((prev) => ({
+            ...prev,
+            campPreference: data.campingPackages[0].name,
+            pickup: data.logistics.meetingPoint
+          }));
         }
       } catch (error) {
-        console.error('Error loading page content:', error);
-        setPageContent(jungleCampingPageService.getDefaultContent());
+        console.error('Error loading jungle camping content', error);
+        const fallback = jungleCampingPageService.getDefaultContent();
+        setContent(fallback);
+        setSelectedCampId(fallback.campingPackages[0]?.id ?? null);
+        setFormData((prev) => ({
+          ...prev,
+          campPreference: fallback.campingPackages[0]?.name ?? '',
+          pickup: fallback.logistics.meetingPoint
+        }));
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
-    loadContent();
+
+    load();
   }, []);
 
-  // Hero image rotation
   useEffect(() => {
-    if (!pageContent?.hero?.images?.length) return;
-    const interval = setInterval(() => {
-      setHeroImageIndex((prev) => (prev + 1) % pageContent.hero.images.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [pageContent?.hero?.images?.length]);
+    if (!content.hero.images.length) return;
+    const timer = setInterval(() => {
+      setHeroIndex((prev) => (prev + 1) % content.hero.images.length);
+    }, 6000);
+    return () => clearInterval(timer);
+  }, [content.hero.images.length]);
 
-  const handleBookingClick = (packageName?: string) => {
-    setSelectedPackage(packageName || null);
-    setIsBookingModalOpen(true);
+  const heroSlides = content.hero.images.length ? content.hero.images : fallbackHeroSlides;
+  const currentSlide = heroSlides[heroIndex % heroSlides.length];
+
+  const selectedCamp = useMemo(
+    () => content.campingPackages.find((pkg) => pkg.id === selectedCampId) ?? content.campingPackages[0],
+    [content.campingPackages, selectedCampId]
+  );
+
+  const teenPrice = Math.round(
+    content.pricing.startingPrice * (1 - content.pricing.teenDiscountPercent / 100)
+  );
+  const estimatedTotal =
+    content.pricing.startingPrice * formData.adults + teenPrice * formData.teens;
+
+  const handleInputChange = (field: keyof typeof formData, value: string | number) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
-  // Loading state
-  if (isLoading) {
+  const scrollToBooking = (campName?: string, campId?: string) => {
+    if (campName) {
+      handleInputChange('campPreference', campName);
+    }
+    if (campId) {
+      setSelectedCampId(campId);
+    }
+    bookingSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    alert('Thanks! Our jungle concierge will confirm your basecamp within 30 minutes.');
+  };
+
+  if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-green-50">
+      <div className="flex min-h-screen items-center justify-center bg-emerald-50">
         <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-green-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading jungle camping experience...</p>
+          <Loader2 className="mx-auto mb-4 h-10 w-10 animate-spin text-emerald-600" />
+          <p className="text-slate-600">Loading jungle camping experience…</p>
         </div>
       </div>
     );
   }
 
-  const heroImages = pageContent?.hero?.images?.length ? pageContent.hero.images : defaultHeroImages;
-  const currentHeroImage = heroImages[heroImageIndex] || defaultHeroImages[0];
-
   return (
     <>
       <Helmet>
-        <title>{pageContent?.seo?.title || 'Jungle Camping Sri Lanka | Recharge Travels'}</title>
-        <meta name="description" content={pageContent?.seo?.description || ''} />
-        <meta name="keywords" content={pageContent?.seo?.keywords?.join(', ') || ''} />
-        <meta property="og:title" content={pageContent?.seo?.title || ''} />
-        <meta property="og:description" content={pageContent?.seo?.description || ''} />
-        <meta property="og:image" content={pageContent?.seo?.ogImage || ''} />
+        <title>{content.seo.title}</title>
+        <meta name="description" content={content.seo.description} />
+        <meta name="keywords" content={content.seo.keywords.join(', ')} />
+        <meta property="og:title" content={content.seo.title} />
+        <meta property="og:description" content={content.seo.description} />
+        <meta property="og:image" content={content.seo.ogImage} />
         <link rel="canonical" href="https://www.rechargetravels.com/experiences/jungle-camping" />
       </Helmet>
 
       <Header />
 
-      {/* Hero Section */}
-      <section className="relative h-[70vh] min-h-[600px] w-full overflow-hidden">
+      <section className="relative h-[70vh] min-h-[600px] overflow-hidden">
         <AnimatePresence mode="wait">
           <motion.div
-            key={heroImageIndex}
+            key={currentSlide.id}
+            className="absolute inset-0"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 1 }}
-            className="absolute inset-0"
           >
             <img
-              src={getOptimizedImageUrl(currentHeroImage.url, 1920)}
-              alt={currentHeroImage.caption}
-              className="w-full h-full object-cover"
-              loading={heroImageIndex === 0 ? 'eager' : 'lazy'}
-              fetchPriority={heroImageIndex === 0 ? 'high' : 'auto'}
+              src={getOptimizedImageUrl(currentSlide.url)}
+              alt={currentSlide.caption}
+              className="h-full w-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/20" />
+            <div className="absolute inset-0 bg-gradient-to-b from-slate-950/85 via-slate-900/60 to-slate-950/90" />
           </motion.div>
         </AnimatePresence>
 
-        <div className="absolute inset-0 flex items-center justify-center z-10">
-          <div className="text-center text-white px-4 max-w-5xl">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-            >
-              <h1 className="text-5xl md:text-7xl font-bold mb-6 drop-shadow-lg">
-                {pageContent?.hero?.title || 'Jungle Camping Adventure'}
+        <div className="relative z-10 mx-auto flex h-full max-w-5xl flex-col items-center justify-center px-4 text-center text-white">
+          <Badge className="mb-6 bg-white/10 text-white backdrop-blur">{content.hero.badge}</Badge>
+          <h1 className="text-4xl font-semibold leading-tight sm:text-5xl lg:text-6xl">
+            {content.hero.title}
               </h1>
-              <p className="text-xl md:text-2xl mb-8 font-light drop-shadow">
-                {pageContent?.hero?.subtitle || 'Sleep Under Stars in the Wild Heart of Sri Lanka'}
-              </p>
-              <Button
-                onClick={() => handleBookingClick()}
-                size="lg"
-                className="bg-green-600 hover:bg-green-700 text-white px-8 py-6 text-lg rounded-full
-                         transform hover:scale-105 transition-all duration-300 shadow-xl"
-              >
-                <Tent className="mr-2 h-5 w-5" />
-                {pageContent?.hero?.ctaText || 'Book Camping Trip'}
-              </Button>
-            </motion.div>
-          </div>
-        </div>
-
-        {/* Scroll Indicator */}
-        <motion.div
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white z-10"
-        >
-          <ChevronDown className="h-8 w-8" />
-        </motion.div>
-      </section>
-
-      {/* Overview Section */}
-      <section className="py-16 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-4xl font-bold mb-6">
-              {pageContent?.overview?.title || 'Immerse Yourself in Wilderness'}
-            </h2>
-            <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
-              {pageContent?.overview?.description || ''}
-            </p>
-          </motion.div>
-
-          {/* Quick Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-            {pageContent?.stats?.map((stat, index) => {
-              const IconComponent = iconMap[stat.iconName] || Trees;
+          <p className="mt-4 max-w-3xl text-lg text-white/85">{content.hero.subtitle}</p>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-sm">
+            {content.stats.map((stat) => {
+              const Icon = iconMap[stat.iconName] || Tent;
               return (
-                <motion.div
+                <span
                   key={stat.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  className="text-center"
+                  className="inline-flex items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-white/90 backdrop-blur"
                 >
-                  <IconComponent className="h-12 w-12 text-green-600 mx-auto mb-3" />
-                  <div className="text-3xl font-bold text-gray-800">{stat.value}</div>
-                  <div className="text-gray-600">{stat.label}</div>
-                </motion.div>
+                  <Icon className="h-4 w-4" />
+                  <strong className="font-semibold">{stat.value}</strong>
+                  <span className="text-white/70">{stat.label}</span>
+                </span>
               );
             })}
           </div>
+          <div className="mt-8 flex flex-wrap justify-center gap-4">
+            <Button size="lg" className="bg-emerald-500 px-8 py-6 text-base" onClick={() => scrollToBooking(selectedCamp?.name, selectedCamp?.id)}>
+              Reserve jungle camp
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              className="border-white/50 bg-white/10 px-8 py-6 text-base text-white hover:bg-white/20"
+              onClick={() => window.open(content.booking.whatsapp, '_blank')}
+            >
+              <MessageCircle className="mr-2 h-4 w-4" /> WhatsApp concierge
+            </Button>
+          </div>
+          <div className="mt-6 text-xs uppercase tracking-[0.4em] text-white/70">
+            {currentSlide.tag}
+          </div>
+        </div>
+
+        <div className="absolute bottom-6 left-1/2 flex -translate-x-1/2 gap-2">
+          {heroSlides.map((slide, idx) => (
+            <button
+              key={slide.id}
+              onClick={() => setHeroIndex(idx)}
+              className={`h-2 rounded-full transition-all ${idx === heroIndex ? 'w-12 bg-white' : 'w-6 bg-white/40'}`}
+              aria-label={`Show hero slide ${idx + 1}`}
+            />
+          ))}
         </div>
       </section>
 
-      {/* Main Content Tabs */}
-      <section className="py-16 px-4 bg-gray-50">
-        <div className="max-w-6xl mx-auto">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4 mb-8">
-              <TabsTrigger value="overview">Experience</TabsTrigger>
-              <TabsTrigger value="packages">Camping Packages</TabsTrigger>
-              <TabsTrigger value="wildlife">Wildlife</TabsTrigger>
-              <TabsTrigger value="prepare">Preparation</TabsTrigger>
-            </TabsList>
+      <section className="bg-white py-16">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="grid gap-10 md:grid-cols-[1.1fr_0.9fr]">
+            <div>
+              <p className="text-xs uppercase tracking-[0.4em] text-emerald-500">Wilderness concierge</p>
+              <h2 className="mt-4 text-3xl font-semibold text-slate-900">{content.overview.title}</h2>
+              <p className="mt-4 text-lg text-slate-600">{content.overview.description}</p>
+            </div>
+            <div className="grid gap-4">
+              {content.overview.highlights.map((highlight) => (
+                <div key={highlight.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-xs uppercase tracking-[0.3em] text-emerald-500">{highlight.label}</p>
+                  <p className="mt-2 text-sm text-slate-700">{highlight.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
 
-            {/* Overview Tab */}
-            <TabsContent value="overview" className="space-y-6">
-              <h3 className="text-2xl font-bold mb-6">The Wilderness Experience</h3>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <Sunrise className="h-5 w-5 mr-2 text-green-600" />
-                      Day Adventures
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-600 mb-4">
-                      Start your days with early morning wildlife drives when animals are most active.
-                      Explore diverse habitats from dense jungle to open grasslands and serene lakes.
-                    </p>
-                    <ul className="space-y-2 text-sm">
-                      <li className="flex items-center">
-                        <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                        Guided nature walks
+      <section className="bg-emerald-50 py-16">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="mb-10 flex flex-col gap-2">
+            <p className="text-xs uppercase tracking-[0.4em] text-emerald-500">Camp atelier</p>
+            <h3 className="text-3xl font-semibold text-slate-900">Pick your basecamp</h3>
+            <p className="text-slate-600">Every stay includes private naturalists, gourmet dining, and concierge transfers.</p>
+          </div>
+          <div className="grid gap-6 md:grid-cols-2">
+            {content.campingPackages.map((pkg) => (
+              <motion.button
+                key={pkg.id}
+                type="button"
+                onClick={() => {
+                  setSelectedCampId(pkg.id);
+                  handleInputChange('campPreference', pkg.name);
+                }}
+                whileHover={{ y: -4 }}
+                className={`flex h-full flex-col overflow-hidden rounded-3xl border text-left shadow-sm transition ${
+                  selectedCampId === pkg.id ? 'border-emerald-400 bg-white shadow-xl' : 'border-slate-200 bg-white hover:border-emerald-200'
+                }`}
+              >
+                <div className="relative h-56 w-full overflow-hidden">
+                  <img src={pkg.image} alt={pkg.name} className="h-full w-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent" />
+                  <div className="absolute bottom-4 left-4 flex items-center gap-2 text-sm text-white">
+                    <Badge className="bg-emerald-500/90 text-white">{pkg.duration}</Badge>
+                    <span>{pkg.difficulty}</span>
+                  </div>
+                </div>
+                <div className="flex flex-1 flex-col gap-4 p-6">
+                  <div>
+                    <h4 className="text-xl font-semibold text-slate-900">{pkg.name}</h4>
+                    <p className="mt-2 text-sm text-slate-600">{pkg.summary}</p>
+                  </div>
+                  <ul className="space-y-1 text-sm text-slate-600">
+                    {pkg.highlights.map((item) => (
+                      <li key={item} className="flex items-center gap-2">
+                        <CheckCircle className="h-3.5 w-3.5 text-emerald-500" />
+                        {item}
                       </li>
-                      <li className="flex items-center">
-                        <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                        Wildlife tracking
-                      </li>
-                      <li className="flex items-center">
-                        <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                        Bird watching sessions
-                      </li>
-                      <li className="flex items-center">
-                        <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                        Photography opportunities
-                      </li>
+                    ))}
                     </ul>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <Moon className="h-5 w-5 mr-2 text-green-600" />
-                      Night Experience
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-600 mb-4">
-                      As darkness falls, the jungle comes alive with nocturnal sounds. Gather around
-                      the campfire for stories, traditional dinner, and stargazing opportunities.
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 text-sm text-slate-600">
+                    <p className="font-medium text-slate-900">Includes</p>
+                    <p className="mt-1 text-slate-600">
+                      {pkg.included.slice(0, 3).join(' • ')}
+                      {pkg.included.length > 3 ? '…' : ''}
                     </p>
-                    <ul className="space-y-2 text-sm">
-                      <li className="flex items-center">
-                        <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                        Campfire gatherings
-                      </li>
-                      <li className="flex items-center">
-                        <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                        Night safari walks
-                      </li>
-                      <li className="flex items-center">
-                        <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                        Astronomy sessions
-                      </li>
-                      <li className="flex items-center">
-                        <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                        Traditional BBQ dinner
-                      </li>
-                    </ul>
-                  </CardContent>
-                </Card>
+                    <p className="mt-2 text-xs text-slate-500">
+                      {pkg.startLocation} · {pkg.transportNote}
+                    </p>
+                  </div>
+                  <div className="mt-auto flex items-center justify-between">
+                    <span className="text-lg font-semibold text-emerald-600">{pkg.priceLabel}</span>
+                    <Button variant="outline" onClick={() => scrollToBooking(pkg.name, pkg.id)}>
+                      Hold camp
+                    </Button>
               </div>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Typical Camping Itinerary</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <h4 className="font-semibold mb-3">Day 1</h4>
-                        <ul className="space-y-2 text-sm text-gray-600">
-                          <li className="flex items-start">
-                            <span className="font-medium mr-2">2:00 PM:</span>
-                            Pickup and journey to the park
-                          </li>
-                          <li className="flex items-start">
-                            <span className="font-medium mr-2">4:00 PM:</span>
-                            Camp setup and orientation
-                          </li>
-                          <li className="flex items-start">
-                            <span className="font-medium mr-2">5:00 PM:</span>
-                            Evening wildlife drive
-                          </li>
-                          <li className="flex items-start">
-                            <span className="font-medium mr-2">7:30 PM:</span>
-                            Campfire dinner
-                          </li>
-                          <li className="flex items-start">
-                            <span className="font-medium mr-2">9:00 PM:</span>
-                            Night walk and stargazing
-                          </li>
-                        </ul>
                       </div>
-                      <div>
-                        <h4 className="font-semibold mb-3">Day 2</h4>
-                        <ul className="space-y-2 text-sm text-gray-600">
-                          <li className="flex items-start">
-                            <span className="font-medium mr-2">5:30 AM:</span>
-                            Wake up call and tea
-                          </li>
-                          <li className="flex items-start">
-                            <span className="font-medium mr-2">6:00 AM:</span>
-                            Morning safari drive
-                          </li>
-                          <li className="flex items-start">
-                            <span className="font-medium mr-2">8:30 AM:</span>
-                            Breakfast at camp
-                          </li>
-                          <li className="flex items-start">
-                            <span className="font-medium mr-2">10:00 AM:</span>
-                            Nature walk and bird watching
-                          </li>
-                          <li className="flex items-start">
-                            <span className="font-medium mr-2">12:00 PM:</span>
-                            Pack up and departure
-                          </li>
-                        </ul>
+              </motion.button>
+            ))}
                       </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
+      </section>
 
-            {/* Packages Tab */}
-            <TabsContent value="packages" className="space-y-6">
-              <h3 className="text-2xl font-bold mb-6">Choose Your Camping Adventure</h3>
-              <div className="grid md:grid-cols-2 gap-6">
-                {pageContent?.campingPackages?.map((pkg, index) => {
-                  const IconComponent = iconMap[pkg.iconName] || Tent;
-                  return (
-                    <motion.div
-                      key={pkg.id}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: index * 0.1 }}
-                    >
-                      <Card className="h-full hover:shadow-xl transition-shadow">
-                        <CardHeader>
-                          <div className="flex items-center justify-between mb-3">
-                            <IconComponent className="h-10 w-10 text-green-600" />
-                            <div className="text-right">
-                              <Badge className="bg-green-600">{pkg.duration}</Badge>
-                              <Badge variant="outline" className="ml-2">{pkg.difficulty}</Badge>
+      <section className="bg-white py-16">
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 lg:grid-cols-[1.1fr_0.9fr]">
+          <div>
+            <p className="text-xs uppercase tracking-[0.4em] text-emerald-500">Wildlife windows</p>
+            <h3 className="mt-3 text-3xl font-semibold text-slate-900">Species diaries</h3>
+            <div className="mt-6 space-y-4">
+              {content.wildlifeSpottings.map((spotting) => (
+                <div key={spotting.id} className="rounded-2xl border border-slate-200 p-4">
+                  <div className="flex items-center justify-between">
+                    <p className="text-lg font-semibold text-slate-900">{spotting.animal}</p>
+                    <Badge variant="secondary">{spotting.frequency}</Badge>
+                  </div>
+                  <p className="mt-2 text-sm text-slate-600">{spotting.description}</p>
+                  <p className="mt-3 flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-slate-500">
+                    <Clock className="h-3.5 w-3.5" /> {spotting.bestTime}
+                  </p>
+                </div>
+              ))}
                             </div>
                           </div>
-                          <CardTitle className="text-xl">{pkg.name}</CardTitle>
-                          <p className="text-2xl font-bold text-green-600">{pkg.price}</p>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
+          <div className="rounded-3xl border border-emerald-100 bg-emerald-950 p-8 text-white">
+            <p className="text-xs uppercase tracking-[0.4em] text-emerald-200">Camp logistics</p>
+            <h3 className="mt-3 text-2xl font-semibold">Everything dialed in</h3>
+            <div className="mt-6 space-y-4 text-sm text-white/80">
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-emerald-200">Meeting point</p>
+                <p className="mt-1">{content.logistics.meetingPoint}</p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-emerald-200">Stay length</p>
+                <p className="mt-1">{content.logistics.stayLength}</p>
+              </div>
                           <div>
-                            <h4 className="font-semibold mb-2">Experience Highlights:</h4>
-                            <ul className="space-y-1 text-sm">
-                              {pkg.highlights?.map((highlight, idx) => (
-                                <li key={idx} className="flex items-start">
-                                  <ChevronRight className="h-4 w-4 text-green-600 mr-1 mt-0.5 flex-shrink-0" />
-                                  <span>{highlight}</span>
+                <p className="text-xs uppercase tracking-[0.3em] text-emerald-200">Start windows</p>
+                <ul className="mt-2 space-y-1">
+                  {content.logistics.startWindows.map((slot) => (
+                    <li key={slot} className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-emerald-300" />
+                      {slot}
                                 </li>
                               ))}
                             </ul>
                           </div>
                           <div>
-                            <h4 className="font-semibold mb-2">Package Includes:</h4>
-                            <ul className="space-y-1 text-sm">
-                              {pkg.included?.map((item, idx) => (
-                                <li key={idx} className="flex items-center">
-                                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                                  <span>{item}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                          <Button
-                            className="w-full bg-green-600 hover:bg-green-700"
-                            onClick={() => handleBookingClick(pkg.name)}
-                          >
-                            Book This Package
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  );
-                })}
+                <p className="text-xs uppercase tracking-[0.3em] text-emerald-200">Amenities</p>
+                <p className="mt-1">{content.logistics.amenities.join(' • ')}</p>
               </div>
-            </TabsContent>
-
-            {/* Wildlife Tab */}
-            <TabsContent value="wildlife" className="space-y-6">
-              <h3 className="text-2xl font-bold mb-6">Wildlife Encounters</h3>
-
-              <Card className="mb-6">
-                <CardHeader>
-                  <CardTitle>About the National Park</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600">
-                    Sri Lanka's national parks are home to incredible biodiversity. The unique feature
-                    of natural lakes attracts diverse wildlife, making it one of the best places for
-                    wildlife viewing. The varied habitats support an incredible array of fauna.
-                  </p>
-                </CardContent>
-              </Card>
-
-              <div className="grid gap-4">
-                {pageContent?.wildlifeSpottings?.map((animal, index) => (
-                  <motion.div
-                    key={animal.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <Card>
-                      <CardHeader>
-                        <div className="flex justify-between items-start">
-                          <CardTitle className="text-lg">{animal.animal}</CardTitle>
-                          <Badge variant="outline">{animal.frequency}</Badge>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-gray-600 mb-2">{animal.description}</p>
-                        <div className="flex items-center text-sm">
-                          <Clock className="h-4 w-4 mr-2 text-green-600" />
-                          <span className="font-medium">Best viewing:</span>
-                          <span className="ml-2">{animal.bestTime}</span>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))}
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-emerald-200">Bring list</p>
+                <p className="mt-1">{content.logistics.packingList.join(' • ')}</p>
               </div>
+              <p className="text-emerald-100">{content.logistics.transferNote}</p>
+              <p className="text-emerald-200/80">{content.logistics.weatherNote}</p>
+            </div>
+          </div>
+                    </div>
+      </section>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Bird Life</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600 mb-4">
-                    The park is a birder's paradise with over 200 recorded species including many endemics.
-                  </p>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <h4 className="font-semibold mb-2">Common Sightings</h4>
-                      <ul className="space-y-1 text-sm text-gray-600">
-                        <li>• Painted Stork</li>
-                        <li>• Lesser Whistling Duck</li>
-                        <li>• White-bellied Sea Eagle</li>
-                        <li>• Crested Serpent Eagle</li>
-                      </ul>
+      <section className="bg-slate-50 py-16">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="mb-8 flex flex-col gap-2">
+            <p className="text-xs uppercase tracking-[0.4em] text-emerald-500">Prep list</p>
+            <h3 className="text-3xl font-semibold text-slate-900">What to pack & what we cover</h3>
                     </div>
-                    <div>
-                      <h4 className="font-semibold mb-2">Endemic Species</h4>
-                      <ul className="space-y-1 text-sm text-gray-600">
-                        <li>• Sri Lankan Junglefowl</li>
-                        <li>• Brown-capped Babbler</li>
-                        <li>• Sri Lankan Grey Hornbill</li>
-                        <li>• Crimson-fronted Barbet</li>
-                      </ul>
-                    </div>
+          <div className="grid gap-6 md:grid-cols-3">
+            {content.campingEssentials.map((category) => {
+              const Icon = iconMap[category.iconName] || Shield;
+              return (
+                <div key={category.id} className="rounded-3xl border border-slate-200 bg-white p-5">
+                  <div className="flex items-center gap-3">
+                    <span className="rounded-2xl bg-emerald-50 p-2 text-emerald-600">
+                      <Icon className="h-5 w-5" />
+                    </span>
+                    <p className="text-base font-semibold text-slate-900">{category.category}</p>
                   </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Preparation Tab */}
-            <TabsContent value="prepare" className="space-y-6">
-              <h3 className="text-2xl font-bold mb-6">Prepare for Your Jungle Adventure</h3>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                {pageContent?.campingEssentials?.map((category, index) => {
-                  const IconComponent = iconMap[category.iconName] || Package;
-                  return (
-                    <Card key={category.id}>
-                      <CardHeader>
-                        <CardTitle className="text-lg flex items-center">
-                          <IconComponent className="h-5 w-5 mr-2 text-green-600" />
-                          {category.category}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <ul className="space-y-2">
-                          {category.items?.map((item, idx) => (
-                            <li key={idx} className="flex items-center text-sm">
-                              <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                              <span>{item}</span>
+                  <ul className="mt-4 space-y-1 text-sm text-slate-600">
+                    {category.items.map((item) => (
+                      <li key={item} className="flex items-center gap-2">
+                        <CheckCircle className="h-3.5 w-3.5 text-emerald-500" />
+                        {item}
                             </li>
                           ))}
                         </ul>
-                      </CardContent>
-                    </Card>
+                </div>
                   );
                 })}
               </div>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Important Guidelines</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                      <h4 className="font-semibold mb-3 text-green-600">Do's</h4>
-                      <ul className="space-y-2 text-sm">
-                        <li className="flex items-start">
-                          <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5" />
-                          <span>Follow guide instructions always</span>
-                        </li>
-                        <li className="flex items-start">
-                          <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5" />
-                          <span>Stay quiet near wildlife</span>
-                        </li>
-                        <li className="flex items-start">
-                          <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5" />
-                          <span>Use eco-friendly products</span>
-                        </li>
-                        <li className="flex items-start">
-                          <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5" />
-                          <span>Respect nature and wildlife</span>
-                        </li>
-                      </ul>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold mb-3 text-red-600">Don'ts</h4>
-                      <ul className="space-y-2 text-sm">
-                        <li className="flex items-start">
-                          <AlertCircle className="h-4 w-4 text-red-500 mr-2 mt-0.5" />
-                          <span>Don't wander off alone</span>
-                        </li>
-                        <li className="flex items-start">
-                          <AlertCircle className="h-4 w-4 text-red-500 mr-2 mt-0.5" />
-                          <span>Don't feed any animals</span>
-                        </li>
-                        <li className="flex items-start">
-                          <AlertCircle className="h-4 w-4 text-red-500 mr-2 mt-0.5" />
-                          <span>Don't litter in the park</span>
-                        </li>
-                        <li className="flex items-start">
-                          <AlertCircle className="h-4 w-4 text-red-500 mr-2 mt-0.5" />
-                          <span>Don't make loud noises</span>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Health & Safety</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="font-semibold mb-2 flex items-center">
-                        <Shield className="h-5 w-5 mr-2 text-green-600" />
-                        Safety Measures
-                      </h4>
-                      <ul className="space-y-1 text-sm text-gray-600">
-                        <li>• First aid kit at camp</li>
-                        <li>• Emergency evacuation plan</li>
-                        <li>• Communication devices</li>
-                        <li>• Trained wilderness guides</li>
-                      </ul>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold mb-2 flex items-center">
-                        <Info className="h-5 w-5 mr-2 text-blue-600" />
-                        Health Precautions
-                      </h4>
-                      <ul className="space-y-1 text-sm text-gray-600">
-                        <li>• Malaria prophylaxis recommended</li>
-                        <li>• Stay hydrated</li>
-                        <li>• Protect against insects</li>
-                        <li>• Inform about allergies</li>
-                      </ul>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
         </div>
       </section>
 
-      {/* Photo Gallery */}
-      <section className="py-16 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">Jungle Camping Gallery</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {pageContent?.gallery?.map((image, index) => (
-              <motion.div
-                key={image.id}
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.05 }}
-                className="relative overflow-hidden rounded-lg group cursor-pointer"
-              >
+      <section className="bg-white py-16">
+        <div className="mx-auto max-w-6xl px-4">
+          <h3 className="text-3xl font-semibold text-slate-900">Gallery</h3>
+          <p className="mt-2 text-slate-600">Camp moods, wildlife sightings, and twilight dinners.</p>
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {content.gallery.map((item) => (
+              <div key={item.id} className="group relative h-56 overflow-hidden rounded-2xl">
                 <img
-                  src={image.url}
-                  alt={image.alt}
-                  className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
+                  src={item.url}
+                  alt={item.alt}
+                  className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
-              </motion.div>
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-transparent to-transparent opacity-0 transition group-hover:opacity-100" />
+                <p className="absolute bottom-3 left-3 text-sm font-medium text-white">{item.alt}</p>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* FAQs Section */}
-      <section className="py-16 px-4 bg-gray-50">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
-          <Accordion type="single" collapsible className="space-y-4">
-            {pageContent?.faqs?.map((faq, index) => (
-              <AccordionItem key={faq.id} value={`item-${index}`}>
-                <AccordionTrigger className="text-left hover:text-green-600">
+      <section className="bg-slate-50 py-16">
+        <div className="mx-auto max-w-5xl px-4">
+          <h3 className="text-3xl font-semibold text-center text-slate-900">Frequently asked</h3>
+          <Accordion type="single" collapsible className="mt-8 space-y-4">
+            {content.faqs.map((faq) => (
+              <AccordionItem key={faq.id} value={faq.id} className="rounded-2xl border border-slate-200 bg-white px-4">
+                <AccordionTrigger className="text-left text-base font-semibold text-slate-900">
                   {faq.question}
                 </AccordionTrigger>
-                <AccordionContent className="text-gray-600">
+                <AccordionContent className="pb-4 text-sm leading-relaxed text-slate-600">
                   {faq.answer}
                 </AccordionContent>
               </AccordionItem>
@@ -703,81 +472,183 @@ const JungleCamping = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 px-4 bg-gradient-to-br from-green-600 to-emerald-700">
-        <div className="max-w-4xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="text-4xl font-bold mb-6 text-white">
-              {pageContent?.cta?.title || 'Ready for Your Wilderness Adventure?'}
-            </h2>
-            <p className="text-xl mb-8 text-white/90">
-              {pageContent?.cta?.description || 'Experience the thrill of camping in Sri Lanka\'s wild heart.'}
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+      <section
+        ref={bookingSectionRef}
+        className="bg-gradient-to-b from-slate-950 via-emerald-950 to-slate-950 py-20 text-white"
+      >
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 md:grid-cols-[1.05fr_0.95fr]">
+          <div>
+            <p className="text-xs uppercase tracking-[0.4em] text-emerald-200">Concierge request</p>
+            <h3 className="mt-3 text-3xl font-semibold">Lock in your camp</h3>
+            <p className="mt-4 text-slate-200">{content.booking.conciergeNote}</p>
+            <div className="mt-8 space-y-3 rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+              <div className="flex items-center gap-3 text-sm">
+                <Phone className="h-4 w-4 text-emerald-300" />
+                {content.booking.contactPhone}
+              </div>
+              <div className="flex items-center gap-3 text-sm">
+                <MessageCircle className="h-4 w-4 text-emerald-300" />
+                {content.booking.responseTime}
+              </div>
               <Button
-                size="lg"
-                className="bg-white text-green-700 hover:bg-gray-100 px-8 py-6 text-lg"
-                onClick={() => handleBookingClick()}
+                size="sm"
+                className="mt-4 w-full bg-emerald-500 text-white hover:bg-emerald-400"
+                onClick={() => window.open(content.booking.whatsapp, '_blank')}
               >
-                <Tent className="mr-2 h-5 w-5" />
-                {pageContent?.cta?.primaryButtonText || 'Book Camping Trip'}
+                WhatsApp concierge
               </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-white text-white hover:bg-white/10 px-8 py-6 text-lg"
-                onClick={() => window.open('https://wa.me/94777721999', '_blank')}
-              >
-                <Phone className="mr-2 h-5 w-5" />
-                {pageContent?.cta?.secondaryButtonText || 'Call for Details'}
-              </Button>
+              <p className="text-xs text-emerald-100">{content.booking.depositNote}</p>
+              <p className="text-xs text-emerald-100">{content.booking.priceIncludes.join(' • ')}</p>
             </div>
-          </motion.div>
+          </div>
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-5 rounded-3xl border border-white/10 bg-white/95 p-6 text-slate-900 shadow-2xl"
+          >
+            <div className="grid gap-4 md:grid-cols-2">
+              <label className="text-sm font-medium">
+                Date
+                <input
+                  type="date"
+                  required
+                  value={formData.date}
+                  onChange={(e) => handleInputChange('date', e.target.value)}
+                  className="mt-1 w-full rounded-2xl border border-slate-300 px-3 py-3"
+                />
+              </label>
+              <label className="text-sm font-medium">
+                Nights
+                <input
+                  type="number"
+                  min={1}
+                  value={formData.nights}
+                  onChange={(e) => handleInputChange('nights', Number(e.target.value))}
+                  className="mt-1 w-full rounded-2xl border border-slate-300 px-3 py-3"
+                />
+              </label>
+            </div>
+            <label className="text-sm font-medium">
+              Preferred camp
+              <select
+                value={formData.campPreference}
+                onChange={(e) => handleInputChange('campPreference', e.target.value)}
+                className="mt-1 w-full rounded-2xl border border-slate-300 px-3 py-3"
+              >
+                {content.campingPackages.map((pkg) => (
+                  <option key={pkg.id}>{pkg.name}</option>
+                ))}
+              </select>
+            </label>
+            <div className="grid gap-4 md:grid-cols-2">
+              <label className="text-sm font-medium">
+                Adults
+                <input
+                  type="number"
+                  min={1}
+                  value={formData.adults}
+                  onChange={(e) => handleInputChange('adults', Number(e.target.value))}
+                  className="mt-1 w-full rounded-2xl border border-slate-300 px-3 py-3"
+                />
+              </label>
+              <label className="text-sm font-medium">
+                Teens
+                <input
+                  type="number"
+                  min={0}
+                  value={formData.teens}
+                  onChange={(e) => handleInputChange('teens', Number(e.target.value))}
+                  className="mt-1 w-full rounded-2xl border border-slate-300 px-3 py-3"
+                />
+              </label>
+            </div>
+            <label className="text-sm font-medium">
+              Pickup / notes
+              <input
+                type="text"
+                value={formData.pickup}
+                onChange={(e) => handleInputChange('pickup', e.target.value)}
+                className="mt-1 w-full rounded-2xl border border-slate-300 px-3 py-3"
+                placeholder="e.g., Colombo hotel, seaplane request"
+              />
+            </label>
+            <div className="grid gap-4 md:grid-cols-2">
+              <label className="text-sm font-medium">
+                Full name
+                <input
+                  type="text"
+                  required
+                  value={formData.contactName}
+                  onChange={(e) => handleInputChange('contactName', e.target.value)}
+                  className="mt-1 w-full rounded-2xl border border-slate-300 px-3 py-3"
+                />
+              </label>
+              <label className="text-sm font-medium">
+                Email
+                <input
+                  type="email"
+                  required
+                  value={formData.contactEmail}
+                  onChange={(e) => handleInputChange('contactEmail', e.target.value)}
+                  className="mt-1 w-full rounded-2xl border border-slate-300 px-3 py-3"
+                />
+              </label>
+            </div>
+            <label className="text-sm font-medium">
+              Phone / WhatsApp
+              <input
+                type="tel"
+                required
+                value={formData.contactPhone}
+                onChange={(e) => handleInputChange('contactPhone', e.target.value)}
+                className="mt-1 w-full rounded-2xl border border-slate-300 px-3 py-3"
+              />
+            </label>
+            <label className="text-sm font-medium">
+              Requests (diet, add-ons)
+              <textarea
+                rows={3}
+                value={formData.requests}
+                onChange={(e) => handleInputChange('requests', e.target.value)}
+                className="mt-1 w-full rounded-2xl border border-slate-300 px-3 py-3"
+              />
+            </label>
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 text-sm text-slate-600">
+              <div className="flex items-center justify-between text-slate-900">
+                <span className="font-medium">Estimated from</span>
+                <span className="text-lg font-semibold">
+                  {content.pricing.currency} {estimatedTotal.toLocaleString()}
+                </span>
+              </div>
+              <p className="mt-2 text-xs text-slate-500">
+                Adults at {content.pricing.currency} {content.pricing.startingPrice.toLocaleString()} • Teens at {content.pricing.currency}{' '}
+                {teenPrice.toLocaleString()}
+              </p>
+              <p className="mt-3 text-xs text-slate-500">{content.pricing.privateCampSurcharge}</p>
+              <p className="text-xs text-slate-500">{content.pricing.addOns.join(' • ')}</p>
+            </div>
+            <Button type="submit" className="w-full bg-emerald-500 py-3 text-base text-white hover:bg-emerald-400">
+              Request itinerary
+            </Button>
+          </form>
         </div>
       </section>
 
-      {/* Contact Info */}
-      <section className="py-12 px-4 bg-gray-900 text-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-3 gap-8 text-center">
-            <a href="https://wa.me/94777721999" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center hover:text-green-400 transition-colors">
-              <svg className="h-8 w-8 mb-3 text-green-400" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-              <h3 className="font-semibold mb-2">WhatsApp Us</h3>
-              <p className="text-gray-300">{pageContent?.contact?.phone || '+94 77 772 1999'}</p>
-              <p className="text-sm text-gray-400">{pageContent?.contact?.phoneNote || 'Available 24/7'}</p>
-            </a>
-            <div className="flex flex-col items-center">
-              <Mail className="h-8 w-8 mb-3 text-green-400" />
-              <h3 className="font-semibold mb-2">Email Us</h3>
-              <p className="text-gray-300">{pageContent?.contact?.email || 'info@rechargetravels.com'}</p>
-              <p className="text-sm text-gray-400">{pageContent?.contact?.emailNote || 'Quick response'}</p>
-            </div>
-            <div className="flex flex-col items-center">
-              <Globe className="h-8 w-8 mb-3 text-green-400" />
-              <h3 className="font-semibold mb-2">Visit Website</h3>
-              <p className="text-gray-300">{pageContent?.contact?.website || 'www.rechargetravels.com'}</p>
-              <p className="text-sm text-gray-400">{pageContent?.contact?.websiteNote || 'More experiences'}</p>
-            </div>
+      <section className="bg-gradient-to-br from-emerald-600 to-emerald-700 py-16 text-white">
+        <div className="mx-auto max-w-4xl px-4 text-center">
+          <h3 className="text-3xl font-semibold">{content.cta.title}</h3>
+          <p className="mt-3 text-lg text-white/90">{content.cta.description}</p>
+          <div className="mt-6 flex flex-wrap justify-center gap-4">
+            <Button className="bg-white text-emerald-700 hover:bg-white/90" onClick={() => scrollToBooking(selectedCamp?.name, selectedCamp?.id)}>
+              {content.cta.primaryButtonText}
+            </Button>
+            <Button variant="outline" className="border-white text-white hover:bg-white/10" onClick={() => window.open(content.booking.whatsapp, '_blank')}>
+              {content.cta.secondaryButtonText}
+            </Button>
           </div>
         </div>
       </section>
 
       <Footer />
-
-      {/* Booking Modal */}
-      <EnhancedBookingModal
-        isOpen={isBookingModalOpen}
-        onClose={() => {
-          setIsBookingModalOpen(false);
-          setSelectedPackage(null);
-        }}
-        type="tour"
-        itemTitle={selectedPackage || "Jungle Camping Adventure"}
-      />
     </>
   );
 };

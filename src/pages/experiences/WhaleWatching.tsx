@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -29,14 +28,18 @@ import {
   Mail,
   Binoculars,
   Navigation,
-  Eye
+  Eye,
+  Shield
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { whaleWatchingPageService, WhaleWatchingPageContent } from '@/services/whaleWatchingPageService';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { whaleWatchingPageService, WhaleWatchingPageContent, WhaleTour } from '@/services/whaleWatchingPageService';
 import { toast } from 'sonner';
 import { cachedFetch } from '@/lib/cache';
 
@@ -58,12 +61,63 @@ const defaultHeroImages = [
   { id: '4', url: 'https://images.unsplash.com/photo-1454372182658-c712e4c5a1db', caption: 'Whale Watching Boat Tour' }
 ];
 
+type EnrichedWhaleTour = WhaleTour & {
+  priceValue: number;
+  priceDisplay: string;
+  maxGuestsValue: number;
+  ratingValue: number;
+  startLocationValue: string;
+  transportNoteValue: string;
+  importantInfoValue: string[];
+};
+
+const enrichTour = (tour: WhaleTour): EnrichedWhaleTour => {
+  const rawPrice = tour.price ?? 0;
+  const priceValue = typeof rawPrice === 'number'
+    ? rawPrice
+    : Number(String(rawPrice).replace(/[^\d.]/g, '')) || 0;
+  const priceDisplay =
+    tour.priceLabel ||
+    (typeof rawPrice === 'string'
+      ? rawPrice
+      : priceValue
+        ? `USD ${priceValue.toLocaleString()}`
+        : 'On Request');
+
+  return {
+    ...tour,
+    price: priceValue,
+    priceValue,
+    priceDisplay,
+    maxGuestsValue: tour.maxGuests ?? 24,
+    ratingValue: tour.rating ?? 4.9,
+    startLocationValue: tour.startLocation || 'Mirissa Harbour Jetty 03',
+    transportNoteValue:
+      tour.transportNote ||
+      'All departures begin at the listed harbour. Transfers requested outside the base city can be arranged for an additional fee.',
+    importantInfoValue:
+      tour.importantInfo && tour.importantInfo.length > 0
+        ? tour.importantInfo
+        : [
+            'Arrive 20 minutes before departure for the safety briefing.',
+            'Passport or NIC required for harbour security clearance.',
+            'Sea conditions may adjust route or duration for guest safety.'
+          ],
+  };
+};
+
 const WhaleWatching = () => {
-  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('locations');
   const [heroImageIndex, setHeroImageIndex] = useState(0);
   const [content, setContent] = useState<WhaleWatchingPageContent | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedTour, setSelectedTour] = useState<EnrichedWhaleTour | null>(null);
+  const tours = useMemo<EnrichedWhaleTour[]>(() => {
+    if (!content?.tours || content.tours.length === 0) {
+      return [];
+    }
+    return content.tours.map(enrichTour);
+  }, [content]);
 
   // Icon mapping function
   const getIconComponent = (iconName: string) => {
@@ -119,8 +173,13 @@ const WhaleWatching = () => {
     return () => clearInterval(interval);
   }, [heroImages.length]);
 
-  const handleBookingClick = (packageName?: string) => {
-    navigate('/booking/whale-watching');
+  const handleBookingClick = (tour?: EnrichedWhaleTour) => {
+    const targetTour = tour ?? tours[0];
+    if (targetTour) {
+      setSelectedTour(targetTour);
+    } else {
+      toast.info('Share your preferences via WhatsApp and our concierge will curate a whale watching plan for you.');
+    }
   };
 
   if (loading || !content) {
@@ -327,7 +386,7 @@ const WhaleWatching = () => {
                             <Button
                               size="sm"
                               className="mt-2"
-                              onClick={() => handleBookingClick(`${location.name} Whale Tour`)}
+                              onClick={() => handleBookingClick()}
                             >
                               Book Tour
                             </Button>
@@ -387,7 +446,7 @@ const WhaleWatching = () => {
             <TabsContent value="tours" className="space-y-6">
               <h3 className="text-2xl font-bold mb-6">Choose Your Whale Watching Experience</h3>
               <div className="grid md:grid-cols-2 gap-6">
-                {content.tours.map((tour, index) => {
+                {tours.map((tour, index) => {
                   const TourIcon = getIconComponent(tour.iconName);
                   return (
                     <motion.div
@@ -407,7 +466,12 @@ const WhaleWatching = () => {
                             </div>
                           </div>
                           <CardTitle className="text-xl">{tour.name}</CardTitle>
-                          <p className="text-2xl font-bold text-blue-600">{tour.price}</p>
+                          <div>
+                            <p className="text-2xl font-bold text-blue-600">{tour.priceDisplay}</p>
+                            <p className="text-sm text-gray-500 mt-1">
+                              Departs from {tour.startLocationValue}
+                            </p>
+                          </div>
                         </CardHeader>
                         <CardContent className="space-y-4">
                           <div>
@@ -434,7 +498,7 @@ const WhaleWatching = () => {
                           </div>
                           <Button
                             className="w-full bg-blue-600 hover:bg-blue-700"
-                            onClick={() => handleBookingClick(tour.name)}
+                            onClick={() => handleBookingClick(tour)}
                           >
                             Book This Tour
                           </Button>
@@ -627,9 +691,292 @@ const WhaleWatching = () => {
         </div>
       </section>
 
+      <Dialog
+        open={!!selectedTour}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedTour(null);
+          }
+        }}
+      >
+        {selectedTour && <WhaleBookingDialog tour={selectedTour} />}
+      </Dialog>
+
       <Footer />
     </>
   );
 };
 
 export default WhaleWatching;
+
+const WhaleBookingDialog = ({ tour }: { tour: EnrichedWhaleTour }) => {
+  const [formData, setFormData] = useState({
+    date: '',
+    guests: 2,
+    contactName: '',
+    contactEmail: '',
+    contactPhone: '',
+    pickupLocation: tour.startLocationValue,
+    specialRequests: '',
+  });
+
+  const clampGuests = (value: number) =>
+    Math.min(Math.max(value || 1, 1), tour.maxGuestsValue || 50);
+
+  const handleInputChange = (field: keyof typeof formData, value: string | number) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: typeof value === 'number' ? clampGuests(value) : value,
+    }));
+  };
+
+  const guestCount = formData.guests || 1;
+  const totalPrice = tour.priceValue * guestCount;
+  const holdingDeposit = Math.max(50, Math.round(totalPrice * 0.25));
+
+  return (
+    <DialogContent className="max-w-5xl border-none bg-transparent p-0">
+      <div className="grid lg:grid-cols-[1.05fr_0.95fr] overflow-hidden rounded-3xl border border-blue-100 bg-white shadow-2xl">
+        <div className="relative bg-gradient-to-b from-sky-50 to-white">
+          <div className="relative h-56 w-full overflow-hidden rounded-t-3xl lg:rounded-tr-none">
+            <img
+              src={tour.image || 'https://images.unsplash.com/photo-1570913149827-d2ac84ab3f9a?w=1600&auto=format&fit=crop'}
+              alt={tour.name}
+              className="h-full w-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/10 to-transparent" />
+            <div className="absolute bottom-4 left-4 right-4 flex flex-wrap items-center justify-between gap-4 text-white">
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-white/70">Whale Watch</p>
+                <p className="text-lg font-semibold">{tour.name}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-white/70">From</p>
+                <p className="text-2xl font-bold">
+                  {tour.priceDisplay}{' '}
+                  <span className="text-sm font-normal text-white/70">per guest</span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-5 p-6 lg:p-8">
+            <div className="flex flex-wrap gap-3 text-sm text-sky-900">
+              <span className="inline-flex items-center gap-1 rounded-full bg-white/80 px-3 py-1 text-slate-700 shadow-sm">
+                <Clock className="h-4 w-4 text-sky-500" />
+                {tour.duration}
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-white/80 px-3 py-1 text-slate-700 shadow-sm">
+                <Calendar className="h-4 w-4 text-sky-500" />
+                {tour.departures}
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-white/80 px-3 py-1 text-slate-700 shadow-sm">
+                <Users className="h-4 w-4 text-sky-500" />
+                Max {tour.maxGuestsValue}
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-white/80 px-3 py-1 text-slate-700 shadow-sm">
+                <Star className="h-4 w-4 text-amber-400" />
+                {tour.ratingValue.toFixed(1)} rating
+              </span>
+            </div>
+
+            <div className="space-y-3 rounded-2xl border border-blue-100 bg-white p-4 shadow-sm">
+              <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+                <Ship className="h-4 w-4 text-sky-500" />
+                Departure logistics
+              </div>
+              <p className="text-sm text-slate-600">
+                Primary departure: <span className="font-semibold">{tour.startLocationValue}</span>
+              </p>
+              <p className="text-xs text-slate-500">{tour.transportNoteValue}</p>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+                  Highlights
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {tour.highlights?.slice(0, 6).map((highlight, index) => (
+                    <span
+                      key={`${highlight}-${index}`}
+                      className="inline-flex items-center gap-1 rounded-full border border-blue-100 bg-sky-50 px-3 py-1 text-xs text-sky-800"
+                    >
+                      <CheckCircle className="h-3.5 w-3.5 text-sky-500" />
+                      {highlight}
+                    </span>
+                  ))}
+                </div>
+                <p className="mt-4 text-sm leading-relaxed text-slate-600">{tour.description}</p>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="rounded-2xl border border-slate-200 bg-white/80 p-4">
+                  <p className="text-sm font-semibold text-slate-800 flex items-center gap-2">
+                    <Shield className="h-4 w-4 text-green-500" />
+                    Included
+                  </p>
+                  <ul className="mt-3 space-y-1 text-sm text-slate-600">
+                    {tour.included?.map((item, index) => (
+                      <li key={`${item}-${index}`} className="flex items-start gap-2">
+                        <span className="mt-1 h-1.5 w-1.5 rounded-full bg-green-500" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50 to-white p-4">
+                  <p className="text-sm font-semibold text-amber-900 flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4 text-amber-500" />
+                    Important notes
+                  </p>
+                  <ul className="mt-3 space-y-1.5 text-sm text-amber-900/80">
+                    {tour.importantInfoValue.map((note, index) => (
+                      <li key={`${note}-${index}`} className="flex items-start gap-2">
+                        <span className="mt-1 h-1.5 w-1.5 rounded-full bg-amber-500/70" />
+                        {note}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-6 border-t border-blue-100 bg-white/95 p-6 lg:border-l lg:border-t-0 lg:p-8">
+          <DialogHeader className="text-left space-y-2">
+            <DialogTitle className="text-2xl font-semibold text-slate-900">Reserve your seats</DialogTitle>
+            <DialogDescription className="text-sm text-slate-500">
+              Share your preferred date, party details, and pickup plan. A marine concierge confirms availability within 30 minutes.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-600">Preferred date</label>
+                <Input
+                  type="date"
+                  value={formData.date}
+                  onChange={(e) => handleInputChange('date', e.target.value)}
+                  className="rounded-2xl border-slate-200 bg-slate-50/60 focus-visible:ring-sky-500"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-600">Guests</label>
+                <Input
+                  type="number"
+                  min={1}
+                  max={tour.maxGuestsValue}
+                  value={formData.guests}
+                  onChange={(e) => handleInputChange('guests', Number(e.target.value))}
+                  className="rounded-2xl border-slate-200 bg-slate-50/60 focus-visible:ring-sky-500"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-600">Lead guest name</label>
+              <Input
+                placeholder="Your full name"
+                value={formData.contactName}
+                onChange={(e) => handleInputChange('contactName', e.target.value)}
+                className="rounded-2xl border-slate-200 bg-slate-50/60 focus-visible:ring-sky-500"
+              />
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-600">Email</label>
+                <Input
+                  type="email"
+                  placeholder="you@email.com"
+                  value={formData.contactEmail}
+                  onChange={(e) => handleInputChange('contactEmail', e.target.value)}
+                  className="rounded-2xl border-slate-200 bg-slate-50/60 focus-visible:ring-sky-500"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-600">Phone / WhatsApp</label>
+                <Input
+                  type="tel"
+                  placeholder="+94 77 123 4567"
+                  value={formData.contactPhone}
+                  onChange={(e) => handleInputChange('contactPhone', e.target.value)}
+                  className="rounded-2xl border-slate-200 bg-slate-50/60 focus-visible:ring-sky-500"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-600">Pickup / meeting point</label>
+              <Input
+                placeholder="e.g., Mirissa Harbour Jetty 03"
+                value={formData.pickupLocation}
+                onChange={(e) => handleInputChange('pickupLocation', e.target.value)}
+                className="rounded-2xl border-slate-200 bg-slate-50/60 focus-visible:ring-sky-500"
+              />
+              <p className="text-xs text-slate-500">
+                Transfers outside the base harbour are quoted separately after we receive your request.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-600">Special requests</label>
+              <Textarea
+                placeholder="Dietary preferences, child seats, photography goals..."
+                rows={3}
+                value={formData.specialRequests}
+                onChange={(e) => handleInputChange('specialRequests', e.target.value)}
+                className="rounded-2xl border-slate-200 bg-slate-50/60 focus-visible:ring-sky-500"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50/80 p-5">
+            <div className="flex items-center justify-between text-sm text-slate-600">
+              <span>Price per guest</span>
+              <span className="font-semibold text-slate-900">
+                {tour.priceValue ? `USD ${tour.priceValue.toLocaleString()}` : 'On request'}
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-sm text-slate-600">
+              <span>Guests</span>
+              <span className="font-semibold text-slate-900">× {guestCount}</span>
+            </div>
+            <div className="flex items-center justify-between text-sm text-slate-600">
+              <span>Concierge assurance deposit (25%)</span>
+              <span className="font-semibold text-slate-900">
+                USD {holdingDeposit.toLocaleString()}
+              </span>
+            </div>
+            <div className="border-t border-slate-200 pt-3">
+              <div className="flex items-center justify-between">
+                <span className="text-lg font-semibold text-slate-900">Estimated total</span>
+                <span className="text-2xl font-bold text-blue-600">
+                  USD {totalPrice.toLocaleString()}
+                </span>
+              </div>
+              <p className="mt-1 text-xs text-slate-500">
+                Final invoice confirms transport supplements, private upgrades, or harbour taxes if requested.
+              </p>
+            </div>
+          </div>
+
+          <Button className="w-full rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-500 py-5 text-base font-semibold shadow-lg shadow-blue-200 hover:from-blue-700 hover:to-indigo-600">
+            Send reservation request
+          </Button>
+
+          <div className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-white/80 p-4 text-xs text-slate-500">
+            <MessageCircle className="h-4 w-4 text-blue-600" />
+            <p>
+              A concierge will reply via WhatsApp or email with availability, permit details, and secure payment links.
+              Need instant help? Call +94 7777 21 999 after submitting your request.
+            </p>
+          </div>
+        </div>
+      </div>
+    </DialogContent>
+  );
+};

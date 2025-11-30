@@ -34,6 +34,13 @@ interface Experience {
   icon?: string;
 }
 
+interface HeroSlide {
+  image: string;
+  title: string;
+  subtitle: string;
+  badge?: string;
+}
+
 interface GalleryImage {
   url: string;
   caption?: string;
@@ -58,6 +65,7 @@ interface AboutSriLankaContent {
   heroTitle: string;
   heroSubtitle: string;
   heroImage: string;
+  heroSlides?: HeroSlide[];
   mainDescription: string;
   secondaryDescription: string;
   stats: {
@@ -85,6 +93,26 @@ const defaultContent: AboutSriLankaContent = {
   heroTitle: "The Pearl of the Indian Ocean",
   heroSubtitle: "Discover Sri Lanka's Rich Heritage and Natural Beauty",
   heroImage: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=1920&q=80",
+  heroSlides: [
+    {
+      image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=1920&q=80",
+      title: "The Pearl of the Indian Ocean",
+      subtitle: "Discover Sri Lanka's Rich Heritage and Natural Beauty",
+      badge: "Discover Paradise"
+    },
+    {
+      image: "https://images.unsplash.com/photo-1588258524675-55d656396b8a?q=80&w=1920",
+      title: "Ancient Kingdoms Await",
+      subtitle: "Walk through 2,500 years of fascinating history at Sigiriya Rock Fortress",
+      badge: "UNESCO Heritage"
+    },
+    {
+      image: "https://images.unsplash.com/photo-1546708773-e52953324f83?q=80&w=1920",
+      title: "Misty Mountain Paradise",
+      subtitle: "Experience the legendary tea plantations and cool climate of Hill Country",
+      badge: "Hill Country"
+    }
+  ],
   mainDescription: "Sri Lanka, a teardrop-shaped island in the Indian Ocean, offers an incredible diversity of experiences within its compact borders. From misty mountains and lush rainforests to golden beaches and ancient ruins, this tropical paradise has captivated travelers for centuries.",
   secondaryDescription: "With a history spanning over 2,500 years, Sri Lanka boasts eight UNESCO World Heritage Sites, a rich cultural tapestry influenced by Buddhism, Hinduism, and colonial heritage, and some of the world's finest tea, spices, and gemstones.",
   stats: {
@@ -315,4 +343,4 @@ export const useAboutSriLankaContent = () => {
   return { content, loading, error };
 };
 
-export type { AboutSriLankaContent, Destination, Experience, GalleryImage, Testimonial, VideoTour };
+export type { AboutSriLankaContent, Destination, Experience, GalleryImage, Testimonial, VideoTour, HeroSlide };

@@ -9,7 +9,7 @@ import {
 import { Link, useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { aboutItems } from './menuData'
-import { Info, BookOpen, Users, Car } from 'lucide-react'
+import { Info, BookOpen, Users, Car, LucideIcon } from 'lucide-react'
 
 interface AboutDropdownProps {
   animatingItem: string | null
@@ -50,16 +50,17 @@ const aboutCategories = {
     items: [
       aboutItemsByHref['/join-with-us'],
       aboutItemsByHref['/vehicle-rental/owner'],
+      aboutItemsByHref['/list-property'],
       aboutItemsByHref['/vendor/register'],
     ].filter(Boolean)
   }
 } as const
 
-const categoryIcons: Record<keyof typeof aboutCategories, React.ReactNode> = {
-  company: <Info className="w-4 h-4" />,
-  planning: <BookOpen className="w-4 h-4" />,
-  community: <Users className="w-4 h-4" />,
-  drivers: <Car className="w-4 h-4" />,
+const categoryIconComponents: Record<keyof typeof aboutCategories, LucideIcon> = {
+  company: Info,
+  planning: BookOpen,
+  community: Users,
+  drivers: Car,
 }
 
 const categoryColors: Record<keyof typeof aboutCategories, string> = {
@@ -124,7 +125,9 @@ const AboutDropdown = ({ animatingItem, onMenuClick, isScrolled }: AboutDropdown
               isScrolled ? "border-emerald-200/50 bg-white/50" : "border-white/10 bg-white/5"
             )}>
               <div className="space-y-1">
-                {categories.map(([key, category]) => (
+                {categories.map(([key, category]) => {
+                  const IconComponent = categoryIconComponents[key]
+                  return (
                   <button
                     key={key}
                     onClick={() => setActiveCategory(key)}
@@ -140,10 +143,10 @@ const AboutDropdown = ({ animatingItem, onMenuClick, isScrolled }: AboutDropdown
                           : "text-gray-300 hover:bg-white/10"
                     )}
                   >
-                    {categoryIcons[key]}
+                    {IconComponent && <IconComponent className="w-4 h-4" />}
                     <span className="truncate">{category.title}</span>
                   </button>
-                ))}
+                )})}
               </div>
             </div>
 

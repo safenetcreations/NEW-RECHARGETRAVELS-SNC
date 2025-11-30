@@ -34,8 +34,6 @@ interface NationalParksTour {
     difficulty: string;
     maxGroupSize: number;
     included: string[];
-    menu?: string[];
-    chef?: string;
     featured?: boolean;
     videoUrl?: string;
     gallery?: string[];
@@ -43,6 +41,9 @@ interface NationalParksTour {
     is_active: boolean;
     created_at?: any;
     updated_at?: any;
+    startLocation?: string;
+    transportNote?: string;
+    importantInfo?: string[];
 }
 
 interface Booking {
@@ -82,30 +83,32 @@ export const NationalParksToursManager = () => {
         image: '',
         rating: 4.5,
         reviews: 0,
-        category: 'cooking-class',
+        category: 'safari',
         highlights: [],
         difficulty: 'Easy',
         maxGroupSize: 10,
         included: [],
-        menu: [],
-        chef: '',
         featured: false,
         videoUrl: '',
         gallery: [],
         availability: 'Available',
         is_active: true,
+        startLocation: '',
+        transportNote: '',
+        importantInfo: [],
     });
 
     const [highlightInput, setHighlightInput] = useState('');
     const [includedInput, setIncludedInput] = useState('');
-    const [menuInput, setMenuInput] = useState('');
+    const [importantInfoInput, setImportantInfoInput] = useState('');
 
     const categories = [
-        { value: 'cooking-class', label: 'Cooking Class' },
-        { value: 'street-food', label: 'Street Food Tour' },
-        { value: 'fine-dining', label: 'Fine Dining' },
-        { value: 'spice-garden', label: 'Spice Garden' },
-        { value: 'tea-experience', label: 'Tea Experience' },
+        { value: 'yala', label: 'Yala National Park' },
+        { value: 'udawalawe', label: 'Udawalawe' },
+        { value: 'wilpattu', label: 'Wilpattu' },
+        { value: 'minneriya', label: 'Minneriya' },
+        { value: 'bundala', label: 'Bundala' },
+        { value: 'safari', label: 'General Safari' },
     ];
 
     const difficulties = [
@@ -228,14 +231,14 @@ export const NationalParksToursManager = () => {
 
                 toast({
                     title: "Success",
-                    description: "Hill Country tour created successfully"
+                    description: "National Park tour created successfully"
                 });
             } else if (selectedTour?.id) {
                 await updateDoc(doc(db, 'nationalparks_tours', selectedTour.id), tourData);
 
                 toast({
                     title: "Success",
-                    description: "Hill Country tour updated successfully"
+                    description: "National Park tour updated successfully"
                 });
             }
 
@@ -312,8 +315,6 @@ export const NationalParksToursManager = () => {
             difficulty: 'Easy',
             maxGroupSize: 10,
             included: [],
-            menu: [],
-            chef: '',
             featured: false,
             videoUrl: '',
             gallery: [],
@@ -324,8 +325,10 @@ export const NationalParksToursManager = () => {
         setIsEditing(false);
         setIsCreating(false);
         setHighlightInput('');
+        setHighlightInput('');
         setIncludedInput('');
-        setMenuInput('');
+        setImportantInfoInput('');
+        setImportantInfoInput('');
     };
 
     const startEdit = (tour: NationalParksTour) => {
@@ -341,7 +344,7 @@ export const NationalParksToursManager = () => {
         setIsEditing(true);
     };
 
-    const addArrayItem = (field: 'highlights' | 'included' | 'menu', value: string) => {
+    const addArrayItem = (field: 'highlights' | 'included' | 'importantInfo', value: string) => {
         if (!value.trim()) return;
 
         setFormData(prev => ({
@@ -352,10 +355,11 @@ export const NationalParksToursManager = () => {
         // Reset input
         if (field === 'highlights') setHighlightInput('');
         if (field === 'included') setIncludedInput('');
-        if (field === 'menu') setMenuInput('');
+        if (field === 'included') setIncludedInput('');
+        if (field === 'importantInfo') setImportantInfoInput('');
     };
 
-    const removeArrayItem = (field: 'highlights' | 'included' | 'menu' | 'gallery', index: number) => {
+    const removeArrayItem = (field: 'highlights' | 'included' | 'gallery' | 'importantInfo', index: number) => {
         setFormData(prev => ({
             ...prev,
             [field]: (prev[field] || []).filter((_, i) => i !== index)
@@ -383,10 +387,10 @@ export const NationalParksToursManager = () => {
             <div className="flex justify-between items-center">
                 <div>
                     <h2 className="text-3xl font-bold flex items-center gap-2">
-                        <Church className="h-8 w-8 text-orange-600" />
-                        Hill Country Tours Management
+                        <Church className="h-8 w-8 text-green-600" />
+                        National Parks Tours Management
                     </h2>
-                    <p className="text-muted-foreground">Manage nationalparks experiences and bookings</p>
+                    <p className="text-muted-foreground">Manage national park experiences and bookings</p>
                 </div>
 
                 <Button
@@ -510,10 +514,10 @@ export const NationalParksToursManager = () => {
                                                             Inactive
                                                         </Badge>
                                                     )}
-                                                    {tour.chef && (
-                                                        <Badge variant="outline" className="text-xs">
-                                                            <Church className="h-3 w-3 mr-1" />
-                                                            {tour.chef}
+                                                    {tour.featured && (
+                                                        <Badge variant="outline" className="text-xs border-yellow-500 text-yellow-600">
+                                                            <Award className="h-3 w-3 mr-1" />
+                                                            Featured
                                                         </Badge>
                                                     )}
                                                 </div>
@@ -561,6 +565,27 @@ export const NationalParksToursManager = () => {
                                             onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                                             placeholder="Describe the nationalparks experience..."
                                             rows={4}
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="startLocation">Start Location</Label>
+                                        <Input
+                                            id="startLocation"
+                                            value={formData.startLocation || ''}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, startLocation: e.target.value }))}
+                                            placeholder="e.g., Yala / Tissamaharama Hotel"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="transportNote">Transport Note</Label>
+                                        <Textarea
+                                            id="transportNote"
+                                            value={formData.transportNote || ''}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, transportNote: e.target.value }))}
+                                            placeholder="e.g., Free pickup from hotels in Tissamaharama..."
+                                            rows={2}
                                         />
                                     </div>
 
@@ -649,29 +674,18 @@ export const NationalParksToursManager = () => {
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="chef">Chef Name</Label>
-                                            <Input
-                                                id="chef"
-                                                value={formData.chef}
-                                                onChange={(e) => setFormData(prev => ({ ...prev, chef: e.target.value }))}
-                                                placeholder="e.g., Chef Kumari"
-                                            />
-                                        </div>
 
-                                        <div className="space-y-2">
-                                            <Label htmlFor="rating">Rating</Label>
-                                            <Input
-                                                id="rating"
-                                                type="number"
-                                                step="0.1"
-                                                min="0"
-                                                max="5"
-                                                value={formData.rating}
-                                                onChange={(e) => setFormData(prev => ({ ...prev, rating: parseFloat(e.target.value) || 4.5 }))}
-                                            />
-                                        </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="rating">Rating</Label>
+                                        <Input
+                                            id="rating"
+                                            type="number"
+                                            step="0.1"
+                                            min="0"
+                                            max="5"
+                                            value={formData.rating}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, rating: parseFloat(e.target.value) || 4.5 }))}
+                                        />
                                     </div>
 
                                     {/* Image Upload */}
@@ -763,6 +777,41 @@ export const NationalParksToursManager = () => {
                                         </div>
                                     </div>
 
+                                    {/* Important Info */}
+                                    <div className="space-y-2">
+                                        <Label>Important Info</Label>
+                                        <div className="flex gap-2">
+                                            <Input
+                                                value={importantInfoInput}
+                                                onChange={(e) => setImportantInfoInput(e.target.value)}
+                                                placeholder="Add important info..."
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter') {
+                                                        e.preventDefault();
+                                                        addArrayItem('importantInfo', importantInfoInput);
+                                                    }
+                                                }}
+                                            />
+                                            <Button
+                                                type="button"
+                                                onClick={() => addArrayItem('importantInfo', importantInfoInput)}
+                                            >
+                                                <Plus className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                        <div className="flex flex-wrap gap-2 mt-2">
+                                            {(formData.importantInfo || []).map((item, idx) => (
+                                                <Badge key={idx} variant="outline" className="flex items-center gap-1 border-amber-200 bg-amber-50 text-amber-900">
+                                                    {item}
+                                                    <X
+                                                        className="h-3 w-3 cursor-pointer"
+                                                        onClick={() => removeArrayItem('importantInfo', idx)}
+                                                    />
+                                                </Badge>
+                                            ))}
+                                        </div>
+                                    </div>
+
                                     {/* Toggles */}
                                     <div className="flex items-center gap-4">
                                         <label className="flex items-center gap-2 cursor-pointer">
@@ -804,13 +853,13 @@ export const NationalParksToursManager = () => {
                             </Card>
                         )}
                     </div>
-                </TabsContent>
+                </TabsContent >
 
                 {/* Bookings Tab */}
-                <TabsContent value="bookings" className="space-y-4">
+                < TabsContent value="bookings" className="space-y-4" >
                     <Card>
                         <CardHeader>
-                            <CardTitle>Hill Country Tour Bookings</CardTitle>
+                            <CardTitle>National Parks Tour Bookings</CardTitle>
                             <CardDescription>Manage customer bookings and reservations</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
@@ -898,9 +947,9 @@ export const NationalParksToursManager = () => {
                             )}
                         </CardContent>
                     </Card>
-                </TabsContent>
-            </Tabs>
-        </div>
+                </TabsContent >
+            </Tabs >
+        </div >
     );
 };
 

@@ -11,15 +11,15 @@ export const useFirebaseAuthState = () => {
     // Subscribe to auth state changes
     const unsubscribe = firebaseAuthService.onAuthStateChanged(async (firebaseUser) => {
       setUser(firebaseUser);
-      
+
       if (firebaseUser) {
         // Check admin status
         const profile = await firebaseAuthService.getUserProfile(firebaseUser.uid);
-        setIsAdmin(profile?.role === 'admin');
+        setIsAdmin(profile?.role === 'admin' || profile?.role === 'super_admin');
       } else {
         setIsAdmin(false);
       }
-      
+
       setLoading(false);
     });
 

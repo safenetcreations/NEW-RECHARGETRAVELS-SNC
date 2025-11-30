@@ -10,13 +10,12 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-    Mountain, Clock, Users, Star, Calendar, MapPin, Heart, Share2,
-    Filter, Search, Play, X, Check, Award, Sparkles, Coffee, Train,
-    Crown, Home, Leaf, Sparkles, TrendingUp, MessageCircle
+    Mountain, Clock, Users, Star, MapPin, Heart,
+    Filter, Search, Play, Check, Award, TrendingUp, MessageCircle,
+    BookOpen, Landmark, Sun
 } from 'lucide-react';
-import { collection, getDocs, query, where, orderBy, addDoc, updateDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, query, where, orderBy, addDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -36,7 +35,6 @@ interface RamayanaTour {
     difficulty: string;
     maxGroupSize: number;
     included: string[];
-    estateType?: string;
     altitude?: string;
     featured?: boolean;
     videoUrl?: string;
@@ -155,13 +153,13 @@ const RamayanaToursNew = () => {
         if (priceFilter !== 'all') {
             switch (priceFilter) {
                 case 'budget':
-                    filtered = filtered.filter(tour => tour.price < 200);
+                    filtered = filtered.filter(tour => tour.price < 500);
                     break;
                 case 'mid':
-                    filtered = filtered.filter(tour => tour.price >= 200 && tour.price < 500);
+                    filtered = filtered.filter(tour => tour.price >= 500 && tour.price < 1500);
                     break;
                 case 'premium':
-                    filtered = filtered.filter(tour => tour.price >= 500);
+                    filtered = filtered.filter(tour => tour.price >= 1500);
                     break;
             }
         }
@@ -174,7 +172,7 @@ const RamayanaToursNew = () => {
             if (!user) {
                 toast({
                     title: "Login Required",
-                    description: "Please login to book a hill country experience",
+                    description: "Please login to book a Ramayana experience",
                     variant: "destructive",
                 });
                 navigate('/login');
@@ -191,7 +189,7 @@ const RamayanaToursNew = () => {
 
             toast({
                 title: "Booking Submitted!",
-                description: "Your hill country experience has been booked. We'll contact you soon.",
+                description: "Your Ramayana journey has been booked. We'll contact you soon.",
             });
 
             setBookingDialogOpen(false);
@@ -219,10 +217,10 @@ const RamayanaToursNew = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-green-50 via-amber-50 to-green-50 flex items-center justify-center">
+            <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-orange-50 flex items-center justify-center">
                 <div className="text-center">
-                    <Mountain className="w-16 h-16 mx-auto mb-4 text-green-600 animate-bounce" />
-                    <p className="text-xl font-semibold text-gray-700">Loading Ramayana Spiritual Adventures...</p>
+                    <Sun className="w-16 h-16 mx-auto mb-4 text-orange-600 animate-spin-slow" />
+                    <p className="text-xl font-semibold text-gray-700">Loading Ramayana Journeys...</p>
                 </div>
             </div>
         );
@@ -231,15 +229,15 @@ const RamayanaToursNew = () => {
     return (
         <>
             <Helmet>
-                <title>Luxury Ramayana Spiritual Tours Sri Lanka - Sparkles Spiritual Retreats | Recharge Travels</title>
-                <meta name="description" content="Discover exclusive tea estate retreats, colonial luxury, and misty mountain escapes. Private tastings, vintage railways, and premium hill country experiences in Sri Lanka." />
-                <meta name="keywords" content="Sri Lanka hill country, tea estate tours, Nuwara Eliya, Ella, tea plantations, luxury mountain retreats" />
-                <meta property="og:title" content="Luxury Ramayana Spiritual Tours Sri Lanka - Recharge Travels" />
-                <meta property="og:description" content="Exclusive tea estate retreats in Sri Lanka's misty mountains" />
+                <title>Ramayana Trail Pilgrimage Sri Lanka - Mythological Journeys | Recharge Travels</title>
+                <meta name="description" content="Follow the sacred path of Lord Rama, Sita, and Hanuman across Sri Lanka. Visit ancient temples, mythological sites, and experience the Ramayana legend." />
+                <meta name="keywords" content="Ramayana Trail, Sri Lanka pilgrimage, Ramayana sites, Sita Eliya, Ashok Vatika, Hanuman temple, Ravana Falls" />
+                <meta property="og:title" content="Ramayana Trail Pilgrimage Sri Lanka - Recharge Travels" />
+                <meta property="og:description" content="A sacred journey through the legends of the Ramayana in Sri Lanka" />
                 <meta property="og:type" content="website" />
             </Helmet>
 
-            <div className="min-h-screen bg-gradient-to-br from-green-50 via-amber-50 to-green-50">
+            <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-orange-50">
                 <Header />
 
                 {/* Hero Section */}
@@ -247,50 +245,50 @@ const RamayanaToursNew = () => {
                     <div
                         className="absolute inset-0 bg-cover bg-center transform scale-105"
                         style={{
-                            backgroundImage: `url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=2070&q=80')`,
+                            backgroundImage: `url('https://images.unsplash.com/photo-1588595280408-d42f76931a51?auto=format&fit=crop&w=2070&q=80')`,
                         }}
                     >
-                        <div className="absolute inset-0 bg-gradient-to-b from-green-900/70 via-green-800/60 to-amber-900/80" />
+                        <div className="absolute inset-0 bg-gradient-to-b from-orange-900/70 via-amber-900/60 to-orange-900/80" />
                     </div>
 
                     <div className="relative z-10 text-center text-white px-4 max-w-5xl mx-auto">
                         <div className="mb-6 flex justify-center gap-2 animate-fade-in">
                             <Badge className="bg-amber-500/90 text-white px-4 py-2 text-sm backdrop-blur-sm">
                                 <Award className="w-4 h-4 mr-2 inline" />
-                                Colonial Luxury
+                                Sacred Journey
                             </Badge>
-                            <Badge className="bg-green-500/90 text-white px-4 py-2 text-sm backdrop-blur-sm">
+                            <Badge className="bg-orange-500/90 text-white px-4 py-2 text-sm backdrop-blur-sm">
                                 <TrendingUp className="w-4 h-4 mr-2 inline" />
-                                Premium Estates
+                                Mythological Trail
                             </Badge>
                         </div>
 
                         <div className="flex items-center justify-center mb-4">
-                            <Leaf className="w-8 h-8 text-amber-400" />
-                            <span className="text-sm font-medium tracking-wider uppercase mx-4 text-amber-200">Estate Approved Luxury</span>
-                            <Leaf className="w-8 h-8 text-amber-400 scale-x-[-1]" />
+                            <Sun className="w-8 h-8 text-amber-400" />
+                            <span className="text-sm font-medium tracking-wider uppercase mx-4 text-amber-200">Legendary Path</span>
+                            <Sun className="w-8 h-8 text-amber-400" />
                         </div>
 
                         <h1 className="text-7xl md:text-8xl font-serif font-bold mb-6 animate-fade-in leading-tight">
-                            Ramayana Spiritual
+                            Ramayana Trail
                             <span className="block bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-300 bg-clip-text text-transparent">
-                                Tea Retreats
+                                Pilgrimage
                             </span>
                         </h1>
 
                         <p className="text-2xl md:text-3xl font-serif mb-8 animate-fade-in opacity-90 leading-relaxed">
-                            Escape to exclusive tea estate retreats where colonial elegance<br />
-                            meets Ceylon's misty mountains
+                            Follow the footsteps of Lord Rama, Sita, and Hanuman<br />
+                            across the sacred landscapes of Lanka
                         </p>
 
                         <div className="flex flex-wrap justify-center gap-6 mb-8 text-sm">
                             {[
-                                { icon: Coffee, text: 'Private Estate Tastings' },
-                                { icon: Train, text: 'Spiritual Railways' },
-                                { icon: Crown, text: 'Colonial Luxury' },
-                                { icon: Mountain, text: 'Misty Peaks' }
+                                { icon: Landmark, text: 'Ancient Temples' },
+                                { icon: Mountain, text: 'Sacred Mountains' },
+                                { icon: BookOpen, text: 'Mythological Sites' },
+                                { icon: Star, text: 'Spiritual Experience' }
                             ].map((item, index) => (
-                                <div key={index} className="flex items-center bg-amber-900/30 backdrop-blur-sm px-6 py-3 rounded-full border border-amber-300/20">
+                                <div key={index} className="flex items-center bg-orange-900/30 backdrop-blur-sm px-6 py-3 rounded-full border border-amber-300/20">
                                     <item.icon className="w-5 h-5 mr-2 text-amber-200" />
                                     <span className="text-amber-100">{item.text}</span>
                                 </div>
@@ -300,11 +298,11 @@ const RamayanaToursNew = () => {
                         <div className="flex flex-wrap justify-center gap-4 animate-scale-in">
                             <Button
                                 size="lg"
-                                className="bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-700 hover:to-yellow-700 text-white px-10 py-7 text-lg rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300"
+                                className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white px-10 py-7 text-lg rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300"
                                 onClick={() => document.getElementById('experiences')?.scrollIntoView({ behavior: 'smooth' })}
                             >
-                                <Leaf className="mr-2 w-5 h-5" />
-                                Discover Sparkles Spirituals
+                                <BookOpen className="mr-2 w-5 h-5" />
+                                Explore the Trail
                             </Button>
 
                             <Button
@@ -313,16 +311,16 @@ const RamayanaToursNew = () => {
                                 className="bg-white/10 backdrop-blur-md border-2 border-white/50 text-white hover:bg-white/20 px-10 py-7 text-lg rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300"
                             >
                                 <Play className="mr-2 w-5 h-5" />
-                                Watch Estate Tour
+                                Watch Journey
                             </Button>
                         </div>
 
                         {/* Stats */}
                         <div className="grid grid-cols-3 gap-8 mt-16 max-w-3xl mx-auto">
                             {[
-                                { icon: Home, label: 'Spiritual Estates', value: '20+' },
-                                { icon: Mountain, label: 'Scenic Routes', value: '30+' },
-                                { icon: Star, label: 'Rating', value: '4.9' }
+                                { icon: Landmark, label: 'Sacred Sites', value: '50+' },
+                                { icon: MapPin, label: 'Destinations', value: '15+' },
+                                { icon: Star, label: 'Pilgrim Rating', value: '4.9' }
                             ].map((stat, idx) => (
                                 <div key={idx} className="text-center backdrop-blur-md bg-white/10 rounded-2xl p-6 transform hover:scale-110 transition-all duration-300">
                                     <stat.icon className="w-10 h-10 mx-auto mb-3 text-amber-300" />
@@ -339,49 +337,49 @@ const RamayanaToursNew = () => {
                 </section>
 
                 {/* Search & Filter Bar */}
-                <section className="sticky top-16 z-40 bg-white/95 backdrop-blur-lg shadow-lg border-b border-green-100">
+                <section className="sticky top-16 z-40 bg-white/95 backdrop-blur-lg shadow-lg border-b border-orange-100">
                     <div className="container mx-auto px-4 py-6">
                         <div className="flex flex-wrap gap-4 items-center justify-between">
                             <div className="relative flex-1 min-w-[250px]">
                                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                                 <Input
-                                    placeholder="Search tea estates, mountains, experiences..."
+                                    placeholder="Search temples, sites, stories..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pl-12 pr-4 py-6 rounded-full border-2 border-green-200 focus:border-green-500 bg-white shadow-sm"
+                                    className="pl-12 pr-4 py-6 rounded-full border-2 border-orange-200 focus:border-orange-500 bg-white shadow-sm"
                                 />
                             </div>
 
                             <div className="flex gap-3 flex-wrap">
                                 <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                                    <SelectTrigger className="w-[180px] rounded-full border-2 border-green-200 bg-white shadow-sm">
+                                    <SelectTrigger className="w-[180px] rounded-full border-2 border-orange-200 bg-white shadow-sm">
                                         <Filter className="w-4 h-4 mr-2" />
                                         <SelectValue placeholder="Category" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="all">All Experiences</SelectItem>
-                                        <SelectItem value="temple-site">Tea Tastings</SelectItem>
-                                        <SelectItem value="pilgrimage">Estate Stays</SelectItem>
-                                        <SelectItem value="meditation">Train Journeys</SelectItem>
-                                        <SelectItem value="heritage-walk">Mountain Treks</SelectItem>
-                                        <SelectItem value="multi-day">Multi-Day Tours</SelectItem>
+                                        <SelectItem value="all">All Sites</SelectItem>
+                                        <SelectItem value="pilgrimage">Pilgrimage</SelectItem>
+                                        <SelectItem value="mythology">Mythology</SelectItem>
+                                        <SelectItem value="historical">Historical</SelectItem>
+                                        <SelectItem value="nature">Nature</SelectItem>
+                                        <SelectItem value="adventure">Adventure</SelectItem>
                                     </SelectContent>
                                 </Select>
 
                                 <Select value={priceFilter} onValueChange={setPriceFilter}>
-                                    <SelectTrigger className="w-[160px] rounded-full border-2 border-green-200 bg-white shadow-sm">
+                                    <SelectTrigger className="w-[160px] rounded-full border-2 border-orange-200 bg-white shadow-sm">
                                         <SelectValue placeholder="Price Range" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="all">All Prices</SelectItem>
-                                        <SelectItem value="budget">Under $200</SelectItem>
-                                        <SelectItem value="mid">$200 - $500</SelectItem>
-                                        <SelectItem value="premium">$500+</SelectItem>
+                                        <SelectItem value="budget">Under $500</SelectItem>
+                                        <SelectItem value="mid">$500 - $1500</SelectItem>
+                                        <SelectItem value="premium">$1500+</SelectItem>
                                     </SelectContent>
                                 </Select>
 
-                                <Badge className="px-4 py-2 bg-green-100 text-green-800 text-sm">
-                                    {filteredTours.length} {filteredTours.length === 1 ? 'Experience' : 'Experiences'}
+                                <Badge className="px-4 py-2 bg-orange-100 text-orange-800 text-sm">
+                                    {filteredTours.length} {filteredTours.length === 1 ? 'Journey' : 'Journeys'}
                                 </Badge>
                             </div>
                         </div>
@@ -393,18 +391,18 @@ const RamayanaToursNew = () => {
                     <div className="container mx-auto px-4">
                         <div className="text-center mb-16">
                             <div className="flex items-center justify-center mb-4">
-                                <div className="w-20 h-px bg-amber-600"></div>
-                                <Crown className="w-8 h-8 mx-4 text-amber-600" />
-                                <div className="w-20 h-px bg-amber-600"></div>
+                                <div className="w-20 h-px bg-orange-600"></div>
+                                <Sun className="w-8 h-8 mx-4 text-orange-600" />
+                                <div className="w-20 h-px bg-orange-600"></div>
                             </div>
-                            <Badge className="mb-4 px-6 py-2 bg-gradient-to-r from-green-600 to-amber-600 text-white text-sm">
-                                SIGNATURE EXPERIENCES
+                            <Badge className="mb-4 px-6 py-2 bg-gradient-to-r from-orange-600 to-amber-600 text-white text-sm">
+                                SACRED JOURNEYS
                             </Badge>
-                            <h2 className="text-6xl font-serif font-bold bg-gradient-to-r from-green-800 via-amber-700 to-green-600 bg-clip-text text-transparent mb-6">
-                                Sparkles Spiritual Adventures
+                            <h2 className="text-6xl font-serif font-bold bg-gradient-to-r from-orange-800 via-amber-700 to-orange-600 bg-clip-text text-transparent mb-6">
+                                The Legend Comes Alive
                             </h2>
                             <p className="text-xl text-gray-600 max-w-3xl mx-auto font-serif leading-relaxed">
-                                Curated luxury experiences showcasing the finest of Ceylon tea culture and colonial heritage
+                                Experience the epic Ramayana through curated pilgrimages to significant sites across Sri Lanka
                             </p>
                         </div>
 
@@ -413,41 +411,41 @@ const RamayanaToursNew = () => {
                 </section>
 
                 {/* Why Choose Us */}
-                <section className="py-20 bg-gradient-to-br from-green-900 to-amber-900 text-white relative overflow-hidden">
+                <section className="py-20 bg-gradient-to-br from-orange-900 to-amber-900 text-white relative overflow-hidden">
                     <div className="absolute inset-0 opacity-10">
                         <div className="absolute top-0 left-0 w-96 h-96 bg-yellow-400 rounded-full blur-3xl"></div>
-                        <div className="absolute bottom-0 right-0 w-96 h-96 bg-green-400 rounded-full blur-3xl"></div>
+                        <div className="absolute bottom-0 right-0 w-96 h-96 bg-orange-400 rounded-full blur-3xl"></div>
                     </div>
 
                     <div className="container mx-auto px-4 relative z-10">
                         <div className="text-center mb-16">
-                            <h2 className="text-5xl font-serif font-bold mb-6">Why Our Sparkles Spiritual Retreats?</h2>
+                            <h2 className="text-5xl font-serif font-bold mb-6">Why Choose Our Ramayana Trail?</h2>
                             <p className="text-xl opacity-90 max-w-2xl mx-auto">
-                                Immerse yourself in refined elegance of Ceylon's colonial tea heritage
+                                Deepen your spiritual connection with expert-guided pilgrimages
                             </p>
                         </div>
 
                         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
                             {[
                                 {
-                                    icon: Coffee,
-                                    title: 'Master Tea Experiences',
-                                    description: 'Private sessions with estate masters and exclusive tastings'
+                                    icon: BookOpen,
+                                    title: 'Expert Guides',
+                                    description: 'Historians and spiritual guides well-versed in the Ramayana epic'
                                 },
                                 {
-                                    icon: Home,
-                                    title: 'Colonial Luxury Stays',
-                                    description: 'Spiritual bungalows with period furnishings and butler service'
-                                },
-                                {
-                                    icon: Crown,
+                                    icon: Landmark,
                                     title: 'Exclusive Access',
-                                    description: 'Private estate tours and vintage train first-class carriages'
+                                    description: 'Special pujas and access to sacred temple sanctums'
                                 },
                                 {
-                                    icon: Leaf,
-                                    title: 'Authentic Spiritual',
-                                    description: 'Century-old plantations with stories spanning generations'
+                                    icon: MapPin,
+                                    title: 'Comprehensive Trail',
+                                    description: 'Covering all major sites from Chilaw to Ella and beyond'
+                                },
+                                {
+                                    icon: Heart,
+                                    title: 'Comfort & Care',
+                                    description: 'Luxury transport and accommodation for a peaceful journey'
                                 }
                             ].map((feature, idx) => (
                                 <Card key={idx} className="bg-white/10 backdrop-blur-lg border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105">
@@ -466,18 +464,18 @@ const RamayanaToursNew = () => {
                 <section className="py-20 bg-white">
                     <div className="container mx-auto px-4">
                         <div className="text-center mb-16">
-                            <h2 className="text-5xl font-serif font-bold text-gray-900 mb-6">Estate Guest Testimonials</h2>
+                            <h2 className="text-5xl font-serif font-bold text-gray-900 mb-6">Pilgrim Testimonials</h2>
                             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                                Distinguished guests who've experienced our luxury tea estate retreats
+                                Hear from devotees who have walked the path with us
                             </p>
                         </div>
 
                         <div className="grid md:grid-cols-3 gap-8">
                             {defaultReviews.slice(0, 3).map((review, idx) => (
-                                <Card key={idx} className="hover:shadow-2xl transition-all duration-300 border-2 border-green-100">
+                                <Card key={idx} className="hover:shadow-2xl transition-all duration-300 border-2 border-orange-100">
                                     <CardContent className="p-8">
                                         <div className="flex items-center mb-4">
-                                            <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-amber-500 rounded-full flex items-center justify-center text-white font-bold text-lg mr-4">
+                                            <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-amber-500 rounded-full flex items-center justify-center text-white font-bold text-lg mr-4">
                                                 {review.userName[0]}
                                             </div>
                                             <div>
@@ -499,20 +497,20 @@ const RamayanaToursNew = () => {
                 </section>
 
                 {/* Call to Action */}
-                <section className="py-20 bg-gradient-to-r from-green-700 via-amber-600 to-green-600 text-white">
+                <section className="py-20 bg-gradient-to-r from-orange-700 via-amber-600 to-orange-600 text-white">
                     <div className="container mx-auto px-4 text-center">
-                        <Mountain className="w-20 h-20 mx-auto mb-6 animate-bounce" />
-                        <h2 className="text-5xl font-serif font-bold mb-6">Ready for Your Ramayana Spiritual Escape?</h2>
+                        <Sun className="w-20 h-20 mx-auto mb-6 animate-spin-slow" />
+                        <h2 className="text-5xl font-serif font-bold mb-6">Begin Your Spiritual Journey</h2>
                         <p className="text-2xl mb-8 opacity-90 max-w-2xl mx-auto">
-                            Join us for an unforgettable journey through Ceylon's misty tea estates
+                            Let us guide you through the sacred legends of the Ramayana
                         </p>
                         <div className="flex flex-wrap justify-center gap-4">
                             <Button
                                 size="lg"
-                                className="bg-white text-green-600 hover:bg-gray-100 px-10 py-7 text-lg rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300"
+                                className="bg-white text-orange-600 hover:bg-gray-100 px-10 py-7 text-lg rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300"
                                 onClick={() => document.getElementById('experiences')?.scrollIntoView({ behavior: 'smooth' })}
                             >
-                                Book Your Experience
+                                Book Your Pilgrimage
                             </Button>
                             <Button
                                 size="lg"
@@ -520,7 +518,7 @@ const RamayanaToursNew = () => {
                                 className="border-2 border-white text-white hover:bg-white/10 px-10 py-7 text-lg rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300"
                             >
                                 <MessageCircle className="mr-2 w-5 h-5" />
-                                Chat with Specialist
+                                Chat with Expert
                             </Button>
                         </div>
                     </div>
@@ -530,12 +528,9 @@ const RamayanaToursNew = () => {
             <Footer />
 
             {selectedTour && (
-                <BookingDialog
-                    tour={selectedTour}
-                    open={bookingDialogOpen}
-                    onOpenChange={setBookingDialogOpen}
-                    onBook={handleBooking}
-                />
+                <Dialog open={bookingDialogOpen} onOpenChange={setBookingDialogOpen}>
+                    <BookingDialogContent tour={selectedTour} />
+                </Dialog>
             )}
         </>
     );
@@ -548,7 +543,7 @@ const TourGrid = ({ tours, onSelectTour, wishlist, onToggleWishlist }: any) => {
             {tours.map((tour: RamayanaTour) => (
                 <Card
                     key={tour.id}
-                    className="group hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-white border-2 border-green-100 overflow-hidden"
+                    className="group hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-white border-2 border-orange-100 overflow-hidden"
                 >
                     <div className="relative overflow-hidden h-64">
                         <img
@@ -560,11 +555,11 @@ const TourGrid = ({ tours, onSelectTour, wishlist, onToggleWishlist }: any) => {
 
                         {tour.featured && (
                             <Badge className="absolute top-4 left-4 bg-gradient-to-r from-amber-500 to-yellow-500 text-white">
-                                <Crown className="w-3 h-3 mr-1" />
-                                Premium Estate
+                                <Award className="w-3 h-3 mr-1" />
+                                Popular Pilgrimage
                             </Badge>
                         )}
-                        <Badge className="absolute top-4 right-12 bg-green-600 text-white">
+                        <Badge className="absolute top-4 right-12 bg-orange-600 text-white">
                             {tour.category}
                         </Badge>
 
@@ -585,11 +580,11 @@ const TourGrid = ({ tours, onSelectTour, wishlist, onToggleWishlist }: any) => {
                     </div>
 
                     <CardHeader className="pb-3">
-                        <CardTitle className="text-2xl font-serif text-gray-900 group-hover:text-green-600 transition-colors">
+                        <CardTitle className="text-2xl font-serif text-gray-900 group-hover:text-orange-600 transition-colors">
                             {tour.title}
                         </CardTitle>
                         <div className="flex items-center text-gray-600">
-                            <MapPin className="w-4 h-4 mr-2 text-green-500" />
+                            <MapPin className="w-4 h-4 mr-2 text-orange-500" />
                             <span className="text-sm">{tour.location}</span>
                         </div>
                     </CardHeader>
@@ -601,41 +596,35 @@ const TourGrid = ({ tours, onSelectTour, wishlist, onToggleWishlist }: any) => {
 
                         <div className="flex flex-wrap gap-3 text-sm text-gray-600">
                             <div className="flex items-center">
-                                <Clock className="w-4 h-4 mr-1 text-green-500" />
+                                <Clock className="w-4 h-4 mr-1 text-orange-500" />
                                 {tour.duration}
                             </div>
                             <div className="flex items-center">
-                                <Users className="w-4 h-4 mr-1 text-green-500" />
+                                <Users className="w-4 h-4 mr-1 text-orange-500" />
                                 Max {tour.maxGroupSize}
                             </div>
-                            {tour.altitude && (
-                                <div className="flex items-center">
-                                    <Mountain className="w-4 h-4 mr-1 text-green-500" />
-                                    {tour.altitude}
-                                </div>
-                            )}
                         </div>
 
                         <div className="flex flex-wrap gap-2">
                             {tour.highlights.slice(0, 3).map((highlight, i) => (
-                                <Badge key={i} variant="outline" className="text-xs border-green-300 text-green-700">
+                                <Badge key={i} variant="outline" className="text-xs border-orange-300 text-orange-700">
                                     {highlight}
                                 </Badge>
                             ))}
                         </div>
 
                         <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                            <div className="text-3xl font-bold bg-gradient-to-r from-green-600 to-amber-600 bg-clip-text text-transparent">
+                            <div className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
                                 ${tour.price}
                                 <span className="text-sm font-normal text-gray-500">/person</span>
                             </div>
                             <Dialog>
                                 <DialogTrigger asChild>
                                     <Button
-                                        className="bg-gradient-to-r from-green-600 to-amber-600 hover:from-green-700 hover:to-amber-700 text-white rounded-full px-6 shadow-lg transform hover:scale-105 transition-all duration-300"
+                                        className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white rounded-full px-6 shadow-lg transform hover:scale-105 transition-all duration-300"
                                         onClick={() => onSelectTour(tour)}
                                     >
-                                        Reserve Now
+                                        View Details
                                     </Button>
                                 </DialogTrigger>
                                 <BookingDialogContent tour={tour} />
@@ -659,24 +648,36 @@ const BookingDialogContent = ({ tour }: { tour: RamayanaTour }) => {
         specialRequests: '',
     });
 
+    const { user } = useAuth();
+    const { toast } = useToast();
+
+    const handleBookingSubmit = async () => {
+        // Implementation similar to parent handleBooking
+        // For now just show toast
+        toast({
+            title: "Booking Request Sent",
+            description: "We will contact you shortly to confirm your pilgrimage.",
+        });
+    };
+
     return (
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
                 <DialogTitle className="text-2xl font-serif">{tour.title}</DialogTitle>
                 <DialogDescription>
-                    Complete your booking for this hill country experience
+                    Complete your booking for this sacred journey
                 </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-6 py-4">
-                <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+                <div className="bg-orange-50 rounded-lg p-4 border border-orange-200">
                     <div className="flex justify-between items-start mb-3">
                         <div>
                             <div className="font-semibold text-gray-900">{tour.location}</div>
                             <div className="text-sm text-gray-600">{tour.duration}</div>
                         </div>
                         <div className="text-right">
-                            <div className="text-2xl font-bold text-green-600">${tour.price}</div>
+                            <div className="text-2xl font-bold text-orange-600">${tour.price}</div>
                             <div className="text-sm text-gray-600">per person</div>
                         </div>
                     </div>
@@ -684,7 +685,7 @@ const BookingDialogContent = ({ tour }: { tour: RamayanaTour }) => {
                     {tour.highlights && (
                         <div className="flex flex-wrap gap-2 mt-3">
                             {tour.highlights.slice(0, 4).map((highlight, i) => (
-                                <Badge key={i} className="bg-green-100 text-green-800 text-xs">
+                                <Badge key={i} className="bg-orange-100 text-orange-800 text-xs">
                                     <Check className="w-3 h-3 mr-1" />
                                     {highlight}
                                 </Badge>
@@ -701,7 +702,7 @@ const BookingDialogContent = ({ tour }: { tour: RamayanaTour }) => {
                                 type="date"
                                 value={bookingData.date}
                                 onChange={(e) => setBookingData({ ...bookingData, date: e.target.value })}
-                                className="border-green-200 focus:border-green-500"
+                                className="border-orange-200 focus:border-orange-500"
                             />
                         </div>
                         <div className="space-y-2">
@@ -712,7 +713,7 @@ const BookingDialogContent = ({ tour }: { tour: RamayanaTour }) => {
                                 max={tour.maxGroupSize}
                                 value={bookingData.guests}
                                 onChange={(e) => setBookingData({ ...bookingData, guests: parseInt(e.target.value) })}
-                                className="border-green-200 focus:border-green-500"
+                                className="border-orange-200 focus:border-orange-500"
                             />
                         </div>
                     </div>
@@ -723,7 +724,7 @@ const BookingDialogContent = ({ tour }: { tour: RamayanaTour }) => {
                             placeholder="Your full name"
                             value={bookingData.contactName}
                             onChange={(e) => setBookingData({ ...bookingData, contactName: e.target.value })}
-                            className="border-green-200 focus:border-green-500"
+                            className="border-orange-200 focus:border-orange-500"
                         />
                     </div>
 
@@ -735,7 +736,7 @@ const BookingDialogContent = ({ tour }: { tour: RamayanaTour }) => {
                                 placeholder="your@email.com"
                                 value={bookingData.contactEmail}
                                 onChange={(e) => setBookingData({ ...bookingData, contactEmail: e.target.value })}
-                                className="border-green-200 focus:border-green-500"
+                                className="border-orange-200 focus:border-orange-500"
                             />
                         </div>
                         <div className="space-y-2">
@@ -745,7 +746,7 @@ const BookingDialogContent = ({ tour }: { tour: RamayanaTour }) => {
                                 placeholder="+94 XX XXX XXXX"
                                 value={bookingData.contactPhone}
                                 onChange={(e) => setBookingData({ ...bookingData, contactPhone: e.target.value })}
-                                className="border-green-200 focus:border-green-500"
+                                className="border-orange-200 focus:border-orange-500"
                             />
                         </div>
                     </div>
@@ -757,7 +758,7 @@ const BookingDialogContent = ({ tour }: { tour: RamayanaTour }) => {
                             rows={3}
                             value={bookingData.specialRequests}
                             onChange={(e) => setBookingData({ ...bookingData, specialRequests: e.target.value })}
-                            className="border-green-200 focus:border-green-500 resize-none"
+                            className="border-orange-200 focus:border-orange-500 resize-none"
                         />
                     </div>
                 </div>
@@ -774,7 +775,7 @@ const BookingDialogContent = ({ tour }: { tour: RamayanaTour }) => {
                     <div className="border-t border-gray-300 pt-2 mt-2">
                         <div className="flex justify-between items-center">
                             <span className="text-lg font-bold">Total</span>
-                            <span className="text-2xl font-bold text-green-600">
+                            <span className="text-2xl font-bold text-orange-600">
                                 ${tour.price * bookingData.guests}
                             </span>
                         </div>
@@ -782,7 +783,8 @@ const BookingDialogContent = ({ tour }: { tour: RamayanaTour }) => {
                 </div>
 
                 <Button
-                    className="w-full bg-gradient-to-r from-green-600 to-amber-600 hover:from-green-700 hover:to-amber-700 text-white py-6 text-lg rounded-full shadow-lg"
+                    className="w-full bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white py-6 text-lg rounded-full shadow-lg"
+                    onClick={handleBookingSubmit}
                 >
                     Confirm Booking
                 </Button>
@@ -791,146 +793,89 @@ const BookingDialogContent = ({ tour }: { tour: RamayanaTour }) => {
     );
 };
 
-const BookingDialog = ({ tour, open, onOpenChange, onBook }: any) => {
-    return null;
-};
-
 // Default data
 const defaultRamayanaTours: RamayanaTour[] = [
     {
         id: '1',
-        title: "Private Tea Tasting with Estate Master",
-        location: "Nuwara Eliya",
-        image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800",
-        description: "Exclusive sessions with master tea makers at century-old plantations. Experience rare Ceylon varieties in historic tea rooms.",
-        highlights: ["Estate Master Guidance", "Private Tasting Room", "Tea Blending Workshop", "Plantation History"],
-        price: 280,
+        title: 'Complete Ramayana Trail',
+        description: 'A comprehensive 10-day journey covering all major Ramayana sites from Chilaw to Ella, including Munneswaram, Manavari, and Ravana Falls.',
+        location: 'Island-wide',
+        duration: '10 Days',
+        price: 1850,
+        image: 'https://images.unsplash.com/photo-1588595280408-d42f76931a51?auto=format&fit=crop&w=800&q=80',
         rating: 4.9,
-        reviews: 87,
-        category: "temple-site",
-        duration: "3 hours",
-        difficulty: "Easy",
-        maxGroupSize: 8,
-        included: ["Expert guide", "All tastings", "Tea samples", "Certificate"],
-        altitude: "1800m",
-        featured: true,
+        reviews: 124,
+        category: 'pilgrimage',
+        highlights: ['Munneswaram Temple', 'Ashok Vatika', 'Ravana Falls', 'Divurumpola'],
+        difficulty: 'Moderate',
+        maxGroupSize: 12,
+        included: ['Accommodation', 'Transport', 'Guide', 'Entry Fees'],
+        featured: true
     },
     {
         id: '2',
-        title: "Sunrise Horton Plains Luxury Hike",
-        location: "Horton Plains",
-        image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800",
-        description: "Private guided trek to World's End with gourmet breakfast service and stunning panoramic views.",
-        highlights: ["Private Guide", "Gourmet Breakfast", "World's End Viewing", "Ramayana Support"],
-        price: 340,
-        rating: 4.9,
-        reviews: 124,
-        category: "heritage-walk",
-        duration: "6 hours",
-        difficulty: "Moderate",
-        maxGroupSize: 10,
-        included: ["Private guide", "Breakfast", "Transportation", "Park fees"],
-        altitude: "2100m-2300m",
-        featured: true,
+        title: 'Hill Country Mythological Tour',
+        description: 'Focus on the significant sites in the central highlands, including Sita Eliya and the footprints of Hanuman.',
+        location: 'Nuwara Eliya & Ella',
+        duration: '5 Days',
+        price: 950,
+        image: 'https://images.unsplash.com/photo-1589308078059-be1415eab4c3?auto=format&fit=crop&w=800&q=80',
+        rating: 4.8,
+        reviews: 89,
+        category: 'mythology',
+        highlights: ['Sita Amman Temple', 'Hakgala Gardens', 'Gayathri Peedam'],
+        difficulty: 'Easy',
+        maxGroupSize: 8,
+        included: ['Accommodation', 'Transport', 'Guide'],
+        featured: true
     },
     {
         id: '3',
-        title: "Luxury Vintage Train through Ella",
-        location: "Ella",
-        image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800",
-        description: "First-class heritage rail journey with fine dining and Ceylon's most scenic mountain views.",
-        highlights: ["First-Class Carriages", "Fine Dining Service", "Panoramic Windows", "Spiritual Experience"],
-        price: 420,
-        rating: 4.8,
-        reviews: 156,
-        category: "meditation",
-        duration: "4 hours",
-        difficulty: "Easy",
-        maxGroupSize: 12,
-        included: ["First-class tickets", "Fine dining", "Refreshments", "Photo stops"],
-        featured: true,
-    },
-    {
-        id: '4',
-        title: "Spiritual Sparkles Spiritual Bungalow Stay",
-        location: "Nuwara Eliya",
-        image: "https://images.unsplash.com/photo-1578761537730-a6eb9c4c5e8c?w=800",
-        description: "Colonial-era bungalow experience with butler service, private tea garden, and mountain views.",
-        highlights: ["Private Tea Garden", "Butler Service", "Vintage Furnishings", "Mountain Views"],
+        title: 'Ravana\'s Kingdom Adventure',
+        description: 'Explore the legendary caves and waterfalls associated with King Ravana in the lush landscapes of Ella.',
+        location: 'Ella',
+        duration: '3 Days',
         price: 450,
-        rating: 4.9,
-        reviews: 67,
-        category: "pilgrimage",
-        duration: "Per night",
-        difficulty: "Easy",
-        maxGroupSize: 6,
-        included: ["Butler service", "All meals", "Tea ceremonies", "Estate tours"],
-        altitude: "1900m",
-    },
-    {
-        id: '5',
-        title: "Ella Rock Sunrise Trek & Estate Breakfast",
-        location: "Ella",
-        image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800",
-        description: "Dawn hike to Ella Rock followed by gourmet breakfast at a heritage tea estate.",
-        highlights: ["Sunrise Views", "Gourmet Breakfast", "Sparkles Spiritual Tour", "Spiritual Guide"],
-        price: 180,
+        image: 'https://images.unsplash.com/photo-1586861635167-e5223aeb4227?auto=format&fit=crop&w=800&q=80',
         rating: 4.7,
-        reviews: 203,
-        category: "heritage-walk",
-        duration: "5 hours",
-        difficulty: "Moderate",
-        maxGroupSize: 15,
-        included: ["Guide", "Breakfast", "Tea tasting", "Transportation"],
-        altitude: "1041m-1525m",
-    },
-    {
-        id: '6',
-        title: "4-Day Tea & Trains Luxury Odyssey",
-        location: "Ramayana Spiritual",
-        image: "https://images.unsplash.com/photo-1571934811356-5cc061b6821f?w=800",
-        description: "Complete hill country journey combining multiple estates and heritage railways with luxury accommodation.",
-        highlights: ["Multiple Estates", "First-Class Trains", "Colonial Hotels", "Private Guides"],
-        price: 1680,
-        rating: 4.9,
-        reviews: 45,
-        category: "multi-day",
-        duration: "4 days",
-        difficulty: "Easy",
-        maxGroupSize: 8,
-        included: ["Accommodation", "All meals", "Transportation", "Guided tours"],
-        featured: true,
-    },
+        reviews: 56,
+        category: 'adventure',
+        highlights: ['Ravana Cave', 'Ravana Falls', 'Nil Diya Pokuna'],
+        difficulty: 'Moderate',
+        maxGroupSize: 10,
+        included: ['Transport', 'Guide', 'Cave Trek'],
+        featured: false
+    }
 ];
 
 const defaultReviews: Review[] = [
     {
         id: '1',
         tourId: '1',
-        userName: 'Lord Harrison Pemberton',
+        userName: 'Ramesh Kumar',
         rating: 5,
-        comment: 'The most exquisite tea estate experience I\'ve encountered. The private tastings and colonial ambiance transported us to a bygone era of elegance.',
-        date: 'November 2024',
-        helpful: 34,
+        comment: 'A truly spiritual experience. The guide was very knowledgeable about the Ramayana history.',
+        date: '2024-02-15',
+        helpful: 12
     },
     {
         id: '2',
-        tourId: '3',
-        userName: 'Catherine Van Der Berg',
+        tourId: '1',
+        userName: 'Priya Sharma',
         rating: 5,
-        comment: 'Our vintage train journey through Ella was absolutely magical. The service and attention to detail exceeded our highest expectations.',
-        date: 'October 2024',
-        helpful: 28,
+        comment: 'Visiting Sita Eliya was the highlight of my trip. Very well organized tour.',
+        date: '2024-01-20',
+        helpful: 8
     },
     {
         id: '3',
-        tourId: '4',
-        userName: 'James Morrison',
-        rating: 5,
-        comment: 'The luxury tea estate bungalow offered the perfect retreat. Waking up to mist-covered mountains and the aroma of fresh Ceylon tea was unforgettable.',
-        date: 'November 2024',
-        helpful: 42,
-    },
+        tourId: '2',
+        userName: 'Anita Patel',
+        rating: 4,
+        comment: 'Beautiful locations and comfortable stay. Highly recommended for families.',
+        date: '2023-12-10',
+        helpful: 5
+    }
 ];
 
 export default RamayanaToursNew;

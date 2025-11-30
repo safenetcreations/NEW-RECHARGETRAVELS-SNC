@@ -59,6 +59,11 @@ export const aboutItems = [
     title: "Vehicle Owner Registration",
     href: "/vehicle-rental/owner",
     description: "Register your car, van, or SUV to earn on Recharge vehicle rentals"
+  },
+  {
+    title: "List Your Property",
+    href: "/list-property",
+    description: "Register your hotel, villa, or apartment to receive bookings"
   }
 ]
 
@@ -203,7 +208,7 @@ export const toursByCategory = {
       },
       {
         title: "National Parks",
-        href: "/tours/wildtours#national-parks",
+        href: "/tours/wildtours/parks",
         description: "Protected wilderness and biodiversity hotspots"
       },
       {
@@ -290,6 +295,11 @@ export const toursByCategory = {
         title: "Hot Air Balloon",
         href: "/experiences/hot-air-balloon-sigiriya",
         description: "Sunrise flights over Sigiriya"
+      },
+      {
+        title: "TripAdvisor Tours",
+        href: "/tours/tripadvisor",
+        description: "View all Recharge tours with live TripAdvisor ratings & USD prices"
       }
     ]
   },
@@ -300,6 +310,11 @@ export const toursByCategory = {
         title: "Luxury Tours",
         href: "/tours/luxury",
         description: "Premium travel experiences"
+      },
+      {
+        title: "Private Charters",
+        href: "/experiences/private-charters",
+        description: "Superyachts, jets, and helicopters curated by our concierge desk"
       },
       {
         title: "Ayurveda Wellness",
@@ -350,7 +365,7 @@ export const wildToursItems = [
   },
   {
     title: "National Parks",
-    href: "/tours/wildtours#national-parks",
+    href: "/tours/wildtours/parks",
     description: "Explore protected wilderness areas and biodiversity hotspots"
   },
 ]
@@ -731,8 +746,8 @@ export const experiencesByCategory = {
       },
       {
         title: "Private Charters",
-        href: "/experiences",
-        description: "Exclusive yacht and helicopter tours"
+        href: "/experiences/private-charters",
+        description: "Superyachts, jets, and helicopters on standby"
       }
     ]
   }

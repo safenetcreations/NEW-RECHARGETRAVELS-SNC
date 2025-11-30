@@ -32,7 +32,7 @@ import {
   Palette
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { doc, setDoc, Timestamp, getDocs, collection, query, orderBy } from 'firebase/firestore';
+import { doc, setDoc, Timestamp, getDocs, collection } from 'firebase/firestore';
 import { db } from '@/services/firebaseService';
 
 type AIProvider = 'gemini' | 'openai' | 'perplexity';
@@ -97,8 +97,8 @@ const AIContentGenerator: React.FC<AIContentGeneratorProps> = ({ onNavigate }) =
 
   // Provider availability
   const providers = {
-    gemini: { name: 'Google Gemini', icon: Sparkles, available: true, color: 'text-blue-500', supportsImage: true },
-    openai: { name: 'OpenAI GPT-4', icon: Brain, available: !!import.meta.env.VITE_OPENAI_API_KEY, color: 'text-green-500', supportsImage: true },
+    gemini: { name: 'Gemini 2.0 Flash (Nano Banana Pro)', icon: Sparkles, available: true, color: 'text-blue-500', supportsImage: true },
+    openai: { name: 'OpenAI GPT-5.1 + DALL-E 3', icon: Brain, available: !!import.meta.env.VITE_OPENAI_API_KEY, color: 'text-green-500', supportsImage: true },
     perplexity: { name: 'Perplexity AI', icon: Globe, available: !!import.meta.env.VITE_PERPLEXITY_API_KEY, color: 'text-purple-500', supportsImage: false }
   };
 
@@ -115,12 +115,14 @@ const AIContentGenerator: React.FC<AIContentGeneratorProps> = ({ onNavigate }) =
 
   const fetchCategories = async () => {
     try {
-      const q = query(collection(db, 'blog_categories'), orderBy('name'));
-      const snapshot = await getDocs(q);
-      const data = snapshot.docs.map(docSnap => ({
+      // Simple query without orderBy to avoid index requirements
+      const snapshot = await getDocs(collection(db, 'blog_categories'));
+      let data = snapshot.docs.map(docSnap => ({
         id: docSnap.id,
         ...docSnap.data()
       })) as BlogCategory[];
+      // Sort on client side
+      data.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
       setCategories(data);
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -179,14 +181,28 @@ const AIContentGenerator: React.FC<AIContentGeneratorProps> = ({ onNavigate }) =
     setGeneratingImage(true);
 
     try {
-      const { geminiService } = await import('@/services/ai/geminiService');
+      let result;
 
-      const result = await geminiService.generateImage({
-        prompt,
-        style: imageStyle,
-        size: imageSize
-      });
+      // Use OpenAI DALL-E if OpenAI is selected and available, otherwise use Gemini
+      if (provider === 'openai' && providers.openai.available) {
+        console.log('Using OpenAI DALL-E 3 for image generation...');
+        const { openaiService } = await import('@/services/ai/openaiService');
+        result = await openaiService.generateImage({
+          prompt,
+          style: imageStyle,
+          size: imageSize
+        });
+      } else {
+        console.log('Using Gemini for image generation...');
+        const { geminiService } = await import('@/services/ai/geminiService');
+        result = await geminiService.generateImage({
+          prompt,
+          style: imageStyle,
+          size: imageSize
+        });
+      }
 
+      console.log('Image result:', result);
       setGeneratedImage(result);
       toast({ title: 'Image generated successfully!' });
     } catch (error: any) {
@@ -773,10 +789,15 @@ const AIContentGenerator: React.FC<AIContentGeneratorProps> = ({ onNavigate }) =
                         src={generatedImage.imageUrl}
                         alt={generatedImage.altText}
                         className="w-full object-cover"
+                        onError={(e) => {
+                          console.error('Image failed to load:', generatedImage.imageUrl);
+                          e.currentTarget.src = 'https://via.placeholder.com/800x600?text=Image+Failed+to+Load';
+                        }}
+                        onLoad={() => console.log('Image loaded successfully')}
                       />
                       <Badge className="absolute bottom-2 left-2 bg-black/50 text-white">
                         <Sparkles className="w-3 h-3 mr-1" />
-                        Gemini Imagen 3
+                        {provider === 'openai' ? 'DALL-E 3' : 'Gemini 2.0 Flash'}
                       </Badge>
                     </div>
                     <div className="flex gap-3">
@@ -792,6 +813,12 @@ const AIContentGenerator: React.FC<AIContentGeneratorProps> = ({ onNavigate }) =
                     <div className="p-3 bg-muted rounded-lg">
                       <Label className="text-xs">Alt Text</Label>
                       <p className="text-sm mt-1">{generatedImage.altText}</p>
+                    </div>
+                    <div className="p-3 bg-muted rounded-lg">
+                      <Label className="text-xs">Image URL</Label>
+                      <p className="text-xs mt-1 break-all text-muted-foreground">
+                        {generatedImage.imageUrl.substring(0, 100)}...
+                      </p>
                     </div>
                   </div>
                 ) : (

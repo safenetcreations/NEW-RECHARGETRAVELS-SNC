@@ -92,48 +92,56 @@ const Tours = () => {
 
         <div className="container mx-auto px-4 text-center relative z-10">
           <div className="mb-6">
-            <span className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white text-sm font-semibold rounded-full shadow-lg">
-              <Sparkles className="w-4 h-4 mr-2" />
-              🎉 Early Bird Special - Save 25% on All Tours!
+            <span className="inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm text-white text-sm font-semibold rounded-full shadow-lg border border-white/30">
+              <Sparkles className="w-4 h-4 mr-2 text-amber-300" />
+              Recharge Travels & Tours
             </span>
           </div>
 
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white via-blue-100 to-emerald-100 bg-clip-text text-transparent">
-            Discover Magical Sri Lanka
+          <h1 className="text-4xl md:text-6xl font-bold mb-6">
+            <span className="block text-white drop-shadow-lg">Our Sri Lanka Tours</span>
           </h1>
           <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto text-green-100">
-            From ancient temples to wildlife safaris, explore the pearl of the Indian Ocean with our expertly guided tours and create memories that last a lifetime.
+            Handcrafted experiences by Recharge Travels. From cultural heritage to wildlife safaris, explore Sri Lanka with our expert local guides.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
             <Button
               size="lg"
               className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-8 py-4 rounded-xl text-lg font-semibold shadow-xl transform hover:scale-105 transition-all duration-300"
+              onClick={() => document.getElementById('tours-grid')?.scrollIntoView({ behavior: 'smooth' })}
             >
               <Calendar className="w-5 h-5 mr-2" />
-              Book Tour Now
+              Browse Our Tours
             </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="border-2 border-white text-white hover:bg-white hover:text-green-800 px-8 py-4 rounded-xl text-lg font-semibold backdrop-blur-sm"
-            >
-              View All Tours
-            </Button>
+            <Link to="/tours/tripadvisor">
+              <Button
+                variant="outline"
+                size="lg"
+                className="border-2 border-white text-white hover:bg-white hover:text-green-800 px-8 py-4 rounded-xl text-lg font-semibold backdrop-blur-sm"
+              >
+                View on TripAdvisor
+                <ArrowUpRight className="w-5 h-5 ml-2" />
+              </Button>
+            </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-              <div className="text-3xl font-bold mb-2">150+</div>
-              <div className="text-green-100">Curated Tours</div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
+              <div className="text-2xl font-bold mb-1">{locallyFilteredTours.length}+</div>
+              <div className="text-green-100 text-sm">Our Tours</div>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-              <div className="text-3xl font-bold mb-2">50K+</div>
-              <div className="text-green-100">Happy Travelers</div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
+              <div className="text-2xl font-bold mb-1">10+ Years</div>
+              <div className="text-green-100 text-sm">Experience</div>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-              <div className="text-3xl font-bold mb-2">4.9★</div>
-              <div className="text-green-100">Average Rating</div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
+              <div className="text-2xl font-bold mb-1">4.9★</div>
+              <div className="text-green-100 text-sm">Rating</div>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
+              <div className="text-2xl font-bold mb-1">SLTDA</div>
+              <div className="text-green-100 text-sm">Certified</div>
             </div>
           </div>
         </div>
@@ -186,7 +194,7 @@ const Tours = () => {
       </section>
 
       {/* Tours Grid */}
-      <section className="py-12">
+      <section id="tours-grid" className="py-12 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {locallyFilteredTours.map((tour) => (

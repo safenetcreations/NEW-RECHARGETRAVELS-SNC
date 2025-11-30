@@ -3,15 +3,23 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { seedFirebaseData, seedDriversOnly } from '@/scripts/seedFirebaseData'
 import { toast } from 'sonner'
-import { Database, CheckCircle, AlertCircle, Users, Car } from 'lucide-react'
+import { Database, CheckCircle, AlertCircle, Users, Car, LogIn } from 'lucide-react'
+import { useAuth } from '@/contexts/AuthContext'
+import { Link } from 'react-router-dom'
 
 const SeedData = () => {
+  const { user } = useAuth()
   const [isSeeding, setIsSeeding] = useState(false)
   const [isSeedingDrivers, setIsSeedingDrivers] = useState(false)
   const [seedStatus, setSeedStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [driverSeedStatus, setDriverSeedStatus] = useState<'idle' | 'success' | 'error'>('idle')
 
   const handleSeedData = async () => {
+    if (!user) {
+      toast.error('Please log in first to seed data')
+      return
+    }
+    
     setIsSeeding(true)
     setSeedStatus('idle')
     
@@ -23,18 +31,23 @@ const SeedData = () => {
         toast.success('Firebase data seeded successfully!')
       } else {
         setSeedStatus('error')
-        toast.error('Failed to seed data')
+        toast.error('Failed to seed data: ' + (result.error?.message || 'Unknown error'))
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Seed error:', error)
       setSeedStatus('error')
-      toast.error('An error occurred while seeding data')
+      toast.error('Error: ' + (error?.message || 'Unknown error'))
     } finally {
       setIsSeeding(false)
     }
   }
 
   const handleSeedDrivers = async () => {
+    if (!user) {
+      toast.error('Please log in first to seed drivers')
+      return
+    }
+    
     setIsSeedingDrivers(true)
     setDriverSeedStatus('idle')
     
@@ -46,15 +59,50 @@ const SeedData = () => {
         toast.success(`Successfully added ${result.driversAdded} sample drivers!`)
       } else {
         setDriverSeedStatus('error')
-        toast.error('Failed to seed driver data')
+        toast.error('Failed to seed drivers: ' + ((result.error as any)?.message || 'Unknown error'))
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Seed drivers error:', error)
       setDriverSeedStatus('error')
-      toast.error('An error occurred while seeding drivers')
+      toast.error('Error: ' + (error?.message || 'Unknown error'))
     } finally {
       setIsSeedingDrivers(false)
     }
+  }
+
+  // Show login prompt if not authenticated
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-12">
+        <div className="container mx-auto px-4 max-w-2xl">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <LogIn className="h-6 w-6 text-orange-500" />
+                Login Required
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="text-center py-8">
+                <AlertCircle className="h-16 w-16 text-amber-500 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold mb-2">Authentication Required</h3>
+                <p className="text-gray-600 mb-6">
+                  You need to be logged in to seed sample data to Firebase.
+                </p>
+                <div className="flex justify-center gap-4">
+                  <Button asChild>
+                    <Link to="/login">Log In</Link>
+                  </Button>
+                  <Button variant="outline" asChild>
+                    <Link to="/signup">Sign Up</Link>
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
   }
 
   return (

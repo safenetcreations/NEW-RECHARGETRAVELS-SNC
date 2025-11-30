@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   LineChart,
   Line,
@@ -16,6 +16,8 @@ import {
   Legend,
   ResponsiveContainer
 } from 'recharts';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 // Sample data for revenue chart
 const revenueData = [
@@ -31,14 +33,6 @@ const revenueData = [
   { month: 'Oct', revenue: 10800, bookings: 325 },
   { month: 'Nov', revenue: 12100, bookings: 367 },
   { month: 'Dec', revenue: 13500, bookings: 402 }
-];
-
-// Sample data for bookings by type
-const bookingTypeData = [
-  { name: 'Tours', value: 45, color: '#8b5cf6' },
-  { name: 'Hotels', value: 30, color: '#ec4899' },
-  { name: 'Transfers', value: 15, color: '#3b82f6' },
-  { name: 'Experiences', value: 10, color: '#10b981' }
 ];
 
 // Sample data for traffic sources
@@ -64,6 +58,42 @@ interface DashboardChartsProps {
 }
 
 const DashboardCharts: React.FC<DashboardChartsProps> = ({ timeRange = 'month' }) => {
+  const [bookingTypeData, setBookingTypeData] = useState([
+    { name: 'Tours', value: 0, color: '#8b5cf6' },
+    { name: 'Hotels', value: 0, color: '#ec4899' },
+    { name: 'Transfers', value: 0, color: '#3b82f6' },
+    { name: 'Experiences', value: 0, color: '#10b981' }
+  ]);
+
+  useEffect(() => {
+    const fetchChartData = async () => {
+      try {
+        const bookingsSnapshot = await getDocs(collection(db, 'bookings'));
+        let tours = 0, hotels = 0, transfers = 0, experiences = 0;
+
+        bookingsSnapshot.docs.forEach(doc => {
+          const type = doc.data().type || 'tour'; // Default to tour if undefined
+          if (type === 'tour') tours++;
+          else if (type === 'hotel') hotels++;
+          else if (type === 'transfer') transfers++;
+          else if (type === 'experience') experiences++;
+        });
+
+        const total = tours + hotels + transfers + experiences || 1;
+
+        setBookingTypeData([
+          { name: 'Tours', value: Math.round((tours / total) * 100), color: '#8b5cf6' },
+          { name: 'Hotels', value: Math.round((hotels / total) * 100), color: '#ec4899' },
+          { name: 'Transfers', value: Math.round((transfers / total) * 100), color: '#3b82f6' },
+          { name: 'Experiences', value: Math.round((experiences / total) * 100), color: '#10b981' }
+        ]);
+      } catch (error) {
+        console.error("Error fetching chart data:", error);
+      }
+    };
+    fetchChartData();
+  }, []);
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Revenue & Bookings Trend */}
@@ -76,12 +106,12 @@ const DashboardCharts: React.FC<DashboardChartsProps> = ({ timeRange = 'month' }
           <AreaChart data={revenueData}>
             <defs>
               <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8}/>
-                <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
+                <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8} />
+                <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
               </linearGradient>
               <linearGradient id="colorBookings" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#ec4899" stopOpacity={0.8}/>
-                <stop offset="95%" stopColor="#ec4899" stopOpacity={0}/>
+                <stop offset="5%" stopColor="#ec4899" stopOpacity={0.8} />
+                <stop offset="95%" stopColor="#ec4899" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />

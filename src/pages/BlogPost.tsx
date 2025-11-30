@@ -2,7 +2,7 @@ import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import ReactMarkdown from 'react-markdown';
-import { Calendar, User, Clock, ArrowLeft, Share2, Headphones, Play, Pause } from 'lucide-react';
+import { Calendar, User, Clock, ArrowLeft, Headphones, Play, Pause, Facebook, Linkedin, Twitter, Mail, MessageCircle, Copy, Check } from 'lucide-react';
 import { useBlogPost } from '@/hooks/useBlog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,6 +12,7 @@ export default function BlogPost() {
   const { slug } = useParams<{ slug: string }>();
   const { data: post, isLoading, error } = useBlogPost(slug!);
   const [isPlaying, setIsPlaying] = React.useState(false);
+  const [copied, setCopied] = React.useState(false);
   const audioRef = React.useRef<HTMLAudioElement>(null);
 
   const formatDate = (dateString: string) => {
@@ -39,6 +40,48 @@ export default function BlogPost() {
     }
   };
 
+  // Social sharing functions
+  const getShareUrl = () => window.location.href;
+  const getShareText = () => post?.title || 'Check out this article';
+  const getShareExcerpt = () => post?.excerpt || '';
+
+  const shareToFacebook = () => {
+    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(getShareUrl())}&quote=${encodeURIComponent(getShareText())}`;
+    window.open(url, '_blank', 'width=600,height=400');
+  };
+
+  const shareToLinkedIn = () => {
+    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(getShareUrl())}`;
+    window.open(url, '_blank', 'width=600,height=400');
+  };
+
+  const shareToTwitter = () => {
+    const url = `https://twitter.com/intent/tweet?url=${encodeURIComponent(getShareUrl())}&text=${encodeURIComponent(getShareText())}`;
+    window.open(url, '_blank', 'width=600,height=400');
+  };
+
+  const shareToWhatsApp = () => {
+    const text = `${getShareText()}\n\n${getShareExcerpt()}\n\n${getShareUrl()}`;
+    const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank');
+  };
+
+  const shareByEmail = () => {
+    const subject = encodeURIComponent(getShareText());
+    const body = encodeURIComponent(`${getShareExcerpt()}\n\nRead more: ${getShareUrl()}`);
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+  };
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(getShareUrl());
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      console.error('Failed to copy:', error);
+    }
+  };
+
   const sharePost = async () => {
     if (navigator.share && post) {
       try {
@@ -48,17 +91,14 @@ export default function BlogPost() {
           url: window.location.href,
         });
       } catch (error) {
-        // Fallback to clipboard
-        navigator.clipboard.writeText(window.location.href);
+        // User cancelled or error
       }
-    } else {
-      navigator.clipboard.writeText(window.location.href);
     }
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background pt-24 md:pt-28">
         <div className="container mx-auto px-4 py-12">
           <div className="max-w-4xl mx-auto space-y-6 animate-pulse">
             <div className="h-8 bg-muted rounded w-3/4" />
@@ -77,7 +117,7 @@ export default function BlogPost() {
 
   if (error || !post) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-background pt-24 md:pt-28 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Article Not Found</h1>
           <p className="text-muted-foreground mb-6">
@@ -101,7 +141,7 @@ export default function BlogPost() {
         <meta name="description" content={post.excerpt || `${post.title} - Travel guide and tips for Sri Lanka`} />
         <meta property="og:title" content={post.title} />
         <meta property="og:description" content={post.excerpt || ''} />
-        {post.featured_image && <meta property="og:image" content={post.featured_image} />}
+        {(post.featured_image || post.featuredImage) && <meta property="og:image" content={post.featured_image || post.featuredImage} />}
         <meta
           property="article:author"
           content={typeof post.author === 'string' ? post.author : post.author?.name || 'Recharge Travels'}
@@ -112,10 +152,10 @@ export default function BlogPost() {
         )}
       </Helmet>
 
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background pt-24 md:pt-28">
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto">
-            
+
             {/* Navigation */}
             <div className="mb-8">
               <Link to="/blog">
@@ -159,16 +199,69 @@ export default function BlogPost() {
                     By {typeof post.author === 'string' ? post.author : post.author?.name || 'Recharge Travels'}
                   </span>
                 </div>
-                
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={sharePost}
-                  className="flex items-center gap-2"
-                >
-                  <Share2 className="h-4 w-4" />
-                  Share
-                </Button>
+
+                {/* Social Share Icons */}
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground mr-1">Share:</span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={shareToFacebook}
+                    className="h-9 w-9 rounded-full hover:bg-blue-100"
+                    title="Share on Facebook"
+                  >
+                    <Facebook className="h-5 w-5 text-blue-600" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={shareToLinkedIn}
+                    className="h-9 w-9 rounded-full hover:bg-blue-100"
+                    title="Share on LinkedIn"
+                  >
+                    <Linkedin className="h-5 w-5 text-blue-700" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={shareToTwitter}
+                    className="h-9 w-9 rounded-full hover:bg-sky-100"
+                    title="Share on Twitter"
+                  >
+                    <Twitter className="h-5 w-5 text-sky-500" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={shareToWhatsApp}
+                    className="h-9 w-9 rounded-full hover:bg-green-100"
+                    title="Share on WhatsApp"
+                  >
+                    <MessageCircle className="h-5 w-5 text-green-500" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={shareByEmail}
+                    className="h-9 w-9 rounded-full hover:bg-gray-100"
+                    title="Share via Email"
+                  >
+                    <Mail className="h-5 w-5 text-gray-600" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={copyToClipboard}
+                    className="h-9 w-9 rounded-full hover:bg-gray-100"
+                    title="Copy Link"
+                  >
+                    {copied ? (
+                      <Check className="h-5 w-5 text-green-500" />
+                    ) : (
+                      <Copy className="h-5 w-5 text-gray-500" />
+                    )}
+                  </Button>
+                </div>
               </div>
             </header>
 
@@ -217,10 +310,10 @@ export default function BlogPost() {
             )}
 
             {/* Featured Image */}
-            {post.featured_image && (
+            {(post.featured_image || post.featuredImage) && (
               <div className="mb-8">
                 <img
-                  src={post.featured_image}
+                  src={post.featured_image || post.featuredImage}
                   alt={post.title}
                   className="w-full aspect-video object-cover rounded-lg"
                 />
@@ -247,13 +340,78 @@ export default function BlogPost() {
                   ),
                 }}
               >
-                {post.body_md}
+                {post.body_md || post.content || ''}
               </ReactMarkdown>
             </article>
 
+            {/* Social Share Bar */}
+            <div className="my-8 p-6 bg-muted/30 rounded-lg">
+              <p className="text-sm font-medium text-center mb-4">Share this article</p>
+              <div className="flex items-center justify-center gap-3">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={shareToFacebook}
+                  className="h-12 w-12 rounded-full hover:bg-blue-100 hover:border-blue-300"
+                  title="Facebook"
+                >
+                  <Facebook className="h-6 w-6 text-blue-600" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={shareToLinkedIn}
+                  className="h-12 w-12 rounded-full hover:bg-blue-100 hover:border-blue-300"
+                  title="LinkedIn"
+                >
+                  <Linkedin className="h-6 w-6 text-blue-700" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={shareToTwitter}
+                  className="h-12 w-12 rounded-full hover:bg-sky-100 hover:border-sky-300"
+                  title="Twitter"
+                >
+                  <Twitter className="h-6 w-6 text-sky-500" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={shareToWhatsApp}
+                  className="h-12 w-12 rounded-full hover:bg-green-100 hover:border-green-300"
+                  title="WhatsApp"
+                >
+                  <MessageCircle className="h-6 w-6 text-green-500" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={shareByEmail}
+                  className="h-12 w-12 rounded-full hover:bg-gray-100"
+                  title="Email"
+                >
+                  <Mail className="h-6 w-6 text-gray-600" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={copyToClipboard}
+                  className="h-12 w-12 rounded-full hover:bg-gray-100"
+                  title="Copy Link"
+                >
+                  {copied ? (
+                    <Check className="h-6 w-6 text-green-500" />
+                  ) : (
+                    <Copy className="h-6 w-6 text-gray-500" />
+                  )}
+                </Button>
+              </div>
+            </div>
+
             {/* Article Footer */}
             <footer className="mt-12 pt-8 border-t">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-4">
                 <div className="flex items-center gap-4">
                   <span className="text-sm text-muted-foreground">
                     Published {formatDate(post.published_at || post.created_at)}
@@ -262,15 +420,13 @@ export default function BlogPost() {
                     <Badge variant="outline">{post.category.name}</Badge>
                   )}
                 </div>
-                
-                <Button
-                  variant="outline"
-                  onClick={sharePost}
-                  className="flex items-center gap-2"
-                >
-                  <Share2 className="h-4 w-4" />
-                  Share Article
-                </Button>
+
+                <Link to="/blog">
+                  <Button variant="outline" className="flex items-center gap-2">
+                    <ArrowLeft className="h-4 w-4" />
+                    More Articles
+                  </Button>
+                </Link>
               </div>
             </footer>
           </div>

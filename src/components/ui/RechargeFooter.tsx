@@ -104,7 +104,8 @@ const RechargeFooter: React.FC = () => {
     { to: '/transport/airport-transfers', label: 'Airport Transfers' },
     { to: '/travel-guide', label: 'Travel Guide' },
     { to: '/hotels', label: 'Hotels' },
-    { to: '/tours/driver-guide', label: 'Driver Guides' }
+    { to: '/tours/driver-guide', label: 'Driver Guides' },
+    { to: '/list-property', label: 'List Your Property' }
   ]
 
   const socialLinks = [

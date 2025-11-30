@@ -72,15 +72,38 @@ export const heroSlidesService = {
    */
   async getAll(): Promise<HeroSlide[]> {
     try {
+      // Fetch all slides and filter in memory to avoid index issues
+      const q = query(collection(db, 'heroSlides'));
+      const snapshot = await getDocs(q);
+      const slides = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as HeroSlide));
+
+      // Filter active and sort by order client-side
+      // Using very loose check for isActive to handle potential type mismatches (boolean, string, undefined)
+      return slides
+        .filter(slide => {
+          const active = slide.isActive as any;
+          return active === true || active === 'true' || active === undefined || active === null;
+        })
+        .sort((a, b) => (a.order || 0) - (b.order || 0));
+    } catch (error) {
+      console.error('Error fetching hero slides:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get all hero slides for admin (includes active and inactive)
+   */
+  async getAllAdmin(): Promise<HeroSlide[]> {
+    try {
       const q = query(
         collection(db, 'heroSlides'),
-        where('isActive', '==', true),
-        orderBy('order', 'asc')
+        orderBy('createdAt', 'desc')
       );
       const snapshot = await getDocs(q);
       return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as HeroSlide));
     } catch (error) {
-      console.error('Error fetching hero slides:', error);
+      console.error('Error fetching hero slides for admin:', error);
       throw error;
     }
   },

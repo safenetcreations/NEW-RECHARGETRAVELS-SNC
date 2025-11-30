@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Plus, Edit, Trash2, Search, Star, Clock, Tag } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Star, Clock, Tag, Download } from 'lucide-react';
 import { cmsService } from '@/services/cmsService';
 import { FeaturedDestination, FeaturedDestinationFormData } from '@/types/cms';
 import FeaturedDestinationForm from './FeaturedDestinationForm';
@@ -85,6 +85,26 @@ const FeaturedDestinationsSection: React.FC = () => {
     }
   };
 
+  const handleImportDefaults = async () => {
+    try {
+      const response = await cmsService.featuredDestinations.importDefaults();
+      if (response.success) {
+        const count = response.data?.length ?? 0;
+        toast.success(
+          count > 0
+            ? `Imported ${count} demo destinations`
+            : 'Imported demo destinations',
+        );
+        fetchDestinations();
+      } else {
+        toast.error(response.error || 'Failed to import demo destinations');
+      }
+    } catch (error) {
+      console.error('Error importing demo destinations:', error);
+      toast.error('Failed to import demo destinations');
+    }
+  };
+
   const filteredDestinations = destinations.filter(destination => {
     const matchesSearch = (destination.name || destination.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       destination.description?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -113,19 +133,27 @@ const FeaturedDestinationsSection: React.FC = () => {
         />
       ) : (
         <>
-          {/* Header */}
           <div className="flex justify-between items-center">
             <div>
               <h2 className="text-2xl font-bold text-gray-900">Featured Destinations</h2>
               <p className="text-gray-600">Manage featured destinations on your homepage</p>
             </div>
-            <Button
-              onClick={() => setShowCreateForm(true)}
-              className="bg-orange-600 hover:bg-orange-700"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add New Destination
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={handleImportDefaults}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Import Demo Destinations
+              </Button>
+              <Button
+                onClick={() => setShowCreateForm(true)}
+                className="bg-orange-600 hover:bg-orange-700"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add New Destination
+              </Button>
+            </div>
           </div>
 
           {/* Filters */}

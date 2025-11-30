@@ -1,50 +1,67 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { Building2, MapPin, DollarSign, Image as ImageIcon, CheckCircle, Loader2, Upload, X, Home, User, Mail, Phone } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import {
+    Building2, MapPin, DollarSign, Image as ImageIcon, CheckCircle,
+    Loader2, Upload, X, Home, User, Mail, Phone, ChevronRight,
+    ChevronLeft, Star, Shield, Globe, Camera, MessageCircle
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useToast } from '@/components/ui/use-toast'
+import { useToast } from '@/hooks/use-toast'
 import { firebaseHotelService } from '@/services/firebaseHotelService'
 import { storage } from '@/lib/firebase'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 
 const PROPERTY_TYPES = [
-    { value: 'vacation_home', label: 'Vacation Home' },
-    { value: 'apartment', label: 'Apartment' },
-    { value: 'villa', label: 'Villa' },
-    { value: 'luxury_resort', label: 'Luxury Resort' },
-    { value: 'boutique', label: 'Boutique Hotel' },
-    { value: 'guesthouse', label: 'Guesthouse' },
-    { value: 'cabana', label: 'Cabana' },
-    { value: 'eco_lodge', label: 'Eco Lodge' },
-    { value: 'budget', label: 'Budget Hotel' },
-    { value: 'business', label: 'Business Hotel' }
+    { value: 'vacation_home', label: 'Vacation Home', icon: Home },
+    { value: 'apartment', label: 'Apartment', icon: Building2 },
+    { value: 'villa', label: 'Villa', icon: Star },
+    { value: 'luxury_resort', label: 'Luxury Resort', icon: Star },
+    { value: 'boutique', label: 'Boutique Hotel', icon: Star },
+    { value: 'guesthouse', label: 'Guesthouse', icon: Home },
+    { value: 'cabana', label: 'Cabana', icon: Home },
+    { value: 'eco_lodge', label: 'Eco Lodge', icon: Home },
+    { value: 'budget', label: 'Budget Hotel', icon: Building2 },
+    { value: 'business', label: 'Business Hotel', icon: Building2 }
 ]
 
 const AMENITIES_LIST = [
-    'WiFi', 'Pool', 'Spa', 'Restaurant', 'Bar', 'Gym', 'Room Service',
-    'Airport Shuttle', 'Parking', 'Air Conditioning', 'Beach Access',
-    'Kitchen', 'Private Pool', 'Washing Machine', 'Balcony', 'Terrace',
-    'BBQ Facilities', 'Garden', 'Pet Friendly'
+    { id: 'WiFi', label: 'Free WiFi', icon: '📶' },
+    { id: 'Pool', label: 'Swimming Pool', icon: '🏊‍♂️' },
+    { id: 'Spa', label: 'Spa & Wellness', icon: '💆‍♀️' },
+    { id: 'Restaurant', label: 'Restaurant', icon: '🍽️' },
+    { id: 'Bar', label: 'Bar / Lounge', icon: '🍸' },
+    { id: 'Gym', label: 'Fitness Center', icon: '💪' },
+    { id: 'Room Service', label: 'Room Service', icon: '🛎️' },
+    { id: 'Airport Shuttle', label: 'Airport Shuttle', icon: '🚐' },
+    { id: 'Parking', label: 'Free Parking', icon: '🅿️' },
+    { id: 'Air Conditioning', label: 'Air Conditioning', icon: '❄️' },
+    { id: 'Beach Access', label: 'Beach Access', icon: '🏖️' },
+    { id: 'Kitchen', label: 'Full Kitchen', icon: '🍳' },
+    { id: 'Private Pool', label: 'Private Pool', icon: '🏊‍♂️' },
+    { id: 'Washing Machine', label: 'Washing Machine', icon: '🧺' },
+    { id: 'Balcony', label: 'Balcony / Terrace', icon: '🌅' },
+    { id: 'BBQ Facilities', label: 'BBQ Facilities', icon: '🍖' },
+    { id: 'Garden', label: 'Private Garden', icon: '🌳' },
+    { id: 'Pet Friendly', label: 'Pet Friendly', icon: '🐾' }
 ]
 
 const ListProperty = () => {
     const navigate = useNavigate()
     const { toast } = useToast()
+    const [currentStep, setCurrentStep] = useState(1)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [photos, setPhotos] = useState<File[]>([])
+    const fileInputRef = useRef<HTMLInputElement>(null)
 
     const [formData, setFormData] = useState({
-        // Owner Info
         ownerName: '',
         ownerEmail: '',
         ownerPhone: '',
-
-        // Property Info
         name: '',
         type: '',
         city: '',
@@ -83,22 +100,31 @@ const ListProperty = () => {
         setPhotos(prev => prev.filter((_, i) => i !== index))
     }
 
+    const nextStep = () => {
+        // Basic validation per step
+        if (currentStep === 1 && (!formData.name || !formData.type || !formData.city)) {
+            toast({ title: "Please fill in all required fields", variant: "destructive" })
+            return
+        }
+        if (currentStep === 2 && (!formData.price || !formData.address)) {
+            toast({ title: "Please fill in all required fields", variant: "destructive" })
+            return
+        }
+        setCurrentStep(prev => prev + 1)
+    }
+
+    const prevStep = () => setCurrentStep(prev => prev - 1)
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-
-        if (!formData.name || !formData.type || !formData.city || !formData.price || !formData.ownerName || !formData.ownerEmail) {
-            toast({
-                title: "Missing Information",
-                description: "Please fill in all required fields.",
-                variant: "destructive"
-            })
+        if (!formData.ownerName || !formData.ownerEmail) {
+            toast({ title: "Owner details are required", variant: "destructive" })
             return
         }
 
         setIsSubmitting(true)
 
         try {
-            // 1. Upload Photos
             const uploadedImages = []
             for (let i = 0; i < photos.length; i++) {
                 const file = photos[i]
@@ -107,24 +133,23 @@ const ListProperty = () => {
                 const url = await getDownloadURL(storageRef)
                 uploadedImages.push({
                     id: `img_${Date.now()}_${i}`,
-                    hotel_id: '', // Will be set after creation or ignored
+                    hotel_id: '',
                     image_url: url,
                     is_primary: i === 0,
                     sort_order: i
                 })
             }
 
-            // 2. Create Hotel Document
             await firebaseHotelService.createHotel({
                 name: formData.name,
                 description: formData.description,
                 hotel_type: formData.type as any,
-                city: { id: 'custom', name: formData.city, country: 'Sri Lanka' }, // Simplified city handling
+                city: { id: 'custom', name: formData.city, country: 'Sri Lanka' },
                 address: formData.address,
                 base_price_per_night: Number(formData.price),
                 amenities: formData.amenities,
                 images: uploadedImages,
-                is_active: false, // Pending approval
+                is_active: false,
                 hostProfile: {
                     name: formData.ownerName,
                     joinedDate: new Date().toISOString(),
@@ -136,20 +161,17 @@ const ListProperty = () => {
             })
 
             toast({
-                title: "Property Listed Successfully!",
-                description: "Your property has been submitted for review. We will contact you shortly.",
+                title: "Application Submitted!",
+                description: "Your property is now under review. We'll contact you shortly.",
             })
 
-            // Redirect to home or success page
-            setTimeout(() => {
-                navigate('/')
-            }, 2000)
+            setTimeout(() => navigate('/'), 2000)
 
         } catch (error) {
             console.error('Error listing property:', error)
             toast({
                 title: "Submission Failed",
-                description: "There was an error submitting your property. Please try again.",
+                description: "Please try again later.",
                 variant: "destructive"
             })
         } finally {
@@ -158,162 +180,405 @@ const ListProperty = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-3xl mx-auto">
-                <div className="text-center mb-10">
-                    <h1 className="text-3xl font-bold text-gray-900">List Your Property</h1>
-                    <p className="mt-2 text-gray-600">Join our network of premium accommodations in Sri Lanka</p>
+        <div className="min-h-screen bg-slate-50 font-sans">
+            {/* Hero Section */}
+            <div className="relative h-[45vh] min-h-[400px] bg-slate-900 overflow-hidden">
+                <div className="absolute inset-0">
+                    <img
+                        src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80"
+                        alt="Luxury Hotel"
+                        className="w-full h-full object-cover opacity-50"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent" />
                 </div>
+                <div className="relative h-full container mx-auto px-4 flex flex-col justify-center items-center text-center text-white">
+                    <motion.h1
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-4xl md:text-5xl font-bold mb-4 font-display"
+                    >
+                        Partner with Recharge Travels
+                    </motion.h1>
+                    <motion.p
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                        className="text-xl text-slate-200 max-w-2xl"
+                    >
+                        Join Sri Lanka's premier luxury travel network. List your property and reach high-value travelers from around the globe.
+                    </motion.p>
+                </div>
+            </div>
 
-                <form onSubmit={handleSubmit} className="space-y-8 bg-white p-8 rounded-2xl shadow-sm">
+            {/* Main Content */}
+            <div className="container mx-auto px-4 py-12 relative z-10">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-                    {/* Owner Details */}
-                    <div className="space-y-6">
-                        <h2 className="text-xl font-semibold flex items-center gap-2">
-                            <User className="h-5 w-5 text-teal-600" />
-                            Owner Details
-                        </h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                                <Label htmlFor="ownerName">Full Name *</Label>
-                                <Input id="ownerName" name="ownerName" value={formData.ownerName} onChange={handleInputChange} placeholder="John Doe" required />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="ownerPhone">Phone Number</Label>
-                                <Input id="ownerPhone" name="ownerPhone" value={formData.ownerPhone} onChange={handleInputChange} placeholder="+94 77 123 4567" />
-                            </div>
-                            <div className="space-y-2 md:col-span-2">
-                                <Label htmlFor="ownerEmail">Email Address *</Label>
-                                <Input id="ownerEmail" name="ownerEmail" type="email" value={formData.ownerEmail} onChange={handleInputChange} placeholder="john@example.com" required />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="border-t border-gray-100" />
-
-                    {/* Property Details */}
-                    <div className="space-y-6">
-                        <h2 className="text-xl font-semibold flex items-center gap-2">
-                            <Home className="h-5 w-5 text-teal-600" />
-                            Property Details
-                        </h2>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="name">Property Name *</Label>
-                            <Input id="name" name="name" value={formData.name} onChange={handleInputChange} placeholder="e.g. Sunset Villa" required />
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                                <Label htmlFor="type">Property Type *</Label>
-                                <Select onValueChange={(val) => handleSelectChange('type', val)}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select type" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {PROPERTY_TYPES.map(type => (
-                                            <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="price">Price per Night (USD) *</Label>
-                                <div className="relative">
-                                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                                    <Input id="price" name="price" type="number" value={formData.price} onChange={handleInputChange} className="pl-9" placeholder="100" required />
+                    {/* Left Column: Benefits */}
+                    <div className="lg:col-span-1 space-y-6">
+                        <div className="bg-white rounded-2xl p-6 shadow-xl border border-slate-100">
+                            <h3 className="text-lg font-semibold mb-4 text-slate-900">Why Partner With Us?</h3>
+                            <div className="space-y-4">
+                                <div className="flex items-start gap-3">
+                                    <div className="p-2 bg-teal-50 rounded-lg text-teal-600">
+                                        <Globe className="h-5 w-5" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-medium text-slate-900">Global Reach</h4>
+                                        <p className="text-sm text-slate-500">Access our network of international luxury travelers.</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-start gap-3">
+                                    <div className="p-2 bg-purple-50 rounded-lg text-purple-600">
+                                        <Shield className="h-5 w-5" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-medium text-slate-900">Verified Guests</h4>
+                                        <p className="text-sm text-slate-500">We screen guests to ensure quality and safety.</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-start gap-3">
+                                    <div className="p-2 bg-amber-50 rounded-lg text-amber-600">
+                                        <Star className="h-5 w-5" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-medium text-slate-900">Premium Branding</h4>
+                                        <p className="text-sm text-slate-500">Showcase your property alongside the best in Sri Lanka.</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                                <Label htmlFor="city">City *</Label>
-                                <Input id="city" name="city" value={formData.city} onChange={handleInputChange} placeholder="e.g. Galle" required />
+                        <div className="bg-gradient-to-br from-teal-600 to-emerald-600 rounded-2xl p-6 text-white shadow-xl">
+                            <h3 className="text-lg font-semibold mb-2">Need Help?</h3>
+                            <p className="text-teal-100 text-sm mb-4">Our partner support team is here to assist you with the onboarding process.</p>
+                            <div className="space-y-3">
+                                <a href="tel:+94777721999" className="flex items-center gap-2 text-sm font-medium hover:text-teal-100 transition-colors">
+                                    <Phone className="h-4 w-4" />
+                                    +94 77 772 1999
+                                </a>
+                                <a href="https://wa.me/94777721999" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-medium hover:text-teal-100 transition-colors">
+                                    <MessageCircle className="h-4 w-4" />
+                                    Chat on WhatsApp
+                                </a>
                             </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="address">Address</Label>
-                                <Input id="address" name="address" value={formData.address} onChange={handleInputChange} placeholder="Full address" />
-                            </div>
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="description">Description</Label>
-                            <Textarea id="description" name="description" value={formData.description} onChange={handleInputChange} placeholder="Describe your property..." rows={4} />
                         </div>
                     </div>
 
-                    <div className="border-t border-gray-100" />
-
-                    {/* Amenities */}
-                    <div className="space-y-6">
-                        <h2 className="text-xl font-semibold flex items-center gap-2">
-                            <CheckCircle className="h-5 w-5 text-teal-600" />
-                            Amenities
-                        </h2>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                            {AMENITIES_LIST.map(amenity => (
-                                <div key={amenity} className="flex items-center space-x-2">
-                                    <input
-                                        type="checkbox"
-                                        id={`amenity-${amenity}`}
-                                        checked={formData.amenities.includes(amenity)}
-                                        onChange={() => toggleAmenity(amenity)}
-                                        className="rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+                    {/* Right Column: Multi-step Form */}
+                    <div className="lg:col-span-2">
+                        <div className="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
+                            {/* Progress Bar */}
+                            <div className="bg-slate-50 px-8 py-4 border-b border-slate-100">
+                                <div className="flex items-center justify-between text-sm font-medium text-slate-500 mb-2">
+                                    <span>Step {currentStep} of 4</span>
+                                    <span>{Math.round((currentStep / 4) * 100)}% Completed</span>
+                                </div>
+                                <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                                    <motion.div
+                                        className="h-full bg-teal-600"
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${(currentStep / 4) * 100}%` }}
+                                        transition={{ duration: 0.3 }}
                                     />
-                                    <label htmlFor={`amenity-${amenity}`} className="text-sm text-gray-700 cursor-pointer select-none">
-                                        {amenity}
-                                    </label>
                                 </div>
-                            ))}
+                            </div>
+
+                            <form onSubmit={handleSubmit} className="p-8">
+                                <AnimatePresence mode="wait">
+
+                                    {/* Step 1: Basic Info */}
+                                    {currentStep === 1 && (
+                                        <motion.div
+                                            key="step1"
+                                            initial={{ opacity: 0, x: 20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: -20 }}
+                                            className="space-y-6"
+                                        >
+                                            <div className="text-center mb-8">
+                                                <h2 className="text-2xl font-bold text-slate-900">Tell us about your property</h2>
+                                                <p className="text-slate-500 mt-2 max-w-md mx-auto">Start by giving your property a name, choosing its type, and setting its location. This helps guests find you easily.</p>
+                                            </div>
+
+                                            <div className="space-y-4">
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="name">Property Name</Label>
+                                                    <Input
+                                                        id="name" name="name"
+                                                        value={formData.name} onChange={handleInputChange}
+                                                        placeholder="e.g. The Ocean Villa"
+                                                        className="h-12 text-lg"
+                                                    />
+                                                </div>
+
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                    <div className="space-y-2">
+                                                        <Label>Property Type</Label>
+                                                        <Select value={formData.type} onValueChange={(val) => handleSelectChange('type', val)}>
+                                                            <SelectTrigger className="h-12">
+                                                                <SelectValue placeholder="Select type" />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {PROPERTY_TYPES.map(type => (
+                                                                    <SelectItem key={type.value} value={type.value}>
+                                                                        <div className="flex items-center gap-2">
+                                                                            <type.icon className="h-4 w-4 text-slate-400" />
+                                                                            {type.label}
+                                                                        </div>
+                                                                    </SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label htmlFor="city">City / Location</Label>
+                                                        <Input
+                                                            id="city" name="city"
+                                                            value={formData.city} onChange={handleInputChange}
+                                                            placeholder="e.g. Galle Fort"
+                                                            className="h-12"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    )}
+
+                                    {/* Step 2: Details */}
+                                    {currentStep === 2 && (
+                                        <motion.div
+                                            key="step2"
+                                            initial={{ opacity: 0, x: 20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: -20 }}
+                                            className="space-y-6"
+                                        >
+                                            <div className="text-center mb-8">
+                                                <h2 className="text-2xl font-bold text-slate-900">Property Details</h2>
+                                                <p className="text-slate-500 mt-2 max-w-md mx-auto">Describe what makes your place special. Add a detailed description, set your price, and highlight key amenities.</p>
+                                            </div>
+
+                                            <div className="space-y-4">
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="description">Description</Label>
+                                                    <Textarea
+                                                        id="description" name="description"
+                                                        value={formData.description} onChange={handleInputChange}
+                                                        placeholder="Describe the unique features, views, and atmosphere..."
+                                                        className="min-h-[150px] text-base resize-none"
+                                                    />
+                                                </div>
+
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                    <div className="space-y-2">
+                                                        <Label htmlFor="price">Base Price per Night (USD)</Label>
+                                                        <div className="relative">
+                                                            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                                                            <Input
+                                                                id="price" name="price" type="number"
+                                                                value={formData.price} onChange={handleInputChange}
+                                                                className="pl-10 h-12 text-lg font-medium"
+                                                                placeholder="250"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label htmlFor="address">Full Address</Label>
+                                                        <Input
+                                                            id="address" name="address"
+                                                            value={formData.address} onChange={handleInputChange}
+                                                            placeholder="Street address, postal code"
+                                                            className="h-12"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-3">
+                                                    <Label>Key Amenities</Label>
+                                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                                        {AMENITIES_LIST.map(amenity => (
+                                                            <div
+                                                                key={amenity.id}
+                                                                onClick={() => toggleAmenity(amenity.id)}
+                                                                className={`
+                                  cursor-pointer p-3 rounded-xl border flex items-center gap-3 transition-all duration-200
+                                  ${formData.amenities.includes(amenity.id)
+                                                                        ? 'bg-teal-50 border-teal-200 ring-1 ring-teal-500'
+                                                                        : 'bg-white border-slate-200 hover:border-teal-200 hover:bg-slate-50'}
+                                `}
+                                                            >
+                                                                <span className="text-xl">{amenity.icon}</span>
+                                                                <span className={`text-sm font-medium ${formData.amenities.includes(amenity.id) ? 'text-teal-900' : 'text-slate-600'}`}>
+                                                                    {amenity.label}
+                                                                </span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    )}
+
+                                    {/* Step 3: Photos */}
+                                    {currentStep === 3 && (
+                                        <motion.div
+                                            key="step3"
+                                            initial={{ opacity: 0, x: 20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: -20 }}
+                                            className="space-y-6"
+                                        >
+                                            <div className="text-center mb-8">
+                                                <h2 className="text-2xl font-bold text-slate-900">Visual Gallery</h2>
+                                                <p className="text-slate-500 mt-2 max-w-md mx-auto">Upload high-quality photos to showcase your property. Bright, clear images attract more bookings.</p>
+                                            </div>
+
+                                            <div className="space-y-6">
+                                                <div
+                                                    onClick={() => fileInputRef.current?.click()}
+                                                    className="border-2 border-dashed border-slate-300 rounded-2xl p-10 text-center cursor-pointer hover:border-teal-500 hover:bg-teal-50 transition-all group"
+                                                >
+                                                    <div className="w-16 h-16 bg-teal-100 text-teal-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                                                        <Upload className="h-8 w-8" />
+                                                    </div>
+                                                    <h3 className="text-lg font-semibold text-slate-900">Click to upload photos</h3>
+                                                    <p className="text-slate-500 mt-1">or drag and drop high-quality images here</p>
+                                                    <input
+                                                        type="file"
+                                                        ref={fileInputRef}
+                                                        multiple
+                                                        accept="image/*"
+                                                        onChange={handlePhotoChange}
+                                                        className="hidden"
+                                                    />
+                                                </div>
+
+                                                {photos.length > 0 && (
+                                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                                        {photos.map((photo, index) => (
+                                                            <div key={index} className="relative aspect-[4/3] rounded-xl overflow-hidden group shadow-sm">
+                                                                <img src={URL.createObjectURL(photo)} alt="Preview" className="w-full h-full object-cover" />
+                                                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={(e) => { e.stopPropagation(); removePhoto(index); }}
+                                                                        className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                                                                    >
+                                                                        <X className="h-4 w-4" />
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </motion.div>
+                                    )}
+
+                                    {/* Step 4: Owner Info */}
+                                    {currentStep === 4 && (
+                                        <motion.div
+                                            key="step4"
+                                            initial={{ opacity: 0, x: 20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: -20 }}
+                                            className="space-y-6"
+                                        >
+                                            <div className="text-center mb-8">
+                                                <h2 className="text-2xl font-bold text-slate-900">Final Step</h2>
+                                                <p className="text-slate-500 mt-2 max-w-md mx-auto">Provide your contact details so we can reach you regarding your listing and bookings.</p>
+                                            </div>
+
+                                            <div className="space-y-4 max-w-md mx-auto">
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="ownerName">Full Name</Label>
+                                                    <div className="relative">
+                                                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                                                        <Input
+                                                            id="ownerName" name="ownerName"
+                                                            value={formData.ownerName} onChange={handleInputChange}
+                                                            className="pl-10 h-12"
+                                                            placeholder="John Doe"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="ownerEmail">Email Address</Label>
+                                                    <div className="relative">
+                                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                                                        <Input
+                                                            id="ownerEmail" name="ownerEmail" type="email"
+                                                            value={formData.ownerEmail} onChange={handleInputChange}
+                                                            className="pl-10 h-12"
+                                                            placeholder="john@example.com"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="ownerPhone">Phone Number</Label>
+                                                    <div className="relative">
+                                                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                                                        <Input
+                                                            id="ownerPhone" name="ownerPhone"
+                                                            value={formData.ownerPhone} onChange={handleInputChange}
+                                                            className="pl-10 h-12"
+                                                            placeholder="+94 77 123 4567"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    )}
+
+                                </AnimatePresence>
+
+                                {/* Navigation Buttons */}
+                                <div className="mt-10 flex justify-between pt-6 border-t border-slate-100">
+                                    {currentStep > 1 ? (
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={prevStep}
+                                            className="h-12 px-6"
+                                        >
+                                            <ChevronLeft className="mr-2 h-4 w-4" /> Back
+                                        </Button>
+                                    ) : (
+                                        <div /> // Spacer
+                                    )}
+
+                                    {currentStep < 4 ? (
+                                        <Button
+                                            type="button"
+                                            onClick={nextStep}
+                                            className="h-12 px-8 bg-teal-600 hover:bg-teal-700 text-white"
+                                        >
+                                            Next Step <ChevronRight className="ml-2 h-4 w-4" />
+                                        </Button>
+                                    ) : (
+                                        <Button
+                                            type="submit"
+                                            disabled={isSubmitting}
+                                            className="h-12 px-8 bg-teal-600 hover:bg-teal-700 text-white min-w-[160px]"
+                                        >
+                                            {isSubmitting ? (
+                                                <>
+                                                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                                                    Submitting...
+                                                </>
+                                            ) : (
+                                                'Submit Application'
+                                            )}
+                                        </Button>
+                                    )}
+                                </div>
+                            </form>
                         </div>
                     </div>
-
-                    <div className="border-t border-gray-100" />
-
-                    {/* Photos */}
-                    <div className="space-y-6">
-                        <h2 className="text-xl font-semibold flex items-center gap-2">
-                            <ImageIcon className="h-5 w-5 text-teal-600" />
-                            Photos
-                        </h2>
-
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            {photos.map((photo, index) => (
-                                <div key={index} className="relative aspect-square rounded-lg overflow-hidden group">
-                                    <img src={URL.createObjectURL(photo)} alt="Preview" className="w-full h-full object-cover" />
-                                    <button
-                                        type="button"
-                                        onClick={() => removePhoto(index)}
-                                        className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                                    >
-                                        <X className="h-4 w-4" />
-                                    </button>
-                                </div>
-                            ))}
-
-                            <label className="border-2 border-dashed border-gray-300 rounded-lg aspect-square flex flex-col items-center justify-center cursor-pointer hover:border-teal-500 hover:bg-teal-50 transition-colors">
-                                <Upload className="h-8 w-8 text-gray-400 mb-2" />
-                                <span className="text-sm text-gray-500">Upload Photos</span>
-                                <input type="file" multiple accept="image/*" onChange={handlePhotoChange} className="hidden" />
-                            </label>
-                        </div>
-                    </div>
-
-                    <div className="pt-6">
-                        <Button type="submit" className="w-full h-12 text-lg bg-teal-600 hover:bg-teal-700" disabled={isSubmitting}>
-                            {isSubmitting ? (
-                                <>
-                                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                                    Submitting...
-                                </>
-                            ) : (
-                                'Submit Property'
-                            )}
-                        </Button>
-                    </div>
-
-                </form>
+                </div>
             </div>
         </div>
     )

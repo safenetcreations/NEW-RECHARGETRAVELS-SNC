@@ -7,7 +7,30 @@ import TransferBookingForm from '@/modules/transfers/components/TransferBookingF
 import PrivateTourBookingForm from '@/components/booking/PrivateTourBookingForm';
 import GroupTransportBookingForm from '@/components/booking/GroupTransportBookingForm';
 import TrainBookingForm from '@/components/booking/TrainBookingForm';
-import { getHeroSlides, HeroSlide, DEFAULT_SLIDES } from '@/services/heroService';
+import { heroSlidesService } from '@/services/cmsService';
+import type { HeroSlide } from '@/types/cms';
+
+// Default fallback slides
+const DEFAULT_HERO_SLIDES: HeroSlide[] = [
+  {
+    id: 'default-1',
+    title: 'Discover Sri Lanka',
+    subtitle: 'Experience the Pearl of the Indian Ocean',
+    description: 'Luxury travel experiences across the island',
+    image: 'https://images.unsplash.com/photo-1586523969943-2d62a1a7d4d3?w=1920&q=80',
+    order: 0,
+    isActive: true
+  },
+  {
+    id: 'default-2',
+    title: 'Ancient Wonders',
+    subtitle: 'Explore 2500 Years of History',
+    description: 'Visit UNESCO World Heritage sites',
+    image: 'https://images.unsplash.com/photo-1588598198321-9735fd52045b?w=1920&q=80',
+    order: 1,
+    isActive: true
+  }
+];
 
 interface LuxuryHeroSectionProps {
   hoveredRegion?: { name: string; description: string } | null;
@@ -17,7 +40,8 @@ interface LuxuryHeroSectionProps {
 const LuxuryHeroSection = ({ hoveredRegion, onLocationsChange }: LuxuryHeroSectionProps) => {
   const navigate = useNavigate();
   const [isBookingOpen, setIsBookingOpen] = useState(false);
-  const [currentSlide, setCurrentSlide] = useState<HeroSlide>(DEFAULT_SLIDES[0]);
+  const [slides, setSlides] = useState<HeroSlide[]>(DEFAULT_HERO_SLIDES);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
 
   // AI Planner state
@@ -53,43 +77,56 @@ const LuxuryHeroSection = ({ hoveredRegion, onLocationsChange }: LuxuryHeroSecti
   };
 
   useEffect(() => {
-    const updateSlideBasedOnHour = async () => {
+    const loadSlides = async () => {
       try {
-        const slides = await getHeroSlides();
-        // Filter out slides with empty or invalid image URLs
-        const validSlides = slides?.filter(slide => slide.image && slide.image.trim() !== '') || [];
+        const fetched = await heroSlidesService.getAll();
+        console.log('[LuxuryHeroSection] Raw fetched slides:', fetched);
 
-        const hour = new Date().getHours();
-        if (validSlides.length > 0) {
-          const index = hour % validSlides.length;
-          setCurrentSlide(validSlides[index]);
-        } else {
-          // Use default slides if no valid slides from Firebase
-          const index = hour % DEFAULT_SLIDES.length;
-          setCurrentSlide(DEFAULT_SLIDES[index]);
-        }
+        const activeSlides = (fetched || []).filter((slide: any) => {
+          const hasImage = slide.image && typeof slide.image === 'string' && slide.image.trim() !== '';
+          if (!hasImage) console.warn('[LuxuryHeroSection] Slide missing image:', slide);
+          return hasImage;
+        }) as HeroSlide[];
+
+        console.log('[LuxuryHeroSection] Active slides after filter:', activeSlides);
+
+        const finalSlides = activeSlides.length > 0 ? activeSlides : DEFAULT_HERO_SLIDES;
+
+        setSlides(finalSlides);
+        const startIndex = Math.floor(Math.random() * finalSlides.length);
+        setCurrentIndex(startIndex);
       } catch (error) {
-        console.error('Failed to update slide:', error);
-        // Use default slide on error
-        const hour = new Date().getHours();
-        const index = hour % DEFAULT_SLIDES.length;
-        setCurrentSlide(DEFAULT_SLIDES[index]);
+        console.error('Failed to load hero slides, using static defaults:', error);
+        setSlides(DEFAULT_HERO_SLIDES);
+        setCurrentIndex(0);
       } finally {
         setLoading(false);
       }
     };
 
-    updateSlideBasedOnHour();
-
-    const interval = setInterval(() => {
-      const date = new Date();
-      if (date.getMinutes() === 0) {
-        updateSlideBasedOnHour();
-      }
-    }, 60000);
-
-    return () => clearInterval(interval);
+    loadSlides();
   }, []);
+
+  useEffect(() => {
+    if (slides.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentIndex(prev => (prev + 1) % slides.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [slides.length]);
+
+  // Safe fallback if no slides are available
+  const currentSlide = slides[currentIndex] || {
+    id: 'default',
+    title: 'Welcome to Sri Lanka',
+    subtitle: 'Experience the Pearl of the Indian Ocean',
+    description: '',
+    image: 'https://images.unsplash.com/photo-1586523969943-2d62a1a7d4d3?w=1920&q=80', // Generic fallback image
+    order: 0,
+    isActive: true,
+    createdAt: null,
+    updatedAt: null
+  } as unknown as HeroSlide;
 
   const scrollToContent = () => {
     const content = document.getElementById('featured-destinations');
@@ -104,48 +141,50 @@ const LuxuryHeroSection = ({ hoveredRegion, onLocationsChange }: LuxuryHeroSecti
       height: '100vh',
       width: '100%',
       overflow: 'hidden',
-      backgroundColor: '#1a1a2e',
-      backgroundImage: `url('https://i.imgur.com/AEnBWJf.jpeg')`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center'
+      backgroundColor: '#1a1a2e'
     }}>
-      {/* Background Image */}
+      {/* Background Images - ALL preloaded with opacity transitions for sync */}
+      {slides.map((slide, index) => (
+        <div
+          key={slide.id || `slide-${index}`}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            opacity: index === currentIndex ? 1 : 0,
+            transition: 'opacity 1s ease-in-out',
+            zIndex: 1
+          }}
+        >
+          <img
+            src={slide.image}
+            alt={slide.title || 'Sri Lanka'}
+            loading={index === 0 ? 'eager' : 'lazy'}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: 'center'
+            }}
+            onError={(e) => {
+              e.currentTarget.src = 'https://images.unsplash.com/photo-1586523969943-2d62a1a7d4d3?w=1920&q=80';
+            }}
+          />
+        </div>
+      ))}
+
+      {/* Dark overlay - always visible */}
       <div style={{
         position: 'absolute',
         top: 0,
         left: 0,
         width: '100%',
         height: '100%',
-        zIndex: 0
-      }}>
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          backgroundColor: 'rgba(0,0,0,0.4)',
-          zIndex: 1
-        }} />
-        <img
-          src={currentSlide.image}
-          alt={currentSlide.title}
-          onError={(e) => {
-            e.currentTarget.style.display = 'none'; // Hide broken image to avoid alt text in corner
-            e.currentTarget.parentElement!.style.backgroundImage = `url('https://i.imgur.com/AEnBWJf.jpeg')`;
-            e.currentTarget.parentElement!.style.backgroundSize = 'cover';
-            e.currentTarget.parentElement!.style.backgroundPosition = 'center';
-          }}
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            objectPosition: 'center',
-            opacity: loading ? 0 : 1,
-            transition: 'opacity 1s ease-in-out'
-          }}
-        />
-      </div>
+        backgroundColor: 'rgba(0,0,0,0.4)',
+        zIndex: 2
+      }} />
 
       {/* Content Container */}
       <div style={{
@@ -160,12 +199,14 @@ const LuxuryHeroSection = ({ hoveredRegion, onLocationsChange }: LuxuryHeroSecti
         padding: '0 20px'
       }}>
 
-        {/* Main Text Content */}
+        {/* Main Text Content - ALL slides stacked with opacity for sync */}
         <div style={{
           textAlign: 'center',
           marginBottom: '40px',
           maxWidth: '900px',
-          width: '100%'
+          width: '100%',
+          position: 'relative',
+          minHeight: '280px'
         }}>
           <div style={{
             display: 'inline-flex',
@@ -182,26 +223,44 @@ const LuxuryHeroSection = ({ hoveredRegion, onLocationsChange }: LuxuryHeroSecti
             <span style={{ fontSize: '14px', fontWeight: 500 }}>#1 Premium Travel Service in Sri Lanka</span>
           </div>
 
-          <h1 style={{
-            fontSize: 'clamp(40px, 5vw, 80px)',
-            fontWeight: 'bold',
-            lineHeight: 1.1,
-            marginBottom: '24px',
-            textShadow: '0 2px 10px rgba(0,0,0,0.3)',
-            fontFamily: 'Playfair Display, serif'
-          }}>
-            {currentSlide.title}
-          </h1>
+          {/* Synchronized Title & Subtitle - stacked with opacity transitions */}
+          <div style={{ position: 'relative', height: '180px' }}>
+            {slides.map((slide, index) => (
+              <div
+                key={`text-${slide.id || index}`}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  opacity: index === currentIndex ? 1 : 0,
+                  transition: 'opacity 1s ease-in-out',
+                  pointerEvents: index === currentIndex ? 'auto' : 'none'
+                }}
+              >
+                <h1 style={{
+                  fontSize: 'clamp(40px, 5vw, 80px)',
+                  fontWeight: 'bold',
+                  lineHeight: 1.1,
+                  marginBottom: '24px',
+                  textShadow: '0 2px 10px rgba(0,0,0,0.3)',
+                  fontFamily: 'Playfair Display, serif'
+                }}>
+                  {slide.title}
+                </h1>
 
-          <p style={{
-            fontSize: 'clamp(18px, 2vw, 24px)',
-            maxWidth: '700px',
-            margin: '0 auto 32px',
-            textShadow: '0 2px 5px rgba(0,0,0,0.3)',
-            opacity: 0.9
-          }}>
-            {currentSlide.subtitle}
-          </p>
+                <p style={{
+                  fontSize: 'clamp(18px, 2vw, 24px)',
+                  maxWidth: '700px',
+                  margin: '0 auto',
+                  textShadow: '0 2px 5px rgba(0,0,0,0.3)',
+                  opacity: 0.9
+                }}>
+                  {slide.subtitle}
+                </p>
+              </div>
+            ))}
+          </div>
 
           {/* Trust Indicators */}
           <div style={{
@@ -245,6 +304,17 @@ const LuxuryHeroSection = ({ hoveredRegion, onLocationsChange }: LuxuryHeroSecti
           {/* Quick Access Buttons */}
           {!isBookingOpen && (
             <div className="flex flex-wrap justify-center gap-3 sm:gap-6 mb-6 sm:mb-8 px-2 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
+              <button
+                onClick={handleAIPlannerContinue}
+                className="luxury-secondary-btn group relative overflow-hidden rounded-full bg-gradient-to-r from-green-500/10 to-teal-500/10 backdrop-blur-md border border-green-400/30 px-4 py-3 sm:px-8 sm:py-6 text-white transition-all duration-500 ease-out hover:border-green-400/60 hover:bg-gradient-to-r hover:from-green-500/20 hover:to-teal-500/20 hover:shadow-lg hover:shadow-green-500/20 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-green-400/50 focus:ring-offset-2 focus:ring-offset-transparent"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out"></div>
+                <div className="relative flex items-center gap-2 sm:gap-3">
+                  <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-green-300 group-hover:text-white transition-colors duration-300" />
+                  <span className="font-semibold text-sm sm:text-lg">AI Trip Planner</span>
+                </div>
+              </button>
+
               <Link to="/tours/luxury">
                 <button className="luxury-secondary-btn group relative overflow-hidden rounded-full bg-gradient-to-r from-purple-500/10 to-pink-500/10 backdrop-blur-md border border-purple-400/30 px-4 py-3 sm:px-8 sm:py-6 text-white transition-all duration-500 ease-out hover:border-purple-400/60 hover:bg-gradient-to-r hover:from-purple-500/20 hover:to-pink-500/20 hover:shadow-lg hover:shadow-purple-500/20 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-purple-400/50 focus:ring-offset-2 focus:ring-offset-transparent">
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out"></div>
@@ -265,15 +335,6 @@ const LuxuryHeroSection = ({ hoveredRegion, onLocationsChange }: LuxuryHeroSecti
                 </button>
               </Link>
 
-              <Link to="/book-now">
-                <button className="luxury-secondary-btn group relative overflow-hidden rounded-full bg-gradient-to-r from-orange-500/10 to-red-500/10 backdrop-blur-md border border-orange-400/30 px-4 py-3 sm:px-8 sm:py-6 text-white transition-all duration-500 ease-out hover:border-orange-400/60 hover:bg-gradient-to-r hover:from-orange-500/20 hover:to-red-500/20 hover:shadow-lg hover:shadow-orange-500/20 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-orange-400/50 focus:ring-offset-2 focus:ring-offset-transparent">
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out"></div>
-                  <div className="relative flex items-center gap-2 sm:gap-3">
-                    <CalendarCheck className="w-4 h-4 sm:w-5 sm:h-5 text-orange-300 group-hover:text-yellow-300 transition-colors duration-300" />
-                    <span className="font-semibold text-sm sm:text-lg">Book Now</span>
-                  </div>
-                </button>
-              </Link>
             </div>
           )}
 
@@ -375,11 +436,10 @@ const LuxuryHeroSection = ({ hoveredRegion, onLocationsChange }: LuxuryHeroSecti
                                   <button
                                     key={days}
                                     onClick={() => setTripDays(days)}
-                                    className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                                      tripDays === days
-                                        ? 'bg-gradient-to-r from-purple-500 to-teal-500 text-white shadow-md'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                    }`}
+                                    className={`px-4 py-2 rounded-lg font-medium transition-all ${tripDays === days
+                                      ? 'bg-gradient-to-r from-purple-500 to-teal-500 text-white shadow-md'
+                                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                      }`}
                                   >
                                     {days} Days
                                   </button>
@@ -446,11 +506,10 @@ const LuxuryHeroSection = ({ hoveredRegion, onLocationsChange }: LuxuryHeroSecti
                                   <button
                                     key={interest.id}
                                     onClick={() => toggleInterest(interest.id)}
-                                    className={`p-2 rounded-lg text-sm font-medium transition-all flex flex-col items-center gap-1 ${
-                                      selectedInterests.includes(interest.id)
-                                        ? 'bg-gradient-to-r from-purple-500 to-teal-500 text-white shadow-md'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                    }`}
+                                    className={`p-2 rounded-lg text-sm font-medium transition-all flex flex-col items-center gap-1 ${selectedInterests.includes(interest.id)
+                                      ? 'bg-gradient-to-r from-purple-500 to-teal-500 text-white shadow-md'
+                                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                      }`}
                                   >
                                     <span className="text-lg">{interest.icon}</span>
                                     <span className="text-xs">{interest.label}</span>

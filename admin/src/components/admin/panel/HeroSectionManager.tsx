@@ -21,6 +21,7 @@ import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { heroSlidesService } from '@/services/cmsService';
 import { HeroSlide, HeroSlideFormData } from '@/types/cms';
+import ImageUpload from '@/components/ui/image-upload';
 
 const HeroSectionManager: React.FC = () => {
   const [slides, setSlides] = useState<HeroSlide[]>([]);
@@ -46,7 +47,7 @@ const HeroSectionManager: React.FC = () => {
   const loadSlides = async () => {
     try {
       setLoading(true);
-      const data = await heroSlidesService.getAll();
+      const data = await heroSlidesService.getAllAdmin();
       setSlides(data);
     } catch (error) {
       console.error('Error loading slides:', error);
@@ -82,9 +83,13 @@ const HeroSectionManager: React.FC = () => {
           toast.error(response.error || 'Failed to create slide');
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving slide:', error);
-      toast.error('An error occurred while saving the slide');
+      if (error.code === 'permission-denied' || error.message?.includes('permission-denied')) {
+        toast.error('Permission denied. You do not have admin privileges to perform this action.');
+      } else {
+        toast.error('An error occurred while saving the slide');
+      }
     }
   };
 
@@ -102,9 +107,13 @@ const HeroSectionManager: React.FC = () => {
       } else {
         toast.error(response.error || 'Failed to delete slide');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting slide:', error);
-      toast.error('An error occurred while deleting the slide');
+      if (error.code === 'permission-denied' || error.message?.includes('permission-denied')) {
+        toast.error('Permission denied. You do not have admin privileges to perform this action.');
+      } else {
+        toast.error('An error occurred while deleting the slide');
+      }
     }
   };
 
@@ -120,9 +129,13 @@ const HeroSectionManager: React.FC = () => {
       } else {
         toast.error(response.error || 'Failed to update slide status');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error toggling slide status:', error);
-      toast.error('An error occurred while updating the slide');
+      if (error.code === 'permission-denied' || error.message?.includes('permission-denied')) {
+        toast.error('Permission denied. You do not have admin privileges to perform this action.');
+      } else {
+        toast.error('An error occurred while updating the slide');
+      }
     }
   };
 
@@ -194,6 +207,12 @@ const HeroSectionManager: React.FC = () => {
         <div>
           <h2 className="text-3xl font-bold text-gray-900">Hero Section Manager</h2>
           <p className="text-gray-600 mt-1">Manage homepage hero carousel slides</p>
+          {/* Debug Info */}
+          {/* <div className="mt-2 p-2 bg-gray-100 rounded text-xs text-gray-500">
+            Debug: Role check - Admin access required. |
+            {/* @ts-ignore */}
+          {/* Project: {import.meta.env.VITE_FIREBASE_PROJECT_ID || 'Hardcoded/Default'}
+          </div> */}
         </div>
         <Button onClick={openCreateDialog} className="bg-blue-600 hover:bg-blue-700">
           <Plus className="w-4 h-4 mr-2" />
@@ -218,9 +237,8 @@ const HeroSectionManager: React.FC = () => {
             {slides.map((slide, index) => (
               <div
                 key={slide.id}
-                className={`p-6 flex items-center gap-6 hover:bg-gray-50 transition-colors ${
-                  !slide.isActive ? 'opacity-60' : ''
-                }`}
+                className={`p-6 flex items-center gap-6 hover:bg-gray-50 transition-colors ${!slide.isActive ? 'opacity-60' : ''
+                  }`}
               >
                 {/* Drag Handle */}
                 <div className="cursor-move text-gray-400 hover:text-gray-600">
@@ -351,25 +369,16 @@ const HeroSectionManager: React.FC = () => {
               />
             </div>
 
-            {/* Image URL */}
+            {/* Image Upload */}
             <div className="space-y-2">
-              <Label htmlFor="image">Image URL *</Label>
-              <Input
-                id="image"
+              <Label>Hero Image *</Label>
+              <ImageUpload
                 value={formData.image}
-                onChange={(e) => handleFieldChange('image', e.target.value)}
-                placeholder="https://example.com/image.jpg"
-                required
+                onChange={(url) => handleFieldChange('image', url)}
+                onRemove={() => handleFieldChange('image', '')}
+                folder="hero-slides"
+                helperText="Recommended: 1920x1080px (16:9). Max: 10MB. Formats: JPG, PNG, WEBP"
               />
-              {formData.image && (
-                <div className="mt-2">
-                  <img
-                    src={formData.image}
-                    alt="Preview"
-                    className="w-full h-48 object-cover rounded-lg"
-                  />
-                </div>
-              )}
             </div>
 
             {/* CTA Text & Link */}

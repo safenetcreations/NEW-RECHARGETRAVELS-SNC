@@ -86,7 +86,7 @@ export const HotelContentManager = () => {
               where('hotel_id', '==', hotel.id)
             );
             const imagesSnapshot = await getDocs(imagesQuery);
-            const images = imagesSnapshot.docs.map(imgDoc => ({ id: imgDoc.id, ...imgDoc.data() }));
+            const images = imagesSnapshot.docs.map(imgDoc => ({ id: imgDoc.id, ...imgDoc.data() } as ImageData));
             return { ...hotel, images };
           } catch (error) {
             console.error(`Error fetching images for hotel ${hotel.id}:`, error);
@@ -232,6 +232,7 @@ export const HotelContentManager = () => {
                       <Star className="h-3 w-3 fill-current text-yellow-500" />
                       {hotel.star_rating} stars
                       <Badge variant="secondary">{hotel.hotel_type}</Badge>
+                      {!hotel.is_active && <Badge variant="destructive" className="ml-2">Pending</Badge>}
                     </div>
                   </div>
                   <div className="flex gap-1">

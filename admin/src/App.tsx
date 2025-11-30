@@ -22,9 +22,13 @@ const PhotographyToursManager = lazy(() => import('@/components/cms/PhotographyT
 const BeachToursManager = lazy(() => import('@/components/cms/BeachToursManager'));
 const EcotourismToursManager = lazy(() => import('@/components/cms/EcotourismToursManager'));
 const RamayanaToursManager = lazy(() => import('@/components/cms/RamayanaToursManager'));
+const CookingClassManager = lazy(() => import('@/components/cms/CookingClassManager'));
 const NationalParksManager = lazy(() => import('@/components/cms/NationalParksManager'));
 const WildToursManager = lazy(() => import('@/components/cms/WildToursManager'));
 const DestinationContentManager = lazy(() => import('@/components/cms/DestinationContentManager'));
+
+// Section-specific routes - each renders AdminPanel with a specific section
+const AdminPanelWithSection = ({ section }: { section: string }) => <AdminPanel initialSection={section} />;
 
 const queryClient = new QueryClient();
 
@@ -50,28 +54,85 @@ function App() {
                 <Route path="/" element={<Navigate to="/login" replace />} />
                 <Route path="/login" element={<AdminLogin />} />
                 <Route path="/signup" element={<AdminLogin />} />
+
+                {/* Main Admin Panel Routes - each with direct URL */}
                 <Route path="/panel" element={<AdminPanel />} />
-                <Route path="/dashboard" element={<AdminPanel />} />
-                <Route path="/bookings" element={<AdminPanel />} />
-                <Route path="/hotels" element={<AdminPanel />} />
-                <Route path="/tours" element={<AdminPanel />} />
-                <Route path="/users" element={<AdminPanel />} />
-                <Route path="/content" element={<AdminPanel />} />
-                <Route path="/settings" element={<AdminPanel />} />
+                <Route path="/dashboard" element={<AdminPanelWithSection section="dashboard" />} />
+
+                {/* Overview */}
+                <Route path="/analytics" element={<AdminPanelWithSection section="analytics" />} />
+
+                {/* Landing Page CMS */}
+                <Route path="/hero-section" element={<AdminPanelWithSection section="hero-section" />} />
+                <Route path="/featured-destinations" element={<AdminPanelWithSection section="featured-destinations" />} />
+                <Route path="/luxury-experiences" element={<AdminPanelWithSection section="luxury-experiences" />} />
+                <Route path="/travel-packages" element={<AdminPanelWithSection section="travel-packages" />} />
+                <Route path="/testimonials" element={<AdminPanelWithSection section="testimonials" />} />
+                <Route path="/about-section" element={<AdminPanelWithSection section="about-section" />} />
+                <Route path="/about-sri-lanka" element={<AdminPanelWithSection section="about-sri-lanka" />} />
+                <Route path="/travel-guide" element={<AdminPanelWithSection section="travel-guide" />} />
+                <Route path="/book-now" element={<AdminPanelWithSection section="book-now" />} />
+                <Route path="/whale-booking" element={<AdminPanelWithSection section="whale-booking" />} />
+                <Route path="/hot-air-balloon" element={<AdminPanelWithSection section="hot-air-balloon" />} />
+                <Route path="/jungle-camping" element={<AdminPanelWithSection section="jungle-camping" />} />
+                <Route path="/kalpitiya-kitesurfing" element={<AdminPanelWithSection section="kalpitiya-kitesurfing" />} />
+                <Route path="/private-charters" element={<AdminPanelWithSection section="private-charters" />} />
+                <Route path="/sea-cucumber-farming" element={<AdminPanelWithSection section="sea-cucumber-farming" />} />
+                <Route path="/why-choose-us" element={<AdminPanelWithSection section="why-choose-us" />} />
+                <Route path="/homepage-stats" element={<AdminPanelWithSection section="homepage-stats" />} />
+
+                {/* Blog System */}
+                <Route path="/blog-manager" element={<AdminPanelWithSection section="blog-manager" />} />
+                <Route path="/ai-content-generator" element={<AdminPanelWithSection section="ai-content-generator" />} />
+
+                {/* Content */}
+                <Route path="/content-dashboard" element={<AdminPanelWithSection section="content-dashboard" />} />
+                <Route path="/pages" element={<AdminPanelWithSection section="pages" />} />
+                <Route path="/posts" element={<AdminPanelWithSection section="posts" />} />
+                <Route path="/media" element={<AdminPanelWithSection section="media" />} />
+                <Route path="/social-media" element={<AdminPanelWithSection section="social-media" />} />
+                <Route path="/trip-builder" element={<AdminPanelWithSection section="trip-builder" />} />
+
+                {/* Services */}
+                <Route path="/hotels" element={<AdminPanelWithSection section="hotels" />} />
+                <Route path="/tours" element={<AdminPanelWithSection section="tours" />} />
+                <Route path="/activities" element={<AdminPanelWithSection section="activities" />} />
+                <Route path="/drivers" element={<AdminPanelWithSection section="drivers" />} />
+                <Route path="/driver-verification" element={<AdminPanelWithSection section="driver-verification" />} />
+                <Route path="/vendor-approvals" element={<AdminPanelWithSection section="vendor-approvals" />} />
+
+                {/* Management */}
+                <Route path="/bookings" element={<AdminPanelWithSection section="bookings" />} />
+                <Route path="/group-transport-bookings" element={<AdminPanelWithSection section="group-transport-bookings" />} />
+                <Route path="/reviews" element={<AdminPanelWithSection section="reviews" />} />
+                <Route path="/users" element={<AdminPanelWithSection section="users" />} />
+
+                {/* Finance */}
+                <Route path="/driver-analytics" element={<AdminPanelWithSection section="driver-analytics" />} />
+                <Route path="/commission-settings" element={<AdminPanelWithSection section="commission-settings" />} />
+                <Route path="/payment-settlements" element={<AdminPanelWithSection section="payment-settlements" />} />
+                <Route path="/driver-wallets" element={<AdminPanelWithSection section="driver-wallets" />} />
+
+                {/* System */}
+                <Route path="/email-templates" element={<AdminPanelWithSection section="email-templates" />} />
+                <Route path="/settings" element={<AdminPanelWithSection section="settings" />} />
+                <Route path="/ai-test" element={<AdminPanelWithSection section="ai-test" />} />
+
+                {/* Standalone pages */}
                 <Route path="/wildlife" element={<WildlifeAdmin />} />
                 <Route path="/cultural" element={<CulturalHeritageAdmin />} />
                 <Route path="/ayurveda" element={<AyurvedaWellnessAdmin />} />
                 <Route path="/culinary" element={<CulinaryToursManager />} />
                 <Route path="/hillcountry" element={<HillCountryToursManager />} />
-                <Route path="/cultural" element={<CulturalToursManager />} />
                 <Route path="/photography" element={<PhotographyToursManager />} />
                 <Route path="/beach" element={<BeachToursManager />} />
                 <Route path="/ecotourism" element={<EcotourismToursManager />} />
                 <Route path="/ramayana" element={<RamayanaToursManager />} />
-                <Route path="/nationalparks" element={<NationalParksManager />} />
+                <Route path="/cooking-class" element={<CookingClassManager />} />
+                <Route path="/nationalparks" element={<AdminPanelWithSection section="nationalparks" />} />
                 <Route path="/wildtours" element={<WildToursManager />} />
+                <Route path="/cultural-tours" element={<CulturalToursManager />} />
                 <Route path="/destinations" element={<DestinationContentManager />} />
-                <Route path="/posts" element={<PostsSection />} />
                 <Route path="/posts/new" element={<CreatePost />} />
               </Routes>
             </Suspense>

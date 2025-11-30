@@ -33,11 +33,19 @@ export interface WhaleTour {
   id: string;
   name: string;
   duration: string;
-  price: string;
+  description: string;
+  price: number | string;
+  priceLabel?: string;
   highlights: string[];
   included: string[];
   iconName: string;
   departures: string;
+  maxGuests?: number;
+  rating?: number;
+  startLocation?: string;
+  transportNote?: string;
+  importantInfo?: string[];
+  image?: string;
 }
 
 export interface Guideline {
@@ -235,7 +243,9 @@ const defaultContent: WhaleWatchingPageContent = {
       id: '1',
       name: "Premium Blue Whale Safari",
       duration: "Half Day",
-      price: "$65",
+      description: "Sunrise departure from Mirissa with marine biologists, luxe breakfast on board, and guaranteed re-sail if whales are not sighted.",
+      price: 65,
+      priceLabel: "USD 65 per guest",
       highlights: [
         "Early morning departure",
         "Marine biologist guide",
@@ -250,13 +260,25 @@ const defaultContent: WhaleWatchingPageContent = {
         "Refreshments"
       ],
       iconName: "Ship",
-      departures: "5:30 AM"
+      departures: "5:30 AM",
+      maxGuests: 15,
+      rating: 4.95,
+      startLocation: "Mirissa Harbour Jetty 03",
+      transportNote: "All Mirissa departures begin at Jetty 03. Private pickups outside Mirissa or Galle can be arranged for an additional transfer fee.",
+      importantInfo: [
+        "Arrive 20 minutes before departure for safety briefing",
+        "Passport or NIC required for harbour security gate",
+        "Sea conditions can shift quickly—motion relief tablets recommended"
+      ],
+      image: "https://images.unsplash.com/photo-1568430462989-44163eb1752f?w=1600&auto=format&fit=crop"
     },
     {
       id: '2',
       name: "Whale & Dolphin Combo",
       duration: "Full Day",
-      price: "$85",
+      description: "Full-day catamaran expedition pairing Sri Lanka’s famous blue whales with playful spinner dolphins and snorkel time above coral reefs.",
+      price: 85,
+      priceLabel: "USD 85 per guest",
       highlights: [
         "Extended ocean time",
         "Multiple species search",
@@ -271,13 +293,25 @@ const defaultContent: WhaleWatchingPageContent = {
         "Certificate"
       ],
       iconName: "Fish",
-      departures: "6:00 AM"
+      departures: "6:00 AM",
+      maxGuests: 18,
+      rating: 4.9,
+      startLocation: "Trincomalee Dutch Bay Pier",
+      transportNote: "Tours depart from Dutch Bay Pier. Pickups from Nilaveli or Kuchchaveli resorts are available with a fuel surcharge.",
+      importantInfo: [
+        "Bring reef-safe sunscreen and a change of clothes",
+        "Snorkeling is weather dependent and subject to captain approval",
+        "Hotel pickups outside Trincomalee town incur an additional fee"
+      ],
+      image: "https://images.unsplash.com/photo-1596414086775-3e321ab08f36?w=1600&auto=format&fit=crop"
     },
     {
       id: '3',
       name: "Private Yacht Experience",
       duration: "Half Day",
-      price: "$450 (up to 6 people)",
+      description: "Charter a private yacht with captain, crew, and champagne service for bespoke whale sightings along the south coast.",
+      price: 450,
+      priceLabel: "USD 450 per yacht (up to 6 guests)",
       highlights: [
         "Private luxury yacht",
         "Flexible timing",
@@ -292,13 +326,25 @@ const defaultContent: WhaleWatchingPageContent = {
         "Photographer available"
       ],
       iconName: "Anchor",
-      departures: "Flexible"
+      departures: "Flexible",
+      maxGuests: 6,
+      rating: 5,
+      startLocation: "Weligama Bay Marina",
+      transportNote: "Yacht charters embark from Weligama Bay. On-request hotel tenders or helicopter transfers are billed separately.",
+      importantInfo: [
+        "Final guest list required 24 hours ahead for coast guard clearance",
+        "Barefoot-friendly vessel—high heels not advised",
+        "Route and duration adjusted according to marine forecasts"
+      ],
+      image: "https://images.unsplash.com/photo-1544551763-92b13f5a8f89?w=1600&auto=format&fit=crop"
     },
     {
       id: '4',
       name: "Research Vessel Tour",
       duration: "6 Hours",
-      price: "$95",
+      description: "Join accredited marine researchers aboard a stabilized vessel, contribute to conservation data, and listen to whale songs via hydrophone.",
+      price: 95,
+      priceLabel: "USD 95 per guest",
       highlights: [
         "Join marine researchers",
         "Hydrophone listening",
@@ -313,7 +359,17 @@ const defaultContent: WhaleWatchingPageContent = {
         "Research certificate"
       ],
       iconName: "Binoculars",
-      departures: "6:30 AM"
+      departures: "6:30 AM",
+      maxGuests: 20,
+      rating: 4.85,
+      startLocation: "Kalpitiya Lagoon Research Dock",
+      transportNote: "Research sailings depart from Kalpitiya lagoon. Transfers from Colombo or Negombo can be arranged with our aviation or chauffeur partners.",
+      importantInfo: [
+        "Participants must be comfortable recording field notes",
+        "Children under 12 not permitted on research sailings",
+        "Sturdy footwear and sun protection required"
+      ],
+      image: "https://images.unsplash.com/photo-1454372182658-c712e4c5a1db?w=1600&auto=format&fit=crop"
     }
   ],
   guidelines: {

@@ -1,0 +1,65 @@
+{
+  "title": "Honeymoon in Paradise: Sri Lanka",
+  "subtitle": "A romantic journey through the pearl of the Indian Ocean.",
+  "category": "romantic-escapes",
+  "slug": "honeymoon-in-paradise",
+  "heroImage": "https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=1200",
+  "gallery": [
+    {
+      "url": "https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=800",
+      "alt": "Sunset cruise",
+      "order": 1
+    }
+  ],
+  "shortDescription": "A magical sunset cruise for couples with champagne and gourmet dining.",
+  "fullDescription": "Sail into the golden sunset on a private luxury boat cruise along the Bentota River.",
+  "highlights": [
+    "Private boat",
+    "Champagne service",
+    "Sunset views",
+    "Gourmet canapés"
+  ],
+  "inclusions": [
+    {
+      "icon": "Ship",
+      "title": "Private Boat",
+      "description": "Luxury river cruiser"
+    }
+  ],
+  "exclusions": [
+    "Hotel transfers"
+  ],
+  "duration": "2.5 hours",
+  "groupSize": "2 people",
+  "price": {
+    "amount": 250,
+    "currency": "USD",
+    "per": "couple"
+  },
+  "availability": {
+    "type": "daily",
+    "minimumNotice": 24
+  },
+  "locations": [
+    {
+      "name": "Bentota",
+      "coordinates": {
+        "lat": 6.4213,
+        "lng": 79.9976
+      }
+    }
+  ],
+  "difficulty": "easy",
+  "cancellationPolicy": "24 hours notice required",
+  "seo": {
+    "metaTitle": "Romantic Sunset Cruise",
+    "metaDescription": "Sunset cruise Bentota",
+    "keywords": [
+      "romantic cruise"
+    ]
+  },
+  "status": "published",
+  "featured": true,
+  "popular": false,
+  "new": false
+}

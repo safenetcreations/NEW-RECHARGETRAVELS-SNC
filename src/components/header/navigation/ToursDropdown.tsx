@@ -10,7 +10,7 @@ import {
 import { Link, useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { toursByCategory } from './menuData'
-import { Compass, Landmark, TreePine, Camera, Sparkles } from 'lucide-react'
+import { Compass, Landmark, TreePine, Camera, Sparkles, Star, LucideIcon } from 'lucide-react'
 
 interface ToursDropdownProps {
   animatingItem: string | null
@@ -18,12 +18,12 @@ interface ToursDropdownProps {
   isScrolled: boolean;
 }
 
-const categoryIcons: Record<string, React.ReactNode> = {
-  adventure: <Compass className="w-4 h-4" />,
-  cultural: <Landmark className="w-4 h-4" />,
-  nature: <TreePine className="w-4 h-4" />,
-  specialty: <Camera className="w-4 h-4" />,
-  luxury: <Sparkles className="w-4 h-4" />
+const categoryIconComponents: Record<string, LucideIcon> = {
+  adventure: Compass,
+  cultural: Landmark,
+  nature: TreePine,
+  specialty: Camera,
+  luxury: Sparkles
 }
 
 const categoryColors: Record<string, string> = {
@@ -90,7 +90,9 @@ const ToursDropdown = ({ animatingItem, onMenuClick, isScrolled }: ToursDropdown
               isScrolled ? "border-purple-200/50 bg-white/50" : "border-white/10 bg-white/5"
             )}>
               <div className="space-y-1">
-                {categories.map(([key, category]) => (
+                {categories.map(([key, category]) => {
+                  const IconComponent = categoryIconComponents[key]
+                  return (
                   <button
                     key={key}
                     onClick={() => setActiveCategory(key)}
@@ -106,14 +108,14 @@ const ToursDropdown = ({ animatingItem, onMenuClick, isScrolled }: ToursDropdown
                           : "text-gray-300 hover:bg-white/10"
                     )}
                   >
-                    {categoryIcons[key]}
+                    {IconComponent && <IconComponent className="w-4 h-4" />}
                     <span className="truncate">{category.title.replace(' & ', ' / ')}</span>
                   </button>
-                ))}
+                )})}
               </div>
               
               {/* View All Link */}
-              <div className="mt-4 pt-3 border-t border-purple-200/30">
+              <div className="mt-4 pt-3 border-t border-purple-200/30 space-y-1">
                 <Link
                   to="/tours"
                   className={cn(
@@ -125,6 +127,18 @@ const ToursDropdown = ({ animatingItem, onMenuClick, isScrolled }: ToursDropdown
                 >
                   <Compass className="w-4 h-4" />
                   View All Tours
+                </Link>
+                <Link
+                  to="/tours/tripadvisor"
+                  className={cn(
+                    "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all",
+                    isScrolled
+                      ? "text-green-700 hover:bg-green-100"
+                      : "text-green-400 hover:bg-white/10"
+                  )}
+                >
+                  <Star className="w-4 h-4" />
+                  TripAdvisor Tours
                 </Link>
               </div>
             </div>

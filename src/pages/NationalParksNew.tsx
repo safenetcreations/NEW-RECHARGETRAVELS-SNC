@@ -14,7 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
     Mountain, Clock, Users, Star, Calendar, MapPin, Heart, Share2,
     Filter, Search, Play, X, Check, Award, Binoculars, Coffee, Train,
-    Crown, Home, Leaf, Binoculars, TrendingUp, MessageCircle
+    Crown, Home, Leaf, TrendingUp, MessageCircle, Shield, AlertTriangle, Car
 } from 'lucide-react';
 import { collection, getDocs, query, where, orderBy, addDoc, updateDoc, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -42,6 +42,9 @@ interface NationalParksTour {
     videoUrl?: string;
     gallery?: string[];
     bestSeason?: string;
+    startLocation?: string;
+    transportNote?: string;
+    importantInfo?: string[];
 }
 
 interface Review {
@@ -98,10 +101,22 @@ const NationalParksToursNew = () => {
             const q = query(toursRef, where('is_active', '==', true), orderBy('featured', 'desc'));
             const snapshot = await getDocs(q);
 
-            const toursData: NationalParksTour[] = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            } as NationalParksTour));
+            const toursData: NationalParksTour[] = snapshot.docs.map(doc => {
+                const raw = doc.data() as NationalParksTour;
+                return {
+                    id: doc.id,
+                    ...raw,
+                    startLocation: raw.startLocation || "Colombo / Hotel Pickup",
+                    transportNote: raw.transportNote || "We provide pickup from your hotel in Yala, Tissamaharama, or Kataragama. Colombo transfers available on request.",
+                    importantInfo: raw.importantInfo && raw.importantInfo.length > 0
+                        ? raw.importantInfo
+                        : [
+                            "Valid ID/Passport required for park entry",
+                            "Wear neutral colored clothing (green, beige, brown)",
+                            "Do not feed wild animals"
+                        ],
+                };
+            });
 
             if (toursData.length === 0) {
                 setTours(defaultNationalParksTours);
@@ -222,7 +237,7 @@ const NationalParksToursNew = () => {
             <div className="min-h-screen bg-gradient-to-br from-green-50 via-amber-50 to-green-50 flex items-center justify-center">
                 <div className="text-center">
                     <Mountain className="w-16 h-16 mx-auto mb-4 text-green-600 animate-bounce" />
-                    <p className="text-xl font-semibold text-gray-700">Loading NationalParks Wildlife Adventures...</p>
+                    <p className="text-xl font-semibold text-gray-700">Loading National Park Adventures...</p>
                 </div>
             </div>
         );
@@ -231,11 +246,11 @@ const NationalParksToursNew = () => {
     return (
         <>
             <Helmet>
-                <title>Luxury NationalParks Wildlife Tours Sri Lanka - Binoculars Wildlife Retreats | Recharge Travels</title>
-                <meta name="description" content="Discover exclusive tea estate retreats, colonial luxury, and misty mountain escapes. Private tastings, vintage railways, and premium hill country experiences in Sri Lanka." />
-                <meta name="keywords" content="Sri Lanka hill country, tea estate tours, Nuwara Eliya, Ella, tea plantations, luxury mountain retreats" />
-                <meta property="og:title" content="Luxury NationalParks Wildlife Tours Sri Lanka - Recharge Travels" />
-                <meta property="og:description" content="Exclusive tea estate retreats in Sri Lanka's misty mountains" />
+                <title>National Parks & Wildlife Safaris Sri Lanka | Recharge Travels</title>
+                <meta name="description" content="Experience the thrill of Sri Lanka's national parks. Yala leopard safaris, Udawalawe elephant gatherings, and Wilpattu wilderness expeditions." />
+                <meta name="keywords" content="Sri Lanka safari, Yala National Park, Wilpattu, Udawalawe, leopard safari, elephant safari, wildlife tours" />
+                <meta property="og:title" content="National Parks & Wildlife Safaris Sri Lanka - Recharge Travels" />
+                <meta property="og:description" content="Premium wildlife safaris in Sri Lanka's top national parks" />
                 <meta property="og:type" content="website" />
             </Helmet>
 
@@ -272,23 +287,23 @@ const NationalParksToursNew = () => {
                         </div>
 
                         <h1 className="text-7xl md:text-8xl font-serif font-bold mb-6 animate-fade-in leading-tight">
-                            NationalParks Wildlife
+                            National Parks
                             <span className="block bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-300 bg-clip-text text-transparent">
-                                Tea Retreats
+                                & Wildlife Safaris
                             </span>
                         </h1>
 
                         <p className="text-2xl md:text-3xl font-serif mb-8 animate-fade-in opacity-90 leading-relaxed">
-                            Escape to exclusive tea estate retreats where colonial elegance<br />
-                            meets Ceylon's misty mountains
+                            Experience the thrill of Sri Lanka's premier national parks<br />
+                            Home to leopards, elephants, and untamed wilderness
                         </p>
 
                         <div className="flex flex-wrap justify-center gap-6 mb-8 text-sm">
                             {[
-                                { icon: Coffee, text: 'Private Estate Tastings' },
-                                { icon: Train, text: 'Wildlife Railways' },
-                                { icon: Crown, text: 'Colonial Luxury' },
-                                { icon: Mountain, text: 'Misty Peaks' }
+                                { icon: Car, text: 'Private Jeep Safaris' },
+                                { icon: Binoculars, text: 'Expert Tracking' },
+                                { icon: Crown, text: 'Luxury Camping' },
+                                { icon: Mountain, text: 'Untamed Wilderness' }
                             ].map((item, index) => (
                                 <div key={index} className="flex items-center bg-amber-900/30 backdrop-blur-sm px-6 py-3 rounded-full border border-amber-300/20">
                                     <item.icon className="w-5 h-5 mr-2 text-amber-200" />
@@ -304,7 +319,7 @@ const NationalParksToursNew = () => {
                                 onClick={() => document.getElementById('experiences')?.scrollIntoView({ behavior: 'smooth' })}
                             >
                                 <Leaf className="mr-2 w-5 h-5" />
-                                Discover Binoculars Wildlifes
+                                Discover National Parks
                             </Button>
 
                             <Button
@@ -320,8 +335,8 @@ const NationalParksToursNew = () => {
                         {/* Stats */}
                         <div className="grid grid-cols-3 gap-8 mt-16 max-w-3xl mx-auto">
                             {[
-                                { icon: Home, label: 'Wildlife Estates', value: '20+' },
-                                { icon: Mountain, label: 'Scenic Routes', value: '30+' },
+                                { icon: Home, label: 'National Parks', value: '26+' },
+                                { icon: Mountain, label: 'Safari Routes', value: '50+' },
                                 { icon: Star, label: 'Rating', value: '4.9' }
                             ].map((stat, idx) => (
                                 <div key={idx} className="text-center backdrop-blur-md bg-white/10 rounded-2xl p-6 transform hover:scale-110 transition-all duration-300">
@@ -345,7 +360,7 @@ const NationalParksToursNew = () => {
                             <div className="relative flex-1 min-w-[250px]">
                                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                                 <Input
-                                    placeholder="Search tea estates, mountains, experiences..."
+                                    placeholder="Search national parks, animals, safaris..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     className="pl-12 pr-4 py-6 rounded-full border-2 border-green-200 focus:border-green-500 bg-white shadow-sm"
@@ -359,12 +374,12 @@ const NationalParksToursNew = () => {
                                         <SelectValue placeholder="Category" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="all">All Experiences</SelectItem>
-                                        <SelectItem value="safari">Tea Tastings</SelectItem>
-                                        <SelectItem value="leopard-tracking">Estate Stays</SelectItem>
-                                        <SelectItem value="elephant-watching">Train Journeys</SelectItem>
-                                        <SelectItem value="jeep-safari">Mountain Treks</SelectItem>
-                                        <SelectItem value="multi-day">Multi-Day Tours</SelectItem>
+                                        <SelectItem value="all">All Safaris</SelectItem>
+                                        <SelectItem value="yala">Yala National Park</SelectItem>
+                                        <SelectItem value="udawalawe">Udawalawe</SelectItem>
+                                        <SelectItem value="wilpattu">Wilpattu</SelectItem>
+                                        <SelectItem value="minneriya">Minneriya</SelectItem>
+                                        <SelectItem value="bundala">Bundala</SelectItem>
                                     </SelectContent>
                                 </Select>
 
@@ -401,10 +416,10 @@ const NationalParksToursNew = () => {
                                 SIGNATURE EXPERIENCES
                             </Badge>
                             <h2 className="text-6xl font-serif font-bold bg-gradient-to-r from-green-800 via-amber-700 to-green-600 bg-clip-text text-transparent mb-6">
-                                Binoculars Wildlife Adventures
+                                National Park Adventures
                             </h2>
                             <p className="text-xl text-gray-600 max-w-3xl mx-auto font-serif leading-relaxed">
-                                Curated luxury experiences showcasing the finest of Ceylon tea culture and colonial heritage
+                                Curated safari experiences showcasing Sri Lanka's diverse wildlife and natural beauty
                             </p>
                         </div>
 
@@ -421,33 +436,33 @@ const NationalParksToursNew = () => {
 
                     <div className="container mx-auto px-4 relative z-10">
                         <div className="text-center mb-16">
-                            <h2 className="text-5xl font-serif font-bold mb-6">Why Our Binoculars Wildlife Retreats?</h2>
+                            <h2 className="text-5xl font-serif font-bold mb-6">Why Choose Our Safaris?</h2>
                             <p className="text-xl opacity-90 max-w-2xl mx-auto">
-                                Immerse yourself in refined elegance of Ceylon's colonial tea heritage
+                                Immerse yourself in the raw beauty of Sri Lanka's wilderness with expert guidance
                             </p>
                         </div>
 
                         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
                             {[
                                 {
-                                    icon: Coffee,
-                                    title: 'Master Tea Experiences',
-                                    description: 'Private sessions with estate masters and exclusive tastings'
+                                    icon: Binoculars,
+                                    title: 'Expert Naturalists',
+                                    description: 'Guided by experienced trackers who know the parks inside out'
                                 },
                                 {
                                     icon: Home,
-                                    title: 'Colonial Luxury Stays',
-                                    description: 'Wildlife bungalows with period furnishings and butler service'
+                                    title: 'Luxury Camping',
+                                    description: 'Glamping experiences under the stars with modern comforts'
                                 },
                                 {
                                     icon: Crown,
-                                    title: 'Exclusive Access',
-                                    description: 'Private estate tours and vintage train first-class carriages'
+                                    title: 'Private Jeeps',
+                                    description: 'Exclusive 4x4 vehicles for a comfortable and private safari'
                                 },
                                 {
                                     icon: Leaf,
-                                    title: 'Authentic Wildlife',
-                                    description: 'Century-old plantations with stories spanning generations'
+                                    title: 'Conservation Focused',
+                                    description: 'Responsible tourism that supports wildlife conservation'
                                 }
                             ].map((feature, idx) => (
                                 <Card key={idx} className="bg-white/10 backdrop-blur-lg border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105">
@@ -466,9 +481,9 @@ const NationalParksToursNew = () => {
                 <section className="py-20 bg-white">
                     <div className="container mx-auto px-4">
                         <div className="text-center mb-16">
-                            <h2 className="text-5xl font-serif font-bold text-gray-900 mb-6">Estate Guest Testimonials</h2>
+                            <h2 className="text-5xl font-serif font-bold text-gray-900 mb-6">Safari Guest Stories</h2>
                             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                                Distinguished guests who've experienced our luxury tea estate retreats
+                                Adventurers who've experienced the magic of Sri Lanka's wildlife
                             </p>
                         </div>
 
@@ -502,9 +517,9 @@ const NationalParksToursNew = () => {
                 <section className="py-20 bg-gradient-to-r from-green-700 via-amber-600 to-green-600 text-white">
                     <div className="container mx-auto px-4 text-center">
                         <Mountain className="w-20 h-20 mx-auto mb-6 animate-bounce" />
-                        <h2 className="text-5xl font-serif font-bold mb-6">Ready for Your NationalParks Wildlife Escape?</h2>
+                        <h2 className="text-5xl font-serif font-bold mb-6">Ready for Your Wildlife Adventure?</h2>
                         <p className="text-2xl mb-8 opacity-90 max-w-2xl mx-auto">
-                            Join us for an unforgettable journey through Ceylon's misty tea estates
+                            Join us for an unforgettable journey into the heart of the wild
                         </p>
                         <div className="flex flex-wrap justify-center gap-4">
                             <Button
@@ -652,140 +667,227 @@ const TourGrid = ({ tours, onSelectTour, wishlist, onToggleWishlist }: any) => {
 const BookingDialogContent = ({ tour }: { tour: NationalParksTour }) => {
     const [bookingData, setBookingData] = useState({
         date: '',
-        guests: 1,
+        guests: 2,
         contactName: '',
         contactEmail: '',
         contactPhone: '',
         specialRequests: '',
+        pickupLocation: tour.startLocation || tour.location
     });
 
+    const totalPrice = tour.price * (bookingData.guests || 1);
+    const holdingDeposit = Math.round(totalPrice * 0.2);
+    const startLocation = tour.startLocation || tour.location;
+    const transportNote = tour.transportNote || "We provide pickup from your hotel in Yala, Tissamaharama, or Kataragama. Colombo transfers available on request.";
+
     return (
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-                <DialogTitle className="text-2xl font-serif">{tour.title}</DialogTitle>
-                <DialogDescription>
-                    Complete your booking for this hill country experience
-                </DialogDescription>
-            </DialogHeader>
-
-            <div className="space-y-6 py-4">
-                <div className="bg-green-50 rounded-lg p-4 border border-green-200">
-                    <div className="flex justify-between items-start mb-3">
-                        <div>
-                            <div className="font-semibold text-gray-900">{tour.location}</div>
-                            <div className="text-sm text-gray-600">{tour.duration}</div>
-                        </div>
-                        <div className="text-right">
-                            <div className="text-2xl font-bold text-green-600">${tour.price}</div>
-                            <div className="text-sm text-gray-600">per person</div>
-                        </div>
-                    </div>
-
-                    {tour.highlights && (
-                        <div className="flex flex-wrap gap-2 mt-3">
-                            {tour.highlights.slice(0, 4).map((highlight, i) => (
-                                <Badge key={i} className="bg-green-100 text-green-800 text-xs">
-                                    <Check className="w-3 h-3 mr-1" />
-                                    {highlight}
-                                </Badge>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Date</label>
-                            <Input
-                                type="date"
-                                value={bookingData.date}
-                                onChange={(e) => setBookingData({ ...bookingData, date: e.target.value })}
-                                className="border-green-200 focus:border-green-500"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Number of Guests</label>
-                            <Input
-                                type="number"
-                                min="1"
-                                max={tour.maxGroupSize}
-                                value={bookingData.guests}
-                                onChange={(e) => setBookingData({ ...bookingData, guests: parseInt(e.target.value) })}
-                                className="border-green-200 focus:border-green-500"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium">Full Name</label>
-                        <Input
-                            placeholder="Your full name"
-                            value={bookingData.contactName}
-                            onChange={(e) => setBookingData({ ...bookingData, contactName: e.target.value })}
-                            className="border-green-200 focus:border-green-500"
+        <DialogContent className="max-w-5xl p-0 overflow-hidden border-none bg-transparent shadow-none">
+            <div className="grid lg:grid-cols-[1.05fr_0.95fr] gap-0 rounded-3xl border border-emerald-100 bg-white/95 shadow-2xl">
+                <div className="relative bg-gradient-to-b from-slate-50 to-white">
+                    <div className="relative h-56 w-full overflow-hidden rounded-t-3xl lg:rounded-tr-none">
+                        <img
+                            src={tour.image}
+                            alt={tour.title}
+                            className="h-full w-full object-cover"
                         />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Email</label>
-                            <Input
-                                type="email"
-                                placeholder="your@email.com"
-                                value={bookingData.contactEmail}
-                                onChange={(e) => setBookingData({ ...bookingData, contactEmail: e.target.value })}
-                                className="border-green-200 focus:border-green-500"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Phone</label>
-                            <Input
-                                type="tel"
-                                placeholder="+94 XX XXX XXXX"
-                                value={bookingData.contactPhone}
-                                onChange={(e) => setBookingData({ ...bookingData, contactPhone: e.target.value })}
-                                className="border-green-200 focus:border-green-500"
-                            />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                        <div className="absolute bottom-4 left-4 right-4 flex flex-wrap items-center justify-between text-white">
+                            <div>
+                                <p className="text-xs uppercase tracking-[0.3em] text-white/60">Wildlife Safari</p>
+                                <p className="text-lg font-semibold">{tour.title}</p>
+                            </div>
+                            <div className="text-right">
+                                <p className="text-xs text-white/70">From</p>
+                                <p className="text-2xl font-bold">${tour.price} <span className="text-sm font-normal text-white/70">per guest</span></p>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium">Special Requests (Optional)</label>
-                        <Textarea
-                            placeholder="Dietary requirements, preferences, or special requirements..."
-                            rows={3}
-                            value={bookingData.specialRequests}
-                            onChange={(e) => setBookingData({ ...bookingData, specialRequests: e.target.value })}
-                            className="border-green-200 focus:border-green-500 resize-none"
-                        />
-                    </div>
-                </div>
-
-                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                    <div className="flex justify-between items-center mb-2">
-                        <span className="text-gray-600">Price per person</span>
-                        <span className="font-semibold">${tour.price}</span>
-                    </div>
-                    <div className="flex justify-between items-center mb-2">
-                        <span className="text-gray-600">Number of guests</span>
-                        <span className="font-semibold">× {bookingData.guests}</span>
-                    </div>
-                    <div className="border-t border-gray-300 pt-2 mt-2">
-                        <div className="flex justify-between items-center">
-                            <span className="text-lg font-bold">Total</span>
-                            <span className="text-2xl font-bold text-green-600">
-                                ${tour.price * bookingData.guests}
+                    <div className="space-y-5 p-6 lg:p-8">
+                        <div className="flex flex-wrap gap-3 text-sm text-slate-600">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-emerald-700">
+                                <Clock className="h-4 w-4" />
+                                {tour.duration}
+                            </span>
+                            <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1 text-amber-700">
+                                <Users className="h-4 w-4" />
+                                Max {tour.maxGroupSize}
+                            </span>
+                            <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-slate-700">
+                                <Star className="h-4 w-4" />
+                                {tour.rating} ({tour.reviews}+ reviews)
                             </span>
                         </div>
+
+                        <div className="space-y-3 rounded-2xl border border-emerald-100 bg-white p-4 shadow-sm">
+                            <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+                                <Car className="h-4 w-4 text-emerald-600" />
+                                Departure logistics
+                            </div>
+                            <p className="text-sm text-slate-600">
+                                {`Primary departure: ${startLocation}.`}
+                            </p>
+                            <div className="text-xs text-slate-500">
+                                {transportNote}
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div>
+                                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Highlights</p>
+                                <div className="mt-3 flex flex-wrap gap-2">
+                                    {tour.highlights?.slice(0, 6).map((highlight, i) => (
+                                        <span key={i} className="inline-flex items-center gap-1 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-xs text-emerald-700">
+                                            <Check className="h-3.5 w-3.5" />
+                                            {highlight}
+                                        </span>
+                                    ))}
+                                </div>
+                                <p className="mt-4 text-sm leading-relaxed text-slate-600">
+                                    {tour.description}
+                                </p>
+                            </div>
+
+                            <div className="grid gap-4 md:grid-cols-2">
+                                <div className="rounded-2xl border border-slate-200 bg-white/70 p-4">
+                                    <p className="text-sm font-semibold text-slate-800 flex items-center gap-2">
+                                        <Shield className="h-4 w-4 text-emerald-600" />
+                                        Included
+                                    </p>
+                                    <ul className="mt-3 space-y-1 text-sm text-slate-600">
+                                        {tour.included?.map((item, index) => (
+                                            <li key={index} className="flex items-start gap-2">
+                                                <span className="mt-1 h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                                                {item}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                                <div className="rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50 to-white p-4">
+                                    <p className="text-sm font-semibold text-amber-800 flex items-center gap-2">
+                                        <AlertTriangle className="h-4 w-4 text-amber-600" />
+                                        Important notes
+                                    </p>
+                                    <ul className="mt-3 space-y-1.5 text-sm text-amber-900/80">
+                                        {(tour.importantInfo || [
+                                            "National park permits require passport/NIC copies.",
+                                            "Weather or animal movements can alter the routing.",
+                                        ]).map((note, index) => (
+                                            <li key={index} className="flex items-start gap-2">
+                                                <span className="mt-1 h-1.5 w-1.5 rounded-full bg-amber-500/70" />
+                                                {note}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <Button
-                    className="w-full bg-gradient-to-r from-green-600 to-amber-600 hover:from-green-700 hover:to-amber-700 text-white py-6 text-lg rounded-full shadow-lg"
-                >
-                    Confirm Booking
-                </Button>
+                <div className="space-y-6 border-t border-emerald-100 bg-white/90 p-6 lg:border-l lg:border-t-0 lg:p-8">
+                    <DialogHeader className="text-left space-y-2">
+                        <DialogTitle className="text-2xl font-semibold text-slate-900">Reserve your spot</DialogTitle>
+                        <DialogDescription className="text-sm text-slate-500">
+                            Share your preferred date and party details. Our concierge team will confirm availability and final logistics within 30 minutes.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-4">
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-slate-600">Preferred date</label>
+                                <Input
+                                    type="date"
+                                    value={bookingData.date}
+                                    onChange={(e) => setBookingData({ ...bookingData, date: e.target.value })}
+                                    className="border-slate-200 focus:border-emerald-500 focus:ring-emerald-500"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-slate-600">Guests</label>
+                                <Input
+                                    type="number"
+                                    min="1"
+                                    max={tour.maxGroupSize}
+                                    value={bookingData.guests}
+                                    onChange={(e) => setBookingData({ ...bookingData, guests: parseInt(e.target.value) })}
+                                    className="border-slate-200 focus:border-emerald-500 focus:ring-emerald-500"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-slate-600">Full Name</label>
+                            <Input
+                                placeholder="Your full name"
+                                value={bookingData.contactName}
+                                onChange={(e) => setBookingData({ ...bookingData, contactName: e.target.value })}
+                                className="border-slate-200 focus:border-emerald-500 focus:ring-emerald-500"
+                            />
+                        </div>
+
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-slate-600">Email</label>
+                                <Input
+                                    type="email"
+                                    placeholder="your@email.com"
+                                    value={bookingData.contactEmail}
+                                    onChange={(e) => setBookingData({ ...bookingData, contactEmail: e.target.value })}
+                                    className="border-slate-200 focus:border-emerald-500 focus:ring-emerald-500"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-slate-600">Phone</label>
+                                <Input
+                                    type="tel"
+                                    placeholder="+94 XX XXX XXXX"
+                                    value={bookingData.contactPhone}
+                                    onChange={(e) => setBookingData({ ...bookingData, contactPhone: e.target.value })}
+                                    className="border-slate-200 focus:border-emerald-500 focus:ring-emerald-500"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-slate-600">Special Requests</label>
+                            <Textarea
+                                placeholder="Dietary requirements, pickup location details..."
+                                rows={3}
+                                value={bookingData.specialRequests}
+                                onChange={(e) => setBookingData({ ...bookingData, specialRequests: e.target.value })}
+                                className="border-slate-200 focus:border-emerald-500 focus:ring-emerald-500 resize-none"
+                            />
+                        </div>
+
+                        <div className="rounded-xl bg-slate-50 p-4 border border-slate-100">
+                            <div className="flex justify-between items-center mb-2 text-sm">
+                                <span className="text-slate-600">Price per person</span>
+                                <span className="font-semibold text-slate-900">${tour.price}</span>
+                            </div>
+                            <div className="flex justify-between items-center mb-2 text-sm">
+                                <span className="text-slate-600">Guests</span>
+                                <span className="font-semibold text-slate-900">× {bookingData.guests}</span>
+                            </div>
+                            <div className="border-t border-slate-200 pt-2 mt-2">
+                                <div className="flex justify-between items-center">
+                                    <span className="font-bold text-slate-900">Total Estimate</span>
+                                    <span className="text-2xl font-bold text-emerald-600">
+                                        ${totalPrice}
+                                    </span>
+                                </div>
+                                <p className="text-xs text-slate-500 mt-1 text-right">
+                                    No payment required today
+                                </p>
+                            </div>
+                        </div>
+
+                        <Button className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white py-6 text-lg rounded-xl shadow-lg transition-all duration-300 transform hover:scale-[1.02]">
+                            Request Booking
+                        </Button>
+                    </div>
+                </div>
             </div>
         </DialogContent>
     );
@@ -799,107 +901,112 @@ const BookingDialog = ({ tour, open, onOpenChange, onBook }: any) => {
 const defaultNationalParksTours: NationalParksTour[] = [
     {
         id: '1',
-        title: "Private Tea Tasting with Estate Master",
-        location: "Nuwara Eliya",
-        image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800",
-        description: "Exclusive sessions with master tea makers at century-old plantations. Experience rare Ceylon varieties in historic tea rooms.",
-        highlights: ["Estate Master Guidance", "Private Tasting Room", "Tea Blending Workshop", "Plantation History"],
-        price: 280,
+        title: "Private Yala Leopard Safari",
+        location: "Yala National Park",
+        image: "https://images.unsplash.com/photo-1549366021-9f761d450615?w=800",
+        description: "Exclusive private jeep safari in Block 1 of Yala National Park, famous for having the highest density of leopards in the world.",
+        highlights: ["High Leopard Density", "Private Jeep", "Expert Tracker", "Breakfast in Park"],
+        price: 150,
         rating: 4.9,
-        reviews: 87,
-        category: "safari",
-        duration: "3 hours",
+        reviews: 128,
+        category: "yala",
+        duration: "Half Day (4-5 hours)",
         difficulty: "Easy",
-        maxGroupSize: 8,
-        included: ["Expert guide", "All tastings", "Tea samples", "Certificate"],
-        altitude: "1800m",
+        maxGroupSize: 6,
+        included: ["Private 4x4 Jeep", "Park Entrance Fees", "Expert Guide", "Refreshments"],
         featured: true,
+        startLocation: "Yala / Tissamaharama Hotel",
+        transportNote: "Free pickup from hotels in Tissamaharama and Yala area.",
+        importantInfo: ["Best time for leopards: 6AM-9AM or 3PM-6PM", "Park closed in September"]
     },
     {
         id: '2',
-        title: "Sunrise Horton Plains Luxury Hike",
-        location: "Horton Plains",
-        image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800",
-        description: "Private guided trek to World's End with gourmet breakfast service and stunning panoramic views.",
-        highlights: ["Private Guide", "Gourmet Breakfast", "World's End Viewing", "NationalParks Support"],
-        price: 340,
-        rating: 4.9,
-        reviews: 124,
-        category: "jeep-safari",
-        duration: "6 hours",
-        difficulty: "Moderate",
-        maxGroupSize: 10,
-        included: ["Private guide", "Breakfast", "Transportation", "Park fees"],
-        altitude: "2100m-2300m",
+        title: "Udawalawe Elephant Safari",
+        location: "Udawalawe National Park",
+        image: "https://images.unsplash.com/photo-1585970480901-90d6bb2a48b5?w=800",
+        description: "Witness large herds of Asian elephants in their natural habitat. Udawalawe guarantees elephant sightings year-round.",
+        highlights: ["Guaranteed Elephants", "Bird Watching", "Scenic Reservoir", "Elephant Transit Home"],
+        price: 120,
+        rating: 4.8,
+        reviews: 95,
+        category: "udawalawe",
+        duration: "3-4 hours",
+        difficulty: "Easy",
+        maxGroupSize: 6,
+        included: ["Safari Jeep", "Park Tickets", "Guide", "Water"],
         featured: true,
+        startLocation: "Udawalawe / Embilipitiya",
     },
     {
         id: '3',
-        title: "Luxury Vintage Train through Ella",
-        location: "Ella",
-        image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800",
-        description: "First-class heritage rail journey with fine dining and Ceylon's most scenic mountain views.",
-        highlights: ["First-Class Carriages", "Fine Dining Service", "Panoramic Windows", "Wildlife Experience"],
-        price: 420,
-        rating: 4.8,
-        reviews: 156,
-        category: "elephant-watching",
-        duration: "4 hours",
-        difficulty: "Easy",
-        maxGroupSize: 12,
-        included: ["First-class tickets", "Fine dining", "Refreshments", "Photo stops"],
+        title: "Wilpattu Wilderness Expedition",
+        location: "Wilpattu National Park",
+        image: "https://images.unsplash.com/photo-1535591273668-578e31182c4f?w=800",
+        description: "Explore Sri Lanka's largest and most scenic national park. Known for its natural lakes ('villus') and elusive leopards and sloth bears.",
+        highlights: ["Scenic Lakes", "Leopards & Bears", "Less Crowded", "Full Day Option"],
+        price: 180,
+        rating: 4.9,
+        reviews: 72,
+        category: "wilpattu",
+        duration: "Full Day",
+        difficulty: "Moderate",
+        maxGroupSize: 6,
+        included: ["Full Day Jeep Hire", "Lunch", "Park Fees", "Tracker"],
         featured: true,
+        startLocation: "Wilpattu Entrance / Anuradhapura",
     },
     {
         id: '4',
-        title: "Wildlife Binoculars Wildlife Bungalow Stay",
-        location: "Nuwara Eliya",
-        image: "https://images.unsplash.com/photo-1578761537730-a6eb9c4c5e8c?w=800",
-        description: "Colonial-era bungalow experience with butler service, private tea garden, and mountain views.",
-        highlights: ["Private Tea Garden", "Butler Service", "Vintage Furnishings", "Mountain Views"],
-        price: 450,
-        rating: 4.9,
-        reviews: 67,
-        category: "leopard-tracking",
-        duration: "Per night",
+        title: "Minneriya Elephant Gathering",
+        location: "Minneriya National Park",
+        image: "https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?w=800",
+        description: "Witness 'The Gathering', the largest meeting of Asian elephants in the world, occurring annually during the dry season.",
+        highlights: ["The Gathering", "Hundreds of Elephants", "Sunset Safari", "Lake Views"],
+        price: 100,
+        rating: 4.7,
+        reviews: 150,
+        category: "minneriya",
+        duration: "3 hours",
         difficulty: "Easy",
         maxGroupSize: 6,
-        included: ["Butler service", "All meals", "Tea ceremonies", "Estate tours"],
-        altitude: "1900m",
+        included: ["Jeep Safari", "Park Fees", "Guide"],
+        bestSeason: "July to October",
+        startLocation: "Habarana / Sigiriya",
     },
     {
         id: '5',
-        title: "Ella Rock Sunrise Trek & Estate Breakfast",
-        location: "Ella",
-        image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800",
-        description: "Dawn hike to Ella Rock followed by gourmet breakfast at a heritage tea estate.",
-        highlights: ["Sunrise Views", "Gourmet Breakfast", "Binoculars Wildlife Tour", "Wildlife Guide"],
-        price: 180,
-        rating: 4.7,
-        reviews: 203,
-        category: "jeep-safari",
-        duration: "5 hours",
-        difficulty: "Moderate",
-        maxGroupSize: 15,
-        included: ["Guide", "Breakfast", "Tea tasting", "Transportation"],
-        altitude: "1041m-1525m",
+        title: "Bundala Bird Paradise",
+        location: "Bundala National Park",
+        image: "https://images.unsplash.com/photo-1452570053594-1b985d6ea890?w=800",
+        description: "A UNESCO Biosphere Reserve and a paradise for migratory birds, including greater flamingos.",
+        highlights: ["Migratory Birds", "Flamingos", "Crocodiles", "Coastal Dunes"],
+        price: 90,
+        rating: 4.6,
+        reviews: 45,
+        category: "bundala",
+        duration: "3 hours",
+        difficulty: "Easy",
+        maxGroupSize: 6,
+        included: ["Jeep", "Park Fees", "Binoculars", "Guide"],
+        startLocation: "Hambantota / Tissamaharama",
     },
     {
         id: '6',
-        title: "4-Day Tea & Trains Luxury Odyssey",
-        location: "NationalParks Wildlife",
-        image: "https://images.unsplash.com/photo-1571934811356-5cc061b6821f?w=800",
-        description: "Complete hill country journey combining multiple estates and heritage railways with luxury accommodation.",
-        highlights: ["Multiple Estates", "First-Class Trains", "Colonial Hotels", "Private Guides"],
-        price: 1680,
+        title: "Luxury Glamping in Yala",
+        location: "Yala National Park Border",
+        image: "https://images.unsplash.com/photo-1478131143081-80f7f84ca84d?w=800",
+        description: "Experience the wild in comfort with an all-inclusive luxury tented camp stay on the border of Yala National Park.",
+        highlights: ["Luxury Tent", "BBQ Dinner", "Bonfire", "Night Walk"],
+        price: 450,
         rating: 4.9,
-        reviews: 45,
-        category: "multi-day",
-        duration: "4 days",
+        reviews: 60,
+        category: "yala",
+        duration: "Overnight",
         difficulty: "Easy",
-        maxGroupSize: 8,
-        included: ["Accommodation", "All meals", "Transportation", "Guided tours"],
+        maxGroupSize: 2,
+        included: ["Accommodation", "All Meals", "2 Safaris", "Drinks"],
         featured: true,
+        startLocation: "Yala Camp Site",
     },
 ];
 
@@ -907,27 +1014,27 @@ const defaultReviews: Review[] = [
     {
         id: '1',
         tourId: '1',
-        userName: 'Lord Harrison Pemberton',
+        userName: 'Sarah Jenkins',
         rating: 5,
-        comment: 'The most exquisite tea estate experience I\'ve encountered. The private tastings and colonial ambiance transported us to a bygone era of elegance.',
+        comment: 'Seeing a leopard in the wild was a dream come true! Our tracker was amazing and spotted one within an hour. The private jeep was very comfortable.',
         date: 'November 2024',
         helpful: 34,
     },
     {
         id: '2',
-        tourId: '3',
-        userName: 'Catherine Van Der Berg',
+        tourId: '2',
+        userName: 'Michael Chen',
         rating: 5,
-        comment: 'Our vintage train journey through Ella was absolutely magical. The service and attention to detail exceeded our highest expectations.',
+        comment: 'Udawalawe is incredible. We saw so many elephants, including babies! A must-do experience for animal lovers.',
         date: 'October 2024',
         helpful: 28,
     },
     {
         id: '3',
-        tourId: '4',
-        userName: 'James Morrison',
+        tourId: '3',
+        userName: 'Emma Thompson',
         rating: 5,
-        comment: 'The luxury tea estate bungalow offered the perfect retreat. Waking up to mist-covered mountains and the aroma of fresh Ceylon tea was unforgettable.',
+        comment: 'Wilpattu is beautiful and so peaceful compared to other parks. We saw a sloth bear and many birds. The full day tour is worth it.',
         date: 'November 2024',
         helpful: 42,
     },

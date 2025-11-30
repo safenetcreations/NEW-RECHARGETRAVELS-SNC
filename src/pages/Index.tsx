@@ -110,8 +110,7 @@ const Index = () => {
         {/* Featured Destinations */}
         <FeaturedDestinations />
 
-        {/* TripAdvisor tours showcase */}
-        <TripAdvisorHighlights />
+
 
         {/* Luxury Experiences */}
         <LuxuryExperiences />
@@ -128,14 +127,19 @@ const Index = () => {
         {/* About Sri Lanka - Enhanced Section */}
         <AboutSriLanka />
 
+        {/* TripAdvisor tours showcase */}
+        <TripAdvisorHighlights />
+
         {/* Travel Guide */}
         <TravelGuide />
 
-        {/* Luxury Blog Section - Auto-updates from Admin Panel */}
-        <LuxuryBlogSection />
+
 
         {/* Reviews Section - Above Footer */}
         <ReviewsSection />
+
+        {/* Luxury Blog Section - Auto-updates from Admin Panel */}
+        <LuxuryBlogSection />
 
         {/* Newsletter removed - Best Value Deals section is in footer */}
       </div>

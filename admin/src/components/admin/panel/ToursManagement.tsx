@@ -20,6 +20,7 @@ import {
 import { toast } from 'sonner';
 import TourFormDialog from './TourFormDialog';
 import { firebaseTourService, Tour } from '../../../services/firebaseTourService';
+import { defaultTours } from '../../../data/defaultTours';
 
 interface ToursManagementProps {
   className?: string;
@@ -69,6 +70,26 @@ const ToursManagement: React.FC<ToursManagementProps> = ({ className }) => {
     } catch (error) {
       console.error('Error loading tours:', error);
       toast.error('Failed to load tours');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSeedTours = async () => {
+    if (!confirm('This will add default tours to your database. Continue?')) return;
+
+    setIsLoading(true);
+    try {
+      let count = 0;
+      for (const tour of defaultTours) {
+        await firebaseTourService.createTour(tour as any);
+        count++;
+      }
+      toast.success(`Successfully added ${count} default tours`);
+      loadTours();
+    } catch (error) {
+      console.error('Error seeding tours:', error);
+      toast.error('Failed to seed tours');
     } finally {
       setIsLoading(false);
     }
@@ -143,14 +164,27 @@ const ToursManagement: React.FC<ToursManagementProps> = ({ className }) => {
                 Manage all tour packages, itineraries, and bookings
               </p>
             </div>
-            <Button
-              onClick={handleCreate}
-              size="lg"
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg"
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              Create New Tour
-            </Button>
+            <div className="flex gap-3">
+              {tours.length === 0 && (
+                <Button
+                  onClick={handleSeedTours}
+                  variant="outline"
+                  size="lg"
+                  className="bg-white hover:bg-gray-50 text-gray-700 shadow-sm"
+                >
+                  <Sparkles className="w-5 h-5 mr-2 text-yellow-500" />
+                  Import Default Tours
+                </Button>
+              )}
+              <Button
+                onClick={handleCreate}
+                size="lg"
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg"
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                Create New Tour
+              </Button>
+            </div>
           </div>
         </CardHeader>
       </Card>
@@ -284,11 +318,10 @@ const ToursManagement: React.FC<ToursManagementProps> = ({ className }) => {
               {/* Status Badge */}
               <div className="absolute top-4 left-4">
                 <span
-                  className={`px-3 py-1 rounded-full text-xs font-bold ${
-                    tour.is_active
-                      ? 'bg-green-500 text-white'
-                      : 'bg-red-500 text-white'
-                  }`}
+                  className={`px-3 py-1 rounded-full text-xs font-bold ${tour.is_active
+                    ? 'bg-green-500 text-white'
+                    : 'bg-red-500 text-white'
+                    }`}
                 >
                   {tour.is_active ? 'Active' : 'Inactive'}
                 </span>
@@ -377,10 +410,16 @@ const ToursManagement: React.FC<ToursManagementProps> = ({ className }) => {
                 : 'Get started by creating your first tour'}
             </p>
             {!searchTerm && categoryFilter === 'all' && (
-              <Button onClick={handleCreate} className="bg-blue-600 hover:bg-blue-700">
-                <Plus className="w-4 h-4 mr-2" />
-                Create Your First Tour
-              </Button>
+              <div className="flex flex-col gap-3 items-center">
+                <Button onClick={handleCreate} className="bg-blue-600 hover:bg-blue-700">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Your First Tour
+                </Button>
+                <Button onClick={handleSeedTours} variant="outline" className="text-yellow-600 border-yellow-200 hover:bg-yellow-50">
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Import Default Tours
+                </Button>
+              </div>
             )}
           </CardContent>
         </Card>

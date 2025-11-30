@@ -21,8 +21,13 @@ import {
   Award,
   Shield,
   Headphones,
-  Wind
+  Wind,
+  Compass,
+  Trees,
+  Landmark,
+  Gem
 } from 'lucide-react';
+import { experiencesByCategory } from '@/components/header/navigation/menuData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -195,6 +200,218 @@ const LuxuryExperiences = () => {
                   <div className="text-sm opacity-90">Concierge Support</div>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ALL EXPERIENCES - Quick Links Section */}
+        <section className="py-16 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white mb-4">Complete Guide</Badge>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">All Sri Lanka Experiences</h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">Browse our complete collection of curated experiences across all categories</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {/* Adventure & Water Sports */}
+              <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-2xl p-6 border border-orange-200">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center text-white">
+                    <Compass className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900">{experiencesByCategory.adventure.title}</h3>
+                </div>
+                <div className="space-y-2">
+                  {experiencesByCategory.adventure.experiences.map((exp) => (
+                    <Link
+                      key={exp.href}
+                      to={exp.href}
+                      className="block p-3 rounded-lg bg-white/80 hover:bg-white hover:shadow-md transition-all group"
+                    >
+                      <div className="font-semibold text-gray-800 group-hover:text-orange-600 flex items-center justify-between">
+                        {exp.title}
+                        <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">{exp.description}</p>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              {/* Wildlife & Nature */}
+              <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-2xl p-6 border border-emerald-200">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-green-500 rounded-xl flex items-center justify-center text-white">
+                    <Trees className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900">{experiencesByCategory.wildlife.title}</h3>
+                </div>
+                <div className="space-y-2">
+                  {experiencesByCategory.wildlife.experiences.map((exp) => (
+                    <Link
+                      key={exp.href}
+                      to={exp.href}
+                      className="block p-3 rounded-lg bg-white/80 hover:bg-white hover:shadow-md transition-all group"
+                    >
+                      <div className="font-semibold text-gray-800 group-hover:text-emerald-600 flex items-center justify-between">
+                        {exp.title}
+                        <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">{exp.description}</p>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              {/* Heritage & Culture */}
+              <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl p-6 border border-purple-200">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-xl flex items-center justify-center text-white">
+                    <Landmark className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900">{experiencesByCategory.heritage.title}</h3>
+                </div>
+                <div className="space-y-2">
+                  {experiencesByCategory.heritage.experiences.map((exp) => (
+                    <Link
+                      key={exp.href}
+                      to={exp.href}
+                      className="block p-3 rounded-lg bg-white/80 hover:bg-white hover:shadow-md transition-all group"
+                    >
+                      <div className="font-semibold text-gray-800 group-hover:text-purple-600 flex items-center justify-between">
+                        {exp.title}
+                        <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">{exp.description}</p>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              {/* Luxury & Custom */}
+              <div className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-2xl p-6 border border-amber-200">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-xl flex items-center justify-center text-white">
+                    <Gem className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900">{experiencesByCategory.luxury.title}</h3>
+                </div>
+                <div className="space-y-2">
+                  {experiencesByCategory.luxury.experiences.map((exp) => (
+                    <Link
+                      key={exp.href}
+                      to={exp.href}
+                      className="block p-3 rounded-lg bg-white/80 hover:bg-white hover:shadow-md transition-all group"
+                    >
+                      <div className="font-semibold text-gray-800 group-hover:text-amber-600 flex items-center justify-between">
+                        {exp.title}
+                        <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">{exp.description}</p>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Additional Experiences Grid */}
+            <div className="mt-12 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <Link to="/experiences/wellness" className="group p-4 bg-gradient-to-br from-teal-50 to-cyan-50 rounded-xl border border-teal-200 hover:shadow-lg transition-all">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-lg flex items-center justify-center text-white">
+                    <Leaf className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-gray-800 group-hover:text-teal-600">Wellness Retreats</div>
+                    <p className="text-xs text-gray-500">Spa & healing packages</p>
+                  </div>
+                </div>
+              </Link>
+
+              <Link to="/experiences/train-journeys" className="group p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200 hover:shadow-lg transition-all">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center text-white">
+                    <Mountain className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-gray-800 group-hover:text-blue-600">Train Journeys</div>
+                    <p className="text-xs text-gray-500">Scenic railway rides</p>
+                  </div>
+                </div>
+              </Link>
+
+              <Link to="/experiences/whale-watching" className="group p-4 bg-gradient-to-br from-sky-50 to-blue-50 rounded-xl border border-sky-200 hover:shadow-lg transition-all">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-sky-500 to-blue-500 rounded-lg flex items-center justify-center text-white">
+                    <Anchor className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-gray-800 group-hover:text-sky-600">Whale Watching</div>
+                    <p className="text-xs text-gray-500">Marine encounters</p>
+                  </div>
+                </div>
+              </Link>
+
+              <Link to="/experiences/cooking-class-sri-lanka" className="group p-4 bg-gradient-to-br from-rose-50 to-pink-50 rounded-xl border border-rose-200 hover:shadow-lg transition-all">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-rose-500 to-pink-500 rounded-lg flex items-center justify-center text-white">
+                    <ChefHat className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-gray-800 group-hover:text-rose-600">Cooking Classes</div>
+                    <p className="text-xs text-gray-500">Sri Lankan cuisine</p>
+                  </div>
+                </div>
+              </Link>
+
+              <Link to="/experiences/hot-air-balloon-sigiriya" className="group p-4 bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl border border-orange-200 hover:shadow-lg transition-all">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-amber-500 rounded-lg flex items-center justify-center text-white">
+                    <Wind className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-gray-800 group-hover:text-orange-600">Hot Air Balloon</div>
+                    <p className="text-xs text-gray-500">Sunrise over Sigiriya</p>
+                  </div>
+                </div>
+              </Link>
+
+              <Link to="/experiences/hikkaduwa-water-sports" className="group p-4 bg-gradient-to-br from-cyan-50 to-teal-50 rounded-xl border border-cyan-200 hover:shadow-lg transition-all">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-teal-500 rounded-lg flex items-center justify-center text-white">
+                    <Anchor className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-gray-800 group-hover:text-cyan-600">Water Sports</div>
+                    <p className="text-xs text-gray-500">Hikkaduwa adventures</p>
+                  </div>
+                </div>
+              </Link>
+
+              <Link to="/experiences/jungle-camping" className="group p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200 hover:shadow-lg transition-all">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center text-white">
+                    <Trees className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-gray-800 group-hover:text-green-600">Jungle Camping</div>
+                    <p className="text-xs text-gray-500">Wilderness stays</p>
+                  </div>
+                </div>
+              </Link>
+
+              <Link to="/custom-experience" className="group p-4 bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl border border-violet-200 hover:shadow-lg transition-all">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-500 rounded-lg flex items-center justify-center text-white">
+                    <Sparkles className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-gray-800 group-hover:text-violet-600">Custom Experience</div>
+                    <p className="text-xs text-gray-500">Build your dream trip</p>
+                  </div>
+                </div>
+              </Link>
             </div>
           </div>
         </section>

@@ -23,7 +23,7 @@ const luxuryExperiences = [
     description: 'Soar above Sri Lanka in our fleet of executive helicopters with champagne service',
     icon: Plane,
     image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=1200&q=80',
-    gradient: 'from-sky-500 via-blue-600 to-indigo-700',
+    color: 'blue',
     link: '/tours/luxury#helicopters',
     stats: { duration: 'Custom', guests: '2-8', rating: 4.9 }
   },
@@ -34,7 +34,7 @@ const luxuryExperiences = [
     description: 'Charter super yachts with personal crew, underwater dining, and spa suites',
     icon: Anchor,
     image: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=1200&q=80',
-    gradient: 'from-cyan-500 via-teal-600 to-blue-700',
+    color: 'cyan',
     link: '/tours/luxury#yachts',
     stats: { duration: 'Half/Full Day', guests: '2-12', rating: 5.0 }
   },
@@ -45,7 +45,7 @@ const luxuryExperiences = [
     description: 'Rolls-Royce, Bentley, and Maybach fleet with personal chauffeurs',
     icon: Car,
     image: 'https://images.unsplash.com/photo-1563720360172-67b8f3dce741?w=1200&q=80',
-    gradient: 'from-amber-500 via-orange-600 to-red-700',
+    color: 'amber',
     link: '/tours/luxury#vehicles',
     stats: { duration: 'Custom', guests: '1-4', rating: 4.9 }
   },
@@ -56,7 +56,7 @@ const luxuryExperiences = [
     description: 'Multi-day curated adventures combining helicopters, yachts, and exclusive access',
     icon: Mountain,
     image: 'https://images.unsplash.com/photo-1549366021-9f761d040a94?w=1200&q=80',
-    gradient: 'from-purple-500 via-pink-600 to-rose-700',
+    color: 'purple',
     link: '/tours/luxury#journeys',
     stats: { duration: '3-5 Days', guests: '2-6', rating: 5.0 }
   },
@@ -67,7 +67,7 @@ const luxuryExperiences = [
     description: 'Private chefs, security details, event planning, and bespoke celebrations',
     icon: Crown,
     image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200&q=80',
-    gradient: 'from-yellow-500 via-amber-600 to-orange-700',
+    color: 'yellow',
     link: '/tours/luxury#concierge',
     stats: { duration: 'On Demand', guests: 'Custom', rating: 5.0 }
   },
@@ -78,7 +78,7 @@ const luxuryExperiences = [
     description: 'Private temple blessings, museum openings, and cultural immersions',
     icon: Sparkles,
     image: 'https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=1200&q=80',
-    gradient: 'from-emerald-500 via-green-600 to-teal-700',
+    color: 'emerald',
     link: '/tours/luxury',
     stats: { duration: 'Custom', guests: '2-10', rating: 5.0 }
   }
@@ -86,12 +86,11 @@ const luxuryExperiences = [
 
 const LuxuryExperiences = () => {
   return (
-    <section className="relative py-24 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-hidden">
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden opacity-20">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-amber-400 to-orange-600 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-tr from-blue-400 to-purple-600 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-pink-400 to-rose-600 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+    <section className="relative py-24 bg-slate-50 overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-orange-100/40 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-100/40 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
       </div>
 
       <div className="container mx-auto px-4 lg:px-8 relative z-10">
@@ -103,16 +102,16 @@ const LuxuryExperiences = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500/20 to-orange-500/20 backdrop-blur-sm px-6 py-3 rounded-full border border-amber-500/30 mb-6">
-            <Crown className="w-5 h-5 text-amber-400" />
-            <span className="text-amber-400 font-semibold text-sm uppercase tracking-wider">Curated Experiences</span>
+          <div className="inline-flex items-center gap-2 bg-white px-6 py-2 rounded-full shadow-sm border border-slate-100 mb-6">
+            <Crown className="w-4 h-4 text-amber-500" />
+            <span className="text-slate-600 font-medium text-sm uppercase tracking-wider">Curated Experiences</span>
           </div>
 
-          <h2 className="text-5xl md:text-6xl font-bold text-white mb-6 font-playfair">
-            Luxury <span className="bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500 bg-clip-text text-transparent">Experiences</span>
+          <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6 font-playfair">
+            Luxury <span className="text-amber-600">Experiences</span>
           </h2>
 
-          <p className="text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed">
             Handcrafted journeys that go beyond the ordinary, designed for discerning travelers
             seeking authentic luxury and unforgettable moments
           </p>
@@ -130,48 +129,43 @@ const LuxuryExperiences = () => {
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1, duration: 0.5 }}
               >
-                <Link to={experience.link}>
-                  <div className="group relative h-[500px] rounded-2xl overflow-hidden shadow-2xl hover:shadow-3xl transition-all duration-500 transform hover:-translate-y-2">
-                    {/* Background Image with Overlay */}
-                    <div className="absolute inset-0">
+                <Link to={experience.link} className="block h-full">
+                  <div className="group h-full bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100 flex flex-col">
+                    {/* Image Section */}
+                    <div className="relative h-64 overflow-hidden">
                       <LazyLoadImage
                         src={experience.image}
                         alt={experience.title}
                         effect="blur"
-                        className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                        className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
                       />
-                      <div className={`absolute inset-0 bg-gradient-to-t ${experience.gradient} opacity-60 group-hover:opacity-70 transition-opacity duration-500`} />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
-                    </div>
-
-                    {/* Content */}
-                    <div className="relative h-full p-8 flex flex-col justify-between">
-                      {/* Top Section - Icon & Badge */}
-                      <div className="flex items-start justify-between">
-                        <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br ${experience.gradient} shadow-xl transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500`}>
-                          <Icon className="w-8 h-8 text-white" />
-                        </div>
-
-                        <div className="flex items-center gap-1 bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/30">
-                          <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
-                          <span className="text-white font-semibold text-sm">{experience.stats.rating}</span>
-                        </div>
+                      <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold text-slate-700 flex items-center gap-1 shadow-sm">
+                        <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
+                        {experience.stats.rating}
                       </div>
 
-                      {/* Bottom Section - Details */}
-                      <div>
-                        <p className="text-amber-400 font-semibold text-sm uppercase tracking-wider mb-2">
+                      {/* Icon Badge */}
+                      <div className={`absolute -bottom-6 left-8 w-12 h-12 rounded-xl bg-white shadow-lg flex items-center justify-center z-10 group-hover:-translate-y-1 transition-transform duration-300`}>
+                        <Icon className={`w-6 h-6 text-${experience.color}-600`} />
+                      </div>
+                    </div>
+
+                    {/* Content Section */}
+                    <div className="p-8 pt-10 flex-grow flex flex-col">
+                      <div className="mb-4">
+                        <span className={`text-${experience.color}-600 font-semibold text-xs uppercase tracking-wider`}>
                           {experience.subtitle}
-                        </p>
-                        <h3 className="text-3xl font-bold text-white mb-3 group-hover:text-amber-400 transition-colors duration-300">
+                        </span>
+                        <h3 className="text-2xl font-bold text-slate-900 mt-1 mb-3 group-hover:text-amber-600 transition-colors">
                           {experience.title}
                         </h3>
-                        <p className="text-slate-200 text-sm leading-relaxed mb-6">
+                        <p className="text-slate-600 text-sm leading-relaxed line-clamp-3">
                           {experience.description}
                         </p>
+                      </div>
 
-                        {/* Stats */}
-                        <div className="flex items-center gap-4 mb-4 text-sm text-slate-300">
+                      <div className="mt-auto pt-4 border-t border-slate-100">
+                        <div className="flex items-center justify-between text-sm text-slate-500 mb-4">
                           <div className="flex items-center gap-2">
                             <Clock className="w-4 h-4" />
                             <span>{experience.stats.duration}</span>
@@ -182,17 +176,11 @@ const LuxuryExperiences = () => {
                           </div>
                         </div>
 
-                        {/* CTA */}
-                        <div className="flex items-center gap-2 text-amber-400 font-semibold group-hover:gap-4 transition-all duration-300">
-                          <span>Explore Now</span>
-                          <ArrowRight className="w-5 h-5 transform group-hover:translate-x-2 transition-transform duration-300" />
+                        <div className="flex items-center text-amber-600 font-semibold text-sm group-hover:gap-2 transition-all">
+                          Explore Experience
+                          <ArrowRight className="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" />
                         </div>
                       </div>
-                    </div>
-
-                    {/* Shine Effect on Hover */}
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                     </div>
                   </div>
                 </Link>
@@ -209,21 +197,20 @@ const LuxuryExperiences = () => {
           transition={{ duration: 0.6 }}
           className="text-center"
         >
-          <div className="max-w-2xl mx-auto bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-xl border border-white/10 rounded-3xl p-12 shadow-2xl">
-            <Sparkles className="w-12 h-12 text-amber-400 mx-auto mb-6" />
-            <h3 className="text-3xl font-bold text-white mb-4">
+          <div className="max-w-3xl mx-auto bg-white rounded-3xl p-12 shadow-xl border border-slate-100 relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500" />
+
+            <Sparkles className="w-10 h-10 text-amber-500 mx-auto mb-6" />
+            <h3 className="text-3xl font-bold text-slate-900 mb-4">
               Can't Find What You're Looking For?
             </h3>
-            <p className="text-slate-300 text-lg mb-8">
+            <p className="text-slate-600 text-lg mb-8">
               We create bespoke experiences tailored to your dreams. Let our luxury concierge design your perfect Sri Lankan adventure.
             </p>
             <Link to="/tours/luxury">
-              <button className="group relative px-10 py-5 bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 text-white font-bold text-lg rounded-xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-                <span className="relative z-10 flex items-center gap-3">
-                  Create Your Custom Experience
-                  <ArrowRight className="w-6 h-6 transform group-hover:translate-x-2 transition-transform duration-300" />
-                </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-rose-500 via-orange-500 to-amber-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <button className="px-8 py-4 bg-slate-900 text-white font-bold text-lg rounded-xl hover:bg-slate-800 transition-colors shadow-lg hover:shadow-xl flex items-center gap-2 mx-auto">
+                Create Your Custom Experience
+                <ArrowRight className="w-5 h-5" />
               </button>
             </Link>
           </div>

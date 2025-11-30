@@ -10,7 +10,7 @@ import {
 import { Link, useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { destinationsByRegion } from './menuData'
-import { MapPin, Mountain, Compass, Sun, Waves } from 'lucide-react'
+import { MapPin, Mountain, Compass, Sun, Waves, LucideIcon } from 'lucide-react'
 
 interface DestinationsDropdownProps {
   animatingItem: string | null
@@ -18,12 +18,12 @@ interface DestinationsDropdownProps {
   isScrolled: boolean;
 }
 
-const regionIcons: Record<string, React.ReactNode> = {
-  northern: <Compass className="w-4 h-4" />,
-  central: <Mountain className="w-4 h-4" />,
-  southern: <Waves className="w-4 h-4" />,
-  eastern: <Sun className="w-4 h-4" />,
-  western: <MapPin className="w-4 h-4" />
+const regionIconComponents: Record<string, LucideIcon> = {
+  northern: Compass,
+  central: Mountain,
+  southern: Waves,
+  eastern: Sun,
+  western: MapPin
 }
 
 const regionColors: Record<string, string> = {
@@ -76,7 +76,9 @@ const DestinationsDropdown = ({ animatingItem, onMenuClick, isScrolled }: Destin
               isScrolled ? "border-amber-200/50 bg-white/50" : "border-white/10 bg-white/5"
             )}>
               <div className="space-y-1">
-                {regions.map(([key, region]) => (
+                {regions.map(([key, region]) => {
+                  const IconComponent = regionIconComponents[key]
+                  return (
                   <button
                     key={key}
                     onClick={() => setActiveRegion(key)}
@@ -92,10 +94,10 @@ const DestinationsDropdown = ({ animatingItem, onMenuClick, isScrolled }: Destin
                           : "text-gray-300 hover:bg-white/10"
                     )}
                   >
-                    {regionIcons[key]}
+                    {IconComponent && <IconComponent className="w-4 h-4" />}
                     <span className="truncate">{region.title.replace(' Sri Lanka', '')}</span>
                   </button>
-                ))}
+                )})}
               </div>
               
               {/* View All Link */}

@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
+import ImageUpload from '@/components/ui/image-upload';
 import { toast } from 'sonner';
 import {
   Save,
@@ -22,6 +23,9 @@ import {
   Utensils,
   FileText,
   Sparkles,
+  Plane,
+  Compass,
+  BookOpen,
 } from 'lucide-react';
 import {
   doc,
@@ -45,6 +49,8 @@ interface Attraction {
   rating: number;
   duration: string;
   price: string;
+  icon?: string;
+  highlights?: string[];
 }
 
 interface ActivityItem {
@@ -64,6 +70,8 @@ interface Restaurant {
   priceRange: string;
   rating: number;
   address: string;
+  specialties?: string[];
+  openHours?: string;
 }
 
 interface HotelItem {
@@ -74,6 +82,7 @@ interface HotelItem {
   priceRange: string;
   amenities: string[];
   address: string;
+  category?: string;
 }
 
 interface DestinationInfo {
@@ -94,9 +103,22 @@ interface WeatherInfo {
 
 interface TravelTip {
   title: string;
-  content: string;
   icon?: string;
-  category: string;
+  category?: string;
+  tips: string[];
+  content?: string;
+}
+
+interface SignatureTour {
+  name: string;
+  description: string;
+  image: string;
+  duration: string;
+  priceFrom: string;
+  highlights: string[];
+  includes: string[];
+  badge?: string;
+  isBestSeller?: boolean;
 }
 
 interface SEOSettings {
@@ -125,6 +147,7 @@ interface DestinationContentAdmin {
   destinationInfo: DestinationInfo;
   weatherInfo: WeatherInfo;
   travelTips: TravelTip[];
+  signatureTours: SignatureTour[];
   seo: SEOSettings;
   ctaSection?: CTASection;
   isPublished: boolean;
@@ -164,6 +187,7 @@ const DEFAULT_KANDY_CONTENT: DestinationContentAdmin = {
     season: 'Tropical Highland',
   },
   travelTips: [],
+  signatureTours: [],
   seo: {
     title: 'Kandy - Cultural Capital of Sri Lanka | Sacred Sites, Tours & Travel Guide',
     description:
@@ -197,7 +221,30 @@ const DestinationContentManager: React.FC = () => {
       const snap = await getDoc(ref);
       if (snap.exists()) {
         const data = snap.data() as DestinationContentAdmin;
-        setContent({ ...DEFAULT_KANDY_CONTENT, ...data, slug: currentSlug });
+        const normalizedTravelTips =
+          (data.travelTips || []).map((tip) => {
+            const entries = tip.tips?.length
+              ? tip.tips
+              : tip.content
+                ? tip.content
+                    .split('\n')
+                    .map((item) => item.trim())
+                    .filter(Boolean)
+                : [];
+            return {
+              ...tip,
+              tips: entries,
+              content: tip.content ?? entries.join('\n'),
+              icon: tip.icon || 'Info',
+            };
+          });
+        setContent({
+          ...DEFAULT_KANDY_CONTENT,
+          ...data,
+          slug: currentSlug,
+          travelTips: normalizedTravelTips,
+          signatureTours: data.signatureTours || [],
+        });
         toast.success('Destination content loaded');
       } else {
         // Initialize with defaults in UI only; save happens when user clicks Save
@@ -210,6 +257,7 @@ const DestinationContentManager: React.FC = () => {
             name: currentSlug.charAt(0).toUpperCase() + currentSlug.slice(1),
             slug: currentSlug,
             heroSlides: DEFAULT_KANDY_CONTENT.heroSlides,
+            signatureTours: [],
           });
         }
         toast.info('No existing document found. Edit and click Save to create it.');
@@ -227,8 +275,17 @@ const DestinationContentManager: React.FC = () => {
     setSaving(true);
     try {
       const ref = doc(db, 'destinations', slug);
+      const formattedTravelTips = (content.travelTips || []).map((tip) => ({
+        ...tip,
+        tips: tip.tips || [],
+        content: tip.content && tip.content.trim().length
+          ? tip.content
+          : (tip.tips || []).join('\n'),
+      }));
       const payload: DestinationContentAdmin = {
         ...content,
+        travelTips: formattedTravelTips,
+        signatureTours: content.signatureTours || [],
         slug,
         id: slug,
       };
@@ -283,6 +340,8 @@ const DestinationContentManager: React.FC = () => {
         rating: 4.5,
         duration: '',
         price: '',
+        icon: 'Landmark',
+        highlights: [],
       },
     ]);
   };
@@ -291,6 +350,16 @@ const DestinationContentManager: React.FC = () => {
     if (!content) return;
     const list = [...content.attractions];
     list[index] = { ...list[index], [field]: value } as Attraction;
+    updateField('attractions', list);
+  };
+
+  const updateAttractionHighlights = (index: number, value: string) => {
+    if (!content) return;
+    const list = [...content.attractions];
+    list[index].highlights = value
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean);
     updateField('attractions', list);
   };
 
@@ -340,6 +409,7 @@ const DestinationContentManager: React.FC = () => {
         priceRange: '',
         amenities: [],
         address: '',
+        category: '',
       },
     ]);
   };
@@ -382,6 +452,8 @@ const DestinationContentManager: React.FC = () => {
         priceRange: '',
         rating: 4.5,
         address: '',
+        specialties: [],
+        openHours: '',
       },
     ]);
   };
@@ -393,10 +465,108 @@ const DestinationContentManager: React.FC = () => {
     updateField('restaurants', list);
   };
 
+  const updateRestaurantSpecialties = (index: number, value: string) => {
+    if (!content) return;
+    const list = [...content.restaurants];
+    list[index].specialties = value
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean);
+    updateField('restaurants', list);
+  };
+
   const removeRestaurant = (index: number) => {
     if (!content) return;
     const list = content.restaurants.filter((_, i) => i !== index);
     updateField('restaurants', list);
+  };
+
+  const addSignatureTour = () => {
+    if (!content) return;
+    updateField('signatureTours', [
+      ...content.signatureTours,
+      {
+        name: '',
+        description: '',
+        image: '',
+        duration: '',
+        priceFrom: '',
+        highlights: [],
+        includes: [],
+        badge: '',
+        isBestSeller: false,
+      },
+    ]);
+  };
+
+  const updateSignatureTour = (index: number, field: keyof SignatureTour, value: string | boolean) => {
+    if (!content) return;
+    const list = [...content.signatureTours];
+    (list[index] as any)[field] = value;
+    updateField('signatureTours', list);
+  };
+
+  const updateSignatureTourHighlights = (index: number, value: string) => {
+    if (!content) return;
+    const list = [...content.signatureTours];
+    list[index].highlights = value
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean);
+    updateField('signatureTours', list);
+  };
+
+  const updateSignatureTourIncludes = (index: number, value: string) => {
+    if (!content) return;
+    const list = [...content.signatureTours];
+    list[index].includes = value
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean);
+    updateField('signatureTours', list);
+  };
+
+  const removeSignatureTour = (index: number) => {
+    if (!content) return;
+    const list = content.signatureTours.filter((_, i) => i !== index);
+    updateField('signatureTours', list);
+  };
+
+  const addTravelTip = () => {
+    if (!content) return;
+    updateField('travelTips', [
+      ...content.travelTips,
+      {
+        title: '',
+        icon: 'Info',
+        category: '',
+        tips: [],
+        content: '',
+      },
+    ]);
+  };
+
+  const updateTravelTip = (index: number, field: keyof TravelTip, value: string) => {
+    if (!content) return;
+    const list = [...content.travelTips];
+    (list[index] as any)[field] = value;
+    updateField('travelTips', list);
+  };
+
+  const updateTravelTipEntries = (index: number, value: string) => {
+    if (!content) return;
+    const list = [...content.travelTips];
+    list[index].tips = value
+      .split('\n')
+      .map((item) => item.trim())
+      .filter(Boolean);
+    updateField('travelTips', list);
+  };
+
+  const removeTravelTip = (index: number) => {
+    if (!content) return;
+    const list = content.travelTips.filter((_, i) => i !== index);
+    updateField('travelTips', list);
   };
 
   if (loading || !content) {
@@ -471,12 +641,14 @@ const DestinationContentManager: React.FC = () => {
       <Card className="shadow-xl">
         <CardContent className="pt-6">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 lg:grid-cols-7 mb-6">
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-9 mb-6">
               <TabsTrigger value="hero">Hero</TabsTrigger>
               <TabsTrigger value="attractions">Attractions</TabsTrigger>
               <TabsTrigger value="activities">Activities</TabsTrigger>
               <TabsTrigger value="hotels">Hotels</TabsTrigger>
               <TabsTrigger value="restaurants">Restaurants</TabsTrigger>
+              <TabsTrigger value="tours">Signature Tours</TabsTrigger>
+              <TabsTrigger value="tips">Travel Tips</TabsTrigger>
               <TabsTrigger value="info-weather">Info & Weather</TabsTrigger>
               <TabsTrigger value="seo">SEO & CTA</TabsTrigger>
             </TabsList>
@@ -536,12 +708,14 @@ const DestinationContentManager: React.FC = () => {
                         <Trash2 className="w-4 h-4 text-red-500" />
                       </Button>
                     </CardHeader>
-                    <CardContent className="space-y-2">
+                    <CardContent className="space-y-4">
                       <div className="space-y-1">
-                        <Label>Image URL</Label>
-                        <Input
+                        <Label>Hero Image</Label>
+                        <ImageUpload
                           value={slide.image}
-                          onChange={(e) => updateHeroSlide(index, 'image', e.target.value)}
+                          onChange={(url) => updateHeroSlide(index, 'image', url)}
+                          onRemove={() => updateHeroSlide(index, 'image', '')}
+                          folder={`destinations/${slug}/hero`}
                         />
                       </div>
                       <div className="space-y-1">
@@ -632,16 +806,18 @@ const DestinationContentManager: React.FC = () => {
                           }
                         />
                       </div>
-                      <div className="space-y-1">
-                        <Label>Image URL</Label>
-                        <Input
+                      <div className="space-y-1 md:col-span-2">
+                        <Label>Feature Image</Label>
+                        <ImageUpload
                           value={attraction.image}
-                          onChange={(e) =>
-                            updateAttraction(index, 'image', e.target.value)
+                          onChange={(url) =>
+                            updateAttraction(index, 'image', url)
                           }
+                          onRemove={() => updateAttraction(index, 'image', '')}
+                          folder={`destinations/${slug}/attractions`}
                         />
                       </div>
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                         <div className="space-y-1">
                           <Label>Rating</Label>
                           <Input
@@ -675,6 +851,25 @@ const DestinationContentManager: React.FC = () => {
                             }
                           />
                         </div>
+                        <div className="space-y-1">
+                          <Label>Icon Key</Label>
+                          <Input
+                            value={attraction.icon || ''}
+                            onChange={(e) =>
+                              updateAttraction(index, 'icon', e.target.value)
+                            }
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-1 md:col-span-2">
+                        <Label>Highlights (comma-separated)</Label>
+                        <Textarea
+                          rows={2}
+                          value={(attraction.highlights || []).join(', ')}
+                          onChange={(e) =>
+                            updateAttractionHighlights(index, e.target.value)
+                          }
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -855,6 +1050,15 @@ const DestinationContentManager: React.FC = () => {
                           }
                         />
                       </div>
+                      <div className="space-y-1">
+                        <Label>Category / Style</Label>
+                        <Input
+                          value={hotel.category || ''}
+                          onChange={(e) =>
+                            updateHotel(index, 'category', e.target.value)
+                          }
+                        />
+                      </div>
                       <div className="space-y-1 md:col-span-2">
                         <Label>Description</Label>
                         <Textarea
@@ -865,13 +1069,13 @@ const DestinationContentManager: React.FC = () => {
                           }
                         />
                       </div>
-                      <div className="space-y-1">
-                        <Label>Image URL</Label>
-                        <Input
+                      <div className="space-y-1 md:col-span-2">
+                        <Label>Image</Label>
+                        <ImageUpload
                           value={hotel.image}
-                          onChange={(e) =>
-                            updateHotel(index, 'image', e.target.value)
-                          }
+                          onChange={(url) => updateHotel(index, 'image', url)}
+                          onRemove={() => updateHotel(index, 'image', '')}
+                          folder={`destinations/${slug}/hotels`}
                         />
                       </div>
                       <div className="space-y-1">
@@ -975,13 +1179,15 @@ const DestinationContentManager: React.FC = () => {
                           }
                         />
                       </div>
-                      <div className="space-y-1">
-                        <Label>Image URL</Label>
-                        <Input
+                      <div className="space-y-1 md:col-span-2">
+                        <Label>Lead Image</Label>
+                        <ImageUpload
                           value={rest.image}
-                          onChange={(e) =>
-                            updateRestaurant(index, 'image', e.target.value)
+                          onChange={(url) =>
+                            updateRestaurant(index, 'image', url)
                           }
+                          onRemove={() => updateRestaurant(index, 'image', '')}
+                          folder={`destinations/${slug}/dining`}
                         />
                       </div>
                       <div className="space-y-1">
@@ -1014,6 +1220,254 @@ const DestinationContentManager: React.FC = () => {
                           value={rest.address}
                           onChange={(e) =>
                             updateRestaurant(index, 'address', e.target.value)
+                          }
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label>Signature Dishes (comma-separated)</Label>
+                        <Textarea
+                          rows={2}
+                          value={(rest.specialties || []).join(', ')}
+                          onChange={(e) =>
+                            updateRestaurantSpecialties(index, e.target.value)
+                          }
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label>Open Hours</Label>
+                        <Input
+                          value={rest.openHours || ''}
+                          onChange={(e) =>
+                            updateRestaurant(index, 'openHours', e.target.value)
+                          }
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="tours" className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Plane className="w-4 h-4 text-amber-600" />
+                  <span className="text-sm font-semibold text-gray-700">
+                    Signature Tours ({content.signatureTours.length})
+                  </span>
+                </div>
+                <Button size="sm" variant="outline" onClick={addSignatureTour}>
+                  <ListPlus className="w-4 h-4 mr-1" />
+                  Add Tour
+                </Button>
+              </div>
+
+              {content.signatureTours.length === 0 && (
+                <p className="text-sm text-gray-500">
+                  No curated tours yet. Add handcrafted journeys with highlights, pricing,
+                  and inclusions for the destination page.
+                </p>
+              )}
+
+              <div className="space-y-4">
+                {content.signatureTours.map((tour, index) => (
+                  <Card key={index} className="border border-dashed">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline">#{index + 1}</Badge>
+                        <CardTitle className="text-sm font-semibold">
+                          {tour.name || 'Untitled tour'}
+                        </CardTitle>
+                        {tour.isBestSeller && (
+                          <Badge className="bg-emerald-500 text-white ml-2">Best Seller</Badge>
+                        )}
+                      </div>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => removeSignatureTour(index)}
+                      >
+                        <Trash2 className="w-4 h-4 text-red-500" />
+                      </Button>
+                    </CardHeader>
+                    <CardContent className="grid md:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label>Tour Name</Label>
+                        <Input
+                          value={tour.name}
+                          onChange={(e) =>
+                            updateSignatureTour(index, 'name', e.target.value)
+                          }
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label>Duration</Label>
+                        <Input
+                          value={tour.duration}
+                          onChange={(e) =>
+                            updateSignatureTour(index, 'duration', e.target.value)
+                          }
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label>Starting Price</Label>
+                        <Input
+                          value={tour.priceFrom}
+                          onChange={(e) =>
+                            updateSignatureTour(index, 'priceFrom', e.target.value)
+                          }
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label>Badge / Label</Label>
+                        <Input
+                          value={tour.badge || ''}
+                          onChange={(e) =>
+                            updateSignatureTour(index, 'badge', e.target.value)
+                          }
+                        />
+                      </div>
+                      <div className="space-y-1 md:col-span-2">
+                        <Label>Tour Description</Label>
+                        <Textarea
+                          rows={3}
+                          value={tour.description}
+                          onChange={(e) =>
+                            updateSignatureTour(index, 'description', e.target.value)
+                          }
+                        />
+                      </div>
+                      <div className="space-y-1 md:col-span-2">
+                        <Label>Hero Image</Label>
+                        <ImageUpload
+                          value={tour.image}
+                          onChange={(url) =>
+                            updateSignatureTour(index, 'image', url)
+                          }
+                          onRemove={() => updateSignatureTour(index, 'image', '')}
+                          folder={`destinations/${slug}/tours`}
+                        />
+                      </div>
+                      <div className="space-y-1 md:col-span-2">
+                        <Label>Highlights (comma-separated)</Label>
+                        <Textarea
+                          rows={2}
+                          value={(tour.highlights || []).join(', ')}
+                          onChange={(e) =>
+                            updateSignatureTourHighlights(index, e.target.value)
+                          }
+                        />
+                      </div>
+                      <div className="space-y-1 md:col-span-2">
+                        <Label>Inclusions (comma-separated)</Label>
+                        <Textarea
+                          rows={2}
+                          value={(tour.includes || []).join(', ')}
+                          onChange={(e) =>
+                            updateSignatureTourIncludes(index, e.target.value)
+                          }
+                        />
+                      </div>
+                      <div className="flex items-center gap-2 mt-2">
+                        <Switch
+                          checked={tour.isBestSeller ?? false}
+                          onCheckedChange={(checked) =>
+                            updateSignatureTour(index, 'isBestSeller', checked)
+                          }
+                        />
+                        <span className="text-xs text-gray-600">
+                          Mark as "Best Seller"
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="tips" className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 text-amber-600" />
+                  <span className="text-sm font-semibold text-gray-700">
+                    Travel Tips ({content.travelTips.length})
+                  </span>
+                </div>
+                <Button size="sm" variant="outline" onClick={addTravelTip}>
+                  <ListPlus className="w-4 h-4 mr-1" />
+                  Add Tip
+                </Button>
+              </div>
+
+              {content.travelTips.length === 0 && (
+                <p className="text-sm text-gray-500">
+                  No tips yet. Add practical advice, etiquette reminders, and packing notes for visitors.
+                </p>
+              )}
+
+              <div className="space-y-4">
+                {content.travelTips.map((tip, index) => (
+                  <Card key={index} className="border border-dashed">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline">#{index + 1}</Badge>
+                        <CardTitle className="text-sm font-semibold">
+                          {tip.title || 'New tip'}
+                        </CardTitle>
+                      </div>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => removeTravelTip(index)}
+                      >
+                        <Trash2 className="w-4 h-4 text-red-500" />
+                      </Button>
+                    </CardHeader>
+                    <CardContent className="grid md:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label>Title</Label>
+                        <Input
+                          value={tip.title}
+                          onChange={(e) =>
+                            updateTravelTip(index, 'title', e.target.value)
+                          }
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label>Icon Key</Label>
+                        <Input
+                          value={tip.icon || ''}
+                          onChange={(e) =>
+                            updateTravelTip(index, 'icon', e.target.value)
+                          }
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label>Category</Label>
+                        <Input
+                          value={tip.category || ''}
+                          onChange={(e) =>
+                            updateTravelTip(index, 'category', e.target.value)
+                          }
+                        />
+                      </div>
+                      <div className="space-y-1 md:col-span-2">
+                        <Label>Bullet Tips (one per line)</Label>
+                        <Textarea
+                          rows={3}
+                          value={(tip.tips || []).join('\n')}
+                          onChange={(e) =>
+                            updateTravelTipEntries(index, e.target.value)
+                          }
+                        />
+                      </div>
+                      <div className="space-y-1 md:col-span-2">
+                        <Label>Optional Summary</Label>
+                        <Textarea
+                          rows={2}
+                          value={tip.content || ''}
+                          onChange={(e) =>
+                            updateTravelTip(index, 'content', e.target.value)
                           }
                         />
                       </div>

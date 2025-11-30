@@ -1,5 +1,5 @@
 import { useState, useEffect, ComponentType, lazy, Suspense } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -116,8 +116,9 @@ const TrainJourneys = lazy(() => import('@/pages/experiences/TrainJourneys'));
 const TeaTrails = lazy(() => import('@/pages/experiences/TeaTrails'));
 const PilgrimageTours = lazy(() => import('@/pages/experiences/PilgrimageTours'));
 const IslandGetaways = lazy(() => import('@/pages/experiences/IslandGetaways'));
-const WhaleWatching = lazy(() => import('@/pages/experiences/WhaleWatching'));
+const WhaleBookingPage = lazy(() => import('@/pages/booking/WhaleBooking'));
 const SeaCucumberFarming = lazy(() => import('@/pages/experiences/SeaCucumberFarming'));
+const PrivateCharters = lazy(() => import('@/pages/experiences/PrivateCharters'));
 const HikkaduwaWaterSports = lazy(() => import('@/pages/experiences/HikkaduwaWaterSports'));
 const HotAirBalloonSigiriya = lazy(() => import('@/pages/experiences/HotAirBalloonSigiriya'));
 const KalpitiyaKiteSurfing = lazy(() => import('@/pages/experiences/KalpitiyaKiteSurfing'));
@@ -125,7 +126,11 @@ const JungleCamping = lazy(() => import('@/pages/experiences/JungleCamping'));
 const LagoonSafari = lazy(() => import('@/pages/experiences/LagoonSafari'));
 const CookingClass = lazy(() => import('@/pages/experiences/CookingClass'));
 const AyurvedaWellness = lazy(() => import('@/pages/experiences/AyurvedaWellness'));
+const AyurvedaBooking = lazy(() => import('@/pages/booking/AyurvedaBooking'));
+const TeaTrailsBooking = lazy(() => import('@/pages/booking/TeaTrailsBooking'));
+const PilgrimageBooking = lazy(() => import('@/pages/booking/PilgrimageBooking'));
 const ExperienceBooking = lazy(() => import('@/pages/booking/ExperienceBooking'));
+const ConciergeBooking = lazy(() => import('@/pages/booking/ConciergeBooking'));
 const LuxuryExperiences = lazy(() => import('@/pages/LuxuryExperiences'));
 const LuxuryExperienceDetail = lazy(() => import('@/pages/LuxuryExperienceDetail'));
 const CustomExperience = lazy(() => import('@/pages/CustomExperience'));
@@ -287,6 +292,7 @@ function App() {
                 <Route path="/destinations/kurunegala" element={<Kurunegala />} />
                 <Route path="/destinations/batticaloa" element={<Batticaloa />} />
                 <Route path="/destinations/:destinationId" element={withSiteChrome(DestinationDetail)} />
+                <Route path="/list-property" element={withSiteChrome(ListProperty)} />
                 <Route path="/transport/airport-transfers" element={<AirportTransfers />} />
                 <Route path="/transport/private-tours" element={<PrivateTours />} />
                 <Route path="/transport/group-transport" element={<GroupTransport />} />
@@ -298,7 +304,8 @@ function App() {
                 <Route path="/experiences/tea-trails" element={<TeaTrails />} />
                 <Route path="/experiences/pilgrimage-tours" element={<PilgrimageTours />} />
                 <Route path="/experiences/island-getaways" element={<IslandGetaways />} />
-                <Route path="/experiences/whale-watching" element={<WhaleWatching />} />
+                <Route path="/experiences/whale-watching" element={<WhaleBookingPage />} />
+                <Route path="/experiences/private-charters" element={<PrivateCharters />} />
                 <Route path="/experiences/sea-cucumber-farming" element={<SeaCucumberFarming />} />
                 <Route path="/experiences/hikkaduwa-water-sports" element={<HikkaduwaWaterSports />} />
                 <Route path="/experiences/hot-air-balloon-sigiriya" element={<HotAirBalloonSigiriya />} />
@@ -307,11 +314,16 @@ function App() {
                 <Route path="/experiences/lagoon-safari" element={<LagoonSafari />} />
                 <Route path="/experiences/cooking-class-sri-lanka" element={<CookingClass />} />
                 <Route path="/experiences/ayurveda" element={<AyurvedaWellness />} />
+                <Route path="/booking/ayurveda" element={<AyurvedaBooking />} />
+                <Route path="/booking/tea-trails" element={<TeaTrailsBooking />} />
+                <Route path="/booking/pilgrimage" element={<PilgrimageBooking />} />
+                <Route path="/booking/concierge" element={withSiteChrome(ConciergeBooking)} />
                 <Route path="/experiences/wellness" element={<WellnessPackages />} />
+                <Route path="/booking/whale-watching" element={<Navigate to="/experiences/whale-watching" replace />} />
                 <Route path="/booking/:experienceSlug" element={<ExperienceBooking />} />
 
                 {/* Additional Tours */}
-                <Route path="/tours/ramayana-trail" element={<RamayanaTrailTour />} />
+
                 <Route path="/tours/ayurveda-wellness" element={<AyurvedaWellnessTour />} />
 
                 {/* Family Activities */}

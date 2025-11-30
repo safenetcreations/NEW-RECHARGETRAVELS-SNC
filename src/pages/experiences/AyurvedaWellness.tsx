@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Leaf, Star, Clock, Users, ChevronRight, Quote, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -6,7 +7,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import BookingModal from '@/components/BookingModal';
 import {
   getAyurvedaPageData,
   HeroContent,
@@ -53,6 +53,7 @@ const defaultCta: CtaContent = {
 };
 
 const AyurvedaWellness = () => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [hero, setHero] = useState<HeroContent>(defaultHero);
   const [philosophy, setPhilosophy] = useState<PhilosophyContent>(defaultPhilosophy);
@@ -60,8 +61,6 @@ const AyurvedaWellness = () => {
   const [retreats, setRetreats] = useState<Retreat[]>([]);
   const [treatments, setTreatments] = useState<Treatment[]>([]);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
-  const [showBookingModal, setShowBookingModal] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<{ title: string; price: number } | null>(null);
 
   useEffect(() => {
     loadPageData();
@@ -95,9 +94,15 @@ const AyurvedaWellness = () => {
     }
   };
 
-  const handleBookNow = (title: string, price: number) => {
-    setSelectedItem({ title, price });
-    setShowBookingModal(true);
+  const handleBookNow = (title: string, price: number, duration?: string, type: 'retreat' | 'treatment' = 'retreat') => {
+    // Navigate to full-page booking with package details
+    const params = new URLSearchParams({
+      package: title,
+      price: price.toString(),
+      duration: duration || '',
+      type: type
+    });
+    navigate(`/booking/ayurveda?${params.toString()}`);
   };
 
   if (loading) {
@@ -269,7 +274,7 @@ const AyurvedaWellness = () => {
                         </div>
                         <Button
                           className="bg-emerald-600 hover:bg-emerald-700"
-                          onClick={() => handleBookNow(retreat.title, retreat.price)}
+                          onClick={() => handleBookNow(retreat.title, retreat.price, retreat.duration, 'retreat')}
                         >
                           Book Now
                         </Button>
@@ -349,7 +354,7 @@ const AyurvedaWellness = () => {
                       <Button
                         variant="outline"
                         className="border-emerald-600 text-emerald-600 hover:bg-emerald-600 hover:text-white"
-                        onClick={() => handleBookNow(treatment.title, treatment.price)}
+                        onClick={() => handleBookNow(treatment.title, treatment.price, treatment.duration, 'treatment')}
                       >
                         Book Treatment
                       </Button>
@@ -448,7 +453,7 @@ const AyurvedaWellness = () => {
             <Button
               size="lg"
               className="bg-amber-500 hover:bg-amber-600 text-emerald-900 font-semibold px-10 py-6 text-lg rounded-full shadow-lg shadow-amber-500/30"
-              onClick={() => setShowBookingModal(true)}
+              onClick={() => navigate('/booking/ayurveda')}
             >
               {cta.buttonText}
               <ChevronRight className="ml-2 w-5 h-5" />
@@ -458,18 +463,6 @@ const AyurvedaWellness = () => {
       </section>
 
       <Footer />
-
-      {/* Booking Modal */}
-      <BookingModal
-        isOpen={showBookingModal}
-        onClose={() => {
-          setShowBookingModal(false);
-          setSelectedItem(null);
-        }}
-        type="tour"
-        itemTitle={selectedItem?.title || 'Ayurveda Wellness Experience'}
-        price={selectedItem?.price || 0}
-      />
     </div>
   );
 };

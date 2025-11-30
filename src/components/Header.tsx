@@ -19,7 +19,9 @@ import {
   MessageCircle,
   ChevronRight,
   Info,
-  Key
+  Key,
+  Calendar,
+  Waves
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { useAuth } from "@/hooks/useAuth"
@@ -51,6 +53,30 @@ const bookNowItems: NavigationItem[] = [
     icon: Home,
     gradient: "from-orange-500/20 via-orange-500/5 to-transparent",
     iconBg: "bg-orange-500/90"
+  },
+  {
+    name: "Private Charters",
+    href: "/experiences/private-charters",
+    description: "Superyacht, jet, and helicopter concierge on 24/7 standby.",
+    icon: Crown,
+    gradient: "from-emerald-500/20 via-emerald-500/5 to-transparent",
+    iconBg: "bg-emerald-500/90"
+  },
+  {
+    name: "Book Now",
+    href: "/book-now",
+    description: "Instant booking form for tailored tours and transfers.",
+    icon: Calendar,
+    gradient: "from-teal-500/20 via-teal-500/5 to-transparent",
+    iconBg: "bg-teal-500/90"
+  },
+  {
+    name: "Whale Watching",
+    href: "/experiences/whale-watching",
+    description: "Mirissa & Trincomalee marine concierge led by biologists.",
+    icon: Waves,
+    gradient: "from-cyan-500/20 via-cyan-500/5 to-transparent",
+    iconBg: "bg-cyan-500/90"
   },
   {
     name: "Find Drivers",
@@ -289,6 +315,11 @@ const Header = () => {
     return location.pathname.startsWith(href)
   }
 
+  const mobileTriggerClass = `md:hidden inline-flex h-11 w-11 items-center justify-center rounded-full border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${isScrolled
+    ? "border-slate-200 bg-white text-slate-900 hover:bg-slate-100 focus:ring-slate-400"
+    : "border-white/30 bg-white/10 text-white hover:bg-white/20 focus:ring-white/70"
+    }`
+
   return (
     <header
       className={`fixed inset-x-0 top-0 z-[120] transition-all duration-500 ${isScrolled
@@ -326,22 +357,33 @@ const Header = () => {
                 +94 7777 21 999
               </a>
 
+              <Link
+                to="/book-now"
+                className={`hidden lg:flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] transition hover:scale-105 ${isScrolled ? "bg-slate-900 text-white hover:bg-slate-800" : "bg-white/90 text-slate-900 hover:bg-white"}`}
+              >
+                Book Now
+              </Link>
+
             </div>
-            <button
-              onClick={() => setIsMobileMenuOpen((prev) => !prev)}
-              className={`md:hidden inline-flex h-11 w-11 items-center justify-center rounded-full border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${isScrolled
-                ? "border-slate-200 bg-white text-slate-900 hover:bg-slate-100 focus:ring-slate-400"
-                : "border-white/30 bg-white/10 text-white hover:bg-white/20 focus:ring-white/70"
-                }`}
-              aria-label="Toggle mobile menu"
-              aria-expanded={isMobileMenuOpen}
-            >
-              {isMobileMenuOpen ? (
+            {isMobileMenuOpen ? (
+              <button
+                onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+                className={mobileTriggerClass}
+                aria-label="Toggle mobile menu"
+                aria-expanded="true"
+              >
                 <X className="h-5 w-5" />
-              ) : (
+              </button>
+            ) : (
+              <button
+                onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+                className={mobileTriggerClass}
+                aria-label="Toggle mobile menu"
+                aria-expanded="false"
+              >
                 <Menu className="h-5 w-5" />
-              )}
-            </button>
+              </button>
+            )}
           </div>
         </div>
       </div>

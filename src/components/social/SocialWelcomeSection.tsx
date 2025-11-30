@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { doc, getDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { Button } from '@/components/ui/button'
@@ -10,13 +10,18 @@ import {
   Youtube,
   Globe,
   Music2,
-  Play,
   Users,
-  MapPin,
   Heart,
   Share2,
   Bell,
-  TrendingUp
+  TrendingUp,
+  Volume2,
+  VolumeX,
+  Play,
+  Pause,
+  SkipBack,
+  SkipForward,
+  Maximize2
 } from 'lucide-react'
 
 const socialPlatforms = [
@@ -127,49 +132,278 @@ const socialPlatforms = [
   },
 ]
 
-export const SocialWelcomeSection = () => {
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [featuredVideoId, setFeaturedVideoId] = useState('92Np5UkerSQ')
-  const [channelId, setChannelId] = useState('UCWxBfcDkOVklKDRW0ljpV0w')
+interface TVVideo {
+  id: string
+  url: string
+  title: string
+}
 
+export const SocialWelcomeSection = () => {
+  // State for TV playlist videos from Firebase
+  const [tvPlaylist, setTvPlaylist] = useState<TVVideo[]>([
+    { id: '1', url: 'https://www.youtube.com/watch?v=92Np5UkerSQ', title: 'Default Video' }
+  ])
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0)
+  const [isMuted, setIsMuted] = useState(true) // Start muted for autoplay
+  const [isPlaying, setIsPlaying] = useState(true)
+  const [showUnmutePrompt, setShowUnmutePrompt] = useState(true)
+  const [currentTime, setCurrentTime] = useState(0)
+  const [duration, setDuration] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
+  const iframeRef = useRef<HTMLIFrameElement>(null)
+  const progressBarRef = useRef<HTMLDivElement>(null)
+
+  // Helper function to extract video ID from YouTube URL
+  const extractVideoId = (url: string): string | null => {
+    const patterns = [
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+      /^([a-zA-Z0-9_-]{11})$/,
+    ]
+    for (const pattern of patterns) {
+      const match = url.match(pattern)
+      if (match) return match[1]
+    }
+    return null
+  }
+
+  // Fetch TV playlist from Firebase
   useEffect(() => {
-    // Fetch social media config from Firebase
-    const fetchSocialConfig = async () => {
+    const fetchTVPlaylist = async () => {
       try {
         const docRef = doc(db, 'settings', 'socialMedia')
         const docSnap = await getDoc(docRef)
 
         if (docSnap.exists()) {
           const data = docSnap.data()
-          if (data.youtube?.featuredVideoId) {
-            setFeaturedVideoId(data.youtube.featuredVideoId)
-          }
-          if (data.youtube?.channelId) {
-            setChannelId(data.youtube.channelId)
+          if (data.youtube?.tvPlaylist && data.youtube.tvPlaylist.length > 0) {
+            // Filter out videos with empty URLs
+            const validVideos = data.youtube.tvPlaylist.filter((v: TVVideo) => v.url && extractVideoId(v.url))
+            if (validVideos.length > 0) {
+              setTvPlaylist(validVideos)
+            }
           }
         }
       } catch (error) {
-        console.error('Error fetching social config:', error)
-        // Use defaults if Firebase fails
+        console.error('Error fetching TV playlist:', error)
+        // Keep default video if fetch fails
       }
     }
 
-    fetchSocialConfig()
+    fetchTVPlaylist()
   }, [])
 
-  // Generate the video embed URL
-  // If featuredVideoId is set, show that video
-  // Otherwise, show the latest 10 uploads playlist with autoplay and loop
-  const getVideoEmbedUrl = () => {
-    if (featuredVideoId && featuredVideoId !== '') {
-      // Show specific featured video with autoplay, loop, and playlist of latest uploads
-      const uploadsPlaylistId = channelId.replace('UC', 'UU') // Convert channel ID to uploads playlist ID
-      return `https://www.youtube.com/embed/${featuredVideoId}?autoplay=1&mute=1&loop=1&playlist=${uploadsPlaylistId}&rel=0&modestbranding=1`
-    } else {
-      // Show latest 10 uploads playlist with autoplay and loop
-      const uploadsPlaylistId = channelId.replace('UC', 'UU')
-      return `https://www.youtube.com/embed/videoseries?list=${uploadsPlaylistId}&autoplay=1&mute=1&loop=1&rel=0&modestbranding=1`
+  // Handle video end - move to next video
+  const handleVideoEnd = useCallback(() => {
+    setCurrentVideoIndex((prevIndex) => {
+      const nextIndex = (prevIndex + 1) % tvPlaylist.length
+      return nextIndex
+    })
+  }, [tvPlaylist.length])
+
+  // Set up message listener for YouTube iframe API
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      // Check if message is from YouTube
+      if (event.origin !== 'https://www.youtube.com') return
+
+      try {
+        const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data
+        // YouTube player state: 0 = ended
+        if (data.event === 'onStateChange' && data.info === 0) {
+          handleVideoEnd()
+        }
+        // Handle video info updates (duration, current time)
+        if (data.event === 'infoDelivery') {
+          if (data.info?.currentTime !== undefined && !isDragging) {
+            setCurrentTime(data.info.currentTime)
+          }
+          if (data.info?.duration !== undefined) {
+            setDuration(data.info.duration)
+          }
+        }
+      } catch (e) {
+        // Not a JSON message, ignore
+      }
     }
+
+    window.addEventListener('message', handleMessage)
+    return () => window.removeEventListener('message', handleMessage)
+  }, [handleVideoEnd, isDragging])
+
+  // Poll for video progress every 500ms
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (iframeRef.current?.contentWindow && isPlaying && !isDragging) {
+        // Request current time from YouTube player
+        const message = JSON.stringify({
+          event: 'listening',
+          id: 1,
+          channel: 'widget'
+        })
+        iframeRef.current.contentWindow.postMessage(message, 'https://www.youtube.com')
+      }
+    }, 500)
+
+    return () => clearInterval(interval)
+  }, [isPlaying, isDragging])
+
+  // Send command to YouTube iframe via postMessage
+  const sendYouTubeCommand = (command: string, args?: any) => {
+    if (iframeRef.current?.contentWindow) {
+      const message = JSON.stringify({
+        event: 'command',
+        func: command,
+        args: args || []
+      })
+      iframeRef.current.contentWindow.postMessage(message, 'https://www.youtube.com')
+    }
+  }
+
+  // Control functions
+  const toggleMute = () => {
+    if (isMuted) {
+      sendYouTubeCommand('unMute')
+      setIsMuted(false)
+      setShowUnmutePrompt(false)
+    } else {
+      sendYouTubeCommand('mute')
+      setIsMuted(true)
+    }
+  }
+
+  const togglePlayPause = () => {
+    if (isPlaying) {
+      sendYouTubeCommand('pauseVideo')
+      setIsPlaying(false)
+    } else {
+      sendYouTubeCommand('playVideo')
+      setIsPlaying(true)
+    }
+  }
+
+  const skipToPrevious = () => {
+    if (tvPlaylist.length > 1) {
+      const newIndex = currentVideoIndex === 0 ? tvPlaylist.length - 1 : currentVideoIndex - 1
+      setCurrentVideoIndex(newIndex)
+    } else {
+      // Rewind to start of current video
+      sendYouTubeCommand('seekTo', [0, true])
+    }
+  }
+
+  const skipToNext = () => {
+    if (tvPlaylist.length > 1) {
+      const newIndex = (currentVideoIndex + 1) % tvPlaylist.length
+      setCurrentVideoIndex(newIndex)
+    }
+  }
+
+  const goFullscreen = () => {
+    if (iframeRef.current) {
+      if (iframeRef.current.requestFullscreen) {
+        iframeRef.current.requestFullscreen()
+      }
+    }
+  }
+
+  // Seek to specific time
+  const seekTo = (time: number) => {
+    sendYouTubeCommand('seekTo', [time, true])
+    setCurrentTime(time)
+  }
+
+  // Format time as MM:SS
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = Math.floor(seconds % 60)
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
+
+  // Handle progress bar click/drag
+  const handleProgressBarInteraction = (clientX: number) => {
+    if (!progressBarRef.current || duration <= 0) return
+
+    const rect = progressBarRef.current.getBoundingClientRect()
+    const percent = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width))
+    const newTime = percent * duration
+
+    setCurrentTime(newTime)
+    if (!isDragging) {
+      seekTo(newTime)
+    }
+  }
+
+  const handleProgressBarMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true)
+    handleProgressBarInteraction(e.clientX)
+  }
+
+  const handleProgressBarTouchStart = (e: React.TouchEvent) => {
+    setIsDragging(true)
+    handleProgressBarInteraction(e.touches[0].clientX)
+  }
+
+  // Handle drag/touch move and end
+  useEffect(() => {
+    if (!isDragging) return
+
+    const handleMouseMove = (e: MouseEvent) => {
+      handleProgressBarInteraction(e.clientX)
+    }
+
+    const handleTouchMove = (e: TouchEvent) => {
+      handleProgressBarInteraction(e.touches[0].clientX)
+    }
+
+    const handleEnd = () => {
+      setIsDragging(false)
+      seekTo(currentTime)
+    }
+
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseup', handleEnd)
+    window.addEventListener('touchmove', handleTouchMove)
+    window.addEventListener('touchend', handleEnd)
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', handleEnd)
+      window.removeEventListener('touchmove', handleTouchMove)
+      window.removeEventListener('touchend', handleEnd)
+    }
+  }, [isDragging, currentTime, duration])
+
+  // Progress percentage
+  const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0
+
+  // Get current video embed URL with HD quality settings
+  const getVideoEmbedUrl = () => {
+    const currentVideo = tvPlaylist[currentVideoIndex]
+    if (!currentVideo) return ''
+
+    const videoId = extractVideoId(currentVideo.url)
+    if (!videoId) return ''
+
+    // Build playlist string for looping through all videos
+    const allVideoIds = tvPlaylist
+      .map(v => extractVideoId(v.url))
+      .filter(Boolean)
+      .join(',')
+
+    // Parameters for HD quality and looping:
+    // - autoplay=1: Start playing automatically
+    // - mute: Based on current state (starts muted for autoplay)
+    // - loop=1: Loop the playlist
+    // - playlist={allVideoIds}: All videos to loop through
+    // - rel=0: Don't show videos from other channels
+    // - modestbranding=1: Minimal YouTube branding
+    // - controls=0: Hide default controls (we have custom ones)
+    // - vq=hd1080: Request HD 1080p quality
+    // - hd=1: Request HD playback
+    // - enablejsapi=1: Enable JavaScript API for controls
+    // - origin: Required for enablejsapi
+    const muteParam = isMuted ? 1 : 0
+    return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${muteParam}&loop=1&playlist=${allVideoIds}&rel=0&modestbranding=1&controls=0&vq=hd1080&hd=1&enablejsapi=1&origin=${window.location.origin}`
   }
 
   return (
@@ -234,39 +468,180 @@ export const SocialWelcomeSection = () => {
                 </div>
               </div>
 
-              {/* Video embed - Auto-playing Latest Videos */}
-              <div className="relative aspect-[16/9] w-full bg-black">
+              {/* Video embed - Auto-playing HD Videos in Loop */}
+              <div className="relative aspect-[16/9] w-full bg-black group">
                 <iframe
+                  ref={iframeRef}
+                  key={`${currentVideoIndex}-${isMuted}`} // Force re-render when video or mute changes
                   src={getVideoEmbedUrl()}
-                  title="Recharge Travels - Latest Videos"
+                  title={`Recharge Travels TV - ${tvPlaylist[currentVideoIndex]?.title || 'Video'}`}
                   className="w-full h-full"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
                   referrerPolicy="strict-origin-when-cross-origin"
                 />
-              </div>
 
-              {/* Bottom bar - Channel info */}
-              <div className="absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-black/95 to-transparent p-6">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <div>
-                    <h3 className="text-white font-bold text-lg mb-1">Latest Adventures from Sri Lanka</h3>
-                    <p className="text-slate-300 text-sm">Subscribe for weekly travel content & exclusive behind-the-scenes</p>
+                {/* Big Unmute Prompt - Shows on first load */}
+                {showUnmutePrompt && isMuted && (
+                  <div
+                    className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm cursor-pointer z-30 transition-opacity"
+                    onClick={toggleMute}
+                  >
+                    <div className="flex flex-col items-center gap-4 animate-pulse">
+                      <div className="w-24 h-24 sm:w-32 sm:h-32 bg-red-600 rounded-full flex items-center justify-center shadow-2xl shadow-red-600/50 hover:scale-110 transition-transform">
+                        <VolumeX className="w-12 h-12 sm:w-16 sm:h-16 text-white" />
+                      </div>
+                      <span className="text-white text-xl sm:text-2xl font-bold drop-shadow-lg">
+                        Click to Enable Sound
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex gap-3">
-                    <Button
-                      asChild
-                      size="lg"
-                      className="bg-red-600 hover:bg-red-500 text-white font-bold rounded-full shadow-lg shadow-red-600/50 transition-all hover:scale-105"
+                )}
+
+                {/* Custom Control Bar - Always visible at bottom */}
+                <div className="absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-black via-black/80 to-transparent p-4 sm:p-6">
+                  {/* Progress Bar with Time */}
+                  <div className="mb-4">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="text-white text-xs sm:text-sm font-mono min-w-[45px]">
+                        {formatTime(currentTime)}
+                      </span>
+
+                      {/* Draggable Progress Bar */}
+                      <div
+                        ref={progressBarRef}
+                        className="flex-1 h-3 sm:h-4 bg-white/20 rounded-full cursor-pointer relative group"
+                        onMouseDown={handleProgressBarMouseDown}
+                        onTouchStart={handleProgressBarTouchStart}
+                      >
+                        {/* Progress fill */}
+                        <div
+                          className="absolute inset-y-0 left-0 bg-gradient-to-r from-red-600 to-red-500 rounded-full transition-all duration-100"
+                          style={{ width: `${progressPercent}%` }}
+                        />
+
+                        {/* Drag handle */}
+                        <div
+                          className={`absolute top-1/2 -translate-y-1/2 w-5 h-5 sm:w-6 sm:h-6 bg-white rounded-full shadow-lg border-2 border-red-500 transition-transform ${
+                            isDragging ? 'scale-125' : 'group-hover:scale-110'
+                          }`}
+                          style={{ left: `calc(${progressPercent}% - 10px)` }}
+                        />
+
+                        {/* Hover time indicator */}
+                        {isDragging && (
+                          <div
+                            className="absolute -top-8 bg-red-600 text-white text-xs px-2 py-1 rounded transform -translate-x-1/2"
+                            style={{ left: `${progressPercent}%` }}
+                          >
+                            {formatTime(currentTime)}
+                          </div>
+                        )}
+                      </div>
+
+                      <span className="text-white text-xs sm:text-sm font-mono min-w-[45px] text-right">
+                        {formatTime(duration)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Control Buttons */}
+                  <div className="flex items-center justify-center gap-3 sm:gap-6 mb-4">
+                    {/* Rewind / Previous */}
+                    <button
+                      onClick={skipToPrevious}
+                      className="w-12 h-12 sm:w-16 sm:h-16 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center transition-all hover:scale-110 border border-white/20"
+                      title={tvPlaylist.length > 1 ? "Previous Video" : "Rewind"}
                     >
-                      <a href="https://www.youtube.com/@rechargetravelsltdColombo?sub_confirmation=1" target="_blank" rel="noopener noreferrer">
-                        <Youtube className="mr-2 h-5 w-5" />
-                        Subscribe Now
-                      </a>
-                    </Button>
+                      <SkipBack className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                    </button>
+
+                    {/* Play/Pause - Biggest button */}
+                    <button
+                      onClick={togglePlayPause}
+                      className="w-16 h-16 sm:w-20 sm:h-20 bg-red-600 hover:bg-red-500 rounded-full flex items-center justify-center transition-all hover:scale-110 shadow-lg shadow-red-600/50"
+                      title={isPlaying ? "Pause" : "Play"}
+                    >
+                      {isPlaying ? (
+                        <Pause className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+                      ) : (
+                        <Play className="w-8 h-8 sm:w-10 sm:h-10 text-white ml-1" />
+                      )}
+                    </button>
+
+                    {/* Forward / Next */}
+                    <button
+                      onClick={skipToNext}
+                      className="w-12 h-12 sm:w-16 sm:h-16 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center transition-all hover:scale-110 border border-white/20"
+                      title={tvPlaylist.length > 1 ? "Next Video" : "Forward"}
+                    >
+                      <SkipForward className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                    </button>
+                  </div>
+
+                  {/* Secondary controls row */}
+                  <div className="flex items-center justify-between">
+                    {/* Left side - Mute button */}
+                    <button
+                      onClick={toggleMute}
+                      className={`flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-3 rounded-full font-bold transition-all hover:scale-105 ${
+                        isMuted
+                          ? 'bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-600/50'
+                          : 'bg-green-600 hover:bg-green-500 text-white shadow-lg shadow-green-600/50'
+                      }`}
+                      title={isMuted ? "Unmute" : "Mute"}
+                    >
+                      {isMuted ? (
+                        <>
+                          <VolumeX className="w-5 h-5 sm:w-6 sm:h-6" />
+                          <span className="text-sm sm:text-base">UNMUTE</span>
+                        </>
+                      ) : (
+                        <>
+                          <Volume2 className="w-5 h-5 sm:w-6 sm:h-6" />
+                          <span className="text-sm sm:text-base">SOUND ON</span>
+                        </>
+                      )}
+                    </button>
+
+                    {/* Center - Video counter */}
+                    {tvPlaylist.length > 1 && (
+                      <div className="bg-black/70 backdrop-blur-sm px-4 py-2 rounded-full text-white text-sm font-medium">
+                        Video {currentVideoIndex + 1} of {tvPlaylist.length}
+                      </div>
+                    )}
+
+                    {/* Right side - Fullscreen */}
+                    <button
+                      onClick={goFullscreen}
+                      className="flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full font-bold transition-all hover:scale-105 border border-white/20 text-white"
+                      title="Fullscreen"
+                    >
+                      <Maximize2 className="w-5 h-5 sm:w-6 sm:h-6" />
+                      <span className="hidden sm:inline text-sm sm:text-base">FULLSCREEN</span>
+                    </button>
                   </div>
                 </div>
               </div>
+
+            </div>
+
+            {/* Subscribe bar - Below video */}
+            <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-900/80 backdrop-blur-xl border border-slate-700 rounded-xl p-4">
+              <div>
+                <h3 className="text-white font-bold text-lg mb-1">Latest Adventures from Sri Lanka</h3>
+                <p className="text-slate-300 text-sm">Subscribe for weekly travel content & exclusive behind-the-scenes</p>
+              </div>
+              <Button
+                asChild
+                size="lg"
+                className="bg-red-600 hover:bg-red-500 text-white font-bold rounded-full shadow-lg shadow-red-600/50 transition-all hover:scale-105"
+              >
+                <a href="https://www.youtube.com/@rechargetravelsltdColombo?sub_confirmation=1" target="_blank" rel="noopener noreferrer">
+                  <Youtube className="mr-2 h-5 w-5" />
+                  Subscribe Now
+                </a>
+              </Button>
             </div>
 
             {/* Stats bar */}

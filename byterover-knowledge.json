@@ -275,5 +275,16 @@
       "src/components/header/navigation/menuData.ts",
       "src/components/header/navigation/AboutDropdown.tsx"
     ]
+  },
+  {
+    "timestamp": "2025-11-28T13:14:53Z",
+    "summary": "Enabled owner approval/rejection emails via SendGrid callable.",
+    "details": [
+      "Owner admin approval screen now sends decision emails through emailService (functions sendEmail) using info@rechargetravels.com; approval and rejection messages include owner ID and notes.",
+      "Requires sendgrid.apikey in Firebase Functions config for live sends."
+    ],
+    "files": [
+      "src/pages/admin/vehicle-rental/OwnerApproval.tsx"
+    ]
   }
 ]

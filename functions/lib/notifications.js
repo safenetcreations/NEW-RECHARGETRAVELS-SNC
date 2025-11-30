@@ -27,7 +27,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 var _a, _b;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendDriverVerificationEmail = exports.checkDriverDocumentExpiry = exports.onDriverStatusChange = exports.onDriverApplicationSubmitted = exports.getNewsletterStats = exports.unsubscribeNewsletter = exports.subscribeNewsletter = exports.notifyBlogSubscribers = exports.sendNewsletterWelcome = exports.sendBookingReminders = exports.sendWelcomeEmail = exports.sendBookingNotification = exports.sendBookingConfirmation = exports.sendWhatsAppMessage = exports.sendEmail = void 0;
+exports.sendDriverVerificationEmail = exports.checkDriverDocumentExpiry = exports.onDriverStatusChange = exports.onDriverApplicationSubmitted = exports.getNewsletterStats = exports.unsubscribeNewsletter = exports.subscribeNewsletter = exports.notifyBlogSubscribers = exports.sendNewsletterWelcome = exports.sendBookingReminders = exports.sendWelcomeEmail = exports.sendBookingNotification = exports.sendHillCountryBookingConfirmation = exports.sendWildToursBookingConfirmation = exports.sendNationalParksBookingConfirmation = exports.sendCulturalBookingConfirmation = exports.sendBookingConfirmation = exports.sendWhatsAppMessage = exports.sendEmail = void 0;
 const functions = __importStar(require("firebase-functions"));
 const admin = __importStar(require("firebase-admin"));
 const mail_1 = __importDefault(require("@sendgrid/mail"));
@@ -1277,33 +1277,39 @@ exports.sendWhatsAppMessage = functions.https.onCall(async (data, context) => {
         throw new functions.https.HttpsError('internal', error.message);
     }
 });
-// Trigger: Send booking confirmation when new booking is created
-exports.sendBookingConfirmation = functions.firestore
-    .document('bookings/{bookingId}')
-    .onCreate(async (snap, context) => {
+// Shared handler for booking confirmations
+const handleBookingConfirmation = async (snap, context) => {
     var _a, _b;
     const booking = snap.data();
     const bookingId = context.params.bookingId;
     try {
-        const customerEmail = ((_a = booking.personal_info) === null || _a === void 0 ? void 0 : _a.email) || booking.email;
-        const customerName = booking.personal_info
-            ? `${booking.personal_info.firstName} ${booking.personal_info.lastName}`
-            : booking.name;
+        // Handle various data structures from different booking forms
+        const customerEmail = ((_a = booking.personal_info) === null || _a === void 0 ? void 0 : _a.email) || booking.email || booking.contactEmail;
+        let customerName = booking.name || 'Valued Customer';
+        if (booking.personal_info) {
+            customerName = `${booking.personal_info.firstName} ${booking.personal_info.lastName}`;
+        }
+        else if (booking.firstName && booking.lastName) {
+            customerName = `${booking.firstName} ${booking.lastName}`;
+        }
+        else if (booking.contactName) {
+            customerName = booking.contactName;
+        }
         if (!customerEmail) {
             console.log('No customer email found for booking:', bookingId);
             return;
         }
         // Prepare template data
         const templateData = {
-            customerName: customerName || 'Valued Customer',
-            confirmationNumber: booking.confirmation_number || bookingId,
-            bookingType: booking.booking_type || booking.type || 'Travel Package',
-            travelDate: booking.check_in_date || booking.tour_start_date || booking.pickup_date || booking.travel_date || 'TBD',
+            customerName,
+            confirmationNumber: booking.confirmation_number || booking.bookingRef || bookingId,
+            bookingType: booking.booking_type || booking.type || booking.tourTitle || 'Travel Package',
+            travelDate: booking.check_in_date || booking.tour_start_date || booking.pickup_date || booking.travel_date || booking.tourDate || booking.date || 'TBD',
             adults: booking.adults || booking.guests || 1,
             children: booking.children || 0,
-            totalAmount: booking.total_price || booking.amount || 0,
+            totalAmount: booking.total_price || booking.amount || booking.totalPrice || 0,
             currency: booking.currency || 'USD',
-            specialRequests: booking.special_requests || ''
+            specialRequests: booking.special_requests || booking.specialRequests || ''
         };
         // Send customer confirmation
         const customerTemplate = emailTemplates.bookingConfirmation(templateData);
@@ -1320,17 +1326,17 @@ exports.sendBookingConfirmation = functions.firestore
             type: 'Booking',
             customerName,
             customerEmail,
-            phone: ((_b = booking.personal_info) === null || _b === void 0 ? void 0 : _b.phone) || booking.phone,
+            phone: ((_b = booking.personal_info) === null || _b === void 0 ? void 0 : _b.phone) || booking.phone || booking.contactPhone,
             details: `
-          <p><strong>Booking ID:</strong> ${booking.confirmation_number || bookingId}</p>
-          <p><strong>Type:</strong> ${booking.booking_type || booking.type}</p>
-          <p><strong>Date:</strong> ${templateData.travelDate}</p>
-          <p><strong>Guests:</strong> ${templateData.adults} Adults, ${templateData.children} Children</p>
-          <p><strong>Amount:</strong> ${templateData.currency} ${templateData.totalAmount}</p>
-          <p><strong>Status:</strong> ${booking.status}</p>
-          <p><strong>Payment:</strong> ${booking.payment_status}</p>
-        `,
-            adminUrl: `https://recharge-travels-73e76.web.app/admin/bookings/${bookingId}`
+        <p><strong>Booking ID:</strong> ${templateData.confirmationNumber}</p>
+        <p><strong>Type:</strong> ${templateData.bookingType}</p>
+        <p><strong>Date:</strong> ${templateData.travelDate}</p>
+        <p><strong>Guests:</strong> ${templateData.adults} Adults, ${templateData.children} Children</p>
+        <p><strong>Amount:</strong> ${templateData.currency} ${templateData.totalAmount}</p>
+        <p><strong>Status:</strong> ${booking.status || 'Pending'}</p>
+        <p><strong>Payment:</strong> ${booking.payment_status || booking.paymentMethod || 'Pending'}</p>
+      `,
+            adminUrl: `https://recharge-travels-73e76.web.app/admin/bookings`
         });
         await mail_1.default.send({
             to: ADMIN_EMAIL,
@@ -1349,7 +1355,23 @@ exports.sendBookingConfirmation = functions.firestore
     catch (error) {
         console.error('Error sending booking confirmation:', error);
     }
-});
+};
+// Trigger: Send booking confirmation when new booking is created
+exports.sendBookingConfirmation = functions.firestore
+    .document('bookings/{bookingId}')
+    .onCreate(handleBookingConfirmation);
+exports.sendCulturalBookingConfirmation = functions.firestore
+    .document('cultural_bookings/{bookingId}')
+    .onCreate(handleBookingConfirmation);
+exports.sendNationalParksBookingConfirmation = functions.firestore
+    .document('nationalparks_bookings/{bookingId}')
+    .onCreate(handleBookingConfirmation);
+exports.sendWildToursBookingConfirmation = functions.firestore
+    .document('wildtours_bookings/{bookingId}')
+    .onCreate(handleBookingConfirmation);
+exports.sendHillCountryBookingConfirmation = functions.firestore
+    .document('hillcountry_bookings/{bookingId}')
+    .onCreate(handleBookingConfirmation);
 // Trigger: Send notification when new inquiry is created
 exports.sendBookingNotification = functions.firestore
     .document('inquiries/{inquiryId}')

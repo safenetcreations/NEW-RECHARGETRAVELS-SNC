@@ -10,12 +10,13 @@ import { toast } from 'sonner';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { db, storage } from '@/lib/firebase';
-import { 
+import {
   Save, Plus, Trash2, Globe, Users, Leaf, Award,
   MapPin, Camera, FileText, Settings, Upload,
   Eye, Edit2, X, Check, Star, Play, Image as ImageIcon,
   MessageSquare, Video, Palmtree, Mountain
 } from 'lucide-react';
+import ImageUpload from '@/components/ui/image-upload';
 
 /**
  * ABOUT SRI LANKA MANAGEMENT - ADMIN PANEL
@@ -59,6 +60,13 @@ interface Experience {
   icon?: string;
 }
 
+interface HeroSlide {
+  image: string;
+  title: string;
+  subtitle: string;
+  badge?: string;
+}
+
 interface GalleryImage {
   url: string;
   caption?: string;
@@ -83,6 +91,7 @@ interface AboutSriLankaContent {
   heroTitle: string;
   heroSubtitle: string;
   heroImage: string;
+  heroSlides?: HeroSlide[];
   mainDescription: string;
   secondaryDescription: string;
   stats: {
@@ -108,6 +117,26 @@ const defaultContent: AboutSriLankaContent = {
   heroTitle: "The Pearl of the Indian Ocean",
   heroSubtitle: "Discover Sri Lanka's Rich Heritage and Natural Beauty",
   heroImage: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=1920",
+  heroSlides: [
+    {
+      image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=1920&q=80",
+      title: "The Pearl of the Indian Ocean",
+      subtitle: "Discover Sri Lanka's Rich Heritage and Natural Beauty",
+      badge: "Discover Paradise"
+    },
+    {
+      image: "https://images.unsplash.com/photo-1588258524675-55d656396b8a?q=80&w=1920",
+      title: "Ancient Kingdoms Await",
+      subtitle: "Walk through 2,500 years of fascinating history at Sigiriya Rock Fortress",
+      badge: "UNESCO Heritage"
+    },
+    {
+      image: "https://images.unsplash.com/photo-1546708773-e52953324f83?q=80&w=1920",
+      title: "Misty Mountain Paradise",
+      subtitle: "Experience the legendary tea plantations and cool climate of Hill Country",
+      badge: "Hill Country"
+    }
+  ],
   mainDescription: "",
   secondaryDescription: "",
   stats: {
@@ -151,7 +180,7 @@ const AboutSriLankaManagement: React.FC = () => {
     try {
       const docRef = doc(db, 'page-content', 'about-sri-lanka');
       const docSnap = await getDoc(docRef);
-      
+
       if (docSnap.exists()) {
         const data = docSnap.data() as AboutSriLankaContent;
         setContent({ ...defaultContent, ...data });
@@ -181,51 +210,33 @@ const AboutSriLankaManagement: React.FC = () => {
     }
   };
 
-  const uploadImage = async (file: File): Promise<string> => {
-    try {
-      setUploading(true);
-      
-      // Validate file
-      if (!file.type.startsWith('image/')) {
-        throw new Error('File must be an image');
-      }
-      
-      if (file.size > 5 * 1024 * 1024) {
-        throw new Error('Image size must be less than 5MB');
-      }
-
-      // Create unique filename
-      const timestamp = Date.now();
-      const filename = `about-sri-lanka/${timestamp}_${file.name}`;
-      
-      // Upload to Firebase Storage
-      const storageRef = ref(storage, filename);
-      await uploadBytes(storageRef, file);
-      
-      // Get download URL
-      const url = await getDownloadURL(storageRef);
-      
-      toast.success('Image uploaded successfully');
-      return url;
-    } catch (error: any) {
-      console.error('Error uploading image:', error);
-      toast.error(error.message || 'Failed to upload image');
-      throw error;
-    } finally {
-      setUploading(false);
-    }
+  // Hero slides management
+  const addHeroSlide = () => {
+    const slides = content.heroSlides || [];
+    setContent({
+      ...content,
+      heroSlides: [
+        ...slides,
+        {
+          image: '',
+          title: 'New Hero Slide',
+          subtitle: 'Add an inspiring description',
+          badge: 'Spotlight'
+        }
+      ]
+    });
   };
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>, field: string) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const updateHeroSlide = (index: number, field: keyof HeroSlide, value: string) => {
+    const slides = [...(content.heroSlides || [])];
+    slides[index] = { ...slides[index], [field]: value };
+    setContent({ ...content, heroSlides: slides });
+  };
 
-    try {
-      const url = await uploadImage(file);
-      setContent({ ...content, [field]: url });
-    } catch (error) {
-      // Error already handled in uploadImage
-    }
+  const removeHeroSlide = (index: number) => {
+    const slides = (content.heroSlides || []).filter((_, i) => i !== index);
+    setContent({ ...content, heroSlides: slides });
+    toast.success('Hero slide removed');
   };
 
   // Highlight management
@@ -269,18 +280,6 @@ const AboutSriLankaManagement: React.FC = () => {
     toast.success('Destination removed');
   };
 
-  const handleDestinationImageUpload = async (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    try {
-      const url = await uploadImage(file);
-      updateDestination(index, 'image', url);
-    } catch (error) {
-      // Error already handled
-    }
-  };
-
   // Experience management
   const addExperience = () => {
     const newExperiences = content.experiences || [];
@@ -304,21 +303,18 @@ const AboutSriLankaManagement: React.FC = () => {
   };
 
   // Gallery management
-  const addGalleryImage = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const addGalleryImageSlot = () => {
+    const newGallery = content.gallery || [];
+    setContent({
+      ...content,
+      gallery: [...newGallery, { url: '', caption: '' }]
+    });
+  };
 
-    try {
-      const url = await uploadImage(file);
-      const newGallery = content.gallery || [];
-      setContent({
-        ...content,
-        gallery: [...newGallery, { url, caption: '' }]
-      });
-      toast.success('Image added to gallery');
-    } catch (error) {
-      // Error already handled
-    }
+  const updateGalleryImage = (index: number, url: string) => {
+    const newGallery = [...(content.gallery || [])];
+    newGallery[index] = { ...newGallery[index], url };
+    setContent({ ...content, gallery: newGallery });
   };
 
   const updateGalleryCaption = (index: number, caption: string) => {
@@ -418,8 +414,8 @@ const AboutSriLankaManagement: React.FC = () => {
               </CardDescription>
             </div>
             <div className="flex gap-2">
-              <Button 
-                onClick={loadContent} 
+              <Button
+                onClick={loadContent}
                 variant="outline"
                 className="border-2"
                 disabled={loading}
@@ -427,8 +423,8 @@ const AboutSriLankaManagement: React.FC = () => {
                 <Eye className="w-4 h-4 mr-2" />
                 Reload
               </Button>
-              <Button 
-                onClick={saveContent} 
+              <Button
+                onClick={saveContent}
                 disabled={saving || uploading}
                 size="lg"
                 className="bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 text-white shadow-lg"
@@ -482,36 +478,108 @@ const AboutSriLankaManagement: React.FC = () => {
 
                 <div className="space-y-2">
                   <Label className="text-lg font-semibold">Hero Image</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      value={content.heroImage}
-                      onChange={(e) => setContent({ ...content, heroImage: e.target.value })}
-                      placeholder="Enter image URL or upload"
-                      className="flex-1"
-                    />
-                    <label htmlFor="hero-image-upload">
-                      <Button type="button" variant="outline" disabled={uploading} asChild>
-                        <span>
-                          <Upload className="w-4 h-4 mr-2" />
-                          {uploading ? 'Uploading...' : 'Upload'}
-                        </span>
-                      </Button>
-                    </label>
-                    <input
-                      id="hero-image-upload"
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => handleImageUpload(e, 'heroImage')}
-                    />
-                  </div>
-                  {content.heroImage && (
-                    <div className="mt-4 rounded-lg overflow-hidden border-2 border-gray-200">
-                      <img src={content.heroImage} alt="Hero preview" className="w-full h-64 object-cover" />
-                    </div>
-                  )}
+                  <ImageUpload
+                    value={content.heroImage}
+                    onChange={(url) => setContent({ ...content, heroImage: url })}
+                    onRemove={() => setContent({ ...content, heroImage: '' })}
+                    folder="about-sri-lanka"
+                    helperText="Recommended: 1920x1080px (16:9). Max: 10MB."
+                  />
                 </div>
               </div>
+
+              <Card className="border-dashed border-2">
+                <CardHeader>
+                  <CardTitle className="text-2xl flex items-center gap-2">
+                    <ImageIcon className="w-5 h-5 text-blue-600" />
+                    Hero Slider Images
+                  </CardTitle>
+                  <CardDescription>
+                    Create multiple hero slides. These appear on the public About Sri Lanka hero carousel in the same order.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="text-sm text-gray-600">
+                      Upload high-resolution images (1920x1080). Add engaging titles/subtitles and optional badges for each slide.
+                    </div>
+                    <Button
+                      type="button"
+                      onClick={addHeroSlide}
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add slide
+                    </Button>
+                  </div>
+
+                  <div className="space-y-6">
+                    {(content.heroSlides || []).length === 0 && (
+                      <div className="rounded-2xl border border-dashed border-gray-200 p-6 text-center text-gray-500">
+                        No hero slides yet. Click "Add slide" to create your first image.
+                      </div>
+                    )}
+
+                    {(content.heroSlides || []).map((slide, index) => (
+                      <div key={index} className="rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm uppercase tracking-widest text-gray-500">Slide {index + 1}</p>
+                            <p className="text-lg font-semibold text-gray-900">{slide.title || 'Untitled slide'}</p>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            className="text-red-500 hover:text-red-600"
+                            onClick={() => removeHeroSlide(index)}
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Remove
+                          </Button>
+                        </div>
+
+                        <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
+                          <ImageUpload
+                            value={slide.image}
+                            onChange={(url) => updateHeroSlide(index, 'image', url)}
+                            onRemove={() => updateHeroSlide(index, 'image', '')}
+                            folder="about-sri-lanka/hero-slides"
+                            helperText="Upload 1920x1080px hero image"
+                          />
+
+                          <div className="space-y-4">
+                            <div className="space-y-2">
+                              <Label>Slide Title</Label>
+                              <Input
+                                value={slide.title}
+                                onChange={(e) => updateHeroSlide(index, 'title', e.target.value)}
+                                placeholder="Stunning view over Sigiriya"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Slide Subtitle</Label>
+                              <Textarea
+                                value={slide.subtitle}
+                                onChange={(e) => updateHeroSlide(index, 'subtitle', e.target.value)}
+                                placeholder="Describe the moment or experience"
+                                rows={3}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Badge (optional)</Label>
+                              <Input
+                                value={slide.badge ?? ''}
+                                onChange={(e) => updateHeroSlide(index, 'badge', e.target.value)}
+                                placeholder="e.g., Discover Paradise"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             {/* Content Tab */}
@@ -569,7 +637,7 @@ const AboutSriLankaManagement: React.FC = () => {
                       Add Highlight
                     </Button>
                   </div>
-                  
+
                   <div className="space-y-2">
                     {content.highlights.map((highlight, index) => (
                       <div key={index} className="flex gap-2">
@@ -794,28 +862,13 @@ const AboutSriLankaManagement: React.FC = () => {
                       </div>
                       <div>
                         <Label>Image</Label>
-                        <div className="flex gap-2">
-                          <Input
-                            value={destination.image}
-                            onChange={(e) => updateDestination(index, 'image', e.target.value)}
-                            placeholder="Image URL"
-                            className="flex-1"
-                          />
-                          <label>
-                            <Button type="button" variant="outline" size="sm" disabled={uploading} asChild>
-                              <span><Upload className="w-4 h-4" /></span>
-                            </Button>
-                            <input
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              onChange={(e) => handleDestinationImageUpload(e, index)}
-                            />
-                          </label>
-                        </div>
-                        {destination.image && (
-                          <img src={destination.image} alt={destination.name} className="w-full h-32 object-cover rounded mt-2" />
-                        )}
+                        <ImageUpload
+                          value={destination.image}
+                          onChange={(url) => updateDestination(index, 'image', url)}
+                          onRemove={() => updateDestination(index, 'image', '')}
+                          folder="about-sri-lanka/destinations"
+                          helperText="Recommended: 800x600px (4:3)"
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -888,14 +941,13 @@ const AboutSriLankaManagement: React.FC = () => {
                       </div>
                       <div>
                         <Label>Image</Label>
-                        <Input
+                        <ImageUpload
                           value={experience.image}
-                          onChange={(e) => updateExperience(index, 'image', e.target.value)}
-                          placeholder="Image URL"
+                          onChange={(url) => updateExperience(index, 'image', url)}
+                          onRemove={() => updateExperience(index, 'image', '')}
+                          folder="about-sri-lanka/experiences"
+                          helperText="Recommended: 800x600px (4:3)"
                         />
-                        {experience.image && (
-                          <img src={experience.image} alt={experience.title} className="w-full h-32 object-cover rounded mt-2" />
-                        )}
                       </div>
                     </CardContent>
                   </Card>
@@ -918,27 +970,25 @@ const AboutSriLankaManagement: React.FC = () => {
             <TabsContent value="gallery" className="space-y-6">
               <div className="flex justify-between items-center">
                 <h3 className="text-2xl font-bold">Photo Gallery</h3>
-                <label>
-                  <Button disabled={uploading} asChild>
-                    <span>
-                      <Upload className="w-4 h-4 mr-2" />
-                      {uploading ? 'Uploading...' : 'Add Image'}
-                    </span>
-                  </Button>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={addGalleryImage}
-                  />
-                </label>
+                <Button onClick={addGalleryImageSlot} disabled={uploading}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Image Slot
+                </Button>
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {(content.gallery || []).map((image, index) => (
                   <Card key={index} className="overflow-hidden shadow-lg group">
                     <div className="relative">
-                      <img src={image.url} alt={image.caption || ''} className="w-full h-48 object-cover" />
+                      <div className="p-2">
+                        <ImageUpload
+                          value={image.url}
+                          onChange={(url) => updateGalleryImage(index, url)}
+                          onRemove={() => updateGalleryImage(index, '')}
+                          folder="about-sri-lanka/gallery"
+                          helperText="Gallery Image"
+                        />
+                      </div>
                       <Button
                         onClick={() => removeGalleryImage(index)}
                         variant="destructive"
@@ -964,18 +1014,10 @@ const AboutSriLankaManagement: React.FC = () => {
                 <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
                   <Camera className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                   <p className="text-gray-600 mb-4">No images in gallery yet</p>
-                  <label>
-                    <Button disabled={uploading}>
-                      <Upload className="w-4 h-4 mr-2" />
-                      Upload Your First Image
-                    </Button>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={addGalleryImage}
-                    />
-                  </label>
+                  <Button onClick={addGalleryImageSlot} disabled={uploading}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Your First Image Slot
+                  </Button>
                 </div>
               )}
             </TabsContent>
@@ -1110,14 +1152,13 @@ const AboutSriLankaManagement: React.FC = () => {
                       </div>
                       <div>
                         <Label>Thumbnail URL</Label>
-                        <Input
+                        <ImageUpload
                           value={video.thumbnail}
-                          onChange={(e) => updateVideoTour(index, 'thumbnail', e.target.value)}
-                          placeholder="Thumbnail image URL"
+                          onChange={(url) => updateVideoTour(index, 'thumbnail', url)}
+                          onRemove={() => updateVideoTour(index, 'thumbnail', '')}
+                          folder="about-sri-lanka/videos"
+                          helperText="Video Thumbnail"
                         />
-                        {video.thumbnail && (
-                          <img src={video.thumbnail} alt={video.title} className="w-full h-32 object-cover rounded mt-2" />
-                        )}
                       </div>
                       <div>
                         <Label>Duration (optional)</Label>
@@ -1169,7 +1210,7 @@ const AboutSriLankaManagement: React.FC = () => {
                       {content.seoTitle.length}/60 characters (recommended: 50-60)
                     </p>
                   </div>
-                  
+
                   <div>
                     <Label className="text-base font-semibold">SEO Description</Label>
                     <Textarea
@@ -1183,7 +1224,7 @@ const AboutSriLankaManagement: React.FC = () => {
                       {content.seoDescription.length}/160 characters (recommended: 150-160)
                     </p>
                   </div>
-                  
+
                   <div>
                     <Label className="text-base font-semibold">SEO Keywords</Label>
                     <Input
@@ -1203,16 +1244,16 @@ const AboutSriLankaManagement: React.FC = () => {
 
           {/* Save Button (sticky bottom) */}
           <div className="sticky bottom-0 bg-white border-t-2 pt-6 mt-8 flex justify-end gap-4">
-            <Button 
-              onClick={loadContent} 
+            <Button
+              onClick={loadContent}
               variant="outline"
               size="lg"
               disabled={loading}
             >
               Cancel & Reload
             </Button>
-            <Button 
-              onClick={saveContent} 
+            <Button
+              onClick={saveContent}
               disabled={saving || uploading}
               size="lg"
               className="bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 text-white shadow-lg px-8"

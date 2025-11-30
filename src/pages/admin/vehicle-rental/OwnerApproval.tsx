@@ -43,6 +43,7 @@ import { useToast } from '@/hooks/use-toast';
 import { collection, doc, getDocs, query, where, orderBy, updateDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { VehicleOwner, OwnerVerificationStatus } from '@/types/vehicleRental';
+import { emailService } from '@/services/emailService';
 
 interface OwnerDocument {
   id: string;
@@ -327,6 +328,46 @@ const OwnerApproval: React.FC = () => {
   const [showRejectionModal, setShowRejectionModal] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<OwnerDocument | null>(null);
   const [documentRejectionReason, setDocumentRejectionReason] = useState('');
+  const sendDecisionEmail = async (owner: OwnerSubmission, status: 'approved' | 'rejected', notes?: string) => {
+    if (!owner.email) return;
+    const subject =
+      status === 'approved'
+        ? 'Your Recharge vehicle owner application is approved'
+        : 'Update on your Recharge vehicle owner application';
+    const html =
+      status === 'approved'
+        ? `
+            <p>Hi ${owner.firstName},</p>
+            <p>Great news! Your vehicle owner application has been approved.</p>
+            <ul>
+              <li>Owner ID: ${owner.id}</li>
+              <li>Status: Approved</li>
+            </ul>
+            <p>You can now log in and list vehicles: <a href="https://www.rechargetravels.com/vehicle-rental/owner-dashboard">Owner Dashboard</a></p>
+            <p>Thanks for partnering with Recharge.</p>
+          `
+        : `
+            <p>Hi ${owner.firstName},</p>
+            <p>Your vehicle owner application needs attention.</p>
+            <ul>
+              <li>Owner ID: ${owner.id}</li>
+              <li>Status: Rejected</li>
+            </ul>
+            ${notes ? `<p>Notes from admin: ${notes}</p>` : ''}
+            <p>Please update your details and re-submit. If you believe this is an error, reply to this email.</p>
+          `;
+
+    try {
+      await emailService.sendEmail({
+        to: owner.email,
+        subject,
+        html,
+        text: `${subject}\nOwner ID: ${owner.id}\nStatus: ${status}${notes ? `\nNotes: ${notes}` : ''}`
+      });
+    } catch (err) {
+      console.error('Owner decision email failed', err);
+    }
+  };
 
   // Stats
   const stats = {
@@ -417,6 +458,11 @@ const OwnerApproval: React.FC = () => {
         title: "Owner Approved",
         description: "The vehicle owner has been verified and can now list vehicles.",
       });
+
+      const approvedOwner = owners.find(o => o.id === ownerId);
+      if (approvedOwner) {
+        sendDecisionEmail(approvedOwner, 'approved');
+      }
       
       setSelectedOwner(null);
       setViewMode('list');
@@ -457,6 +503,11 @@ const OwnerApproval: React.FC = () => {
         title: "Owner Rejected",
         description: "The owner application has been rejected.",
       });
+
+      const rejectedOwner = owners.find(o => o.id === ownerId);
+      if (rejectedOwner) {
+        sendDecisionEmail(rejectedOwner, 'rejected', rejectionNotes);
+      }
       
       setShowRejectionModal(false);
       setRejectionNotes('');

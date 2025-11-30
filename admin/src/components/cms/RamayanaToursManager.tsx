@@ -101,11 +101,11 @@ export const RamayanaToursManager = () => {
     const [menuInput, setMenuInput] = useState('');
 
     const categories = [
-        { value: 'cooking-class', label: 'Cooking Class' },
-        { value: 'street-food', label: 'Street Food Tour' },
-        { value: 'fine-dining', label: 'Fine Dining' },
-        { value: 'spice-garden', label: 'Spice Garden' },
-        { value: 'tea-experience', label: 'Tea Experience' },
+        { value: 'pilgrimage', label: 'Pilgrimage' },
+        { value: 'mythology', label: 'Mythology' },
+        { value: 'historical', label: 'Historical' },
+        { value: 'nature', label: 'Nature' },
+        { value: 'adventure', label: 'Adventure' },
     ];
 
     const difficulties = [
@@ -228,14 +228,14 @@ export const RamayanaToursManager = () => {
 
                 toast({
                     title: "Success",
-                    description: "Hill Country tour created successfully"
+                    description: "Ramayana tour created successfully"
                 });
             } else if (selectedTour?.id) {
                 await updateDoc(doc(db, 'ramayana_tours', selectedTour.id), tourData);
 
                 toast({
                     title: "Success",
-                    description: "Hill Country tour updated successfully"
+                    description: "Ramayana tour updated successfully"
                 });
             }
 
@@ -307,7 +307,7 @@ export const RamayanaToursManager = () => {
             image: '',
             rating: 4.5,
             reviews: 0,
-            category: 'cooking-class',
+            category: 'pilgrimage',
             highlights: [],
             difficulty: 'Easy',
             maxGroupSize: 10,
@@ -384,7 +384,7 @@ export const RamayanaToursManager = () => {
                 <div>
                     <h2 className="text-3xl font-bold flex items-center gap-2">
                         <Church className="h-8 w-8 text-orange-600" />
-                        Hill Country Tours Management
+                        Ramayana Tours Management
                     </h2>
                     <p className="text-muted-foreground">Manage ramayana experiences and bookings</p>
                 </div>

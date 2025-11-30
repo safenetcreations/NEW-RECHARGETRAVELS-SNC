@@ -75,21 +75,52 @@ export const useBlogPosts = (categoryId?: string) => {
   return useQuery({
     queryKey: ['blog-posts', categoryId],
     queryFn: async () => {
-      const blogsCollection = collection(db, BLOGS_COLLECTION);
-      const constraints: QueryConstraint[] = [
-        where('status', '==', 'published'),
-        orderBy('publishedAt', 'desc')
-      ];
+      try {
+        const blogsCollection = collection(db, BLOGS_COLLECTION);
 
-      if (categoryId) {
-        constraints.splice(1, 0, where('category.id', '==', categoryId));
+        // Try with composite index first
+        try {
+          const constraints: QueryConstraint[] = [
+            where('status', '==', 'published'),
+            orderBy('publishedAt', 'desc')
+          ];
+
+          if (categoryId) {
+            constraints.splice(1, 0, where('category.id', '==', categoryId));
+          }
+
+          const q = query(blogsCollection, ...constraints);
+          const snapshot = await getDocs(q);
+          const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          return data as BlogPost[];
+        } catch (indexError) {
+          // Fallback: fetch without ordering (index might not be ready)
+          console.warn('Index not ready, using fallback query:', indexError);
+          const fallbackQuery = query(
+            blogsCollection,
+            where('status', '==', 'published')
+          );
+          const snapshot = await getDocs(fallbackQuery);
+          let data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as BlogPost[];
+
+          // Sort client-side
+          data.sort((a, b) => {
+            const dateA = a.publishedAt?.toDate?.() || new Date(a.published_at || a.createdAt || 0);
+            const dateB = b.publishedAt?.toDate?.() || new Date(b.published_at || b.createdAt || 0);
+            return dateB.getTime() - dateA.getTime();
+          });
+
+          // Filter by category client-side if needed
+          if (categoryId) {
+            data = data.filter(post => post.category?.id === categoryId);
+          }
+
+          return data;
+        }
+      } catch (error) {
+        console.error('Error fetching blog posts:', error);
+        return [];
       }
-
-      const q = query(blogsCollection, ...constraints);
-      const snapshot = await getDocs(q);
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-      return data as BlogPost[];
     },
   });
 };
@@ -175,17 +206,44 @@ export const useFeaturedPosts = () => {
   return useQuery({
     queryKey: ['featured-blog-posts'],
     queryFn: async () => {
-      const blogsCollection = collection(db, BLOGS_COLLECTION);
-      const q = query(
-        blogsCollection,
-        where('status', '==', 'published'),
-        orderBy('publishedAt', 'desc'),
-        limit(6)
-      );
-      const snapshot = await getDocs(q);
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      try {
+        const blogsCollection = collection(db, BLOGS_COLLECTION);
 
-      return data as BlogPost[];
+        // Try with composite index first
+        try {
+          const q = query(
+            blogsCollection,
+            where('status', '==', 'published'),
+            orderBy('publishedAt', 'desc'),
+            limit(6)
+          );
+          const snapshot = await getDocs(q);
+          const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          return data as BlogPost[];
+        } catch (indexError) {
+          // Fallback: fetch without ordering (index might not be ready)
+          console.warn('Index not ready for featured posts, using fallback:', indexError);
+          const fallbackQuery = query(
+            blogsCollection,
+            where('status', '==', 'published')
+          );
+          const snapshot = await getDocs(fallbackQuery);
+          let data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as BlogPost[];
+
+          // Sort client-side
+          data.sort((a, b) => {
+            const dateA = a.publishedAt?.toDate?.() || new Date(a.published_at || a.createdAt || 0);
+            const dateB = b.publishedAt?.toDate?.() || new Date(b.published_at || b.createdAt || 0);
+            return dateB.getTime() - dateA.getTime();
+          });
+
+          // Return top 6
+          return data.slice(0, 6);
+        }
+      } catch (error) {
+        console.error('Error fetching featured posts:', error);
+        return [];
+      }
     },
   });
 };

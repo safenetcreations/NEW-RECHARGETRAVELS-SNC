@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Calendar, Clock, MapPin, Users, Car, Hotel, Utensils, Shield, ChevronRight, Check, Plus, Waves, Fish, Camera, Ship } from 'lucide-react';
+import { Calendar, Clock, MapPin, Users, Car, Hotel, Utensils, ChevronRight, Check, Plus } from 'lucide-react';
 import { DatePicker } from '@/components/ui/date-picker';
 import { addDays } from 'date-fns';
 import Header from '@/components/Header';
@@ -39,6 +39,7 @@ interface AdditionalService {
 const ExperienceBooking: React.FC = () => {
   const { experienceSlug } = useParams();
   const navigate = useNavigate();
+
   const [activeStep, setActiveStep] = useState(1);
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const [selectedHotel, setSelectedHotel] = useState<Hotel | null>(null);

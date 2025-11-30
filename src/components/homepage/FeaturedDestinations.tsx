@@ -92,7 +92,7 @@ const shuffleArray = <T,>(array: T[]): T[] => {
   return shuffled;
 };
 
-// Resolve the best href for a destination, preferring CMS link/path when available
+// Resolve the best href for a destination
 const getDestinationHref = (destination: FeaturedDestination): string => {
   const slug = destination.name.toLowerCase().replace(/\s+/g, '-');
   const pathFromCms = destination.link || (destination as any).path;
@@ -103,37 +103,20 @@ const FeaturedDestinations = () => {
   const [destinations, setDestinations] = useState<FeaturedDestination[]>(
     shuffleArray(fallbackDestinations as unknown as FeaturedDestination[])
   );
-  const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
 
-  const [backgroundImage, setBackgroundImage] = useState<string>(
-    'https://images.unsplash.com/photo-1588598198321-9735fd52045b?w=1920&auto=format&fit=crop&q=80'
-  );
-
-  // Fetch destinations and settings from CMS
+  // Fetch destinations from CMS
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true);
-
-        // Fetch destinations
         const destinationsData = await cmsService.featuredDestinations.getAll();
         if (destinationsData && destinationsData.length > 0) {
           setDestinations(shuffleArray(destinationsData as FeaturedDestination[]));
         }
-
-        // Fetch settings
-        const settings = await cmsService.homepageSettings.getActive();
-        if (settings?.featuredDestinationsBackgroundImage) {
-          setBackgroundImage(settings.featuredDestinationsBackgroundImage);
-        }
       } catch (error) {
         console.error('Error fetching CMS data:', error);
-      } finally {
-        setLoading(false);
       }
     };
-
     fetchData();
   }, []);
 
@@ -165,48 +148,59 @@ const FeaturedDestinations = () => {
   }, [totalPages]);
 
   return (
-    <section id="featured-destinations" className="relative py-20 overflow-hidden">
-      {/* Full Background with Sri Lanka Cities/Landscape */}
-      <div className="absolute inset-0">
-        {/* Background Image - Sri Lanka Panorama */}
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage: `url('${backgroundImage}')`,
-          }}
-        />
-        {/* Dark overlay for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-900/95 via-slate-900/85 to-slate-900/95" />
-        {/* Decorative gradient accents */}
-        <div className="absolute inset-0 bg-gradient-to-r from-emerald-900/30 via-transparent to-teal-900/30" />
+    <section id="featured-destinations" className="relative py-24 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+      {/* Subtle background pattern */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute inset-0" style={{
+          backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+          backgroundSize: '40px 40px'
+        }} />
       </div>
 
       <div className="relative container mx-auto px-4 lg:px-8">
-        {/* Section Header - No Card Background */}
+        {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <div className="inline-flex items-center gap-2 bg-emerald-500 px-6 py-3 rounded-full mb-6">
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 px-6 py-3 rounded-full mb-8 shadow-lg shadow-emerald-500/25">
             <Compass className="w-5 h-5 text-white" />
             <span className="text-white font-bold tracking-wide uppercase text-sm">Discover Paradise</span>
             <Sparkles className="w-5 h-5 text-yellow-300" />
           </div>
 
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-black mb-6">
-            <span className="block text-white mb-2 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Explore Sri Lanka</span>
-            <span className="block text-yellow-300 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Featured Destinations</span>
+          {/* SUPER BRIGHT HEADING */}
+          <h2 className="text-5xl md:text-6xl lg:text-7xl font-black mb-8 leading-tight">
+            <span
+              className="block text-white mb-3"
+              style={{
+                textShadow: '0 0 20px rgba(255,255,255,0.9), 0 0 40px rgba(255,255,255,0.6), 0 0 60px rgba(255,255,255,0.4), 0 4px 12px rgba(0,0,0,0.8)',
+                letterSpacing: '-0.02em'
+              }}
+            >
+              Explore Sri Lanka
+            </span>
+            <span
+              className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-400 to-orange-400"
+              style={{
+                filter: 'drop-shadow(0 0 20px rgba(251, 191, 36, 0.6)) drop-shadow(0 0 40px rgba(251, 191, 36, 0.4))',
+                letterSpacing: '-0.02em'
+              }}
+            >
+              Featured Destinations
+            </span>
           </h2>
 
-          <p className="text-lg md:text-xl text-white max-w-3xl mx-auto font-medium" style={{ textShadow: '1px 1px 4px #000' }}>
+          <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
             From misty tea hills to sunlit beaches and ancient cities, step into the landscapes that make Sri Lanka feel alive.
           </p>
         </motion.div>
 
         {/* Destinations Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-14">
           {currentDestinations.map((destination, index) => (
             <motion.div
               key={destination.id}
@@ -217,30 +211,27 @@ const FeaturedDestinations = () => {
               className="group"
             >
               <Link to={getDestinationHref(destination)}>
-                <div className="relative h-[400px] rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 bg-slate-900">
+                <div className="relative h-[420px] rounded-3xl overflow-hidden shadow-2xl shadow-black/40 hover:shadow-orange-500/20 transition-all duration-500 transform hover:-translate-y-2">
                   {/* Background Image */}
                   <div
                     className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
                     style={{ backgroundImage: `url(${destination.image})` }}
                   />
 
-                  {/* Fallback gradient if image fails */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-900 to-sky-900 -z-10" />
-
                   {/* Gradient Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
 
                   {/* Category Badge */}
-                  <div className="absolute top-4 left-4 z-10">
-                    <span className="px-4 py-2 bg-white rounded-full text-sm font-bold text-gray-800">
+                  <div className="absolute top-5 left-5 z-10">
+                    <span className="px-4 py-2 bg-white/95 backdrop-blur-sm rounded-full text-sm font-bold text-gray-800 shadow-lg">
                       {destination.category}
                     </span>
                   </div>
 
                   {/* Rating Badge */}
                   {destination.rating && (
-                    <div className="absolute top-4 right-4 z-10">
-                      <div className="flex items-center gap-1 px-3 py-2 bg-black/60 backdrop-blur-sm rounded-full">
+                    <div className="absolute top-5 right-5 z-10">
+                      <div className="flex items-center gap-1.5 px-3 py-2 bg-black/70 backdrop-blur-sm rounded-full border border-white/10">
                         <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                         <span className="text-white font-bold text-sm">{destination.rating}</span>
                       </div>
@@ -248,15 +239,15 @@ const FeaturedDestinations = () => {
                   )}
 
                   {/* Content */}
-                  <div className="absolute bottom-0 left-0 right-0 p-6 z-10">
+                  <div className="absolute bottom-0 left-0 right-0 p-7 z-10">
                     {/* Location */}
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-2 mb-3">
                       <MapPin className="w-4 h-4 text-orange-400" />
                       <span className="text-orange-300 text-sm font-medium">{destination.title}</span>
                     </div>
 
                     {/* Name */}
-                    <h3 className="text-3xl font-bold text-white mb-3">
+                    <h3 className="text-3xl font-bold text-white mb-3" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
                       {destination.name}
                     </h3>
 
@@ -265,13 +256,13 @@ const FeaturedDestinations = () => {
                       {destination.description}
                     </p>
 
-                    {/* Features/Highlights */}
+                    {/* Features */}
                     {destination.features && destination.features.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mb-4">
+                      <div className="flex flex-wrap gap-2 mb-5">
                         {destination.features.slice(0, 3).map((feature, idx) => (
                           <span
                             key={idx}
-                            className="px-3 py-1 bg-white/20 rounded-full text-xs text-white"
+                            className="px-3 py-1 bg-white/15 backdrop-blur-sm rounded-full text-xs text-white font-medium border border-white/10"
                           >
                             {feature}
                           </span>
@@ -286,27 +277,27 @@ const FeaturedDestinations = () => {
                       </span>
                       <div className="flex items-center gap-2 text-orange-400 font-semibold group-hover:gap-3 transition-all">
                         <span>Explore</span>
-                        <ArrowRight className="w-5 h-5" />
+                        <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                       </div>
                     </div>
                   </div>
 
-                  {/* Hover Border */}
-                  <div className="absolute inset-0 rounded-2xl border-2 border-transparent group-hover:border-orange-400/50 transition-all duration-300" />
+                  {/* Hover Border Glow */}
+                  <div className="absolute inset-0 rounded-3xl border-2 border-transparent group-hover:border-orange-400/40 transition-all duration-300" />
                 </div>
               </Link>
             </motion.div>
           ))}
         </div>
 
-        {/* Navigation - Only show if more than 1 page */}
+        {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-6 mb-12">
+          <div className="flex items-center justify-center gap-6 mb-14">
             <Button
               variant="outline"
               size="icon"
               onClick={prevPage}
-              className="w-12 h-12 rounded-full bg-white/10 border-white/20 hover:bg-white/20 text-white"
+              className="w-12 h-12 rounded-full bg-white/5 border-white/20 hover:bg-white/15 hover:border-white/40 text-white transition-all"
             >
               <ChevronLeft className="w-6 h-6" />
             </Button>
@@ -317,10 +308,11 @@ const FeaturedDestinations = () => {
                   type="button"
                   key={idx}
                   onClick={() => setCurrentPage(idx)}
-                  className={`h-3 rounded-full transition-all duration-300 ${currentPage === idx
-                    ? 'w-10 bg-orange-400'
-                    : 'w-3 bg-white/30 hover:bg-white/50'
-                    }`}
+                  className={`h-3 rounded-full transition-all duration-300 ${
+                    currentPage === idx
+                      ? 'w-10 bg-gradient-to-r from-orange-400 to-amber-500'
+                      : 'w-3 bg-white/30 hover:bg-white/50'
+                  }`}
                   aria-label={`Go to page ${idx + 1}`}
                 />
               ))}
@@ -330,7 +322,7 @@ const FeaturedDestinations = () => {
               variant="outline"
               size="icon"
               onClick={nextPage}
-              className="w-12 h-12 rounded-full bg-white/10 border-white/20 hover:bg-white/20 text-white"
+              className="w-12 h-12 rounded-full bg-white/5 border-white/20 hover:bg-white/15 hover:border-white/40 text-white transition-all"
             >
               <ChevronRight className="w-6 h-6" />
             </Button>
@@ -342,18 +334,23 @@ const FeaturedDestinations = () => {
           <Link to="/destinations">
             <Button
               size="lg"
-              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold px-10 py-6 rounded-xl text-lg"
+              className="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 hover:from-orange-600 hover:via-amber-600 hover:to-orange-600 text-white font-bold px-12 py-7 rounded-2xl text-lg shadow-xl shadow-orange-500/25 hover:shadow-orange-500/40 transition-all hover:scale-105"
             >
-              <Compass className="w-5 h-5 mr-2" />
+              <Compass className="w-6 h-6 mr-3" />
               View All Destinations
-              <ArrowRight className="w-5 h-5 ml-2" />
+              <ArrowRight className="w-6 h-6 ml-3" />
             </Button>
           </Link>
         </div>
 
-        {/* Stats */}
-        <div className="bg-slate-900 rounded-3xl p-6 md:p-8 border border-white/10">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+        {/* Stats Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="bg-gradient-to-r from-slate-800/50 via-slate-800/80 to-slate-800/50 backdrop-blur-sm rounded-3xl p-10 border border-white/10"
+        >
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
               { value: '25+', label: 'Destinations', icon: '🗺️' },
               { value: '8', label: 'UNESCO Sites', icon: '🏛️' },
@@ -368,15 +365,15 @@ const FeaturedDestinations = () => {
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.1 }}
               >
-                <div className="text-3xl mb-2">{stat.icon}</div>
-                <div className="text-3xl md:text-4xl font-extrabold text-white mb-1">
+                <div className="text-4xl mb-3">{stat.icon}</div>
+                <div className="text-4xl md:text-5xl font-black text-white mb-2">
                   {stat.value}
                 </div>
-                <div className="text-sm md:text-base text-gray-300 font-semibold tracking-wide">{stat.label}</div>
+                <div className="text-base text-gray-400 font-semibold tracking-wide">{stat.label}</div>
               </motion.div>
             ))}
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

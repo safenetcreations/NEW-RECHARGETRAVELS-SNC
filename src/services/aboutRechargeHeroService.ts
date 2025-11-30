@@ -7,7 +7,8 @@ import {
     query,
     orderBy,
     serverTimestamp,
-    updateDoc
+    updateDoc,
+    getDoc
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
@@ -17,6 +18,7 @@ export interface AboutRechargeHeroSlide {
     title: string;
     subtitle: string;
     badge?: string;
+    isActive?: boolean;
     createdAt?: any;
 }
 
@@ -63,21 +65,33 @@ export const DEFAULT_RECHARGE_SLIDES: AboutRechargeHeroSlide[] = [
 
 export async function getAboutRechargeHeroSlides(): Promise<AboutRechargeHeroSlide[]> {
     try {
-        const q = query(collection(db, COLLECTION_NAME), orderBy('createdAt', 'asc'));
-        const querySnapshot = await getDocs(q);
+        // ONLY fetch from admin panel - page-content/about-recharge-travels
+        const pageContentRef = doc(db, 'page-content', 'about-recharge-travels');
+        const pageContentSnap = await getDoc(pageContentRef);
 
-        if (querySnapshot.empty) {
-            await initializeDefaultRechargeSlides();
-            return DEFAULT_RECHARGE_SLIDES;
+        if (pageContentSnap.exists()) {
+            const data = pageContentSnap.data();
+            if (data.heroSlides && Array.isArray(data.heroSlides) && data.heroSlides.length > 0) {
+                // Filter to only active slides with valid images
+                const activeSlides = data.heroSlides.filter(
+                    (slide: AboutRechargeHeroSlide) =>
+                        slide.isActive !== false &&
+                        slide.image &&
+                        slide.image.trim() !== ''
+                );
+                if (activeSlides.length > 0) {
+                    console.log('Loaded hero slides from admin panel:', activeSlides.length);
+                    return activeSlides;
+                }
+            }
         }
 
-        return querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        } as AboutRechargeHeroSlide));
+        // Return empty array if no admin panel slides - NO FALLBACK to defaults
+        console.log('No hero slides found in admin panel');
+        return [];
     } catch (error) {
         console.error('Error fetching About Recharge hero slides:', error);
-        return DEFAULT_RECHARGE_SLIDES;
+        return [];
     }
 }
 

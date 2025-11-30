@@ -1,366 +1,389 @@
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
-const COLLECTION_NAME = 'pageContent';
+const COLLECTION_NAME = 'waterSportsBookingContent';
 const DOC_ID = 'kalpitiya-kitesurfing';
 
-// Interfaces
-export interface HeroImage {
+export interface KalpitiyaHeroSlide {
+  image: string;
+  caption: string;
+  tag?: string;
+}
+
+export interface KalpitiyaBadge {
+  label: string;
+  value: string;
+  iconName: string;
+}
+
+export interface KalpitiyaHighlight {
+  label: string;
+  description: string;
+}
+
+export interface KalpitiyaExperience {
   id: string;
-  url: string;
+  name: string;
+  summary: string;
+  duration: string;
+  priceLabel: string;
+  level: 'Beginner' | 'Intermediate' | 'Advanced' | 'All Levels';
+  includes: string[];
+  image?: string;
+  iconName: string;
+}
+
+export interface KalpitiyaComboPackage {
+  id: string;
+  name: string;
+  badge: string;
+  duration: string;
+  priceLabel: string;
+  highlights: string[];
+  includes: string[];
+  iconName: string;
+}
+
+export interface KalpitiyaLogistics {
+  meetingPoint: string;
+  sessionTimes: string[];
+  baseLocation: string;
+  transferNote: string;
+  gearProvided: string[];
+  bringList: string[];
+  weatherPolicy: string;
+}
+
+export interface KalpitiyaGalleryImage {
+  id: string;
+  image: string;
   caption: string;
 }
 
-export interface Stat {
-  id: string;
-  iconName: string;
-  label: string;
-  value: string;
-}
-
-export interface KitePackage {
-  id: string;
-  name: string;
-  duration: string;
-  price: string;
-  level: string;
-  highlights: string[];
-  included: string[];
-  iconName: string;
-}
-
-export interface WindCondition {
-  id: string;
-  season: string;
-  months: string;
-  windSpeed: string;
-  direction: string;
-  conditions: string;
-  recommended: string;
-}
-
-export interface KitingSpot {
-  id: string;
-  name: string;
-  description: string;
-  conditions: string;
-  bestFor: string;
-  features: string[];
-  waterDepth: string;
-}
-
-export interface PreparationItem {
-  id: string;
-  iconName: string;
-  title: string;
-  items: string[];
-}
-
-export interface FAQ {
+export interface KalpitiyaFaq {
   id: string;
   question: string;
   answer: string;
 }
 
-export interface GalleryImage {
-  id: string;
-  url: string;
-  alt: string;
+export interface KalpitiyaBookingInfo {
+  contactPhone: string;
+  whatsapp: string;
+  email: string;
+  responseTime: string;
+  conciergeNote: string;
+}
+
+export interface KalpitiyaPricingInfo {
+  currency: string;
+  startingPrice: number;
+  depositNote: string;
+  refundPolicy: string;
+  extrasNote: string;
 }
 
 export interface KalpitiyaKitesurfingPageContent {
   hero: {
     title: string;
     subtitle: string;
-    ctaText: string;
-    images: HeroImage[];
+    badge: string;
+    gallery: KalpitiyaHeroSlide[];
   };
   overview: {
-    title: string;
-    description: string;
+    summary: string;
+    badges: KalpitiyaBadge[];
+    highlights: KalpitiyaHighlight[];
   };
-  stats: Stat[];
-  kitePackages: KitePackage[];
-  windConditions: WindCondition[];
-  kitingSpots: KitingSpot[];
-  preparation: PreparationItem[];
-  faqs: FAQ[];
-  gallery: GalleryImage[];
-  cta: {
-    title: string;
-    description: string;
-    primaryButtonText: string;
-    secondaryButtonText: string;
-  };
-  contact: {
-    phone: string;
-    phoneNote: string;
-    email: string;
-    emailNote: string;
-    website: string;
-    websiteNote: string;
-  };
+  experiences: KalpitiyaExperience[];
+  combos: KalpitiyaComboPackage[];
+  logistics: KalpitiyaLogistics;
+  safety: string[];
+  faqs: KalpitiyaFaq[];
+  gallery: KalpitiyaGalleryImage[];
+  booking: KalpitiyaBookingInfo;
+  pricing: KalpitiyaPricingInfo;
   seo: {
     title: string;
     description: string;
     keywords: string[];
     ogImage: string;
   };
-  updatedAt?: any;
 }
 
-// Default content
-const defaultContent: KalpitiyaKitesurfingPageContent = {
+export const defaultKalpitiyaContent: KalpitiyaKitesurfingPageContent = {
   hero: {
-    title: 'Kalpitiya Kitesurfing',
-    subtitle: "Ride the Wind at Sri Lanka's Premier Kite Destination",
-    ctaText: 'Book Kite Session',
-    images: [
-      { id: '1', url: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=1920&h=1080&fit=crop', caption: 'Kitesurfing in Kalpitiya' },
-      { id: '2', url: 'https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=1920&h=1080&fit=crop', caption: 'Perfect Wind Conditions' },
-      { id: '3', url: 'https://images.unsplash.com/photo-1540979388789-6cee28a1cdc9?w=1920&h=1080&fit=crop', caption: 'Lagoon Kitesurfing' },
-      { id: '4', url: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=1920&h=1080&fit=crop', caption: 'Sunset Kite Sessions' }
+    title: 'Kalpitiya Kitesurfing Concierge',
+    subtitle: 'Ride the Indian Ocean trade winds with IKO-certified guides, premium gear, and concierge-planned downwinders.',
+    badge: 'Trade Wind Capital',
+    gallery: [
+      {
+        image: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&w=2000&q=80',
+        caption: 'Lagoon coaching laps at sunrise',
+        tag: 'Flat water'
+      },
+      {
+        image: 'https://images.unsplash.com/photo-1502680390469-be75c86b636f?auto=format&fit=crop&w=2000&q=80',
+        caption: 'Downwinder to Vella Island',
+        tag: 'Downwinders'
+      },
+      {
+        image: 'https://images.unsplash.com/photo-1540979388789-6cee28a1cdc9?auto=format&fit=crop&w=2000&q=80',
+        caption: 'Sunset freestyle jam',
+        tag: 'Freestyle'
+      },
+      {
+        image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=2000&q=80',
+        caption: 'Golden-hour foil sessions',
+        tag: 'Foil'
+      }
     ]
   },
   overview: {
-    title: "Sri Lanka's Kitesurfing Paradise",
-    description: "Kalpitiya is renowned as one of Asia's best kitesurfing destinations, offering consistent winds, warm waters, and stunning lagoon conditions. Whether you're a beginner looking to learn or an experienced rider seeking perfect conditions, Kalpitiya delivers an unforgettable kitesurfing experience with its flat-water lagoons and wave spots."
+    summary:
+      'Kalpitiya delivers 200+ wind days a year, butter-flat lagoons, and wave spots within boat reach. Our concierge crew handles permits, transport, and session planning so you can focus on progression.',
+    badges: [
+      { label: 'Wind Days', value: '200+', iconName: 'Wind' },
+      { label: 'Kite Spots', value: '8+', iconName: 'Map' },
+      { label: 'IKO Pros', value: '100%', iconName: 'Shield' },
+      { label: 'Students Certified', value: '5,000+', iconName: 'Users' }
+    ],
+    highlights: [
+      {
+        label: 'Dual monsoon seasons',
+        description: 'May–Oct trade winds and Dec–Mar light-wind freestyle keep Kalpitiya rideable almost year round.'
+      },
+      {
+        label: 'Concierge downwinders',
+        description: 'Private boats shadow your ride with cold-pressed juices, drone clips, and rescue coverage.'
+      },
+      {
+        label: 'Boutique kite village',
+        description: 'Lagoon-front lockers, freshwater showers, gear tuning bay, and mezze bar open sunrise to sunset.'
+      }
+    ]
   },
-  stats: [
-    { id: '1', iconName: 'Wind', label: 'Wind Days/Year', value: '200+' },
-    { id: '2', iconName: 'Compass', label: 'Kite Spots', value: '8+' },
-    { id: '3', iconName: 'Users', label: 'Students Trained', value: '5,000+' },
-    { id: '4', iconName: 'Award', label: 'IKO Certified', value: '100%' }
-  ],
-  kitePackages: [
+  experiences: [
     {
-      id: '1',
-      name: 'Beginner Discovery',
-      duration: '3 Days',
-      price: '$299',
+      id: 'beginner-discovery',
+      name: 'Beginner Discovery (IKO Level 1-2)',
+      summary: 'From first kite handling through your inaugural water starts with radio helmets and rescue boat shadow.',
+      duration: '3 days • 12 hours',
+      priceLabel: 'USD 299 per rider',
       level: 'Beginner',
-      highlights: ['Safety & theory', 'Kite control', 'Body dragging', 'Water start intro'],
-      included: ['All equipment', 'IKO certified instructor', 'Safety gear', 'Boat rescue support', 'Certificate'],
-      iconName: 'GraduationCap'
+      includes: ['All 2024 Cabrinha kites + boards', 'IKO-certified bilingual coach', 'Impact vest & helmet', 'Daily progress cards', 'Rescue boat + GoPro clip'],
+      iconName: 'GraduationCap',
+      image: 'https://images.unsplash.com/photo-1505533321630-975218a5f66f?auto=format&fit=crop&w=1400&q=80'
     },
     {
-      id: '2',
-      name: 'Intermediate Progression',
-      duration: '2 Days',
-      price: '$199',
+      id: 'intermediate-progression',
+      name: 'Intermediate Progression Lab',
+      summary: 'Dial in upwind angles, transitions, basic jumps, and foil intros with video feedback in butter-flat water.',
+      duration: '2 days • 8 hours',
+      priceLabel: 'USD 199 per rider',
       level: 'Intermediate',
-      highlights: ['Upwind riding', 'Transitions', 'Jump basics', 'Speed control'],
-      included: ['Premium equipment', 'Personal coaching', 'Video analysis', 'Theory session', 'Progress card'],
-      iconName: 'TrendingUp'
+      includes: ['Premium freeride quiver', 'Video analysis + debriefs', 'Hydration + recovery snacks', 'Radio coaching', 'Foil add-on optional'],
+      iconName: 'TrendingUp',
+      image: 'https://images.unsplash.com/photo-1534180477871-5d6cc81f3920?auto=format&fit=crop&w=1400&q=80'
     },
     {
-      id: '3',
-      name: 'Wave Riding Master Class',
-      duration: '3 Days',
-      price: '$449',
+      id: 'wave-master',
+      name: 'Strapless Wave Master Class',
+      summary: 'Boat-supported strike missions to Donkey Point with pro coaches covering carving, aerials, and safety.',
+      duration: '3 days • 9 hours',
+      priceLabel: 'USD 449 per rider',
       level: 'Advanced',
-      highlights: ['Wave selection', 'Strapless riding', 'Bottom turns', 'Aerial maneuvers'],
-      included: ['Directional boards', 'Expert instructor', 'Spot guiding', 'All equipment', 'Video coaching'],
-      iconName: 'Waves'
+      includes: ['Directional quiver', 'Personal spot guide', 'Surf safety briefing', 'Photo pack + edits', 'Boat support & fuel'],
+      iconName: 'Waves',
+      image: 'https://images.unsplash.com/photo-1473893604213-66bd3e39263a?auto=format&fit=crop&w=1400&q=80'
     },
     {
-      id: '4',
-      name: 'Kite Safari',
-      duration: '5 Days',
-      price: '$899',
+      id: 'kite-safari',
+      name: 'Island Hopper Kite Safari',
+      summary: 'Five-day lagoon + ocean itinerary featuring Vella, Dream Spot, and private sandbars with glamping.',
+      duration: '5 days',
+      priceLabel: 'USD 899 per guest',
       level: 'All Levels',
-      highlights: ['Multiple spots', 'Downwinders', 'Island exploration', 'Cultural visits'],
-      included: ['All transfers', 'Accommodation', 'Equipment', 'Meals', 'Guide', 'Support boat'],
-      iconName: 'Map'
+      includes: ['Luxury tented camps', 'Chef + mixologist', 'Boat logistics + fuel', 'Massage + recovery ice baths', 'Pro media team'],
+      iconName: 'Map',
+      image: 'https://images.unsplash.com/photo-1529257414771-1960b7bea4eb?auto=format&fit=crop&w=1400&q=80'
     }
   ],
-  windConditions: [
+  combos: [
     {
-      id: '1',
-      season: 'Peak Season',
-      months: 'May - October',
-      windSpeed: '15-25 knots',
-      direction: 'Southwest',
-      conditions: 'Consistent strong winds, perfect for all levels',
-      recommended: 'Best time for beginners and advanced riders'
+      id: 'foil-dawn-patrol',
+      name: 'Foil Dawn Patrol + Yoga',
+      badge: 'Sunrise',
+      duration: '4 hours',
+      priceLabel: 'USD 125 per guest',
+      highlights: ['Tow-assisted foil coaching', 'Sunrise mobility flow', 'Cold brew & açai bowls', 'Drone slow-mo footage'],
+      includes: ['Armstrong foil sets', 'Radio helmets', 'Private coach', 'Post-session stretch therapist'],
+      iconName: 'Sun'
     },
     {
-      id: '2',
-      season: 'Secondary Season',
-      months: 'December - March',
-      windSpeed: '12-20 knots',
-      direction: 'Northeast',
-      conditions: 'Lighter winds, ideal for learning and freestyle',
-      recommended: 'Great for beginners and light wind sessions'
+      id: 'family-lagoon-pass',
+      name: 'Family Lagoon Pass',
+      badge: 'Families',
+      duration: 'Half day',
+      priceLabel: 'USD 320 (family of four)',
+      highlights: ['Kid-friendly trainer kites', 'SUP & clear kayaks', 'Beach picnic with mocktails', 'Mini-photo shoot'],
+      includes: ['Child-size safety gear', 'Shade cabana + fans', 'Concierge host', 'Digital gallery delivery'],
+      iconName: 'Users'
     },
     {
-      id: '3',
-      season: 'Transition Period',
-      months: 'April & November',
-      windSpeed: 'Variable',
-      direction: 'Variable',
-      conditions: 'Changing conditions between monsoons',
-      recommended: 'Suitable for flexible travelers'
-    },
-    {
-      id: '4',
-      season: 'Off Season',
-      months: 'Late October - November',
-      windSpeed: 'Light',
-      direction: 'Variable',
-      conditions: 'Unpredictable winds, some rain',
-      recommended: 'Not recommended for kitesurfing'
+      id: 'twilight-downwinder',
+      name: 'Twilight Sandbar Downwinder',
+      badge: 'Signature',
+      duration: '6 hours',
+      priceLabel: 'USD 275 per guest',
+      highlights: ['Dream Spot to Kalpitiya cruise', 'Support catamaran with tapas', 'Live DJ + bonfire finale', 'Night drone light show'],
+      includes: ['GPS trackers + VHF radios', 'Chef-styled tapas + champagne', 'Transport back to base', 'Photo & video edits'],
+      iconName: 'Sparkles'
     }
   ],
-  kitingSpots: [
-    {
-      id: '1',
-      name: 'Kalpitiya Lagoon',
-      description: 'The main kitesurfing spot with flat water conditions perfect for beginners and freestyle.',
-      conditions: 'Flat water, shallow, consistent wind',
-      bestFor: 'Beginners, Freestyle, Learning',
-      features: ['Waist-deep water', 'No obstacles', 'Rescue boat access', 'Schools nearby'],
-      waterDepth: 'Waist to chest deep'
-    },
-    {
-      id: '2',
-      name: 'Vella Island',
-      description: 'Pristine island spot offering both flat water and small waves for progression.',
-      conditions: 'Mixed conditions, less crowded',
-      bestFor: 'Intermediate, Exploration',
-      features: ['Remote location', 'Clean water', 'Natural beauty', 'Camping possible'],
-      waterDepth: 'Variable depths'
-    },
-    {
-      id: '3',
-      name: 'Dream Spot',
-      description: 'Famous downwinder destination with beautiful scenery and excellent conditions.',
-      conditions: 'Open water, stronger winds',
-      bestFor: 'Downwinders, Advanced riders',
-      features: ['Scenic route', 'Strong consistent wind', 'Clear water', 'Dolphin sightings'],
-      waterDepth: 'Deep water'
-    },
-    {
-      id: '4',
-      name: 'Donkey Point',
-      description: 'Wave spot for experienced riders seeking more challenging conditions.',
-      conditions: 'Waves, stronger currents',
-      bestFor: 'Wave riding, Advanced',
-      features: ['Wave riding', 'Less crowded', 'Challenging conditions', 'Reef breaks'],
-      waterDepth: 'Variable with reef'
-    }
-  ],
-  preparation: [
-    {
-      id: '1',
-      iconName: 'Shirt',
-      title: 'What to Bring',
-      items: ['Swimwear', 'Sunscreen SPF 50+', 'Sunglasses with strap', 'Rash guard', 'Water shoes', 'Towel']
-    },
-    {
-      id: '2',
-      iconName: 'Shield',
-      title: 'Safety Gear Provided',
-      items: ['Impact vest', 'Helmet (beginners)', 'Safety leash', 'Harness', 'Radio communication']
-    },
-    {
-      id: '3',
-      iconName: 'CheckCircle',
-      title: 'Before Your Session',
-      items: ['Eat light meal 2h before', 'Stay hydrated', 'Apply sunscreen', 'Listen to briefing', 'Warm up properly']
-    }
+  logistics: {
+    meetingPoint: 'Recharge Lagoon Basecamp, Kalpitiya Peninsula',
+    sessionTimes: ['Sunrise Thermal • 6:00 AM', 'Trade Wind Peak • 11:30 AM', 'Golden Hour Glass • 4:30 PM'],
+    baseLocation: 'Lagoon-front HQ with lockers, repair bay, freshwater showers, mezze bar, and nap pods.',
+    transferNote: 'Complimentary tuk transfer within 5 km. Chauffeur vans or seaplane add-ons available from Colombo/Negombo.',
+    gearProvided: ['2024 Cabrinha + Duotone quiver', 'Armstrong foil fleet', 'Mystic harnesses in all sizes', 'Impact vests & helmets', 'Radio comm headsets'],
+    bringList: ['Swimwear + rash guard', 'High SPF reef-safe sunscreen', 'Sunglasses with strap', 'Any medications', 'Waterproof phone pouch'],
+    weatherPolicy: '95% wind reliability in main season. If wind drops below safe minimums we reschedule or refund.'
+  },
+  safety: [
+    'IKO Level 2+ instructors with rescue + first aid certifications',
+    'Dedicated rescue RIB on standby during every session',
+    'Daily gear inspections and logbook sign-offs',
+    'Live weather + gust radar monitored from basecamp'
   ],
   faqs: [
-    { id: '1', question: 'Do I need prior experience to learn kitesurfing?', answer: 'No prior experience is needed! Our beginner courses start from scratch, teaching you everything from kite control to your first water starts. Basic swimming ability is the only requirement. Most students are riding independently within 3-4 days of lessons.' },
-    { id: '2', question: 'What is the best time of year for kitesurfing in Kalpitiya?', answer: 'The peak season runs from May to October when the southwest monsoon brings consistent 15-25 knot winds. A secondary season from December to March offers lighter northeast winds (12-20 knots), ideal for beginners and freestyle. We recommend avoiding late October to November.' },
-    { id: '3', question: 'What equipment do I need to bring?', answer: 'We provide all kitesurfing equipment including kites, boards, harnesses, and safety gear. You should bring swimwear, high SPF sunscreen, sunglasses with a strap, and optionally reef shoes and a rash guard. We also have equipment available for rent if you prefer using your own.' },
-    { id: '4', question: 'Is kitesurfing safe for beginners?', answer: "Yes, when learned properly with qualified instructors. All our instructors are IKO certified with extensive experience. We use modern safety systems, provide thorough briefings, and maintain rescue boat support. The Kalpitiya lagoon's shallow, flat water makes it one of the safest places to learn." },
-    { id: '5', question: 'Can I bring my own equipment?', answer: 'You can bring your own equipment. We recommend kites suitable for the expected wind conditions (9-12m for peak season, 12-15m for secondary season). Storage facilities are available, and our team can advise on the best setup for current conditions.' },
-    { id: '6', question: 'What happens if there is no wind?', answer: "Wind days in season are highly reliable (95%+ in peak season). If conditions are unsuitable, we'll reschedule your session to the next available slot or offer alternative activities like SUP, snorkeling, or dolphin watching. Multi-day packages include flexible scheduling." }
+    {
+      id: 'faq-1',
+      question: 'Do I need prior kite experience?',
+      answer: 'No. Our discovery course covers safety, kite handling, body dragging, and water starts over three days. Basic swimming ability is the only prerequisite.'
+    },
+    {
+      id: 'faq-2',
+      question: 'When is the best season for Kalpitiya?',
+      answer: 'Peak winds blow May–October (15–25 knots). December–March offers lighter 12–18 knot sessions perfect for freestyle, foiling, and first-timers.'
+    },
+    {
+      id: 'faq-3',
+      question: 'Can non-kiters join?',
+      answer: 'Yes—partners can book dolphin cruises, SUP safaris, spa rituals, or simply enjoy our lagoon lounge while you ride.'
+    },
+    {
+      id: 'faq-4',
+      question: 'What happens if there is no wind?',
+      answer: 'We pivot to foil lessons behind a boat, SUP mangrove tours, or reschedule. If wind fails entirely, you receive a 100% refund for that session.'
+    }
   ],
   gallery: [
-    { id: '1', url: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&h=300&fit=crop', alt: 'Kitesurfing action' },
-    { id: '2', url: 'https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=400&h=300&fit=crop', alt: 'Kite on beach' },
-    { id: '3', url: 'https://images.unsplash.com/photo-1540979388789-6cee28a1cdc9?w=400&h=300&fit=crop', alt: 'Lagoon view' },
-    { id: '4', url: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&h=300&fit=crop', alt: 'Sunset session' },
-    { id: '5', url: 'https://images.unsplash.com/photo-1530870110042-98b2cb110834?w=400&h=300&fit=crop', alt: 'Kite jumping' },
-    { id: '6', url: 'https://images.unsplash.com/photo-1506665531195-3566af2b4dfa?w=400&h=300&fit=crop', alt: 'Beach setup' },
-    { id: '7', url: 'https://images.unsplash.com/photo-1537519646099-335112f03225?w=400&h=300&fit=crop', alt: 'Group lesson' },
-    { id: '8', url: 'https://images.unsplash.com/photo-1527004760346-e47d0e5e62f4?w=400&h=300&fit=crop', alt: 'Aerial view' }
+    {
+      id: 'gallery-1',
+      image: 'https://images.unsplash.com/photo-1530870110042-98b2cb110834?auto=format&fit=crop&w=1000&q=80',
+      caption: 'Coach-led lagoon progression sets'
+    },
+    {
+      id: 'gallery-2',
+      image: 'https://images.unsplash.com/photo-1529257414771-1960b7bea4eb?auto=format&fit=crop&w=1000&q=80',
+      caption: 'Downwind convoy to Vella Island'
+    },
+    {
+      id: 'gallery-3',
+      image: 'https://images.unsplash.com/photo-1473893604213-66bd3e39263a?auto=format&fit=crop&w=1000&q=80',
+      caption: 'Donkey Point wave playground'
+    },
+    {
+      id: 'gallery-4',
+      image: 'https://images.unsplash.com/photo-1526045478516-99145907023c?auto=format&fit=crop&w=1000&q=80',
+      caption: 'Twilight foil missions'
+    }
   ],
-  cta: {
-    title: 'Ready to Ride the Wind?',
-    description: 'Book your kitesurfing adventure in Kalpitiya today. Perfect conditions, expert instruction, and unforgettable experiences await!',
-    primaryButtonText: 'Book Kite Session',
-    secondaryButtonText: 'Call for Details'
+  booking: {
+    contactPhone: '+94 777 721 999',
+    whatsapp: 'https://wa.me/94777721999',
+    email: 'concierge@rechargetravels.com',
+    responseTime: 'WhatsApp + email replies in under 15 minutes (06:00 – 22:00 GMT+5:30)',
+    conciergeNote: 'Tell us your wind window, riding level, and desired vibe—our lagoon hosts craft the rest.'
   },
-  contact: {
-    phone: '+94 76 505 9595',
-    phoneNote: 'Available 24/7',
-    email: 'info@rechargetravels.com',
-    emailNote: 'Quick response',
-    website: 'www.rechargetravels.com',
-    websiteNote: 'More experiences'
+  pricing: {
+    currency: 'USD',
+    startingPrice: 299,
+    depositNote: 'Secure your slot with a 30% deposit; balance due after day one once wind delivers.',
+    refundPolicy: 'Weather cancellations receive 100% refunds or transferable credits. Date changes free up to 24 hours prior.',
+    extrasNote: 'Drone media crews, seaplane transfers, private chefs, and tented glamping upgrades available.'
   },
   seo: {
-    title: 'Kalpitiya Kitesurfing | Learn to Kitesurf Sri Lanka | Recharge Travels',
-    description: "Experience world-class kitesurfing in Kalpitiya, Sri Lanka. IKO certified lessons, equipment rental, and kite safaris. Perfect wind conditions from May to October.",
-    keywords: ['Kalpitiya kitesurfing', 'learn to kitesurf Sri Lanka', 'kite lessons Kalpitiya', 'kiteboarding Sri Lanka', 'IKO certified', 'kite safari'],
-    ogImage: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=1200&h=630&fit=crop'
+    title: 'Kalpitiya Kitesurfing | Concierge Kite Lessons & Safaris | Recharge Travels',
+    description:
+      'Book IKO-certified kite lessons, foil coaching, and concierge-planned downwinders in Kalpitiya. Dual monsoon seasons, premium gear, and lagoonfront basecamp.',
+    keywords: [
+      'Kalpitiya kitesurfing',
+      'Sri Lanka kite lessons',
+      'Kalpitiya kite safari',
+      'IKO certified Sri Lanka',
+      'Kalpitiya wind season'
+    ],
+    ogImage: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&w=1200&h=630&q=80'
   }
 };
 
-// Service class
-class KalpitiyaKitesurfingPageService {
-  async getPageContent(): Promise<KalpitiyaKitesurfingPageContent> {
-    try {
-      const docRef = doc(db, COLLECTION_NAME, DOC_ID);
-      const docSnap = await getDoc(docRef);
+class KalpitiyaKitesurfingBookingService {
+  async getContent(): Promise<KalpitiyaKitesurfingPageContent> {
+    const docRef = doc(db, COLLECTION_NAME, DOC_ID);
+    const snapshot = await getDoc(docRef);
 
-      if (docSnap.exists()) {
-        return docSnap.data() as KalpitiyaKitesurfingPageContent;
-      } else {
-        await this.updatePageContent(defaultContent);
-        return defaultContent;
-      }
-    } catch (error) {
-      console.error('Error fetching Kalpitiya kitesurfing page content:', error);
-      return defaultContent;
+    if (!snapshot.exists()) {
+      await setDoc(docRef, defaultKalpitiyaContent);
+      return defaultKalpitiyaContent;
     }
+
+    const data = snapshot.data() as Partial<KalpitiyaKitesurfingPageContent>;
+
+    return {
+      ...defaultKalpitiyaContent,
+      ...data,
+      hero: {
+        ...defaultKalpitiyaContent.hero,
+        ...(data.hero || {}),
+        gallery:
+          data.hero?.gallery && data.hero.gallery.length > 0
+            ? data.hero.gallery
+            : defaultKalpitiyaContent.hero.gallery
+      },
+      overview: {
+        ...defaultKalpitiyaContent.overview,
+        ...(data.overview || {}),
+        badges:
+          data.overview?.badges && data.overview.badges.length > 0
+            ? data.overview.badges
+            : defaultKalpitiyaContent.overview.badges,
+        highlights:
+          data.overview?.highlights && data.overview.highlights.length > 0
+            ? data.overview.highlights
+            : defaultKalpitiyaContent.overview.highlights
+      },
+      experiences: data.experiences && data.experiences.length > 0 ? data.experiences : defaultKalpitiyaContent.experiences,
+      combos: data.combos && data.combos.length > 0 ? data.combos : defaultKalpitiyaContent.combos,
+      logistics: { ...defaultKalpitiyaContent.logistics, ...(data.logistics || {}) },
+      safety: data.safety && data.safety.length > 0 ? data.safety : defaultKalpitiyaContent.safety,
+      faqs: data.faqs && data.faqs.length > 0 ? data.faqs : defaultKalpitiyaContent.faqs,
+      gallery: data.gallery && data.gallery.length > 0 ? data.gallery : defaultKalpitiyaContent.gallery,
+      booking: { ...defaultKalpitiyaContent.booking, ...(data.booking || {}) },
+      pricing: { ...defaultKalpitiyaContent.pricing, ...(data.pricing || {}) },
+      seo: { ...defaultKalpitiyaContent.seo, ...(data.seo || {}) }
+    };
   }
 
-  async updatePageContent(content: Partial<KalpitiyaKitesurfingPageContent>): Promise<boolean> {
-    try {
-      const docRef = doc(db, COLLECTION_NAME, DOC_ID);
-      await setDoc(docRef, {
-        ...content,
-        updatedAt: serverTimestamp()
-      }, { merge: true });
-      return true;
-    } catch (error) {
-      console.error('Error updating Kalpitiya kitesurfing page content:', error);
-      return false;
-    }
+  async saveContent(content: Partial<KalpitiyaKitesurfingPageContent>) {
+    const docRef = doc(db, COLLECTION_NAME, DOC_ID);
+    await setDoc(docRef, content, { merge: true });
   }
 
-  async resetToDefault(): Promise<boolean> {
-    try {
-      const docRef = doc(db, COLLECTION_NAME, DOC_ID);
-      await setDoc(docRef, {
-        ...defaultContent,
-        updatedAt: serverTimestamp()
-      });
-      return true;
-    } catch (error) {
-      console.error('Error resetting Kalpitiya kitesurfing page content:', error);
-      return false;
-    }
-  }
-
-  getDefaultContent(): KalpitiyaKitesurfingPageContent {
-    return defaultContent;
+  getDefaultContent() {
+    return defaultKalpitiyaContent;
   }
 }
 
-export const kalpitiyaKitesurfingPageService = new KalpitiyaKitesurfingPageService();
+export const kalpitiyaKitesurfingPageService = new KalpitiyaKitesurfingBookingService();
 export default kalpitiyaKitesurfingPageService;

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { useNavigate } from 'react-router-dom';
 import { collection, doc, getDoc, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useQuery } from '@tanstack/react-query';
@@ -9,7 +10,6 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import EnhancedBookingModal from '@/components/EnhancedBookingModal';
 import {
   Leaf, Clock, MapPin, ChevronRight, Play, Phone, Mail,
   Send, Camera, Coffee, Mountain, Users, Calendar, DollarSign,
@@ -194,8 +194,7 @@ const defaultTeaTrailsData: TeaTrailsData = {
 };
 
 const TeaTrails = () => {
-  const [showBookingModal, setShowBookingModal] = useState(false);
-  const [selectedTour, setSelectedTour] = useState<Tour | null>(null);
+  const navigate = useNavigate();
   const [contactForm, setContactForm] = useState({
     name: '',
     email: '',
@@ -294,10 +293,24 @@ const TeaTrails = () => {
     setContactForm({ name: '', email: '', phone: '', message: '' });
   };
 
-  // Handle tour booking
+  // Handle tour booking - Navigate to full-page booking
   const handleBookTour = (tour: Tour) => {
-    setSelectedTour(tour);
-    setShowBookingModal(true);
+    const params = new URLSearchParams({
+      package: tour.title,
+      price: tour.salePriceUSD.toString(),
+      duration: tour.duration,
+    });
+    navigate(`/booking/tea-trails?${params.toString()}`);
+  };
+
+  // Handle general booking - Navigate to full-page booking
+  const handleBookNow = (title?: string, price?: number, duration?: string) => {
+    const params = new URLSearchParams({
+      package: title || 'Ceylon Tea Trail Experience',
+      price: (price || 299).toString(),
+      duration: duration || '3 Days',
+    });
+    navigate(`/booking/tea-trails?${params.toString()}`);
   };
 
   // JSON-LD structured data
@@ -446,7 +459,7 @@ const TeaTrails = () => {
               <Button 
                 size="lg" 
                 className="bg-green-600 hover:bg-green-700 text-white shadow-xl hover:shadow-2xl transition-all duration-200"
-                onClick={() => setShowBookingModal(true)}
+                onClick={() => handleBookNow()}
               >
                 <Calendar className="w-5 h-5 mr-2" />
                 Book Tea Trail Tour
@@ -568,7 +581,7 @@ const TeaTrails = () => {
                           </div>
                         )}
                       </div>
-                      <Button className="bg-green-600 hover:bg-green-700" onClick={() => setShowBookingModal(true)}>
+                      <Button className="bg-green-600 hover:bg-green-700" onClick={() => handleBookNow()}>
                         Book This Route
                       </Button>
                     </CardContent>
@@ -755,7 +768,7 @@ const TeaTrails = () => {
               <Button
                 size="lg"
                 className="bg-white text-green-700 hover:bg-gray-100 shadow-xl hover:shadow-2xl transition-all duration-200"
-                onClick={() => setShowBookingModal(true)}
+                onClick={() => handleBookNow()}
               >
                 <Leaf className="w-5 h-5 mr-2" />
                 Start Your Tea Journey
@@ -849,29 +862,6 @@ const TeaTrails = () => {
       </section>
 
       <Footer />
-
-      {/* Booking Modal */}
-      {showBookingModal && (
-        <EnhancedBookingModal
-          isOpen={showBookingModal}
-          onClose={() => {
-            setShowBookingModal(false);
-            setSelectedTour(null);
-          }}
-          experienceType="tea-trails"
-          experienceDetails={selectedTour ? {
-            name: selectedTour.title,
-            price: selectedTour.salePriceUSD,
-            duration: selectedTour.duration,
-            image: selectedTour.thumbnail
-          } : {
-            name: "Tea Trail Experience",
-            price: 299,
-            duration: "3 Days",
-            image: data.heroImageURL
-          }}
-        />
-      )}
     </>
   );
 };

@@ -1,17 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-import { getAboutRechargeHeroSlides, AboutRechargeHeroSlide, DEFAULT_RECHARGE_SLIDES } from '@/services/aboutRechargeHeroService';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { getAboutRechargeHeroSlides, AboutRechargeHeroSlide } from '@/services/aboutRechargeHeroService';
 import {
   heroStats,
   timelineEvents,
   achievementHighlights,
-  fleetVehicles,
+  fleetVehicles as defaultFleetVehicles,
   reviewPlatforms,
   customerReviews,
 } from '@/data/about/rechargeHistory';
+
+// Fleet vehicle type from admin panel
+interface AdminFleetVehicle {
+  id: string;
+  name: string;
+  description: string;
+  image: string;
+}
+
+// Timeline event type from admin panel
+interface AdminTimelineEvent {
+  id: string;
+  yearRange: string;
+  title: string;
+  description: string;
+  type: 'success' | 'crisis' | 'milestone';
+  highlights: string[];
+  location: string;
+  images: string[];
+}
 import {
   ChevronLeft, ChevronRight, ChevronDown, Star, Calendar, Users,
   Car, Bus, MapPin, Award, Shield, Phone, MessageCircle,
@@ -24,24 +44,74 @@ import { Card } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 
 const AboutRechargeTravel = () => {
-  // Hero slider state
-  const [heroSlides, setHeroSlides] = useState<AboutRechargeHeroSlide[]>(DEFAULT_RECHARGE_SLIDES);
+  // Hero slider state - start empty, only show admin panel slides
+  const [heroSlides, setHeroSlides] = useState<AboutRechargeHeroSlide[]>([]);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [heroLoading, setHeroLoading] = useState(true);
 
-  // Load hero slides
+  // Fleet vehicles from admin panel
+  const [fleetVehicles, setFleetVehicles] = useState<AdminFleetVehicle[]>([]);
+
+  // Timeline events from admin panel (with images)
+  const [adminTimeline, setAdminTimeline] = useState<AdminTimelineEvent[]>([]);
+
+  // Track active carousel image for each timeline event
+  const [timelineCarouselIndex, setTimelineCarouselIndex] = useState<Record<string, number>>({});
+
+  // Load all content from admin panel
+  useEffect(() => {
+    const loadAboutContent = async () => {
+      try {
+        const docRef = doc(db, 'page-content', 'about-recharge-travels');
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+
+          // Load fleet vehicles with images
+          if (data.fleet && Array.isArray(data.fleet) && data.fleet.length > 0) {
+            const validFleet = data.fleet.filter(
+              (v: AdminFleetVehicle) => v.name && v.name.trim() !== ''
+            );
+            if (validFleet.length > 0) {
+              setFleetVehicles(validFleet);
+            }
+          }
+
+          // Load timeline events with images
+          if (data.timeline && Array.isArray(data.timeline) && data.timeline.length > 0) {
+            const validTimeline = data.timeline.filter(
+              (t: AdminTimelineEvent) => t.yearRange && t.title
+            );
+            if (validTimeline.length > 0) {
+              setAdminTimeline(validTimeline);
+              // Initialize carousel indexes
+              const initialIndexes: Record<string, number> = {};
+              validTimeline.forEach((t: AdminTimelineEvent) => {
+                initialIndexes[t.id] = 0;
+              });
+              setTimelineCarouselIndex(initialIndexes);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error loading about content:', error);
+      }
+    };
+    loadAboutContent();
+  }, []);
+
+  // Load hero slides from admin panel ONLY
   useEffect(() => {
     const loadHeroSlides = async () => {
       try {
         const slides = await getAboutRechargeHeroSlides();
-        // Filter out slides with empty or invalid image URLs
+        // Only use slides from admin panel
         const validSlides = slides?.filter(slide => slide.image && slide.image.trim() !== '') || [];
-        if (validSlides.length > 0) {
-          setHeroSlides(validSlides);
-        }
-        // Keep DEFAULT_RECHARGE_SLIDES if no valid slides from Firebase
+        setHeroSlides(validSlides);
       } catch (error) {
         console.error('Failed to load hero slides:', error);
+        setHeroSlides([]);
       } finally {
         setHeroLoading(false);
       }
@@ -49,8 +119,9 @@ const AboutRechargeTravel = () => {
     loadHeroSlides();
   }, []);
 
-  // Auto-advance slides every 6 seconds
+  // Auto-advance slides every 6 seconds (only if there are slides)
   useEffect(() => {
+    if (heroSlides.length <= 1) return;
     const interval = setInterval(() => {
       setCurrentSlideIndex((prev) => (prev + 1) % heroSlides.length);
     }, 6000);
@@ -69,6 +140,28 @@ const AboutRechargeTravel = () => {
 
   const scrollToContent = () => {
     document.getElementById('story')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // Timeline carousel navigation
+  const nextTimelineImage = (eventId: string, totalImages: number) => {
+    setTimelineCarouselIndex(prev => ({
+      ...prev,
+      [eventId]: ((prev[eventId] || 0) + 1) % totalImages
+    }));
+  };
+
+  const prevTimelineImage = (eventId: string, totalImages: number) => {
+    setTimelineCarouselIndex(prev => ({
+      ...prev,
+      [eventId]: ((prev[eventId] || 0) - 1 + totalImages) % totalImages
+    }));
+  };
+
+  const setTimelineImage = (eventId: string, index: number) => {
+    setTimelineCarouselIndex(prev => ({
+      ...prev,
+      [eventId]: index
+    }));
   };
 
   // Icon mapping for achievements
@@ -108,20 +201,22 @@ const AboutRechargeTravel = () => {
         <link rel="canonical" href="https://recharge-travels.com/about" />
       </Helmet>
 
-      <Header />
-
       <div className="bg-white">
         {/* Hero Section with Auto-Sliding Images */}
-        <section className="relative h-screen flex items-center justify-center overflow-hidden">
-          <AnimatePresence mode="wait">
+        <section className="relative h-screen flex items-center justify-center overflow-hidden bg-slate-900">
+          {/* Static dark background to prevent white flash */}
+          <div className="absolute inset-0 bg-slate-900" />
+
+          {/* Crossfade images - no wait mode for smooth transition */}
+          <AnimatePresence>
             <motion.div
               key={currentSlideIndex}
               className="absolute inset-0 bg-cover bg-center bg-no-repeat"
               style={{ backgroundImage: `url(${currentSlide?.image})` }}
-              initial={{ opacity: 0, scale: 1.1 }}
-              animate={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 1.5 }}
+              transition={{ duration: 1.2, ease: "easeInOut" }}
             >
               <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70"></div>
             </motion.div>
@@ -157,26 +252,30 @@ const AboutRechargeTravel = () => {
                   ))}
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Button
-                    size="lg"
-                    className="bg-white text-blue-600 hover:bg-blue-50 px-8 py-6 text-lg font-semibold rounded-full shadow-xl"
-                    onClick={scrollToContent}
-                  >
-                    Our Story
-                  </Button>
-                  <Link to="/book-now">
-                    <Button
-                      size="lg"
-                      variant="outline"
-                      className="border-2 border-white text-white hover:bg-white/10 px-8 py-6 text-lg font-semibold rounded-full backdrop-blur-sm"
-                    >
-                      Book With Us
-                    </Button>
-                  </Link>
-                </div>
               </motion.div>
             </AnimatePresence>
+
+          </div>
+
+          {/* Static Buttons - Always Visible - Outside animated content */}
+          <div className="absolute bottom-40 left-1/2 -translate-x-1/2 z-30 flex flex-col sm:flex-row gap-6 justify-center">
+            <Button
+              size="lg"
+              className="bg-white text-blue-600 hover:bg-blue-50 hover:scale-105 px-12 py-8 text-xl font-bold rounded-full shadow-2xl transition-all duration-300 min-w-[220px]"
+              onClick={scrollToContent}
+            >
+              <Heart className="w-6 h-6 mr-3" />
+              Our Story
+            </Button>
+            <Link to="/book-now">
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white hover:scale-105 px-12 py-8 text-xl font-bold rounded-full shadow-2xl transition-all duration-300 min-w-[220px] border-0"
+              >
+                <Car className="w-6 h-6 mr-3" />
+                Book With Us
+              </Button>
+            </Link>
           </div>
 
           {/* Slide Navigation */}
@@ -285,7 +384,7 @@ const AboutRechargeTravel = () => {
           </div>
         </section>
 
-        {/* Timeline Section */}
+        {/* Timeline Section with Image Carousels */}
         <section className="py-24 bg-white">
           <div className="container mx-auto px-4 lg:px-8">
             <motion.div
@@ -307,11 +406,9 @@ const AboutRechargeTravel = () => {
               </p>
             </motion.div>
 
-            <div className="relative max-w-4xl mx-auto">
-              {/* Timeline Line */}
-              <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-600 via-amber-500 to-green-600 transform -translate-x-1/2 hidden md:block"></div>
-
-              {timelineEvents.map((event, index) => {
+            {/* Timeline with alternating layout and image carousels */}
+            <div className="space-y-16 max-w-7xl mx-auto">
+              {(adminTimeline.length > 0 ? adminTimeline : timelineEvents).map((event, index) => {
                 const isLeft = index % 2 === 0;
                 const typeColors = {
                   success: 'border-green-500 bg-green-50',
@@ -324,43 +421,135 @@ const AboutRechargeTravel = () => {
                   milestone: 'bg-amber-500',
                 };
 
+                // Get images from admin timeline if available
+                const eventImages = (event as AdminTimelineEvent).images?.filter(img => img && img.trim() !== '') || [];
+                const hasImages = eventImages.length > 0;
+                const currentImageIndex = timelineCarouselIndex[event.id] || 0;
+
                 return (
                   <motion.div
                     key={event.id}
-                    initial={{ opacity: 0, x: isLeft ? -50 : 50 }}
-                    whileInView={{ opacity: 1, x: 0 }}
+                    initial={{ opacity: 0, y: 50 }}
+                    whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6, delay: index * 0.1 }}
-                    className={`relative mb-12 md:w-1/2 ${isLeft ? 'md:pr-12 md:text-right' : 'md:pl-12 md:ml-auto'}`}
+                    className={`grid grid-cols-1 lg:grid-cols-2 gap-8 items-center ${!isLeft ? 'lg:flex-row-reverse' : ''}`}
                   >
-                    {/* Year Badge */}
-                    <div className={`absolute top-0 ${isLeft ? 'md:right-0 md:translate-x-1/2' : 'md:left-0 md:-translate-x-1/2'} hidden md:flex w-20 h-20 rounded-full ${badgeColors[event.type]} items-center justify-center text-white font-bold text-lg shadow-lg z-10`}>
-                      {event.yearRange}
+                    {/* Content Card - alternates position */}
+                    <div className={`order-2 ${isLeft ? 'lg:order-1' : 'lg:order-2'}`}>
+                      <div className="relative">
+                        {/* Year Badge */}
+                        <div className={`absolute -top-4 ${isLeft ? 'left-4' : 'right-4'} z-10 px-6 py-3 rounded-full text-white font-bold text-xl shadow-xl ${badgeColors[event.type]}`}>
+                          {event.yearRange}
+                        </div>
+
+                        <Card className={`p-8 pt-12 border-l-4 ${typeColors[event.type]} shadow-xl hover:shadow-2xl transition-all`}>
+                          <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">{event.title}</h3>
+                          {event.location && (
+                            <p className="text-sm text-blue-600 font-semibold mb-3 flex items-center gap-2">
+                              <MapPin className="w-4 h-4" />
+                              {event.location}
+                            </p>
+                          )}
+                          <p className="text-gray-700 text-lg mb-6 leading-relaxed">{event.description}</p>
+                          {event.highlights && event.highlights.length > 0 && (
+                            <ul className="space-y-2 text-gray-600">
+                              {event.highlights.map((h, i) => (
+                                <li key={i} className="flex items-center gap-3">
+                                  <Star className="w-4 h-4 text-amber-500 shrink-0" />
+                                  <span>{h}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </Card>
+                      </div>
                     </div>
 
-                    <Card className={`p-6 border-l-4 ${typeColors[event.type]} shadow-lg hover:shadow-xl transition-shadow`}>
-                      <div className={`md:hidden mb-3 inline-block px-4 py-1 rounded-full text-white text-sm font-bold ${badgeColors[event.type]}`}>
-                        {event.yearRange}
-                      </div>
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">{event.title}</h3>
-                      {event.location && (
-                        <p className="text-sm text-blue-600 font-semibold mb-2 flex items-center gap-1 justify-start md:justify-end">
-                          <MapPin className="w-4 h-4" />
-                          {event.location}
-                        </p>
+                    {/* Image Carousel - alternates position */}
+                    <div className={`order-1 ${isLeft ? 'lg:order-2' : 'lg:order-1'}`}>
+                      {hasImages ? (
+                        <div className="relative rounded-2xl overflow-hidden shadow-2xl aspect-video bg-slate-900">
+                          {/* Background for smooth transitions */}
+                          <div className="absolute inset-0 bg-slate-900" />
+
+                          {/* Carousel Images */}
+                          <AnimatePresence>
+                            <motion.img
+                              key={currentImageIndex}
+                              src={eventImages[currentImageIndex]}
+                              alt={`${event.title} - Image ${currentImageIndex + 1}`}
+                              className="absolute inset-0 w-full h-full object-cover"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                              transition={{ duration: 0.5 }}
+                            />
+                          </AnimatePresence>
+
+                          {/* Gradient overlay */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+
+                          {/* Year overlay badge */}
+                          <div className={`absolute top-4 ${isLeft ? 'right-4' : 'left-4'} px-4 py-2 rounded-full bg-white/20 backdrop-blur-sm text-white font-bold`}>
+                            {event.yearRange}
+                          </div>
+
+                          {/* Navigation Arrows */}
+                          {eventImages.length > 1 && (
+                            <>
+                              <button
+                                onClick={() => prevTimelineImage(event.id, eventImages.length)}
+                                className="absolute left-3 top-1/2 -translate-y-1/2 p-2 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/40 transition-all"
+                              >
+                                <ChevronLeft className="w-6 h-6 text-white" />
+                              </button>
+                              <button
+                                onClick={() => nextTimelineImage(event.id, eventImages.length)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/40 transition-all"
+                              >
+                                <ChevronRight className="w-6 h-6 text-white" />
+                              </button>
+                            </>
+                          )}
+
+                          {/* Dots Indicator */}
+                          {eventImages.length > 1 && (
+                            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                              {eventImages.map((_, imgIndex) => (
+                                <button
+                                  key={imgIndex}
+                                  onClick={() => setTimelineImage(event.id, imgIndex)}
+                                  className={`w-2.5 h-2.5 rounded-full transition-all ${
+                                    imgIndex === currentImageIndex
+                                      ? 'bg-white w-6'
+                                      : 'bg-white/50 hover:bg-white/70'
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Image counter */}
+                          <div className="absolute bottom-4 right-4 px-3 py-1 rounded-full bg-black/50 text-white text-sm">
+                            {currentImageIndex + 1} / {eventImages.length}
+                          </div>
+                        </div>
+                      ) : (
+                        /* Placeholder when no images */
+                        <div className={`relative rounded-2xl overflow-hidden shadow-xl aspect-video bg-gradient-to-br ${
+                          event.type === 'success' ? 'from-green-400 to-green-600' :
+                          event.type === 'crisis' ? 'from-red-400 to-red-600' :
+                          'from-amber-400 to-orange-500'
+                        } flex items-center justify-center`}>
+                          <div className="text-center text-white">
+                            <Calendar className="w-16 h-16 mx-auto mb-4 opacity-80" />
+                            <p className="text-4xl font-bold">{event.yearRange}</p>
+                            <p className="text-lg opacity-80 mt-2">{event.title}</p>
+                          </div>
+                        </div>
                       )}
-                      <p className="text-gray-700 mb-4">{event.description}</p>
-                      {event.highlights.length > 0 && (
-                        <ul className={`space-y-1 text-sm text-gray-600 ${isLeft ? 'md:text-right' : ''}`}>
-                          {event.highlights.map((h, i) => (
-                            <li key={i} className="flex items-center gap-2">
-                              <Star className="w-3 h-3 text-amber-500 shrink-0" />
-                              {h}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </Card>
+                    </div>
                   </motion.div>
                 );
               })}
@@ -435,7 +624,7 @@ const AboutRechargeTravel = () => {
             </motion.div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {fleetVehicles.map((vehicle, index) => (
+              {(fleetVehicles.length > 0 ? fleetVehicles : defaultFleetVehicles).map((vehicle, index) => (
                 <motion.div
                   key={vehicle.id}
                   initial={{ opacity: 0, y: 30 }}
@@ -448,13 +637,13 @@ const AboutRechargeTravel = () => {
                   <Card className="overflow-hidden border-0 shadow-xl hover:shadow-2xl transition-all">
                     <div className="relative h-48 overflow-hidden">
                       <img
-                        src={fleetImages[vehicle.id]}
+                        src={vehicle.image || fleetImages[vehicle.id] || 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=600&q=80'}
                         alt={vehicle.name}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                       <div className="absolute bottom-4 left-4 text-white">
-                        {fleetIcons[vehicle.id]}
+                        <Car className="w-12 h-12" />
                       </div>
                     </div>
                     <div className="p-6">
@@ -642,7 +831,6 @@ const AboutRechargeTravel = () => {
         </section>
       </div>
 
-      <Footer />
     </>
   );
 };

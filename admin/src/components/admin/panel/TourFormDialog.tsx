@@ -204,11 +204,10 @@ const TourFormDialog: React.FC<TourFormDialogProps> = ({
       return;
     }
 
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image size must be less than 5MB');
-      return;
-    }
+    // Log file size
+    const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+    console.log(`📁 Tour image: ${file.name}, Size: ${sizeInMB}MB`);
+    toast.info(`Uploading ${sizeInMB}MB image...`);
 
     setIsUploading(true);
     try {

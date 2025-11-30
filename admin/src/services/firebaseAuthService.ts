@@ -1,5 +1,5 @@
 import { auth, db } from '@/lib/firebase';
-import { 
+import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
@@ -15,10 +15,10 @@ import {
   reauthenticateWithCredential,
   EmailAuthProvider
 } from 'firebase/auth';
-import { 
-  doc, 
-  setDoc, 
-  getDoc, 
+import {
+  doc,
+  setDoc,
+  getDoc,
   updateDoc,
   serverTimestamp,
   collection,
@@ -34,7 +34,7 @@ export interface UserProfile {
   email: string;
   displayName?: string;
   photoURL?: string;
-  role: 'user' | 'admin' | 'driver';
+  role: 'user' | 'admin' | 'driver' | 'super_admin';
   phoneNumber?: string;
   address?: string;
   dateOfBirth?: string;
@@ -169,7 +169,7 @@ class FirebaseAuthService {
 
       // Update email
       await updateEmail(user, newEmail);
-      
+
       // Send verification to new email
       await sendEmailVerification(user);
 
@@ -189,7 +189,7 @@ class FirebaseAuthService {
   // Create user profile in Firestore
   private async createUserProfile(user: User, additionalData?: any): Promise<void> {
     const userRef = doc(db, 'users', user.uid);
-    
+
     const profile: any = {
       email: user.email,
       displayName: user.displayName || additionalData?.displayName || '',
@@ -218,7 +218,7 @@ class FirebaseAuthService {
   async getUserProfile(userId: string): Promise<UserProfile | null> {
     try {
       const userDoc = await getDoc(doc(db, 'users', userId));
-      
+
       if (!userDoc.exists()) {
         return null;
       }
@@ -251,10 +251,10 @@ class FirebaseAuthService {
   async updateUserProfile(userId: string, updates: Partial<UserProfile>): Promise<{ success: boolean; error: string | null }> {
     try {
       const userRef = doc(db, 'users', userId);
-      
+
       // Remove fields that shouldn't be updated directly
       const { id, createdAt, ...updateData } = updates as any;
-      
+
       await updateDoc(userRef, {
         ...updateData,
         updatedAt: serverTimestamp()
@@ -291,7 +291,7 @@ class FirebaseAuthService {
   async isAdmin(userId: string): Promise<boolean> {
     try {
       const profile = await this.getUserProfile(userId);
-      return profile?.role === 'admin';
+      return profile?.role === 'admin' || profile?.role === 'super_admin';
     } catch (error) {
       console.error('Error checking admin status:', error);
       return false;
@@ -306,7 +306,7 @@ class FirebaseAuthService {
         where('email', '==', email),
         limit(1)
       );
-      
+
       const querySnapshot = await getDocs(usersQuery);
       return !querySnapshot.empty;
     } catch (error) {

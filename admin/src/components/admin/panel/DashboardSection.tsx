@@ -1,7 +1,9 @@
 
-import React, { useState, Suspense, lazy } from 'react';
+import React, { useState, Suspense, lazy, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import {
   Users,
   Hotel,
@@ -19,38 +21,84 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 
 const DashboardCharts = lazy(() => import('./DashboardCharts'));
 
-const DashboardSection: React.FC = () => {
+const DashboardSection: React.FC<{ onNavigate: (section: string) => void }> = ({ onNavigate }) => {
   const [timeRange, setTimeRange] = useState<'today' | 'week' | 'month' | 'year'>('month');
-  const stats = [
+  const [stats, setStats] = useState([
     {
       title: "Total Hotels",
-      value: "245",
+      value: "0",
       icon: Hotel,
-      change: "+12%",
-      changeType: "positive"
+      change: "+0%",
+      changeType: "neutral"
     },
     {
-      title: "Blog Posts", 
-      value: "24",
+      title: "Blog Posts",
+      value: "0",
       icon: FileText,
-      change: "+8%",
-      changeType: "positive"
+      change: "+0%",
+      changeType: "neutral"
     },
     {
-      title: "Total Users", 
-      value: "1,234",
+      title: "Total Users",
+      value: "0",
       icon: Users,
-      change: "+5%",
-      changeType: "positive"
+      change: "+0%",
+      changeType: "neutral"
     },
     {
       title: "Bookings",
-      value: "567",
+      value: "0",
       icon: Calendar,
-      change: "-2%",
-      changeType: "negative"
+      change: "+0%",
+      changeType: "neutral"
     }
-  ];
+  ]);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const hotelsCount = (await getDocs(collection(db, 'hotels'))).size;
+        const postsCount = (await getDocs(collection(db, 'posts'))).size; // Assuming 'posts' collection
+        const usersCount = (await getDocs(collection(db, 'users'))).size;
+        const bookingsCount = (await getDocs(collection(db, 'bookings'))).size;
+
+        setStats([
+          {
+            title: "Total Hotels",
+            value: hotelsCount.toString(),
+            icon: Hotel,
+            change: "+12%", // Placeholder for growth
+            changeType: "positive"
+          },
+          {
+            title: "Blog Posts",
+            value: postsCount.toString(),
+            icon: FileText,
+            change: "+8%", // Placeholder
+            changeType: "positive"
+          },
+          {
+            title: "Total Users",
+            value: usersCount.toLocaleString(),
+            icon: Users,
+            change: "+5%", // Placeholder
+            changeType: "positive"
+          },
+          {
+            title: "Bookings",
+            value: bookingsCount.toString(),
+            icon: Calendar,
+            change: "+2%", // Placeholder
+            changeType: "positive"
+          }
+        ]);
+      } catch (error) {
+        console.error("Error fetching dashboard stats:", error);
+      }
+    };
+
+    fetchStats();
+  }, []);
 
   return (
     <div className="space-y-8">
@@ -95,14 +143,14 @@ const DashboardSection: React.FC = () => {
               </div>
             </div>
           </div>
-          <Button className="admin-btn-primary">
+          <Button className="admin-btn-primary" onClick={() => onNavigate('ai-content-generator')}>
             <Sparkles className="h-5 w-5 mr-2" />
             Generate Content
             <ArrowRight className="h-5 w-5 ml-2" />
           </Button>
         </div>
       </div>
-        
+
       {/* Stats Cards with Enhanced Design */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, index) => {
@@ -120,11 +168,10 @@ const DashboardSection: React.FC = () => {
                 <div className={`p-3 bg-gradient-to-br ${gradients[index]} rounded-xl shadow-md group-hover:scale-110 transition-transform duration-300`}>
                   <IconComponent className="h-6 w-6 text-white" />
                 </div>
-                <div className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold ${
-                  isPositive
-                    ? 'bg-green-100 text-green-700'
-                    : 'bg-red-100 text-red-700'
-                }`}>
+                <div className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold ${isPositive
+                  ? 'bg-green-100 text-green-700'
+                  : 'bg-red-100 text-red-700'
+                  }`}>
                   {isPositive ? (
                     <ArrowUp className="w-3 h-3" />
                   ) : (
@@ -216,19 +263,31 @@ const DashboardSection: React.FC = () => {
             <h3 className="text-xl font-bold text-gray-900">Quick Actions</h3>
           </div>
           <div className="space-y-3">
-            <button className="w-full text-left px-5 py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl transition-all transform hover:scale-105 shadow-md hover:shadow-xl flex items-center gap-3 font-semibold">
+            <button
+              onClick={() => onNavigate('ai-content-generator')}
+              className="w-full text-left px-5 py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl transition-all transform hover:scale-105 shadow-md hover:shadow-xl flex items-center gap-3 font-semibold"
+            >
               <Sparkles className="h-5 w-5" />
               Generate Blog Content
             </button>
-            <button className="w-full text-left px-5 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-xl transition-all transform hover:scale-105 shadow-md hover:shadow-xl flex items-center gap-3 font-semibold">
+            <button
+              onClick={() => onNavigate('hotels')}
+              className="w-full text-left px-5 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-xl transition-all transform hover:scale-105 shadow-md hover:shadow-xl flex items-center gap-3 font-semibold"
+            >
               <Hotel className="h-5 w-5" />
               Add New Hotel
             </button>
-            <button className="w-full text-left px-5 py-4 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white rounded-xl transition-all transform hover:scale-105 shadow-md hover:shadow-xl flex items-center gap-3 font-semibold">
+            <button
+              onClick={() => onNavigate('analytics')}
+              className="w-full text-left px-5 py-4 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white rounded-xl transition-all transform hover:scale-105 shadow-md hover:shadow-xl flex items-center gap-3 font-semibold"
+            >
               <FileText className="h-5 w-5" />
               View Reports
             </button>
-            <button className="w-full text-left px-5 py-4 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-xl transition-all transform hover:scale-105 shadow-md hover:shadow-xl flex items-center gap-3 font-semibold">
+            <button
+              onClick={() => onNavigate('users')}
+              className="w-full text-left px-5 py-4 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-xl transition-all transform hover:scale-105 shadow-md hover:shadow-xl flex items-center gap-3 font-semibold"
+            >
               <Users className="h-5 w-5" />
               Manage Users
             </button>

@@ -54,9 +54,7 @@ export async function getHeroSlides(): Promise<HeroSlide[]> {
         const querySnapshot = await getDocs(q);
 
         if (querySnapshot.empty) {
-            // If no slides exist, initialize with defaults
-            await initializeDefaultSlides();
-            return DEFAULT_SLIDES;
+            return [];
         }
 
         return querySnapshot.docs.map(doc => ({
@@ -65,7 +63,7 @@ export async function getHeroSlides(): Promise<HeroSlide[]> {
         } as HeroSlide));
     } catch (error) {
         console.error('Error fetching hero slides:', error);
-        return DEFAULT_SLIDES;
+        return [];
     }
 }
 

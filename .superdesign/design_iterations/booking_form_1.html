@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Recharge Travels • Global Booking Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --deep-emerald: #0c3b2e;
+        --jungle: #0d5c46;
+        --mint: #e6f5ef;
+        --sand: #f8faf9;
+        --amber: #f0b429;
+        --slate: #1a2e35;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f6fbf8 0%, #dcede4 45%, #eef7f3 100%);
+        color: var(--slate);
+      }
+
+      .booking-shell {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .booking-header {
+        position: sticky;
+        top: 0;
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(13, 92, 70, 0.08);
+        z-index: 20;
+      }
+
+      .header-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1.2rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1.5rem;
+      }
+
+      .logo {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-decoration: none;
+        color: var(--jungle);
+        font-weight: 700;
+        font-size: 1.2rem;
+      }
+
+      .logo-mark {
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #0d5c46, #19a477);
+        display: grid;
+        place-items: center;
+      }
+
+      .logo-mark svg {
+        width: 28px;
+        height: 28px;
+        stroke: #fffbe6;
+      }
+
+      .secure-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.65rem 1.2rem;
+        border-radius: 999px;
+        background: var(--mint);
+        color: var(--jungle);
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+
+      .booking-main {
+        flex: 1;
+        max-width: 1200px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 2rem 1.25rem 3rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.75rem;
+      }
+
+      .progress-steps {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        position: relative;
+        padding-bottom: 1.5rem;
+      }
+
+      .progress-steps::before {
+        content: "";
+        position: absolute;
+        inset: 20px 15%;
+        height: 2px;
+        background: rgba(26, 46, 53, 0.1);
+      }
+
+      .progress-step {
+        position: relative;
+        padding: 0.5rem 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.4rem;
+        z-index: 1;
+      }
+
+      .step-circle {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: 3px solid rgba(26, 46, 53, 0.12);
+        display: grid;
+        place-items: center;
+        font-weight: 600;
+        background: #fff;
+        color: rgba(26, 46, 53, 0.4);
+      }
+
+      .progress-step.active .step-circle,
+      .progress-step.completed .step-circle {
+        background: var(--jungle);
+        border-color: var(--jungle);
+        color: white;
+      }
+
+      .progress-step.completed .step-circle {
+        background: var(--amber);
+        border-color: var(--amber);
+      }
+
+      .step-label {
+        font-size: 0.8rem;
+        color: rgba(26, 46, 53, 0.7);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-weight: 600;
+      }
+
+      .booking-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 360px;
+        gap: 2rem;
+        align-items: flex-start;
+      }
+
+      @media (max-width: 1024px) {
+        .booking-grid {
+          grid-template-columns: 1fr;
+        }
+        .summary-column {
+          order: -1;
+        }
+      }
+
+      .form-column {
+        background: white;
+        border-radius: 24px;
+        padding: 2rem;
+        box-shadow: 0 25px 60px rgba(13, 92, 70, 0.08);
+      }
+
+      .form-step {
+        display: none;
+        animation: fade 0.3s ease;
+      }
+
+      .form-step.active {
+        display: block;
+      }
+
+      @keyframes fade {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .step-header h2 {
+        font-family: "Playfair Display", serif;
+        font-size: 2rem;
+        color: var(--jungle);
+        margin-bottom: 0.3rem;
+      }
+
+      .step-header p {
+        color: rgba(26, 46, 53, 0.65);
+        font-size: 0.95rem;
+      }
+
+      .section {
+        margin-top: 2rem;
+      }
+
+      .section h3 {
+        font-size: 1.05rem;
+        color: var(--slate);
+        margin-bottom: 1rem;
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+      }
+
+      label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: rgba(26, 46, 53, 0.75);
+        display: block;
+        margin-bottom: 0.4rem;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        border: 2px solid rgba(12, 59, 46, 0.15);
+        border-radius: 14px;
+        padding: 0.85rem 1rem;
+        font-size: 1rem;
+        font-family: inherit;
+        transition: all 0.2s ease;
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        border-color: var(--jungle);
+        box-shadow: 0 0 0 3px rgba(13, 92, 70, 0.12);
+        outline: none;
+      }
+
+      .pickup-options {
+        display: flex;
+        flex-direction: column;
+        gap: 0.9rem;
+      }
+
+      .pickup-card {
+        border: 2px solid rgba(26, 46, 53, 0.08);
+        border-radius: 14px;
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .pickup-card.selected {
+        border-color: var(--jungle);
+        background: linear-gradient(120deg, rgba(13, 92, 70, 0.12), rgba(255, 255, 255, 0.6));
+        box-shadow: 0 10px 30px rgba(13, 92, 70, 0.15);
+      }
+
+      .traveler-row {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        padding: 1rem;
+        border-radius: 14px;
+        background: #f5faf7;
+      }
+
+      .counter button {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 2px solid var(--jungle);
+        background: white;
+        color: var(--jungle);
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .counter span {
+        width: 36px;
+        text-align: center;
+        font-weight: 600;
+      }
+
+      .payment-methods {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 1rem;
+      }
+
+      .payment-card {
+        border: 2px solid rgba(12, 59, 46, 0.12);
+        border-radius: 16px;
+        padding: 1rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .payment-card.selected {
+        border-color: var(--jungle);
+        background: #f1fbf6;
+      }
+
+      .card-details {
+        margin-top: 1.5rem;
+        padding: 1.25rem;
+        border-radius: 16px;
+        background: #f8faf9;
+      }
+
+      .checkbox {
+        display: flex;
+        gap: 0.8rem;
+        align-items: flex-start;
+        font-size: 0.9rem;
+      }
+
+      .checkbox input {
+        width: 18px;
+        height: 18px;
+      }
+
+      .policy-box {
+        margin-top: 1rem;
+        padding: 1rem;
+        border-radius: 16px;
+        background: #eef8f3;
+        display: flex;
+        gap: 1rem;
+      }
+
+      .error {
+        border-color: #e53935 !important;
+      }
+
+      .error-text {
+        color: #e53935;
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+        display: none;
+      }
+
+      .error-text.show {
+        display: block;
+      }
+
+      .summary-column {
+        position: sticky;
+        top: 100px;
+      }
+
+      .summary-panel {
+        border-radius: 24px;
+        overflow: hidden;
+        background: white;
+        box-shadow: 0 25px 60px rgba(13, 92, 70, 0.12);
+      }
+
+      .summary-media {
+        position: relative;
+        height: 220px;
+        overflow: hidden;
+      }
+
+      .summary-media img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .summary-media::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.8));
+      }
+
+      .summary-media-content {
+        position: absolute;
+        bottom: 1rem;
+        left: 1.5rem;
+        color: white;
+      }
+
+      .summary-body {
+        padding: 1.75rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+      }
+
+      .price-box {
+        background: #f5faf7;
+        padding: 1.25rem;
+        border-radius: 18px;
+      }
+
+      .price-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.95rem;
+        margin-bottom: 0.4rem;
+      }
+
+      .price-row.total {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-top: 0.6rem;
+      }
+
+      .highlights ul {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+        font-size: 0.9rem;
+        color: rgba(26, 46, 53, 0.75);
+      }
+
+      .highlights li {
+        position: relative;
+        padding-left: 1.3rem;
+      }
+
+      .highlights li::before {
+        content: "✓";
+        position: absolute;
+        left: 0;
+        color: var(--jungle);
+        font-weight: 700;
+      }
+
+      .support-card {
+        text-align: center;
+        padding: 1rem;
+        border: 1px dashed rgba(26, 46, 53, 0.2);
+        border-radius: 14px;
+      }
+
+      .support-card a {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.7rem;
+        padding: 0.65rem 1.4rem;
+        border-radius: 999px;
+        background: #22c15e;
+        color: white;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .booking-footer {
+        background: white;
+        border-top: 1px solid rgba(26, 46, 53, 0.08);
+      }
+
+      .footer-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1.2rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        font-size: 0.85rem;
+        color: rgba(26, 46, 53, 0.6);
+      }
+
+      .form-actions {
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(26, 46, 53, 0.08);
+        display: flex;
+        gap: 1rem;
+        justify-content: space-between;
+      }
+
+      .btn {
+        border: none;
+        border-radius: 14px;
+        padding: 0.9rem 1.6rem;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .btn.primary {
+        background: linear-gradient(135deg, #0d5c46, #1a7f5f);
+        color: white;
+        margin-left: auto;
+      }
+
+      .btn.primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px rgba(13, 92, 70, 0.25);
+      }
+
+      .btn.secondary {
+        background: white;
+        color: var(--slate);
+        border: 2px solid rgba(26, 46, 53, 0.2);
+      }
+
+      .btn.hidden {
+        display: none;
+      }
+
+      .spinner {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top-color: white;
+        animation: spin 0.9s linear infinite;
+        display: none;
+      }
+
+      .spinner.show {
+        display: inline-block;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @media (max-width: 640px) {
+        .form-column,
+        .summary-panel {
+          padding: 1.4rem;
+          border-radius: 18px;
+        }
+        .form-actions {
+          flex-direction: column;
+        }
+        .btn.primary {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="booking-shell">
+      <header class="booking-header">
+        <div class="header-content">
+          <a class="logo" href="#">
+            <span class="logo-mark">
+              <svg viewBox="0 0 32 32" fill="none">
+                <path d="M8 22c4.5-6 5.5-10 8-14 2.5 4 3.5 8 8 14" stroke-width="2.5" stroke-linecap="round" />
+                <path d="M16 8v16" stroke-width="2" stroke-linecap="round" />
+                <path d="M6 16h20" stroke-width="2" stroke-linecap="round" />
+              </svg>
+            </span>
+            <span>Recharge Travels</span>
+          </a>
+          <div class="secure-pill">🔐 256-bit Secure Checkout</div>
+        </div>
+      </header>
+
+      <main class="booking-main">
+        <div class="progress-steps">
+          <div class="progress-step active" data-step="1">
+            <span class="step-circle">1</span>
+            <span class="step-label">Traveler</span>
+          </div>
+          <div class="progress-step" data-step="2">
+            <span class="step-circle">2</span>
+            <span class="step-label">Experience</span>
+          </div>
+          <div class="progress-step" data-step="3">
+            <span class="step-circle">3</span>
+            <span class="step-label">Payment</span>
+          </div>
+        </div>
+
+        <section class="booking-grid">
+          <div class="form-column">
+            <div class="form-step active" id="step-1">
+              <div class="step-header">
+                <h2>Who's booking?</h2>
+                <p>We’ll send confirmations and concierge updates to these contacts.</p>
+              </div>
+              <div class="section">
+                <div class="form-grid">
+                  <div>
+                    <label for="firstName">First Name *</label>
+                    <input type="text" id="firstName" placeholder="Shehan" />
+                    <small class="error-text" id="first-error">First name is required.</small>
+                  </div>
+                  <div>
+                    <label for="lastName">Last Name *</label>
+                    <input type="text" id="lastName" placeholder="Perera" />
+                    <small class="error-text" id="last-error">Last name is required.</small>
+                  </div>
+                  <div>
+                    <label for="email">Email *</label>
+                    <input type="email" id="email" placeholder="you@email.com" />
+                    <small class="error-text" id="email-error">Valid email is required.</small>
+                  </div>
+                  <div>
+                    <label for="phone">WhatsApp Number *</label>
+                    <input type="tel" id="phone" placeholder="+94 77 123 4567" />
+                    <small class="error-text" id="phone-error">Number required for logistics.</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-step" id="step-2">
+              <div class="step-header">
+                <h2>Experience details</h2>
+                <p>Choose dates, pickup, and how many travelers are joining.</p>
+              </div>
+              <div class="section">
+                <h3>📅 Travel Date</h3>
+                <input type="date" id="tourDate" />
+                <small class="error-text" id="date-error">Select a date.</small>
+              </div>
+              <div class="section">
+                <h3>🚐 Pickup preference</h3>
+                <div class="pickup-options" id="pickupOptions"></div>
+                <small class="error-text" id="pickup-error">Select a pickup option.</small>
+                <label for="pickupAddress" style="margin-top:1rem;">Hotel / Villa Address</label>
+                <input type="text" id="pickupAddress" placeholder="Hotel name or villa address" />
+              </div>
+              <div class="section">
+                <h3>👥 Travelers</h3>
+                <div class="traveler-row">
+                  <div style="flex:1">
+                    <strong>Adults</strong>
+                    <p style="font-size:0.85rem;color:rgba(26,46,53,.6)">13+ years</p>
+                  </div>
+                  <div class="counter">
+                    <button type="button" onclick="updateCount('adult', -1)">−</button>
+                    <span id="adultCount">2</span>
+                    <button type="button" onclick="updateCount('adult', 1)">+</button>
+                  </div>
+                </div>
+                <div class="traveler-row">
+                  <div style="flex:1">
+                    <strong>Children</strong>
+                    <p style="font-size:0.85rem;color:rgba(26,46,53,.6)">3 - 12 years</p>
+                  </div>
+                  <div class="counter">
+                    <button type="button" onclick="updateCount('child', -1)">−</button>
+                    <span id="childCount">0</span>
+                    <button type="button" onclick="updateCount('child', 1)">+</button>
+                  </div>
+                </div>
+              </div>
+              <div class="section">
+                <h3>📝 Notes for concierge</h3>
+                <textarea rows="4" id="notes" placeholder="Dietary notes, celebrations, flight numbers..."></textarea>
+              </div>
+            </div>
+
+            <div class="form-step" id="step-3">
+              <div class="step-header">
+                <h2>Payment</h2>
+                <p>Secure 256-bit checkout. We accept global cards & PayPal.</p>
+              </div>
+              <div class="section">
+                <h3>💳 Payment method</h3>
+                <div class="payment-methods">
+                  <label class="payment-card selected" onclick="selectPayment('card')">
+                    <input type="radio" name="pay" checked hidden />
+                    <span>Credit/Debit</span>
+                    <small>Visa • MasterCard • AmEx</small>
+                  </label>
+                  <label class="payment-card" onclick="selectPayment('paypal')">
+                    <input type="radio" name="pay" hidden />
+                    <span>PayPal</span>
+                  </label>
+                  <label class="payment-card" onclick="selectPayment('bank')">
+                    <input type="radio" name="pay" hidden />
+                    <span>Bank Transfer</span>
+                  </label>
+                </div>
+              </div>
+              <div class="card-details" id="cardDetails">
+                <div class="form-grid">
+                  <div>
+                    <label>Card Number</label>
+                    <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" />
+                    <small class="error-text" id="card-error">Card number required.</small>
+                  </div>
+                  <div>
+                    <label>Name on Card</label>
+                    <input type="text" id="cardName" placeholder="Cardholder name" />
+                  </div>
+                </div>
+                <div class="form-grid">
+                  <div>
+                    <label>Expiry (MM/YY)</label>
+                    <input type="text" id="cardExpiry" placeholder="05/28" maxlength="5" />
+                  </div>
+                  <div>
+                    <label>CVC</label>
+                    <input type="text" id="cardCVC" placeholder="123" maxlength="4" />
+                  </div>
+                </div>
+              </div>
+              <div class="section">
+                <label class="checkbox">
+                  <input type="checkbox" id="terms" />
+                  <span>I accept Recharge Travels’ booking terms and the 24h flexible cancellation policy.</span>
+                </label>
+                <small class="error-text" id="terms-error">Please accept terms.</small>
+                <div class="policy-box">
+                  <span>✅</span>
+                  <div>
+                    <strong>Free cancellation up to 24h</strong>
+                    <p>Full refund if you cancel 24 hours before pickup. After that, charges may apply.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn secondary hidden" id="backBtn" type="button" onclick="prevStep()">← Back</button>
+              <button class="btn primary" id="nextBtn" type="button" onclick="nextStep()">Continue →</button>
+              <button class="btn primary hidden" id="submitBtn" type="button" onclick="submitBooking()">
+                <span class="spinner" id="spinner"></span>
+                <span id="submitLabel">Complete Booking ✓</span>
+              </button>
+            </div>
+          </div>
+
+          <aside class="summary-column">
+            <div class="summary-panel">
+              <div class="summary-media">
+                <img id="summaryImage" src="https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&q=80" alt="Recharge Signature Journey" />
+                <div class="summary-media-content">
+                  <div style="font-size:0.9rem;opacity:.8">Recharge Signature Experience</div>
+                  <div style="font-size:1.5rem;font-weight:700" id="summaryTitle">Jaffna Cultural Circuit</div>
+                  <div>★★★★★ <span id="summaryReviews">(127 reviews)</span></div>
+                </div>
+              </div>
+              <div class="summary-body">
+                <div>
+                  <h3 style="font-family:'Playfair Display',serif;font-size:1.35rem;">Journey Overview</h3>
+                  <p style="color:rgba(26,46,53,.65)">Hosted by Recharge Travels Concierge</p>
+                </div>
+                <div class="tour-meta">
+                  <span>⏱️ <span id="summaryDuration">10 hours</span></span>
+                  <span>👥 Private Group</span>
+                </div>
+                <div class="price-box">
+                  <div class="price-row">
+                    <span>Subtotal</span>
+                    <span id="summarySubtotal">$0.00</span>
+                  </div>
+                  <div class="price-row" id="pickupRow" style="display:none;">
+                    <span>Pickup</span>
+                    <span id="summaryPickupCost">$0.00</span>
+                  </div>
+                  <div class="price-row total">
+                    <span>Total</span>
+                    <span id="summaryTotal">$0.00</span>
+                  </div>
+                </div>
+                <div>
+                  <h4 style="margin-bottom:.6rem;">Highlights</h4>
+                  <div class="highlights">
+                    <ul id="highlightList"></ul>
+                  </div>
+                </div>
+                <div class="support-card">
+                  <p>Need any help before booking?</p>
+                  <a href="https://wa.me/94771234567" target="_blank" rel="noreferrer">💬 WhatsApp concierge</a>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </section>
+      </main>
+
+      <footer class="booking-footer">
+        <div class="footer-content">
+          <span>© 2025 Recharge Travels & Tours • Colombo • Jaffna • Yala</span>
+          <span>🔒 PCI-DSS Secure • ✈️ IATA-accredited logistics • ☎️ 24/7 Hotline</span>
+        </div>
+      </footer>
+    </div>
+
+    <script>
+      const TOUR_CONFIG = {
+        title: "Jaffna Cultural Circuit",
+        rating: 5,
+        reviewCount: 127,
+        duration: "10 hours",
+        pricing: { adult: 220, child: 120, symbol: "$" },
+        highlights: ["Private charter transfers", "Temple concierge access", "Island gourmet lunch"],
+        pickupOptions: [
+          { id: "colombo", label: "Colombo City Hotels", time: "04:30", surcharge: 0 },
+          { id: "negombo", label: "Negombo / Airport", time: "04:00", surcharge: 10 },
+          { id: "jaffna", label: "Jaffna Hotels", time: "07:30", surcharge: -40 }
+        ]
+      };
+
+      let step = 1;
+      const formState = {
+        pickup: TOUR_CONFIG.pickupOptions[0].id,
+        adults: 2,
+        children: 0,
+        payment: "card"
+      };
+
+      const pickupContainer = document.getElementById("pickupOptions");
+      TOUR_CONFIG.pickupOptions.forEach((opt, index) => {
+        const card = document.createElement("label");
+        card.className = `pickup-card ${index === 0 ? "selected" : ""}`;
+        card.innerHTML = `
+          <input type="radio" hidden name="pickupRadio" ${index === 0 ? "checked" : ""}/>
+          <div style="flex:1">
+            <strong>${opt.label}</strong>
+            <p style="font-size:0.85rem;color:rgba(26,46,53,.6)">Pickup ${opt.time}</p>
+          </div>
+          <span style="font-weight:600;color:${opt.surcharge > 0 ? "var(--jungle)" : "rgba(26,46,53,.6)"};">
+            ${opt.surcharge > 0 ? `+${TOUR_CONFIG.pricing.symbol}${opt.surcharge}` : opt.surcharge < 0 ? `-${TOUR_CONFIG.pricing.symbol}${Math.abs(opt.surcharge)}` : "Included"}
+          </span>`;
+        card.addEventListener("click", () => {
+          formState.pickup = opt.id;
+          document.querySelectorAll(".pickup-card").forEach(c => c.classList.remove("selected"));
+          card.classList.add("selected");
+          updateSummary();
+        });
+        pickupContainer.appendChild(card);
+      });
+
+      function updateCount(type, delta) {
+        const key = type === "adult" ? "adults" : "children";
+        const min = type === "adult" ? 1 : 0;
+        formState[key] = Math.max(min, formState[key] + delta);
+        document.getElementById(`${type}Count`).textContent = formState[key];
+        updateSummary();
+      }
+
+      function selectPayment(method) {
+        formState.payment = method;
+        document.querySelectorAll(".payment-card").forEach(card => card.classList.remove("selected"));
+        document.querySelectorAll(".payment-card")[method === "card" ? 0 : method === "paypal" ? 1 : 2].classList.add("selected");
+        document.getElementById("cardDetails").style.display = method === "card" ? "block" : "none";
+      }
+
+      function nextStep() {
+        document.getElementById(`step-${step}`).classList.remove("active");
+        document.querySelectorAll(".progress-step")[step - 1].classList.remove("active");
+        document.querySelectorAll(".progress-step")[step - 1].classList.add("completed");
+        document.querySelectorAll(".progress-step")[step - 1].querySelector(".step-circle").textContent = "✓";
+        step = Math.min(3, step + 1);
+        document.getElementById(`step-${step}`).classList.add("active");
+        document.querySelectorAll(".progress-step")[step - 1].classList.add("active");
+        document.getElementById("backBtn").classList.toggle("hidden", step === 1);
+        document.getElementById("nextBtn").classList.toggle("hidden", step === 3);
+        document.getElementById("submitBtn").classList.toggle("hidden", step !== 3);
+      }
+
+      function prevStep() {
+        document.getElementById(`step-${step}`).classList.remove("active");
+        document.querySelectorAll(".progress-step")[step - 1].classList.remove("active");
+        step = Math.max(1, step - 1);
+        document.getElementById(`step-${step}`).classList.add("active");
+        document.querySelectorAll(".progress-step")[step - 1].classList.add("active");
+        document.getElementById("backBtn").classList.toggle("hidden", step === 1);
+        document.getElementById("nextBtn").classList.toggle("hidden", step === 3);
+        document.getElementById("submitBtn").classList.toggle("hidden", step !== 3);
+      }
+
+      function calculateTotal() {
+        const pickup = TOUR_CONFIG.pickupOptions.find(p => p.id === formState.pickup);
+        const base = formState.adults * TOUR_CONFIG.pricing.adult + formState.children * TOUR_CONFIG.pricing.child;
+        const pickupCost = pickup ? pickup.surcharge * (formState.adults + formState.children) : 0;
+        return { base, pickupCost, total: base + pickupCost };
+      }
+
+      function updateSummary() {
+        const totals = calculateTotal();
+        document.getElementById("summarySubtotal").textContent = `${TOUR_CONFIG.pricing.symbol}${totals.base.toFixed(2)}`;
+        document.getElementById("summaryTotal").textContent = `${TOUR_CONFIG.pricing.symbol}${totals.total.toFixed(2)}`;
+        const pickupRow = document.getElementById("pickupRow");
+        if (totals.pickupCost !== 0) {
+          pickupRow.style.display = "flex";
+          document.getElementById("summaryPickupCost").textContent = `${totals.pickupCost > 0 ? "+" : "-"}${TOUR_CONFIG.pricing.symbol}${Math.abs(totals.pickupCost).toFixed(2)}`;
+        } else {
+          pickupRow.style.display = "none";
+        }
+        const highlightList = document.getElementById("highlightList");
+        highlightList.innerHTML = TOUR_CONFIG.highlights.map(h => `<li>${h}</li>`).join("");
+        document.getElementById("summaryReviews").textContent = `(${TOUR_CONFIG.reviewCount} reviews)`;
+      }
+
+      function submitBooking() {
+        document.getElementById("spinner").classList.add("show");
+        document.getElementById("submitLabel").textContent = "Processing...";
+        setTimeout(() => {
+          document.getElementById("submitLabel").textContent = "Confirmed! We emailed your voucher.";
+          document.getElementById("spinner").classList.remove("show");
+        }, 1500);
+      }
+
+      updateSummary();
+    </script>
+  </body>
+</html>
