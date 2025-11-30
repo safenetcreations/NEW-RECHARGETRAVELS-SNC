@@ -7,6 +7,7 @@ import ToursDropdown from './navigation/ToursDropdown'
 import DestinationsDropdown from './navigation/DestinationsDropdown'
 import TransportDropdown from './navigation/TransportDropdown'
 import ExperiencesDropdown from './navigation/ExperiencesDropdown'
+import LuxuryDropdown from './navigation/LuxuryDropdown'
 import AboutDropdown from './navigation/AboutDropdown'
 import BookNowDropdown from './navigation/BookNowDropdown'
 
@@ -25,7 +26,7 @@ const HeaderNavigationMenu = ({
 }: NavigationMenuProps) => {
   return (
     <div className={cn("flex w-full justify-center", className)}>
-      <NavigationMenu className="w-full max-w-fit justify-center" delayDuration={0} skipDelayDuration={0}>
+      <NavigationMenu className="w-full max-w-fit justify-center" delayDuration={100} skipDelayDuration={300}>
         <NavigationMenuList
           className={cn(
             "gap-0.5 px-2 py-1.5 rounded-full border backdrop-blur-[18px] transition-all duration-500 ease-out",
@@ -53,6 +54,12 @@ const HeaderNavigationMenu = ({
           />
 
           <ExperiencesDropdown
+            animatingItem={animatingItem}
+            onMenuClick={onMenuClick}
+            isScrolled={isScrolled}
+          />
+
+          <LuxuryDropdown
             animatingItem={animatingItem}
             onMenuClick={onMenuClick}
             isScrolled={isScrolled}

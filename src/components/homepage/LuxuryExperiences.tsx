@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import {
@@ -14,50 +15,29 @@ import {
 } from 'lucide-react';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import 'react-lazy-load-image-component/src/effects/blur.css';
+import { db } from '@/lib/firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
-const luxuryExperiences = [
-  {
-    id: 'helicopter-charters',
-    title: 'Helicopter Charters',
-    subtitle: 'Sky-High Luxury',
-    description: 'Soar above Sri Lanka in our fleet of executive helicopters with champagne service',
-    icon: Plane,
-    image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=1200&q=80',
-    color: 'blue',
-    link: '/tours/luxury#helicopters',
-    stats: { duration: 'Custom', guests: '2-8', rating: 4.9 }
-  },
-  {
-    id: 'private-yachts',
-    title: 'Private Yachts',
-    subtitle: 'Oceanic Excellence',
-    description: 'Charter super yachts with personal crew, underwater dining, and spa suites',
-    icon: Anchor,
-    image: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=1200&q=80',
-    color: 'cyan',
-    link: '/tours/luxury#yachts',
-    stats: { duration: 'Half/Full Day', guests: '2-12', rating: 5.0 }
-  },
-  {
-    id: 'luxury-vehicles',
-    title: 'Luxury Vehicles',
-    subtitle: 'Supreme Comfort',
-    description: 'Rolls-Royce, Bentley, and Maybach fleet with personal chauffeurs',
-    icon: Car,
-    image: 'https://images.unsplash.com/photo-1563720360172-67b8f3dce741?w=1200&q=80',
-    color: 'amber',
-    link: '/tours/luxury#vehicles',
-    stats: { duration: 'Custom', guests: '1-4', rating: 4.9 }
-  },
+// Default images as fallback
+const defaultImages: Record<string, string> = {
+  'dream-journeys': 'https://images.unsplash.com/photo-1596402184320-417e7178b2cd?w=1200&q=80',
+  'vip-concierge': 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&q=80',
+  'exclusive-access': 'https://images.unsplash.com/photo-1596402184320-417e7178b2cd?w=1200&q=80',
+  'helicopter-charters': 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=1200&q=80',
+  'private-yachts': 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=1200&q=80',
+  'luxury-vehicles': 'https://images.unsplash.com/photo-1563720360172-67b8f3dce741?w=1200&q=80'
+};
+
+const luxuryExperiencesData = [
   {
     id: 'dream-journeys',
     title: 'Dream Journeys',
     subtitle: 'Ultimate Experiences',
     description: 'Multi-day curated adventures combining helicopters, yachts, and exclusive access',
     icon: Mountain,
-    image: 'https://images.unsplash.com/photo-1549366021-9f761d040a94?w=1200&q=80',
-    color: 'purple',
-    link: '/tours/luxury#journeys',
+    image: 'https://images.unsplash.com/photo-1596402184320-417e7178b2cd?w=1200&q=80',
+    color: 'amber',
+    link: '/experiences/luxury/dream-journeys',
     stats: { duration: '3-5 Days', guests: '2-6', rating: 5.0 }
   },
   {
@@ -66,25 +46,102 @@ const luxuryExperiences = [
     subtitle: 'Personalized Service',
     description: 'Private chefs, security details, event planning, and bespoke celebrations',
     icon: Crown,
-    image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200&q=80',
-    color: 'yellow',
-    link: '/tours/luxury#concierge',
+    image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&q=80',
+    color: 'rose',
+    link: '/experiences/luxury/vip-concierge',
     stats: { duration: 'On Demand', guests: 'Custom', rating: 5.0 }
   },
   {
-    id: 'exclusive-experiences',
+    id: 'exclusive-access',
     title: 'Exclusive Access',
     subtitle: 'VIP Privileges',
     description: 'Private temple blessings, museum openings, and cultural immersions',
     icon: Sparkles,
-    image: 'https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=1200&q=80',
-    color: 'emerald',
-    link: '/tours/luxury',
+    image: 'https://images.unsplash.com/photo-1596402184320-417e7178b2cd?w=1200&q=80',
+    color: 'violet',
+    link: '/experiences/luxury/exclusive-access',
     stats: { duration: 'Custom', guests: '2-10', rating: 5.0 }
+  },
+  {
+    id: 'helicopter-charters',
+    title: 'Helicopter Charters',
+    subtitle: 'Sky-High Luxury',
+    description: 'Soar above Sri Lanka in our fleet of executive helicopters with champagne service',
+    icon: Plane,
+    image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=1200&q=80',
+    color: 'blue',
+    link: '/experiences/luxury/helicopter-charters',
+    stats: { duration: 'Custom', guests: '2-8', rating: 4.9 }
+  },
+  {
+    id: 'private-yachts',
+    title: 'Private Yachts',
+    subtitle: 'Oceanic Excellence',
+    description: 'Charter super yachts with personal crew for whale watching and coastal adventures',
+    icon: Anchor,
+    image: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=1200&q=80',
+    color: 'cyan',
+    link: '/experiences/luxury/private-yachts',
+    stats: { duration: 'Half/Full Day', guests: '2-12', rating: 5.0 }
+  },
+  {
+    id: 'luxury-vehicles',
+    title: 'Luxury Vehicles',
+    subtitle: 'Supreme Comfort',
+    description: 'Rolls-Royce, Bentley, and Maybach fleet with professional chauffeurs',
+    icon: Car,
+    image: 'https://images.unsplash.com/photo-1563720360172-67b8f3dce741?w=1200&q=80',
+    color: 'slate',
+    link: '/experiences/luxury/luxury-vehicles',
+    stats: { duration: 'Custom', guests: '1-4', rating: 4.9 }
   }
 ];
 
 const LuxuryExperiences = () => {
+  const [dynamicImages, setDynamicImages] = useState<Record<string, string>>({});
+
+  // Fetch images from Firestore on mount - ALL luxury pages
+  useEffect(() => {
+    const fetchImages = async () => {
+      const imageMap: Record<string, string> = {};
+      
+      // Map of ALL page IDs to their Firestore document names
+      const pageDocMap: Record<string, string> = {
+        'dream-journeys': 'dream-journeys',
+        'vip-concierge': 'vip-concierge',
+        'exclusive-access': 'exclusive-access',
+        'helicopter-charters': 'helicopter-charters',
+        'private-yachts': 'private-yachts',
+        'luxury-vehicles': 'luxury-vehicles'
+      };
+
+      for (const [pageId, docName] of Object.entries(pageDocMap)) {
+        try {
+          const docRef = doc(db, 'luxuryPages', docName);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            // Get first hero image if available
+            if (data.heroImages && data.heroImages.length > 0) {
+              imageMap[pageId] = data.heroImages[0].url;
+            }
+          }
+        } catch (error) {
+          console.error(`Error fetching ${pageId} images:`, error);
+        }
+      }
+      
+      setDynamicImages(imageMap);
+    };
+
+    fetchImages();
+  }, []);
+
+  // Merge dynamic images with defaults
+  const getImage = (id: string, fallback: string) => {
+    return dynamicImages[id] || fallback;
+  };
+
   return (
     <section className="relative py-24 bg-slate-50 overflow-hidden">
       {/* Background Elements */}
@@ -119,7 +176,7 @@ const LuxuryExperiences = () => {
 
         {/* Luxury Experiences Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-          {luxuryExperiences.map((experience, index) => {
+          {luxuryExperiencesData.map((experience, index) => {
             const Icon = experience.icon;
             return (
               <motion.div
@@ -134,7 +191,7 @@ const LuxuryExperiences = () => {
                     {/* Image Section */}
                     <div className="relative h-64 overflow-hidden">
                       <LazyLoadImage
-                        src={experience.image}
+                        src={getImage(experience.id, experience.image)}
                         alt={experience.title}
                         effect="blur"
                         className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
@@ -207,7 +264,7 @@ const LuxuryExperiences = () => {
             <p className="text-slate-600 text-lg mb-8">
               We create bespoke experiences tailored to your dreams. Let our luxury concierge design your perfect Sri Lankan adventure.
             </p>
-            <Link to="/tours/luxury">
+            <Link to="/experiences/luxury/dream-journeys">
               <button className="px-8 py-4 bg-slate-900 text-white font-bold text-lg rounded-xl hover:bg-slate-800 transition-colors shadow-lg hover:shadow-xl flex items-center gap-2 mx-auto">
                 Create Your Custom Experience
                 <ArrowRight className="w-5 h-5" />

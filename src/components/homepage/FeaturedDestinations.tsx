@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { MapPin, Star, ArrowRight, Compass, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { cmsService } from '@/services/cmsService';
@@ -13,7 +13,7 @@ const fallbackDestinations = [
     name: 'Sigiriya',
     title: 'Lion Rock Fortress',
     description: 'Ancient rock fortress rising 200m above jungle. UNESCO World Heritage site.',
-    image: 'https://images.unsplash.com/photo-1586523969943-2d62a1a7d4d3?w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1603852452378-a4e8d84324a2?w=800&q=80',
     category: 'UNESCO Heritage',
     rating: 4.9,
     reviews: 2847,
@@ -25,7 +25,7 @@ const fallbackDestinations = [
     name: 'Ella',
     title: 'Hill Country Paradise',
     description: 'Misty mountain town famous for Nine Arch Bridge and hiking trails.',
-    image: 'https://images.unsplash.com/photo-1566296314736-6eaac1ca0cb9?w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800&q=80',
     category: 'Hill Country',
     rating: 4.8,
     reviews: 1923,
@@ -37,7 +37,7 @@ const fallbackDestinations = [
     name: 'Kandy',
     title: 'Temple of Sacred Tooth',
     description: 'Cultural capital housing Buddha\'s sacred tooth relic.',
-    image: 'https://images.unsplash.com/photo-1580181046391-e7e83f206c62?w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1546587348-d12660c30c50?w=800&q=80',
     category: 'Cultural Heritage',
     rating: 4.7,
     reviews: 2156,
@@ -49,7 +49,7 @@ const fallbackDestinations = [
     name: 'Galle',
     title: 'Dutch Colonial Fort',
     description: 'Historic fort city with colonial architecture and ocean views.',
-    image: 'https://images.unsplash.com/photo-1588598198321-9735fd52045b?w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?w=800&q=80',
     category: 'Colonial Heritage',
     rating: 4.8,
     reviews: 1834,
@@ -61,7 +61,7 @@ const fallbackDestinations = [
     name: 'Mirissa',
     title: 'Whale Watching Capital',
     description: 'Pristine beach paradise and world\'s best blue whale destination.',
-    image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?w=800&q=80',
     category: 'Beach & Wildlife',
     rating: 4.9,
     reviews: 1567,
@@ -73,12 +73,36 @@ const fallbackDestinations = [
     name: 'Yala',
     title: 'Leopard Kingdom',
     description: 'World\'s highest leopard density. Iconic safari destination.',
-    image: 'https://images.unsplash.com/photo-1549366021-9f761d450615?w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1456926631375-92c8ce872def?w=800&q=80',
     category: 'Wildlife Safari',
     rating: 4.9,
     reviews: 2341,
     features: ['Leopards', 'Elephants', 'Bird Watching'],
     path: '/wild-tours'
+  },
+  {
+    id: 'nuwara-eliya',
+    name: 'Nuwara Eliya',
+    title: 'Little England',
+    description: 'Cool climate hill station surrounded by tea plantations.',
+    image: 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=800&q=80',
+    category: 'Tea Country',
+    rating: 4.7,
+    reviews: 1456,
+    features: ['Tea Estates', 'Gregory Lake', 'Horton Plains'],
+    path: '/destinations/nuwara-eliya'
+  },
+  {
+    id: 'trincomalee',
+    name: 'Trincomalee',
+    title: 'East Coast Paradise',
+    description: 'Pristine beaches, whale watching and ancient temples.',
+    image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80',
+    category: 'Beach & Heritage',
+    rating: 4.8,
+    reviews: 1234,
+    features: ['Nilaveli Beach', 'Pigeon Island', 'Koneswaram Temple'],
+    path: '/destinations/trincomalee'
   }
 ];
 
@@ -100,25 +124,26 @@ const getDestinationHref = (destination: FeaturedDestination): string => {
 };
 
 const FeaturedDestinations = () => {
+  const navigate = useNavigate();
   const [destinations, setDestinations] = useState<FeaturedDestination[]>(
     shuffleArray(fallbackDestinations as unknown as FeaturedDestination[])
   );
   const [currentPage, setCurrentPage] = useState(0);
 
-  // Fetch destinations from CMS
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const destinationsData = await cmsService.featuredDestinations.getAll();
-        if (destinationsData && destinationsData.length > 0) {
-          setDestinations(shuffleArray(destinationsData as FeaturedDestination[]));
-        }
-      } catch (error) {
-        console.error('Error fetching CMS data:', error);
-      }
-    };
-    fetchData();
-  }, []);
+  // CMS fetch disabled - using fallback data with proper links
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const destinationsData = await cmsService.featuredDestinations.getAll();
+  //       if (destinationsData && destinationsData.length > 0) {
+  //         setDestinations(shuffleArray(destinationsData as FeaturedDestination[]));
+  //       }
+  //     } catch (error) {
+  //       console.error('Error fetching CMS data:', error);
+  //     }
+  //   };
+  //   fetchData();
+  // }, []);
 
   // Pagination
   const itemsPerPage = 6;
@@ -150,8 +175,8 @@ const FeaturedDestinations = () => {
   return (
     <section id="featured-destinations" className="relative py-24 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
       {/* Subtle background pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0" style={{
+      <div className="absolute inset-0 opacity-5 pointer-events-none">
+        <div className="absolute inset-0 pointer-events-none" style={{
           backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
           backgroundSize: '40px 40px'
         }} />
@@ -201,17 +226,12 @@ const FeaturedDestinations = () => {
 
         {/* Destinations Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-14">
-          {currentDestinations.map((destination, index) => (
-            <motion.div
-              key={destination.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-              className="group"
-            >
-              <Link to={getDestinationHref(destination)}>
-                <div className="relative h-[420px] rounded-3xl overflow-hidden shadow-2xl shadow-black/40 hover:shadow-orange-500/20 transition-all duration-500 transform hover:-translate-y-2">
+          {currentDestinations.map((destination, index) => {
+            const href = (destination as any).path || `/destinations/${destination.name.toLowerCase().replace(/\s+/g, '-')}`;
+            return (
+            <div key={destination.id} className="group">
+              <a href={href}>
+                <div className="relative h-[420px] rounded-3xl overflow-hidden shadow-2xl shadow-black/40 hover:shadow-orange-500/20 transition-all duration-500 transform hover:-translate-y-2 cursor-pointer">
                   {/* Background Image */}
                   <div
                     className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
@@ -285,9 +305,10 @@ const FeaturedDestinations = () => {
                   {/* Hover Border Glow */}
                   <div className="absolute inset-0 rounded-3xl border-2 border-transparent group-hover:border-orange-400/40 transition-all duration-300" />
                 </div>
-              </Link>
-            </motion.div>
-          ))}
+              </a>
+            </div>
+          );
+          })}
         </div>
 
         {/* Pagination */}

@@ -22,6 +22,7 @@ import ReviewsSection from "@/components/homepage/ReviewsSection";
 import ComprehensiveSEO from "@/components/seo/ComprehensiveSEO";
 import InteractiveTripBuilder from "@/components/trip-builder/InteractiveTripBuilder";
 // import QuoteCalculator from "@/components/quote-calculator/QuoteCalculator";
+import AirportTransferSection from "@/components/homepage/AirportTransferSection";
 import { useLanguage } from "@/contexts/LanguageContext";
 import HomepageSchema from "@/components/seo/HomepageSchema";
 
@@ -100,6 +101,9 @@ const Index = () => {
       <div className="w-full overflow-x-hidden">
         {/* Hero Section with 4 Booking Tabs */}
         <LuxuryHeroSection />
+
+        {/* Airport Transfer Booking Section */}
+        <AirportTransferSection />
 
         {/* Interactive Trip Builder */}
         <InteractiveTripBuilder />

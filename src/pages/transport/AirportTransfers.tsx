@@ -24,7 +24,7 @@ import {
   VEHICLE_TYPES,
   searchAirports,
   searchDestinations,
-  calculateTransferPrice,
+  calculateDynamicPrice,
   ROUTE_DISTANCES,
   PRELOADED_HOTELS,
   TRANSFER_EXTRAS,
@@ -32,8 +32,9 @@ import {
   JAF_AIRPORT_COORDS,
   calculateHaversineDistance,
   calculateDuration,
-  calculateTotalWithExtras,
+  calculateTotalWithExtrasUSD,
   searchHotels,
+  DEFAULT_VEHICLE_PRICING,
 } from '@/services/airportTransferService';
 import type {
   AirportTransferBooking,
@@ -42,6 +43,7 @@ import type {
   TransferExtra,
   FlightInfo,
   PriceBreakdown,
+  VehiclePricing,
 } from '@/services/airportTransferService';
 import {
   searchFlight,
@@ -51,6 +53,15 @@ import {
   getStatusText,
   getAirlineFromFlightNumber,
 } from '@/services/flightTrackingService';
+import { GoogleMap, DirectionsRenderer, Marker, useJsApiLoader, Autocomplete } from '@react-google-maps/api';
+import { getEffectiveApiKey, isDemoMode, googleMapsLibraries } from '@/lib/googleMapsConfig';
+import { Route, Milestone, LocateFixed, FileText, Send } from 'lucide-react';
+import {
+  downloadBookingPDF,
+  openWhatsAppConfirmation,
+  notifyAdminWhatsApp,
+  sendBookingConfirmation,
+} from '@/services/bookingConfirmationService';
 
 // Icon mapping for extras
 const extraIconMap: { [key: string]: React.ElementType } = {
@@ -120,6 +131,7 @@ const AirportTransfers = () => {
   const [bookingComplete, setBookingComplete] = useState(false);
   const [bookingReference, setBookingReference] = useState('');
   const [bookingState, setBookingState] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
+  const [completedBooking, setCompletedBooking] = useState<AirportTransferBooking | null>(null);
 
   // Flight tracking state (Step 2)
   const [flightSearchQuery, setFlightSearchQuery] = useState('');
@@ -143,10 +155,35 @@ const AirportTransfers = () => {
   const [calculatedDistance, setCalculatedDistance] = useState(0);
   const [calculatedDuration, setCalculatedDuration] = useState('');
 
+  // Google Maps state
+  const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
+
+  // Google Maps API loader - use same ID as other components to avoid conflicts
+  const apiKey = getEffectiveApiKey();
+  const { isLoaded: googleMapsLoaded, loadError } = useJsApiLoader({
+    id: 'google-map-script',  // Shared ID to prevent multiple loader instances
+    googleMapsApiKey: apiKey || '',
+    libraries: googleMapsLibraries
+  });
+
+  // Check if Google Places is truly ready
+  const isGooglePlacesReady = googleMapsLoaded && !loadError && apiKey && !isDemoMode() &&
+    typeof window !== 'undefined' && window.google?.maps?.places;
+
   // Refs
   const airportInputRef = useRef<HTMLDivElement>(null);
   const destinationInputRef = useRef<HTMLDivElement>(null);
   const hotelInputRef = useRef<HTMLDivElement>(null);
+
+  // Google Places Autocomplete refs
+  const [destinationAutocomplete, setDestinationAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
+  const [placesDestination, setPlacesDestination] = useState<{
+    name: string;
+    address: string;
+    coordinates: { lat: number; lng: number };
+    placeId: string;
+  } | null>(null);
 
   // Load page content
   useEffect(() => {
@@ -161,6 +198,74 @@ const AirportTransfers = () => {
       }
     };
     loadContent();
+  }, []);
+
+  // Parse URL parameters and pre-fill form (from homepage booking section)
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const pickup = urlParams.get('pickup');
+    const dropoff = urlParams.get('dropoff');
+    const date = urlParams.get('date');
+    const time = urlParams.get('time');
+    const passengers = urlParams.get('passengers');
+    const type = urlParams.get('type');
+
+    // Set transfer type
+    if (type === 'arrival' || type === 'departure') {
+      setTransferType(type);
+    }
+
+    // Set date and time
+    if (date) setPickupDate(date);
+    if (time) setPickupTime(time);
+    if (passengers) setAdults(parseInt(passengers) || 2);
+
+    // Try to match pickup to an airport
+    if (pickup) {
+      const matchedAirport = SRI_LANKA_AIRPORTS.find(
+        a => a.name.toLowerCase().includes(pickup.toLowerCase()) ||
+             a.code.toLowerCase() === pickup.toLowerCase()
+      );
+      if (matchedAirport) {
+        setSelectedAirport(matchedAirport);
+        setAirportSearch(matchedAirport.name);
+      } else {
+        // Try matching to a destination for departure transfers
+        const matchedDest = SRI_LANKA_DESTINATIONS.find(
+          d => d.name.toLowerCase().includes(pickup.toLowerCase())
+        );
+        if (matchedDest) {
+          setSelectedDestination(matchedDest);
+          setDestinationSearch(matchedDest.name);
+        }
+      }
+    }
+
+    // Try to match dropoff to destination or airport
+    if (dropoff) {
+      const matchedDest = SRI_LANKA_DESTINATIONS.find(
+        d => d.name.toLowerCase().includes(dropoff.toLowerCase())
+      );
+      if (matchedDest) {
+        setSelectedDestination(matchedDest);
+        setDestinationSearch(matchedDest.name);
+      } else {
+        // Try matching to an airport for departure transfers
+        const matchedAirport = SRI_LANKA_AIRPORTS.find(
+          a => a.name.toLowerCase().includes(dropoff.toLowerCase()) ||
+               a.code.toLowerCase() === dropoff.toLowerCase()
+        );
+        if (matchedAirport && type === 'departure') {
+          setSelectedAirport(matchedAirport);
+          setAirportSearch(matchedAirport.name);
+        }
+      }
+    }
+
+    // Clear URL params after processing (optional - keeps URL clean)
+    if (pickup || dropoff || date || time) {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
   }, []);
 
   // Click outside handlers
@@ -211,6 +316,77 @@ const AirportTransfers = () => {
     return () => clearInterval(interval);
   }, [pageContent?.heroSlides]);
 
+  // Calculate Google Maps directions when entering step 5 or 6 (pre-fetch for better UX)
+  useEffect(() => {
+    if ((step === 5 || step === 6) && googleMapsLoaded && selectedAirport && (selectedDestination || selectedHotel || placesDestination) && !directions) {
+      const calculateDirections = async () => {
+        try {
+          const directionsService = new google.maps.DirectionsService();
+
+          // Get airport coordinates
+          const airportCoords = selectedAirport.code === 'CMB' ? CMB_AIRPORT_COORDS :
+                               selectedAirport.code === 'JAF' ? JAF_AIRPORT_COORDS :
+                               CMB_AIRPORT_COORDS;
+
+          // Get destination coordinates (priority: Google Places > Hotel > Static destination)
+          let destCoords = { lat: 7.2906, lng: 80.6337 }; // Default Kandy
+          if (placesDestination) {
+            // Google Places selected location
+            destCoords = placesDestination.coordinates;
+          } else if (selectedHotel) {
+            destCoords = selectedHotel.coordinates;
+          } else if (selectedDestination) {
+            // Map destinations to approximate coordinates
+            const destCoordinates: { [key: string]: { lat: number; lng: number } } = {
+              'colombo': { lat: 6.9271, lng: 79.8612 },
+              'negombo': { lat: 7.2008, lng: 79.8358 },
+              'kandy': { lat: 7.2906, lng: 80.6337 },
+              'galle': { lat: 6.0535, lng: 80.2210 },
+              'bentota': { lat: 6.4280, lng: 79.9958 },
+              'hikkaduwa': { lat: 6.1395, lng: 80.1037 },
+              'mirissa': { lat: 5.9485, lng: 80.4718 },
+              'tangalle': { lat: 6.0241, lng: 80.7968 },
+              'ella': { lat: 6.8667, lng: 81.0466 },
+              'nuwara eliya': { lat: 6.9497, lng: 80.7891 },
+              'sigiriya': { lat: 7.9570, lng: 80.7603 },
+              'dambulla': { lat: 7.8675, lng: 80.6517 },
+              'polonnaruwa': { lat: 7.9403, lng: 81.0188 },
+              'anuradhapura': { lat: 8.3114, lng: 80.4037 },
+              'yala': { lat: 6.3728, lng: 81.5158 },
+              'trincomalee': { lat: 8.5874, lng: 81.2152 },
+              'jaffna': { lat: 9.6615, lng: 80.0255 },
+              'arugam bay': { lat: 6.8406, lng: 81.8369 },
+            };
+            const destKey = selectedDestination.area.toLowerCase();
+            destCoords = destCoordinates[destKey] || { lat: 7.2906, lng: 80.6337 };
+          }
+
+          // Determine origin and destination based on transfer type
+          const origin = transferType === 'departure'
+            ? new google.maps.LatLng(destCoords.lat, destCoords.lng)
+            : new google.maps.LatLng(airportCoords.lat, airportCoords.lng);
+          const destination = transferType === 'departure'
+            ? new google.maps.LatLng(airportCoords.lat, airportCoords.lng)
+            : new google.maps.LatLng(destCoords.lat, destCoords.lng);
+
+          const result = await directionsService.route({
+            origin,
+            destination,
+            travelMode: google.maps.TravelMode.DRIVING,
+          });
+
+          setDirections(result);
+          setMapLoaded(true);
+        } catch (error) {
+          console.error('Error calculating directions:', error);
+          setMapLoaded(true); // Still show map without directions
+        }
+      };
+
+      calculateDirections();
+    }
+  }, [step, googleMapsLoaded, selectedAirport, selectedDestination, selectedHotel, placesDestination, directions, transferType]);
+
   // Airport search results
   const airportResults = useMemo(() => {
     return searchAirports(airportSearch);
@@ -221,13 +397,35 @@ const AirportTransfers = () => {
     return searchDestinations(destinationSearch);
   }, [destinationSearch]);
 
-  // Calculate price
+  // Calculate price - works with both static destinations and Google Places
+  // Uses dynamic pricing from admin panel (Firebase) in USD
   const calculatedPrice = useMemo(() => {
-    if (!selectedDestination || !selectedVehicle) return null;
-    const destKey = selectedDestination.area.toLowerCase().replace(/\s+/g, '-');
-    const distance = ROUTE_DISTANCES[destKey] || 100;
-    return calculateTransferPrice(distance, selectedVehicle.id, transferType === 'round-trip');
-  }, [selectedDestination, selectedVehicle, transferType]);
+    if (!selectedVehicle) return null;
+
+    // Use calculatedDistance which is set from either:
+    // - selectedHotel coordinates (Google Places)
+    // - selectedDestination (static list)
+    let distance = calculatedDistance;
+
+    // Fallback to route distances for static destinations
+    if (distance === 0 && selectedDestination) {
+      const destKey = selectedDestination.area.toLowerCase().replace(/\s+/g, '-');
+      distance = ROUTE_DISTANCES[destKey] || 100;
+    }
+
+    // Default minimum distance
+    if (distance === 0) {
+      distance = 30; // Default 30km if nothing selected
+    }
+
+    // Use dynamic pricing from admin panel (pageContent?.vehiclePricing) or defaults
+    return calculateDynamicPrice(
+      distance,
+      selectedVehicle.id,
+      pageContent?.vehiclePricing,
+      transferType === 'round-trip'
+    );
+  }, [selectedDestination, selectedVehicle, transferType, calculatedDistance, pageContent?.vehiclePricing]);
 
   // Filtered vehicles by passenger count
   const suitableVehicles = useMemo(() => {
@@ -240,25 +438,27 @@ const AirportTransfers = () => {
     return searchHotels(hotelSearchQuery);
   }, [hotelSearchQuery]);
 
-  // Enhanced price calculation with extras
+  // Enhanced price calculation with extras (USD, dynamic pricing from admin panel)
   const enhancedPrice = useMemo((): PriceBreakdown | null => {
     if (!selectedVehicle || calculatedDistance === 0) return null;
-    return calculateTotalWithExtras(
+    return calculateTotalWithExtrasUSD(
       calculatedDistance,
       selectedVehicle.id,
       selectedExtras,
       childSeatCount,
-      transferType === 'round-trip'
+      transferType === 'round-trip',
+      pageContent?.vehiclePricing
     );
-  }, [selectedVehicle, calculatedDistance, selectedExtras, childSeatCount, transferType]);
+  }, [selectedVehicle, calculatedDistance, selectedExtras, childSeatCount, transferType, pageContent?.vehiclePricing]);
 
   // Step validation
   const canProceedToStep = (targetStep: number): boolean => {
+    const hasDestination = !!(selectedHotel || selectedDestination || placesDestination);
     switch (targetStep) {
       case 2:
-        return !!(selectedAirport && (selectedHotel || selectedDestination) && pickupDate && pickupTime);
+        return !!(selectedAirport && hasDestination && pickupDate && pickupTime);
       case 3:
-        return !!(selectedAirport && (selectedHotel || selectedDestination) && pickupDate && pickupTime);
+        return !!(selectedAirport && hasDestination && pickupDate && pickupTime);
       case 4:
         return !!selectedVehicle;
       case 5:
@@ -327,15 +527,58 @@ const AirportTransfers = () => {
     setShowDestinationResults(false);
   };
 
+  // Google Places Autocomplete handlers
+  const onDestinationAutocompleteLoad = (autocomplete: google.maps.places.Autocomplete) => {
+    setDestinationAutocomplete(autocomplete);
+  };
+
+  const onDestinationPlaceChanged = () => {
+    if (destinationAutocomplete) {
+      const place = destinationAutocomplete.getPlace();
+      if (place.geometry && place.geometry.location) {
+        const lat = place.geometry.location.lat();
+        const lng = place.geometry.location.lng();
+
+        setPlacesDestination({
+          name: place.name || place.formatted_address || 'Selected Location',
+          address: place.formatted_address || '',
+          coordinates: { lat, lng },
+          placeId: place.place_id || '',
+        });
+
+        // Also set as hotel for distance calculation
+        setSelectedHotel({
+          id: place.place_id || `place-${Date.now()}`,
+          name: place.name || 'Selected Location',
+          city: place.vicinity || place.formatted_address?.split(',')[1]?.trim() || 'Sri Lanka',
+          area: place.formatted_address?.split(',')[0] || 'Sri Lanka',
+          coordinates: { lat, lng },
+          rating: 4.5,
+          image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400',
+        });
+
+        setDestinationSearch(place.name || place.formatted_address || '');
+        setShowDestinationResults(false);
+        setSelectedDestination(null); // Clear static selection
+        setDirections(null); // Reset directions to recalculate
+      }
+    }
+  };
+
   // Get min date (today)
   const getMinDate = () => new Date().toISOString().split('T')[0];
 
   // Handle booking submission
   const handleSubmitBooking = async () => {
-    if (!selectedAirport || !selectedDestination || !selectedVehicle || !calculatedPrice) return;
+    const hasDestination = !!(selectedHotel || selectedDestination || placesDestination);
+    if (!selectedAirport || !hasDestination || !selectedVehicle || !calculatedPrice) return;
     if (!firstName || !lastName || !email || !phone || !country) return;
 
     setIsSubmitting(true);
+
+    // Get destination info from either Google Places or static selection
+    const destinationName = placesDestination?.name || selectedHotel?.name || selectedDestination?.name || 'Unknown';
+    const destinationArea = placesDestination?.address || selectedHotel?.city || selectedDestination?.area || 'Sri Lanka';
 
     try {
       const booking = await airportTransferService.createBooking({
@@ -347,8 +590,8 @@ const AirportTransfers = () => {
           country: selectedAirport.country
         },
         dropoffLocation: {
-          name: selectedDestination.name,
-          area: selectedDestination.area
+          name: destinationName,
+          area: destinationArea
         },
         flightNumber,
         pickupDate,
@@ -370,7 +613,7 @@ const AirportTransfers = () => {
         },
         pricing: {
           basePrice: calculatedPrice.breakdown.basePrice,
-          distance: calculatedPrice.breakdown.distance,
+          distance: calculatedDistance,
           totalPrice: calculatedPrice.price,
           currency: calculatedPrice.currency
         },
@@ -383,8 +626,16 @@ const AirportTransfers = () => {
       });
 
       setBookingReference(booking.bookingReference);
+      setCompletedBooking(booking);
       setBookingComplete(true);
       setBookingState('success');
+
+      // Send confirmation emails and log for WhatsApp
+      try {
+        await sendBookingConfirmation(booking);
+      } catch (confirmError) {
+        console.error('Error sending confirmations:', confirmError);
+      }
 
       toast.success('Booking Confirmed!', {
         description: `Your booking reference is ${booking.bookingReference}`
@@ -710,39 +961,83 @@ const AirportTransfers = () => {
                       )}
                     </div>
 
-                    {/* Destination Search */}
+                    {/* Destination Search with Google Places */}
                     <div ref={destinationInputRef} className="relative">
                       <Label className="text-sm font-semibold text-slate-600 mb-2 block">
                         {transferType === 'departure' ? 'Pickup Location' : 'Drop-off Location'}
                       </Label>
                       <div className="relative">
-                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-amber-500" />
-                        <Input
-                          value={destinationSearch}
-                          onChange={(e) => {
-                            setDestinationSearch(e.target.value);
-                            setShowDestinationResults(true);
-                            if (!e.target.value) setSelectedDestination(null);
-                          }}
-                          onFocus={() => setShowDestinationResults(true)}
-                          placeholder="Hotel, city, or destination..."
-                          className="pl-10 py-3 h-14 bg-white border-2 border-emerald-200 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 rounded-xl text-slate-800 placeholder:text-slate-400 font-medium"
-                        />
-                        {selectedDestination && (
+                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-amber-500 z-10" />
+
+                        {/* Google Places Autocomplete */}
+                        {googleMapsLoaded && apiKey && !isDemoMode() ? (
+                          <Autocomplete
+                            onLoad={onDestinationAutocompleteLoad}
+                            onPlaceChanged={onDestinationPlaceChanged}
+                            options={{
+                              componentRestrictions: { country: 'lk' },
+                              types: ['establishment', 'geocode'],
+                              fields: ['place_id', 'geometry', 'name', 'formatted_address', 'vicinity'],
+                            }}
+                          >
+                            <input
+                              type="text"
+                              value={destinationSearch}
+                              onChange={(e) => {
+                                setDestinationSearch(e.target.value);
+                                setShowDestinationResults(true);
+                                if (!e.target.value) {
+                                  setSelectedDestination(null);
+                                  setSelectedHotel(null);
+                                  setPlacesDestination(null);
+                                }
+                              }}
+                              onFocus={() => setShowDestinationResults(true)}
+                              placeholder="Search hotel, address, or place..."
+                              className="w-full pl-10 pr-10 py-3 h-14 bg-white border-2 border-emerald-200 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 rounded-xl text-slate-800 placeholder:text-slate-400 font-medium outline-none"
+                            />
+                          </Autocomplete>
+                        ) : (
+                          /* Fallback to static search when no API key */
+                          <Input
+                            value={destinationSearch}
+                            onChange={(e) => {
+                              setDestinationSearch(e.target.value);
+                              setShowDestinationResults(true);
+                              if (!e.target.value) setSelectedDestination(null);
+                            }}
+                            onFocus={() => setShowDestinationResults(true)}
+                            placeholder="Hotel, city, or destination..."
+                            className="pl-10 py-3 h-14 bg-white border-2 border-emerald-200 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 rounded-xl text-slate-800 placeholder:text-slate-400 font-medium"
+                          />
+                        )}
+
+                        {(selectedDestination || placesDestination) && (
                           <button
                             onClick={() => {
                               setSelectedDestination(null);
+                              setSelectedHotel(null);
+                              setPlacesDestination(null);
                               setDestinationSearch('');
+                              setDirections(null);
                             }}
-                            className="absolute right-3 top-1/2 -translate-y-1/2"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 z-10"
                           >
                             <X className="w-4 h-4 text-slate-400 hover:text-slate-600" />
                           </button>
                         )}
                       </div>
 
-                      {/* Destination Results Dropdown */}
-                      {showDestinationResults && destinationResults.length > 0 && (
+                      {/* Google Places Status Indicator */}
+                      {googleMapsLoaded && apiKey && !isDemoMode() && (
+                        <div className="flex items-center gap-1 mt-1">
+                          <LocateFixed className="w-3 h-3 text-emerald-500" />
+                          <span className="text-xs text-emerald-600">Google Places enabled</span>
+                        </div>
+                      )}
+
+                      {/* Fallback: Static Destination Results Dropdown (when no Google API) */}
+                      {(!googleMapsLoaded || !apiKey || isDemoMode()) && showDestinationResults && destinationResults.length > 0 && (
                         <div className="absolute z-50 w-full mt-2 bg-white rounded-xl shadow-2xl border border-emerald-100 max-h-80 overflow-y-auto">
                           {destinationResults.map((dest, i) => (
                             <button
@@ -1099,9 +1394,10 @@ const AirportTransfers = () => {
 
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {suitableVehicles.map((vehicle) => {
-                      const destKey = selectedDestination?.area.toLowerCase().replace(/\s+/g, '-') || '';
-                      const distance = ROUTE_DISTANCES[destKey] || 100;
-                      const price = calculateTransferPrice(distance, vehicle.id, transferType === 'round-trip');
+                      // Use calculatedDistance for Google Places, or fallback to route distances
+                      const distance = calculatedDistance > 0 ? calculatedDistance :
+                        (selectedDestination ? ROUTE_DISTANCES[selectedDestination.area.toLowerCase().replace(/\s+/g, '-')] || 100 : 100);
+                      const price = calculateDynamicPrice(distance, vehicle.id, pageContent?.vehiclePricing, transferType === 'round-trip');
 
                       return (
                         <div
@@ -1421,9 +1717,161 @@ const AirportTransfers = () => {
                 >
                   <div className="mb-6">
                     <h2 className="text-2xl md:text-3xl font-bold text-emerald-800" style={{ fontFamily: '"Playfair Display", serif' }}>
-                      Payment
+                      Review & Pay
                     </h2>
-                    <p className="text-slate-500 mt-1">Secure 256-bit checkout. We accept global cards & PayPal.</p>
+                    <p className="text-slate-500 mt-1">Review your journey details and complete payment</p>
+                  </div>
+
+                  {/* Journey Map Preview */}
+                  <div className="bg-gradient-to-br from-emerald-50 to-white rounded-2xl border-2 border-emerald-100 overflow-hidden">
+                    <div className="p-4 border-b border-emerald-100 bg-emerald-50/50">
+                      <h3 className="font-bold text-emerald-800 flex items-center gap-2">
+                        <Route className="w-5 h-5" />
+                        Your Journey Route
+                      </h3>
+                    </div>
+
+                    {/* Route Info Cards */}
+                    <div className="p-4">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                        <div className="bg-white rounded-xl p-3 border border-emerald-100 text-center">
+                          <Plane className="w-5 h-5 text-emerald-600 mx-auto mb-1" />
+                          <p className="text-xs text-slate-500">From</p>
+                          <p className="font-bold text-slate-800 text-sm">{selectedAirport?.code || 'CMB'}</p>
+                        </div>
+                        <div className="bg-white rounded-xl p-3 border border-emerald-100 text-center">
+                          <MapPin className="w-5 h-5 text-emerald-600 mx-auto mb-1" />
+                          <p className="text-xs text-slate-500">To</p>
+                          <p className="font-bold text-slate-800 text-sm truncate">
+                            {selectedHotel?.name || selectedDestination?.name || 'Destination'}
+                          </p>
+                        </div>
+                        <div className="bg-white rounded-xl p-3 border border-emerald-100 text-center">
+                          <Milestone className="w-5 h-5 text-emerald-600 mx-auto mb-1" />
+                          <p className="text-xs text-slate-500">Distance</p>
+                          <p className="font-bold text-emerald-700 text-sm">{calculatedDistance} km</p>
+                        </div>
+                        <div className="bg-white rounded-xl p-3 border border-emerald-100 text-center">
+                          <Clock className="w-5 h-5 text-emerald-600 mx-auto mb-1" />
+                          <p className="text-xs text-slate-500">Duration</p>
+                          <p className="font-bold text-emerald-700 text-sm">{calculatedDuration || '~2h'}</p>
+                        </div>
+                      </div>
+
+                      {/* Google Map - Shows route when directions are loaded */}
+                      <div className="rounded-xl overflow-hidden border border-emerald-200" style={{ height: '280px' }}>
+                        {googleMapsLoaded && apiKey && !isDemoMode() && directions ? (
+                          <GoogleMap
+                            mapContainerStyle={{ width: '100%', height: '100%' }}
+                            center={directions ? undefined : { lat: 7.8731, lng: 80.7718 }}
+                            zoom={directions ? undefined : 8}
+                            onLoad={(map) => {
+                              // Auto-fit bounds when map loads with directions
+                              if (directions && directions.routes[0]?.bounds) {
+                                map.fitBounds(directions.routes[0].bounds);
+                                // Add slight padding
+                                setTimeout(() => {
+                                  const currentZoom = map.getZoom();
+                                  if (currentZoom && currentZoom > 12) {
+                                    map.setZoom(12);
+                                  }
+                                }, 100);
+                              }
+                            }}
+                            options={{
+                              zoomControl: true,
+                              streetViewControl: false,
+                              mapTypeControl: false,
+                              fullscreenControl: false,
+                              styles: [
+                                { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+                                { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+                              ]
+                            }}
+                          >
+                            {directions && (
+                              <DirectionsRenderer
+                                directions={directions}
+                                options={{
+                                  suppressMarkers: false,
+                                  polylineOptions: {
+                                    strokeColor: '#0d5c46',
+                                    strokeOpacity: 0.9,
+                                    strokeWeight: 5,
+                                  },
+                                  markerOptions: {
+                                    zIndex: 100,
+                                  },
+                                  preserveViewport: false // Allow auto-fit to route
+                                }}
+                              />
+                            )}
+                          </GoogleMap>
+                        ) : googleMapsLoaded && apiKey && !isDemoMode() && !directions ? (
+                          /* Loading state while fetching directions */
+                          <div className="w-full h-full bg-gradient-to-br from-emerald-100 to-emerald-50 flex flex-col items-center justify-center">
+                            <div className="text-center">
+                              <Loader2 className="w-10 h-10 text-emerald-600 animate-spin mx-auto mb-3" />
+                              <p className="text-emerald-700 font-semibold">Calculating your route...</p>
+                              <p className="text-sm text-emerald-600">
+                                {selectedAirport?.code || 'CMB'} → {placesDestination?.name?.split(',')[0] || selectedHotel?.name?.split(' ')[0] || selectedDestination?.area || 'Destination'}
+                              </p>
+                            </div>
+                          </div>
+                        ) : (
+                          /* Fallback Static Map Preview */
+                          <div className="w-full h-full bg-gradient-to-br from-emerald-100 to-emerald-50 flex flex-col items-center justify-center relative">
+                            <div className="absolute inset-0 opacity-10">
+                              <svg viewBox="0 0 400 300" className="w-full h-full">
+                                <path d="M50,250 Q150,100 200,150 T350,50" stroke="#0d5c46" strokeWidth="3" fill="none" strokeDasharray="8,4" />
+                                <circle cx="50" cy="250" r="8" fill="#0d5c46" />
+                                <circle cx="350" cy="50" r="8" fill="#f0b429" />
+                              </svg>
+                            </div>
+                            <div className="relative z-10 text-center">
+                              <div className="flex items-center justify-center gap-4 mb-4">
+                                <div className="bg-emerald-600 text-white rounded-full p-3">
+                                  <Plane className="w-6 h-6" />
+                                </div>
+                                <div className="flex flex-col items-center">
+                                  <div className="w-24 h-0.5 bg-emerald-400 relative">
+                                    <div className="absolute -top-1 left-1/2 transform -translate-x-1/2">
+                                      <Car className="w-4 h-4 text-emerald-600" />
+                                    </div>
+                                  </div>
+                                  <span className="text-xs text-emerald-600 mt-1">{calculatedDistance} km</span>
+                                </div>
+                                <div className="bg-amber-500 text-white rounded-full p-3">
+                                  <MapPin className="w-6 h-6" />
+                                </div>
+                              </div>
+                              <p className="text-emerald-700 font-semibold">
+                                {selectedAirport?.code || 'CMB'} → {placesDestination?.name?.split(',')[0] || selectedHotel?.name?.split(' ')[0] || selectedDestination?.area || 'Destination'}
+                              </p>
+                              <p className="text-sm text-emerald-600">Estimated {calculatedDuration || '~2 hours'} drive</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Journey Details */}
+                      <div className="mt-4 grid md:grid-cols-2 gap-3">
+                        <div className="flex items-center gap-3 bg-white rounded-xl p-3 border border-slate-100">
+                          <Calendar className="w-5 h-5 text-emerald-600" />
+                          <div>
+                            <p className="text-xs text-slate-500">Pickup Date & Time</p>
+                            <p className="font-semibold text-slate-800">{pickupDate} at {pickupTime}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3 bg-white rounded-xl p-3 border border-slate-100">
+                          <Car className="w-5 h-5 text-emerald-600" />
+                          <div>
+                            <p className="text-xs text-slate-500">Vehicle</p>
+                            <p className="font-semibold text-slate-800">{selectedVehicle?.name || 'Standard Sedan'}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Payment Methods */}
@@ -1522,44 +1970,151 @@ const AirportTransfers = () => {
               )}
 
               {/* Booking Success */}
-              {bookingComplete && (
+              {bookingComplete && completedBooking && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="text-center py-8"
+                  className="py-6"
                 >
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: 'spring', bounce: 0.5 }}
-                    className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6"
-                  >
-                    <Check className="w-10 h-10 text-emerald-700" />
-                  </motion.div>
+                  {/* Success Header */}
+                  <div className="text-center mb-8">
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: 'spring', bounce: 0.5 }}
+                      className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6"
+                    >
+                      <Check className="w-10 h-10 text-emerald-700" />
+                    </motion.div>
 
-                  <h2 className="text-3xl font-bold text-slate-800 mb-2" style={{ fontFamily: '"Playfair Display", serif' }}>
-                    Booking Confirmed!
-                  </h2>
-                  <p className="text-slate-600 mb-6">Your airport transfer has been successfully booked.</p>
+                    <h2 className="text-3xl font-bold text-slate-800 mb-2" style={{ fontFamily: '"Playfair Display", serif' }}>
+                      Booking Confirmed!
+                    </h2>
+                    <p className="text-slate-600">Your airport transfer has been successfully booked.</p>
+                  </div>
 
-                  <div className="bg-emerald-50 rounded-2xl p-6 max-w-md mx-auto mb-6">
+                  {/* Booking Reference */}
+                  <div className="bg-emerald-50 rounded-2xl p-6 max-w-md mx-auto mb-8">
                     <p className="text-sm text-slate-600 mb-2">Your Booking Reference</p>
                     <p className="text-3xl font-bold text-emerald-700">{bookingReference}</p>
                   </div>
 
-                  <p className="text-sm text-slate-500 mb-8">
-                    A confirmation email has been sent to <strong>{email}</strong>
-                  </p>
+                  {/* Booking Summary Preview */}
+                  <div className="bg-white rounded-2xl border border-slate-200 p-6 mb-8">
+                    <h3 className="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2">
+                      <FileText className="w-5 h-5 text-emerald-600" /> Booking Summary
+                    </h3>
 
-                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    {/* Route */}
+                    <div className="bg-gradient-to-r from-emerald-50 to-amber-50 rounded-xl p-4 mb-4">
+                      <div className="flex items-center justify-center gap-4 text-lg font-bold">
+                        <span className="text-emerald-700">{completedBooking.pickupAirport?.code || 'CMB'}</span>
+                        <span className="text-amber-500">{completedBooking.transferType === 'round-trip' ? '⇄' : '→'}</span>
+                        <span className="text-emerald-700">{completedBooking.dropoffLocation?.name?.split(',')[0]}</span>
+                      </div>
+                    </div>
+
+                    {/* Details Grid */}
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div className="bg-slate-50 rounded-lg p-3">
+                        <p className="text-slate-500 text-xs mb-1">Date</p>
+                        <p className="font-semibold text-slate-800">{completedBooking.pickupDate}</p>
+                      </div>
+                      <div className="bg-slate-50 rounded-lg p-3">
+                        <p className="text-slate-500 text-xs mb-1">Time</p>
+                        <p className="font-semibold text-slate-800">{completedBooking.pickupTime}</p>
+                      </div>
+                      <div className="bg-slate-50 rounded-lg p-3">
+                        <p className="text-slate-500 text-xs mb-1">Vehicle</p>
+                        <p className="font-semibold text-slate-800">{completedBooking.vehicleName}</p>
+                      </div>
+                      <div className="bg-slate-50 rounded-lg p-3">
+                        <p className="text-slate-500 text-xs mb-1">Passengers</p>
+                        <p className="font-semibold text-slate-800">{completedBooking.adults}A + {completedBooking.children}C</p>
+                      </div>
+                      <div className="bg-slate-50 rounded-lg p-3">
+                        <p className="text-slate-500 text-xs mb-1">Distance</p>
+                        <p className="font-semibold text-slate-800">{completedBooking.pricing?.distance || 0} km</p>
+                      </div>
+                      <div className="bg-emerald-100 rounded-lg p-3">
+                        <p className="text-emerald-600 text-xs mb-1">Total</p>
+                        <p className="font-bold text-emerald-700 text-lg">${completedBooking.pricing?.totalPrice || 0}</p>
+                      </div>
+                    </div>
+
+                    {/* Passenger Info */}
+                    <div className="mt-4 pt-4 border-t border-slate-100">
+                      <p className="text-sm text-slate-600">
+                        <strong>Passenger:</strong> {completedBooking.customerInfo?.firstName} {completedBooking.customerInfo?.lastName}
+                      </p>
+                      <p className="text-sm text-slate-600">
+                        <strong>Email:</strong> {completedBooking.customerInfo?.email}
+                      </p>
+                      <p className="text-sm text-slate-600">
+                        <strong>Phone:</strong> {completedBooking.customerInfo?.phone}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="space-y-4">
+                    {/* Primary Actions */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <Button
+                        className="w-full py-4 text-white rounded-xl font-semibold"
+                        style={{ background: 'linear-gradient(135deg, #0d5c46, #1a7f5f)' }}
+                        onClick={() => completedBooking && downloadBookingPDF(completedBooking)}
+                      >
+                        <Download className="mr-2 w-5 h-5" /> Download PDF Receipt
+                      </Button>
+                      <Button
+                        className="w-full py-4 bg-green-500 hover:bg-green-600 text-white rounded-xl font-semibold"
+                        onClick={() => completedBooking && openWhatsAppConfirmation(completedBooking)}
+                      >
+                        <MessageCircle className="mr-2 w-5 h-5" /> Send via WhatsApp
+                      </Button>
+                    </div>
+
+                    {/* Secondary Actions */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <Button
+                        variant="outline"
+                        className="w-full py-3 border-2 border-slate-200 rounded-xl"
+                        onClick={() => window.print()}
+                      >
+                        <Printer className="mr-2 w-4 h-4" /> Print Confirmation
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full py-3 border-2 border-amber-300 text-amber-700 hover:bg-amber-50 rounded-xl"
+                        onClick={() => completedBooking && notifyAdminWhatsApp(completedBooking)}
+                      >
+                        <Send className="mr-2 w-4 h-4" /> Notify Admin (WhatsApp)
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Email Confirmation Notice */}
+                  <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-100">
+                    <p className="text-sm text-blue-700 flex items-center gap-2">
+                      <Mail className="w-4 h-4" />
+                      Confirmation email sent to <strong>{email}</strong> and admin at <strong>info@rechargetravels.com</strong>
+                    </p>
+                  </div>
+
+                  {/* Book Another */}
+                  <div className="mt-8 pt-6 border-t border-slate-100 text-center">
                     <Button
                       onClick={() => {
                         setStep(1);
                         setBookingComplete(false);
                         setBookingState('idle');
+                        setCompletedBooking(null);
                         // Reset form
                         setSelectedAirport(null);
                         setSelectedDestination(null);
+                        setSelectedHotel(null);
+                        setPlacesDestination(null);
                         setAirportSearch('');
                         setDestinationSearch('');
                         setSelectedVehicle(null);
@@ -1571,31 +2126,26 @@ const AirportTransfers = () => {
                         setSelectedExtras(['meet-greet']);
                         setPaymentMethod(null);
                         setAgreedToTerms(false);
+                        setDirections(null);
+                        setCalculatedDistance(0);
                       }}
-                      variant="outline"
-                      className="px-8 py-3 border-2 border-slate-200 rounded-xl"
+                      variant="ghost"
+                      className="text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50"
                     >
-                      Book Another Transfer
-                    </Button>
-                    <Button
-                      className="px-8 py-3 text-white rounded-xl"
-                      style={{ background: 'linear-gradient(135deg, #0d5c46, #1a7f5f)' }}
-                      onClick={() => window.print()}
-                    >
-                      <Printer className="mr-2 w-4 h-4" /> Print Confirmation
+                      <ArrowRight className="mr-2 w-4 h-4" /> Book Another Transfer
                     </Button>
                   </div>
 
-                  {/* WhatsApp Support */}
-                  <div className="mt-8 pt-8 border-t border-slate-100">
-                    <p className="text-sm text-slate-500 mb-3">Need help with your booking?</p>
+                  {/* 24/7 Support */}
+                  <div className="mt-6 text-center">
+                    <p className="text-sm text-slate-500 mb-2">Need assistance?</p>
                     <a
                       href="https://wa.me/94777721999"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-6 py-3 bg-green-500 text-white font-semibold rounded-full hover:bg-green-600 transition-colors"
+                      className="inline-flex items-center gap-2 text-green-600 font-semibold hover:text-green-700"
                     >
-                      <MessageCircle className="w-5 h-5" /> WhatsApp Concierge
+                      <Headphones className="w-4 h-4" /> 24/7 WhatsApp Concierge
                     </a>
                   </div>
                 </motion.div>
@@ -1651,16 +2201,16 @@ const AirportTransfers = () => {
 
                     {/* Price Box */}
                     <div className="bg-emerald-50 rounded-2xl p-4">
-                      {selectedVehicle && (
+                      {selectedVehicle && calculatedPrice && (
                         <div className="flex justify-between text-sm mb-2">
                           <span className="text-slate-600">{selectedVehicle.name}</span>
-                          <span className="text-slate-800">${calculatedPrice?.breakdown.basePrice || 0}</span>
+                          <span className="text-slate-800">${calculatedPrice.breakdown.basePrice || 0}</span>
                         </div>
                       )}
-                      {calculatedDistance > 0 && (
+                      {calculatedDistance > 0 && calculatedPrice && (
                         <div className="flex justify-between text-sm mb-2">
                           <span className="text-slate-600">Distance ({calculatedDistance}km)</span>
-                          <span className="text-slate-800">${calculatedPrice?.breakdown.distance || 0}</span>
+                          <span className="text-slate-800">${calculatedPrice.breakdown.distancePrice || 0}</span>
                         </div>
                       )}
                       {selectedExtras.filter(id => id !== 'meet-greet').length > 0 && (
@@ -1676,7 +2226,14 @@ const AirportTransfers = () => {
                       )}
                       <div className="flex justify-between items-baseline pt-3 border-t border-emerald-200 mt-2">
                         <span className="text-slate-600 font-medium">Total</span>
-                        <span className="text-2xl font-bold text-emerald-800">${calculatedPrice?.price || 0}</span>
+                        <span className="text-2xl font-bold text-emerald-800">
+                          ${calculatedPrice ? (
+                            calculatedPrice.price + selectedExtras.filter(id => id !== 'meet-greet').reduce((sum, id) => {
+                              const extra = TRANSFER_EXTRAS.find(e => e.id === id);
+                              return sum + (extra?.priceUSD || 0);
+                            }, 0) + (selectedExtras.includes('child-seat') ? childSeatCount * 5 : 0)
+                          ) : 0}
+                        </span>
                       </div>
                     </div>
 

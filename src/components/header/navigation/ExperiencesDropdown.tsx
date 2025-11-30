@@ -9,7 +9,7 @@ import {
 import { Link, useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { experiencesByCategory } from './menuData'
-import { Compass, TreePine, Landmark, Sparkles, LucideIcon } from 'lucide-react'
+import { Compass, TreePine, Landmark, Heart, LucideIcon } from 'lucide-react'
 
 interface ExperiencesDropdownProps {
   animatingItem: string | null
@@ -21,14 +21,14 @@ const categoryIconComponents: Record<string, LucideIcon> = {
   adventure: Compass,
   wildlife: TreePine,
   heritage: Landmark,
-  luxury: Sparkles
+  luxury: Heart
 }
 
 const categoryColors: Record<string, string> = {
   adventure: "from-orange-500 to-red-500",
   wildlife: "from-green-500 to-emerald-500",
   heritage: "from-purple-500 to-indigo-500",
-  luxury: "from-amber-500 to-yellow-500"
+  luxury: "from-pink-500 to-rose-500"
 }
 
 const ExperiencesDropdown = ({ animatingItem, onMenuClick, isScrolled }: ExperiencesDropdownProps) => {

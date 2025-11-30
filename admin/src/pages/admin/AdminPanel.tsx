@@ -71,6 +71,12 @@ const NationalParksManager = lazy(() => import('@/components/cms/NationalParksMa
 const AyurvedaManager = lazy(() => import('@/components/admin/panel/AyurvedaManager'));
 const TeaTrailsManager = lazy(() => import('@/components/admin/panel/TeaTrailsManager'));
 const PilgrimageManager = lazy(() => import('@/components/admin/panel/PilgrimageManager'));
+const CustomerCrmManager = lazy(() => import('@/components/admin/panel/CustomerCrmManager'));
+const PrivateToursManager = lazy(() => import('@/components/admin/panel/PrivateToursManager'));
+const GroupTransportManager = lazy(() => import('@/components/admin/panel/GroupTransportManager'));
+const TrainBookingManager = lazy(() => import('@/components/admin/panel/TrainBookingManager'));
+const GlobalToursManager = lazy(() => import('@/components/admin/panel/GlobalToursManager'));
+const GlobalTourBookingsManager = lazy(() => import('@/components/admin/panel/GlobalTourBookingsManager'));
 
 interface AdminPanelProps {
   initialSection?: string;
@@ -146,12 +152,23 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ initialSection }) => {
           return <TeaTrailsManager />;
         case 'pilgrimage-tours':
           return <PilgrimageManager />;
+        case 'private-tours':
+          return <PrivateToursManager />;
+        case 'group-transport':
+          return <GroupTransportManager />;
+        case 'train-booking':
+          return <TrainBookingManager />;
         case 'destination-content':
           return <DestinationContentManager />;
         case 'negombo-destination':
           return <NegomboDestinationManagement />;
         case 'adams-peak-destination':
           return <AdamsPeakDestinationManagement />;
+        // Global Tours
+        case 'global-tours':
+          return <GlobalToursManager />;
+        case 'global-tour-bookings':
+          return <GlobalTourBookingsManager />;
         // Services
         case 'hotels':
           return <HotelsManagement />;
@@ -173,6 +190,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ initialSection }) => {
           return <VendorApprovals />;
         case 'bookings':
           return <BookingsManagement />;
+        case 'customers':
+          return <CustomerCrmManager />;
         case 'reviews':
           return <ReviewsSection />;
         case 'users':

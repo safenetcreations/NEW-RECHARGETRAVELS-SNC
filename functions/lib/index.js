@@ -23,15 +23,14 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.exportHotels = exports.bulkDeleteHotels = exports.bulkUpdateHotels = exports.bulkImportHotels = exports.getTripAdvisorTours = exports.googlePlacesApiHandler = exports.storeConversation = exports.getAvailabilityCalendar = exports.searchTours = exports.calculateTourPrice = exports.checkVehicleAvailability = exports.getNewsletterStats = exports.unsubscribeNewsletter = exports.subscribeNewsletter = exports.notifyBlogSubscribers = exports.sendNewsletterWelcome = exports.sendBookingReminders = exports.sendWelcomeEmail = exports.sendBookingNotification = exports.sendBookingConfirmation = exports.sendWhatsAppMessage = exports.sendEmail = void 0;
+exports.exportHotels = exports.bulkDeleteHotels = exports.bulkUpdateHotels = exports.bulkImportHotels = exports.getTripAdvisorTours = exports.googlePlacesApiHandler = exports.storeConversation = exports.getAvailabilityCalendar = exports.searchTours = exports.calculateTourPrice = exports.checkVehicleAvailability = exports.handleStripeWebhook = exports.createCheckoutSession = exports.sendWhatsAppMessage = exports.getGlobalTourBookingWhatsAppLink = exports.resendGlobalTourBookingConfirmation = exports.sendGlobalTourBookingConfirmation = exports.sendCulinaryBookingConfirmation = exports.sendBeachToursBookingConfirmation = exports.getTrainBookingWhatsAppLink = exports.resendTrainBookingConfirmation = exports.sendTrainBookingConfirmation = exports.getNewsletterStats = exports.unsubscribeNewsletter = exports.subscribeNewsletter = exports.notifyBlogSubscribers = exports.sendNewsletterWelcome = exports.sendBookingReminders = exports.sendWelcomeEmail = exports.sendBookingNotification = exports.sendAirportTransferConfirmation = exports.sendBookingConfirmation = void 0;
 const admin = __importStar(require("firebase-admin"));
 // Initialize Firebase Admin
 admin.initializeApp();
 // Import notification/email functions
 var notifications_1 = require("./notifications");
-Object.defineProperty(exports, "sendEmail", { enumerable: true, get: function () { return notifications_1.sendEmail; } });
-Object.defineProperty(exports, "sendWhatsAppMessage", { enumerable: true, get: function () { return notifications_1.sendWhatsAppMessage; } });
 Object.defineProperty(exports, "sendBookingConfirmation", { enumerable: true, get: function () { return notifications_1.sendBookingConfirmation; } });
+Object.defineProperty(exports, "sendAirportTransferConfirmation", { enumerable: true, get: function () { return notifications_1.sendAirportTransferConfirmation; } });
 Object.defineProperty(exports, "sendBookingNotification", { enumerable: true, get: function () { return notifications_1.sendBookingNotification; } });
 Object.defineProperty(exports, "sendWelcomeEmail", { enumerable: true, get: function () { return notifications_1.sendWelcomeEmail; } });
 Object.defineProperty(exports, "sendBookingReminders", { enumerable: true, get: function () { return notifications_1.sendBookingReminders; } });
@@ -40,6 +39,21 @@ Object.defineProperty(exports, "notifyBlogSubscribers", { enumerable: true, get:
 Object.defineProperty(exports, "subscribeNewsletter", { enumerable: true, get: function () { return notifications_1.subscribeNewsletter; } });
 Object.defineProperty(exports, "unsubscribeNewsletter", { enumerable: true, get: function () { return notifications_1.unsubscribeNewsletter; } });
 Object.defineProperty(exports, "getNewsletterStats", { enumerable: true, get: function () { return notifications_1.getNewsletterStats; } });
+// Train booking email & WhatsApp functions
+Object.defineProperty(exports, "sendTrainBookingConfirmation", { enumerable: true, get: function () { return notifications_1.sendTrainBookingConfirmation; } });
+Object.defineProperty(exports, "resendTrainBookingConfirmation", { enumerable: true, get: function () { return notifications_1.resendTrainBookingConfirmation; } });
+Object.defineProperty(exports, "getTrainBookingWhatsAppLink", { enumerable: true, get: function () { return notifications_1.getTrainBookingWhatsAppLink; } });
+Object.defineProperty(exports, "sendBeachToursBookingConfirmation", { enumerable: true, get: function () { return notifications_1.sendBeachToursBookingConfirmation; } });
+Object.defineProperty(exports, "sendCulinaryBookingConfirmation", { enumerable: true, get: function () { return notifications_1.sendCulinaryBookingConfirmation; } });
+// Global Tour booking email & WhatsApp functions
+Object.defineProperty(exports, "sendGlobalTourBookingConfirmation", { enumerable: true, get: function () { return notifications_1.sendGlobalTourBookingConfirmation; } });
+Object.defineProperty(exports, "resendGlobalTourBookingConfirmation", { enumerable: true, get: function () { return notifications_1.resendGlobalTourBookingConfirmation; } });
+Object.defineProperty(exports, "getGlobalTourBookingWhatsAppLink", { enumerable: true, get: function () { return notifications_1.getGlobalTourBookingWhatsAppLink; } });
+var whatsapp_1 = require("./whatsapp");
+Object.defineProperty(exports, "sendWhatsAppMessage", { enumerable: true, get: function () { return whatsapp_1.sendWhatsAppMessage; } });
+var payments_1 = require("./payments");
+Object.defineProperty(exports, "createCheckoutSession", { enumerable: true, get: function () { return payments_1.createCheckoutSession; } });
+Object.defineProperty(exports, "handleStripeWebhook", { enumerable: true, get: function () { return payments_1.handleStripeWebhook; } });
 // Import Yalu data functions
 var yalu_data_functions_1 = require("./yalu-data-functions");
 Object.defineProperty(exports, "checkVehicleAvailability", { enumerable: true, get: function () { return yalu_data_functions_1.checkVehicleAvailability; } });

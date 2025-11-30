@@ -49,7 +49,9 @@ import {
   Navigation,
   Mountain,
   Droplets,
-  Crown
+  Crown,
+  UserCheck,
+  Train
 } from 'lucide-react';
 
 interface AdminSidebarProps {
@@ -180,6 +182,9 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
         { id: 'ayurveda-wellness', label: 'Ayurveda & Wellness', icon: Leaf, path: '/ayurveda-wellness' },
         { id: 'tea-trails', label: 'Tea Trails', icon: Leaf, path: '/tea-trails' },
         { id: 'pilgrimage-tours', label: 'Pilgrimage Tours', icon: Mountain, path: '/pilgrimage-tours' },
+        { id: 'private-tours', label: 'Private Tours', icon: Car, path: '/private-tours' },
+        { id: 'group-transport', label: 'Group Transport', icon: Bus, path: '/group-transport' },
+        { id: 'train-booking', label: 'Train Booking', icon: Train, path: '/train-booking' },
         { id: 'why-choose-us', label: 'Why Choose Us', icon: CheckCircle, path: '/why-choose-us' },
         { id: 'homepage-stats', label: 'Homepage Stats', icon: TrendingUp, path: '/homepage-stats' },
       ]
@@ -205,6 +210,8 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
     {
       title: 'Services',
       items: [
+        { id: 'global-tours', label: 'Global Tours', icon: Globe, path: '/global-tours' },
+        { id: 'global-tour-bookings', label: 'Tour Bookings', icon: Calendar, path: '/global-tour-bookings' },
         { id: 'hotels', label: 'Hotels & Lodges', icon: Hotel, path: '/hotels' },
         { id: 'tours', label: 'Tours & Packages', icon: MapPin, path: '/tours' },
         { id: 'nationalparks', label: 'National Parks', icon: TreePine, path: '/nationalparks' },
@@ -220,6 +227,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
       items: [
         { id: 'bookings', label: 'Bookings', icon: Calendar, path: '/bookings' },
         { id: 'group-transport-bookings', label: 'Group Transport Bookings', icon: Bus, path: '/group-transport-bookings' },
+        { id: 'customers', label: 'Customer CRM', icon: UserCheck, path: '/customers' },
         { id: 'reviews', label: 'Reviews', icon: Star, path: '/reviews' },
         { id: 'users', label: 'User Management', icon: Users, path: '/users' },
       ]

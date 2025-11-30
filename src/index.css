@@ -5,6 +5,17 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Force Dialog/Modal to be on top of everything */
+[data-radix-dialog-overlay],
+[data-radix-alert-dialog-overlay] {
+  z-index: 9998 !important;
+}
+
+[data-radix-dialog-content],
+[data-radix-alert-dialog-content] {
+  z-index: 9999 !important;
+}
+
 /* Enhanced Wildlife-Themed Design System */
 
 :root {
@@ -153,6 +164,30 @@
     -webkit-text-size-adjust: 100%;
     min-height: 100vh;
     background-color: hsl(var(--background)) !important;
+  }
+
+  /* Fix input text visibility globally */
+  input,
+  select,
+  textarea {
+    color: #1f2937 !important;
+    -webkit-text-fill-color: #1f2937 !important;
+    font-family: inherit !important;
+  }
+
+  input::placeholder,
+  select::placeholder,
+  textarea::placeholder {
+    color: #9ca3af !important;
+    -webkit-text-fill-color: #9ca3af !important;
+    opacity: 1 !important;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    color: #111827 !important;
+    -webkit-text-fill-color: #111827 !important;
   }
   
   #root {

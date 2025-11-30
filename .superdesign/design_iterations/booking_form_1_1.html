@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Build Your Sri Lanka Adventure • Recharge Travels</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --deep-emerald: #0c3b2e;
+        --jungle: #0d5c46;
+        --mint: #e6f5ef;
+        --sand: #f8faf9;
+        --amber: #f0b429;
+        --slate: #1a2e35;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif !important;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f6fbf8 0%, #dcede4 45%, #eef7f3 100%);
+        color: var(--slate) !important;
+      }
+
+      h1, h2, h3, h4, h5, h6, p, span, div, input, select, textarea, button, label {
+        font-family: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif !important;
+      }
+
+      .adventure-shell {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .adventure-header {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(13, 92, 70, 0.08);
+        padding: 1.5rem 2rem;
+        text-align: center;
+      }
+
+      .header-title {
+        font-family: "Playfair Display", serif !important;
+        font-size: 2.5rem;
+        color: var(--jungle) !important;
+        margin-bottom: 0.5rem;
+      }
+
+      .header-subtitle {
+        color: rgba(26, 46, 53, 0.7) !important;
+        font-size: 1.1rem;
+        max-width: 600px;
+        margin: 0 auto;
+        line-height: 1.6;
+      }
+
+      /* Progress Steps */
+      .progress-steps {
+        display: flex;
+        justify-content: center;
+        gap: 0;
+        padding: 2rem 1rem;
+        background: white;
+        position: relative;
+      }
+
+      .progress-step {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem 2rem;
+        position: relative;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .progress-step::after {
+        content: "";
+        position: absolute;
+        right: -12px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 24px;
+        height: 24px;
+        background: white;
+        border-right: 2px solid rgba(26, 46, 53, 0.1);
+        border-bottom: 2px solid rgba(26, 46, 53, 0.1);
+        transform: translateY(-50%) rotate(-45deg);
+      }
+
+      .progress-step:last-child::after {
+        display: none;
+      }
+
+      .step-number {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(26, 46, 53, 0.08);
+        color: rgba(26, 46, 53, 0.5) !important;
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+      }
+
+      .progress-step.active .step-number {
+        background: var(--jungle);
+        color: white !important;
+        box-shadow: 0 4px 15px rgba(13, 92, 70, 0.3);
+      }
+
+      .progress-step.completed .step-number {
+        background: var(--amber);
+        color: white !important;
+      }
+
+      .step-text {
+        font-weight: 600;
+        color: rgba(26, 46, 53, 0.5) !important;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+      }
+
+      .progress-step.active .step-text,
+      .progress-step.completed .step-text {
+        color: var(--slate) !important;
+      }
+
+      /* Main Content */
+      .adventure-main {
+        flex: 1;
+        max-width: 1200px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 2rem 1.5rem 3rem;
+      }
+
+      .step-content {
+        display: none;
+        animation: fadeIn 0.4s ease;
+      }
+
+      .step-content.active {
+        display: block;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      /* Search Section - Step 1 */
+      .search-section {
+        background: white;
+        border-radius: 24px;
+        padding: 2rem;
+        box-shadow: 0 20px 50px rgba(13, 92, 70, 0.1);
+        margin-bottom: 2rem;
+      }
+
+      .search-header {
+        margin-bottom: 1.5rem;
+      }
+
+      .search-header h2 {
+        font-family: "Playfair Display", serif !important;
+        font-size: 1.75rem;
+        color: var(--jungle) !important;
+        margin-bottom: 0.3rem;
+      }
+
+      .search-header p {
+        color: rgba(26, 46, 53, 0.65) !important;
+        font-size: 0.95rem;
+      }
+
+      /* Search Input - FIXED VISIBILITY */
+      .search-wrapper {
+        position: relative;
+        margin-bottom: 1.5rem;
+      }
+
+      .search-icon {
+        position: absolute;
+        left: 1.25rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--jungle) !important;
+        font-size: 1.25rem;
+        pointer-events: none;
+        z-index: 2;
+      }
+
+      .search-input {
+        width: 100%;
+        padding: 1.1rem 1.25rem 1.1rem 3.5rem;
+        border: 2px solid rgba(13, 92, 70, 0.15);
+        border-radius: 16px;
+        font-size: 1.1rem !important;
+        font-family: "DM Sans", sans-serif !important;
+        font-weight: 500 !important;
+        color: var(--slate) !important;
+        background: white !important;
+        transition: all 0.2s ease;
+        -webkit-appearance: none;
+        appearance: none;
+      }
+
+      .search-input::placeholder {
+        color: rgba(26, 46, 53, 0.45) !important;
+        font-weight: 400 !important;
+        font-size: 1rem !important;
+      }
+
+      .search-input:focus {
+        outline: none;
+        border-color: var(--jungle);
+        box-shadow: 0 0 0 4px rgba(13, 92, 70, 0.12);
+      }
+
+      /* Ensure input text is always visible */
+      input[type="text"],
+      input[type="search"] {
+        color: #1a2e35 !important;
+        -webkit-text-fill-color: #1a2e35 !important;
+        opacity: 1 !important;
+      }
+
+      input[type="text"]::placeholder,
+      input[type="search"]::placeholder {
+        color: rgba(26, 46, 53, 0.45) !important;
+        -webkit-text-fill-color: rgba(26, 46, 53, 0.45) !important;
+        opacity: 1 !important;
+      }
+
+      /* Places Grid */
+      .places-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 1rem;
+      }
+
+      .place-card {
+        position: relative;
+        border-radius: 16px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        aspect-ratio: 1;
+      }
+
+      .place-card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+      }
+
+      .place-card:hover img {
+        transform: scale(1.08);
+      }
+
+      .place-card::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, 0.75));
+        pointer-events: none;
+      }
+
+      .place-info {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 1rem;
+        z-index: 1;
+        color: white !important;
+      }
+
+      .place-name {
+        font-weight: 700;
+        font-size: 1rem;
+        margin-bottom: 0.2rem;
+        color: white !important;
+      }
+
+      .place-region {
+        font-size: 0.8rem;
+        opacity: 0.85;
+        color: white !important;
+      }
+
+      .place-check {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: white;
+        border: 3px solid rgba(255, 255, 255, 0.5);
+        display: grid;
+        place-items: center;
+        z-index: 2;
+        transition: all 0.2s ease;
+        opacity: 0;
+      }
+
+      .place-card.selected .place-check {
+        opacity: 1;
+        background: var(--amber);
+        border-color: var(--amber);
+      }
+
+      .place-card.selected {
+        box-shadow: 0 0 0 4px var(--amber);
+      }
+
+      /* Selected Places Tags */
+      .selected-places {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(26, 46, 53, 0.1);
+      }
+
+      .selected-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: var(--mint);
+        border-radius: 999px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--jungle) !important;
+      }
+
+      .selected-tag button {
+        background: none;
+        border: none;
+        color: var(--jungle) !important;
+        cursor: pointer;
+        font-size: 1.1rem;
+        line-height: 1;
+        opacity: 0.7;
+      }
+
+      .selected-tag button:hover {
+        opacity: 1;
+      }
+
+      /* Activities Section */
+      .activities-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.25rem;
+      }
+
+      .activity-card {
+        background: white;
+        border-radius: 18px;
+        padding: 1.5rem;
+        border: 2px solid rgba(26, 46, 53, 0.08);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        gap: 1rem;
+        align-items: flex-start;
+      }
+
+      .activity-card:hover {
+        border-color: rgba(13, 92, 70, 0.2);
+        box-shadow: 0 10px 30px rgba(13, 92, 70, 0.1);
+      }
+
+      .activity-card.selected {
+        border-color: var(--jungle);
+        background: linear-gradient(135deg, rgba(13, 92, 70, 0.05), rgba(255, 255, 255, 1));
+      }
+
+      .activity-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+        background: var(--mint);
+        display: grid;
+        place-items: center;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+      }
+
+      .activity-details h4 {
+        font-size: 1.05rem;
+        color: var(--slate) !important;
+        margin-bottom: 0.3rem;
+      }
+
+      .activity-details p {
+        font-size: 0.85rem;
+        color: rgba(26, 46, 53, 0.6) !important;
+        margin-bottom: 0.5rem;
+        line-height: 1.5;
+      }
+
+      .activity-price {
+        font-weight: 700;
+        color: var(--jungle) !important;
+        font-size: 1rem;
+      }
+
+      /* Quote Section */
+      .quote-panel {
+        background: white;
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 25px 60px rgba(13, 92, 70, 0.12);
+      }
+
+      .quote-header {
+        background: linear-gradient(135deg, var(--jungle), #1a7f5f);
+        padding: 2rem;
+        color: white !important;
+      }
+
+      .quote-header h2 {
+        font-family: "Playfair Display", serif !important;
+        font-size: 1.75rem;
+        margin-bottom: 0.5rem;
+        color: white !important;
+      }
+
+      .quote-header p {
+        opacity: 0.9;
+        color: white !important;
+      }
+
+      .quote-body {
+        padding: 2rem;
+      }
+
+      .quote-summary {
+        background: #f5faf7;
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .quote-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px dashed rgba(26, 46, 53, 0.1);
+        color: var(--slate) !important;
+      }
+
+      .quote-row:last-child {
+        border: none;
+      }
+
+      .quote-row.total {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--jungle) !important;
+        padding-top: 1rem;
+        margin-top: 0.5rem;
+        border-top: 2px solid var(--jungle);
+        border-bottom: none;
+      }
+
+      .route-preview {
+        margin-bottom: 1.5rem;
+      }
+
+      .route-preview h4 {
+        font-size: 1rem;
+        margin-bottom: 1rem;
+        color: var(--slate) !important;
+      }
+
+      .route-stops {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .route-stop {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        background: #f8faf9;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        color: var(--slate) !important;
+      }
+
+      .route-stop-number {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--jungle);
+        color: white !important;
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+        font-size: 0.8rem;
+      }
+
+      /* Buttons */
+      .btn {
+        border: none;
+        border-radius: 14px;
+        padding: 1rem 2rem;
+        font-size: 1rem;
+        font-weight: 600;
+        font-family: "DM Sans", sans-serif !important;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, var(--jungle), #1a7f5f);
+        color: white !important;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px rgba(13, 92, 70, 0.25);
+      }
+
+      .btn-secondary {
+        background: white;
+        color: var(--slate) !important;
+        border: 2px solid rgba(26, 46, 53, 0.2);
+      }
+
+      .form-actions {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(26, 46, 53, 0.1);
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .header-title {
+          font-size: 1.75rem;
+        }
+        .progress-steps {
+          flex-direction: column;
+          gap: 0.5rem;
+          align-items: stretch;
+        }
+        .progress-step::after {
+          display: none;
+        }
+        .places-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .activities-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="adventure-shell">
+      <header class="adventure-header">
+        <h1 class="header-title">Build Your Sri Lanka Adventure</h1>
+        <p class="header-subtitle">Simply click on places you want to visit. We'll calculate the best route, suggest activities, and give you an instant price estimate!</p>
+      </header>
+
+      <nav class="progress-steps">
+        <div class="progress-step active" data-step="1" onclick="goToStep(1)">
+          <span class="step-number">1</span>
+          <span class="step-text">Choose Places</span>
+        </div>
+        <div class="progress-step" data-step="2" onclick="goToStep(2)">
+          <span class="step-number">2</span>
+          <span class="step-text">Select Activities</span>
+        </div>
+        <div class="progress-step" data-step="3" onclick="goToStep(3)">
+          <span class="step-number">3</span>
+          <span class="step-text">Get Quote</span>
+        </div>
+      </nav>
+
+      <main class="adventure-main">
+        <!-- Step 1: Choose Places -->
+        <div class="step-content active" id="step-1">
+          <div class="search-section">
+            <div class="search-header">
+              <h2>🗺️ Where would you like to go?</h2>
+              <p>Search or click on destinations to add them to your itinerary</p>
+            </div>
+            
+            <div class="search-wrapper">
+              <span class="search-icon">🔍</span>
+              <input 
+                type="text" 
+                class="search-input" 
+                id="placeSearch" 
+                placeholder="Search places... e.g. Sigiriya, Ella, Galle..." 
+                autocomplete="off"
+              />
+            </div>
+
+            <div class="places-grid" id="placesGrid"></div>
+
+            <div class="selected-places" id="selectedPlaces" style="display: none;">
+              <strong style="width: 100%; margin-bottom: 0.5rem; color: var(--slate);">Your destinations:</strong>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <div></div>
+            <button class="btn btn-primary" onclick="goToStep(2)">Continue to Activities →</button>
+          </div>
+        </div>
+
+        <!-- Step 2: Select Activities -->
+        <div class="step-content" id="step-2">
+          <div class="search-section">
+            <div class="search-header">
+              <h2>🎯 Choose Your Experiences</h2>
+              <p>Select activities based on your chosen destinations</p>
+            </div>
+
+            <div class="search-wrapper">
+              <span class="search-icon">🔍</span>
+              <input 
+                type="text" 
+                class="search-input" 
+                id="activitySearch" 
+                placeholder="Search activities... e.g. Safari, Temple visit, Hiking..." 
+                autocomplete="off"
+              />
+            </div>
+
+            <div class="activities-grid" id="activitiesGrid"></div>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn btn-secondary" onclick="goToStep(1)">← Back to Places</button>
+            <button class="btn btn-primary" onclick="goToStep(3)">Get My Quote →</button>
+          </div>
+        </div>
+
+        <!-- Step 3: Get Quote -->
+        <div class="step-content" id="step-3">
+          <div class="quote-panel">
+            <div class="quote-header">
+              <h2>🎉 Your Adventure Quote</h2>
+              <p>Here's your personalized Sri Lanka itinerary</p>
+            </div>
+            <div class="quote-body">
+              <div class="route-preview">
+                <h4>📍 Your Optimized Route</h4>
+                <div class="route-stops" id="routeStops"></div>
+              </div>
+
+              <div class="quote-summary">
+                <div class="quote-row">
+                  <span>Destinations (<span id="placeCount">0</span>)</span>
+                  <span id="placeCost">$0</span>
+                </div>
+                <div class="quote-row">
+                  <span>Activities (<span id="activityCount">0</span>)</span>
+                  <span id="activityCost">$0</span>
+                </div>
+                <div class="quote-row">
+                  <span>Transport & Guide</span>
+                  <span id="transportCost">$0</span>
+                </div>
+                <div class="quote-row total">
+                  <span>Total Estimate</span>
+                  <span id="totalCost">$0</span>
+                </div>
+              </div>
+
+              <button class="btn btn-primary" style="width: 100%;" onclick="requestBooking()">
+                💬 Request Full Itinerary via WhatsApp
+              </button>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn btn-secondary" onclick="goToStep(2)">← Back to Activities</button>
+            <div></div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      // Data
+      const PLACES = [
+        { id: 'sigiriya', name: 'Sigiriya', region: 'Cultural Triangle', img: 'https://images.unsplash.com/photo-1586613835341-6f249a8ac4d8?w=400&h=400&fit=crop', cost: 80 },
+        { id: 'kandy', name: 'Kandy', region: 'Hill Country', img: 'https://images.unsplash.com/photo-1588598198321-9735fd5a2586?w=400&h=400&fit=crop', cost: 60 },
+        { id: 'ella', name: 'Ella', region: 'Hill Country', img: 'https://images.unsplash.com/photo-1566296412498-36946b46ad2a?w=400&h=400&fit=crop', cost: 70 },
+        { id: 'galle', name: 'Galle Fort', region: 'Southern Coast', img: 'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=400&h=400&fit=crop', cost: 50 },
+        { id: 'yala', name: 'Yala National Park', region: 'South East', img: 'https://images.unsplash.com/photo-1544979590-37e9b47eb705?w=400&h=400&fit=crop', cost: 120 },
+        { id: 'mirissa', name: 'Mirissa', region: 'Southern Coast', img: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=400&fit=crop', cost: 45 },
+        { id: 'nuwaraeliya', name: 'Nuwara Eliya', region: 'Hill Country', img: 'https://images.unsplash.com/photo-1566296412498-36946b46ad2a?w=400&h=400&fit=crop', cost: 55 },
+        { id: 'jaffna', name: 'Jaffna', region: 'Northern Province', img: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=400&fit=crop', cost: 100 },
+        { id: 'trincomalee', name: 'Trincomalee', region: 'East Coast', img: 'https://images.unsplash.com/photo-1544979590-37e9b47eb705?w=400&h=400&fit=crop', cost: 85 },
+        { id: 'anuradhapura', name: 'Anuradhapura', region: 'Cultural Triangle', img: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=400&fit=crop', cost: 65 },
+      ];
+
+      const ACTIVITIES = [
+        { id: 'safari', name: 'Wildlife Safari', desc: 'Spot leopards, elephants & exotic birds', icon: '🦁', cost: 85, places: ['yala'] },
+        { id: 'hiking', name: 'Mountain Hiking', desc: 'Trek through tea plantations & peaks', icon: '🥾', cost: 45, places: ['ella', 'nuwaraeliya'] },
+        { id: 'temple', name: 'Temple & Heritage Tour', desc: 'Explore ancient Buddhist sites', icon: '🛕', cost: 35, places: ['kandy', 'anuradhapura', 'sigiriya'] },
+        { id: 'whale', name: 'Whale Watching', desc: 'See blue whales & dolphins', icon: '🐋', cost: 65, places: ['mirissa', 'trincomalee'] },
+        { id: 'cooking', name: 'Cooking Class', desc: 'Learn authentic Sri Lankan cuisine', icon: '🍛', cost: 40, places: ['kandy', 'galle'] },
+        { id: 'surf', name: 'Surfing Lessons', desc: 'Catch waves on golden beaches', icon: '🏄', cost: 55, places: ['mirissa', 'trincomalee'] },
+        { id: 'train', name: 'Scenic Train Ride', desc: 'Iconic blue train through hills', icon: '🚂', cost: 25, places: ['ella', 'kandy', 'nuwaraeliya'] },
+        { id: 'diving', name: 'Scuba Diving', desc: 'Explore coral reefs & shipwrecks', icon: '🤿', cost: 95, places: ['trincomalee', 'mirissa'] },
+        { id: 'ayurveda', name: 'Ayurveda Spa', desc: 'Traditional wellness treatments', icon: '🧘', cost: 70, places: ['kandy', 'nuwaraeliya', 'galle'] },
+        { id: 'fort', name: 'Fort Walking Tour', desc: 'Colonial history & architecture', icon: '🏰', cost: 30, places: ['galle', 'jaffna'] },
+      ];
+
+      // State
+      let currentStep = 1;
+      let selectedPlaces = [];
+      let selectedActivities = [];
+
+      // Render Places
+      function renderPlaces(filter = '') {
+        const grid = document.getElementById('placesGrid');
+        const filtered = PLACES.filter(p => 
+          p.name.toLowerCase().includes(filter.toLowerCase()) ||
+          p.region.toLowerCase().includes(filter.toLowerCase())
+        );
+        
+        grid.innerHTML = filtered.map(place => `
+          <div class="place-card ${selectedPlaces.includes(place.id) ? 'selected' : ''}" 
+               onclick="togglePlace('${place.id}')">
+            <img src="${place.img}" alt="${place.name}" loading="lazy" />
+            <div class="place-info">
+              <div class="place-name">${place.name}</div>
+              <div class="place-region">${place.region}</div>
+            </div>
+            <div class="place-check">✓</div>
+          </div>
+        `).join('');
+
+        updateSelectedTags();
+      }
+
+      // Toggle Place Selection
+      function togglePlace(id) {
+        const index = selectedPlaces.indexOf(id);
+        if (index > -1) {
+          selectedPlaces.splice(index, 1);
+        } else {
+          selectedPlaces.push(id);
+        }
+        renderPlaces(document.getElementById('placeSearch').value);
+        updateSelectedTags();
+      }
+
+      // Update Selected Tags
+      function updateSelectedTags() {
+        const container = document.getElementById('selectedPlaces');
+        if (selectedPlaces.length === 0) {
+          container.style.display = 'none';
+          return;
+        }
+        
+        container.style.display = 'flex';
+        const tags = selectedPlaces.map(id => {
+          const place = PLACES.find(p => p.id === id);
+          return `<span class="selected-tag">${place.name} <button onclick="togglePlace('${id}')">&times;</button></span>`;
+        }).join('');
+        
+        container.innerHTML = `<strong style="width: 100%; margin-bottom: 0.5rem; color: var(--slate);">Your destinations:</strong>${tags}`;
+      }
+
+      // Render Activities
+      function renderActivities(filter = '') {
+        const grid = document.getElementById('activitiesGrid');
+        const relevantActivities = ACTIVITIES.filter(a => 
+          a.places.some(p => selectedPlaces.includes(p)) ||
+          selectedPlaces.length === 0
+        );
+        
+        const filtered = relevantActivities.filter(a =>
+          a.name.toLowerCase().includes(filter.toLowerCase()) ||
+          a.desc.toLowerCase().includes(filter.toLowerCase())
+        );
+
+        grid.innerHTML = filtered.map(activity => `
+          <div class="activity-card ${selectedActivities.includes(activity.id) ? 'selected' : ''}"
+               onclick="toggleActivity('${activity.id}')">
+            <div class="activity-icon">${activity.icon}</div>
+            <div class="activity-details">
+              <h4>${activity.name}</h4>
+              <p>${activity.desc}</p>
+              <span class="activity-price">$${activity.cost} / person</span>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // Toggle Activity Selection
+      function toggleActivity(id) {
+        const index = selectedActivities.indexOf(id);
+        if (index > -1) {
+          selectedActivities.splice(index, 1);
+        } else {
+          selectedActivities.push(id);
+        }
+        renderActivities(document.getElementById('activitySearch').value);
+      }
+
+      // Calculate Quote
+      function calculateQuote() {
+        const placeCost = selectedPlaces.reduce((sum, id) => {
+          const place = PLACES.find(p => p.id === id);
+          return sum + (place ? place.cost : 0);
+        }, 0);
+
+        const activityCost = selectedActivities.reduce((sum, id) => {
+          const activity = ACTIVITIES.find(a => a.id === id);
+          return sum + (activity ? activity.cost : 0);
+        }, 0);
+
+        const transportCost = selectedPlaces.length * 30;
+        const total = placeCost + activityCost + transportCost;
+
+        document.getElementById('placeCount').textContent = selectedPlaces.length;
+        document.getElementById('activityCount').textContent = selectedActivities.length;
+        document.getElementById('placeCost').textContent = `$${placeCost}`;
+        document.getElementById('activityCost').textContent = `$${activityCost}`;
+        document.getElementById('transportCost').textContent = `$${transportCost}`;
+        document.getElementById('totalCost').textContent = `$${total}`;
+
+        // Route stops
+        const routeStops = document.getElementById('routeStops');
+        routeStops.innerHTML = selectedPlaces.map((id, i) => {
+          const place = PLACES.find(p => p.id === id);
+          return `<div class="route-stop">
+            <span class="route-stop-number">${i + 1}</span>
+            <span>${place.name}</span>
+          </div>`;
+        }).join('');
+      }
+
+      // Navigation
+      function goToStep(step) {
+        if (step === currentStep) return;
+        
+        // Update progress steps
+        document.querySelectorAll('.progress-step').forEach((el, i) => {
+          el.classList.remove('active', 'completed');
+          if (i + 1 < step) el.classList.add('completed');
+          if (i + 1 === step) el.classList.add('active');
+        });
+
+        // Update content
+        document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
+        document.getElementById(`step-${step}`).classList.add('active');
+        
+        currentStep = step;
+
+        if (step === 2) renderActivities();
+        if (step === 3) calculateQuote();
+      }
+
+      // Request Booking
+      function requestBooking() {
+        const places = selectedPlaces.map(id => PLACES.find(p => p.id === id).name).join(', ');
+        const activities = selectedActivities.map(id => ACTIVITIES.find(a => a.id === id).name).join(', ');
+        const message = encodeURIComponent(`Hi! I'd like to book a Sri Lanka adventure:\n\nDestinations: ${places || 'Not selected'}\nActivities: ${activities || 'Not selected'}\n\nPlease send me a detailed itinerary!`);
+        window.open(`https://wa.me/94771234567?text=${message}`, '_blank');
+      }
+
+      // Search handlers
+      document.getElementById('placeSearch').addEventListener('input', (e) => {
+        renderPlaces(e.target.value);
+      });
+
+      document.getElementById('activitySearch').addEventListener('input', (e) => {
+        renderActivities(e.target.value);
+      });
+
+      // Initialize
+      renderPlaces();
+    </script>
+  </body>
+</html>

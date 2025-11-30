@@ -40,15 +40,36 @@ export const GoogleMapsLoader: React.FC<GoogleMapsLoaderProps> = ({
 
       try {
         console.log('Loading Google Maps script with API key...');
-        
-        // Remove existing scripts
-        const existingScripts = document.querySelectorAll('script[src*="maps.googleapis.com"]');
-        existingScripts.forEach(script => {
-          console.log('Removing existing Google Maps script');
-          script.remove();
-        });
 
-        // Load Google Maps script
+        // Check if a script is already being loaded by @react-google-maps/api
+        const existingScripts = document.querySelectorAll('script[src*="maps.googleapis.com"]');
+        if (existingScripts.length > 0) {
+          console.log('Google Maps script already exists, waiting for it to load...');
+          // Wait for the existing script to load instead of creating a new one
+          const waitForMaps = new Promise<void>((resolve, reject) => {
+            const timeout = setTimeout(() => {
+              reject(new Error('Google Maps loading timeout (15s)'));
+            }, 15000);
+
+            const checkReady = () => {
+              if ((window as any).google && (window as any).google.maps) {
+                clearTimeout(timeout);
+                console.log('Google Maps API is ready (from existing script)');
+                resolve();
+              } else {
+                setTimeout(checkReady, 100);
+              }
+            };
+            checkReady();
+          });
+          await waitForMaps;
+          setIsLoaded(true);
+          setIsLoading(false);
+          onLoad?.();
+          return;
+        }
+
+        // Load Google Maps script only if no script exists
         const script = document.createElement('script');
         script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&v=weekly`;
         script.async = true;
@@ -64,7 +85,7 @@ export const GoogleMapsLoader: React.FC<GoogleMapsLoaderProps> = ({
           script.onload = () => {
             clearTimeout(timeout);
             console.log('Google Maps script loaded successfully');
-            
+
             // Wait for Google Maps to be fully available
             const checkReady = () => {
               if ((window as any).google && (window as any).google.maps) {

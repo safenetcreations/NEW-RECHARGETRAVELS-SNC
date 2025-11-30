@@ -42,10 +42,20 @@ interface PriceRoute {
   duration: string;
 }
 
+interface VehiclePricing {
+  id: string;
+  name: string;
+  basePrice: number; // USD
+  pricePerKm: number; // USD per km
+  passengers: number;
+  luggage: number;
+}
+
 interface AirportTransfersContent {
   heroSlides: HeroSlide[];
   serviceFeatures: ServiceFeature[];
   priceRoutes: PriceRoute[];
+  vehiclePricing: VehiclePricing[];
   trustIndicators: {
     rating: string;
     reviews: string;
@@ -76,6 +86,15 @@ const defaultContent: AirportTransfersContent = {
       price: "$35",
       duration: "45 mins"
     }
+  ],
+  vehiclePricing: [
+    { id: 'economy', name: 'Economy Sedan', basePrice: 11, pricePerKm: 0.25, passengers: 3, luggage: 2 },
+    { id: 'sedan', name: 'Premium Sedan', basePrice: 14, pricePerKm: 0.31, passengers: 3, luggage: 3 },
+    { id: 'suv', name: 'SUV', basePrice: 23, pricePerKm: 0.47, passengers: 5, luggage: 4 },
+    { id: 'van', name: 'Mini Van', basePrice: 20, pricePerKm: 0.41, passengers: 8, luggage: 6 },
+    { id: 'luxury', name: 'Luxury Vehicle', basePrice: 47, pricePerKm: 0.78, passengers: 3, luggage: 3 },
+    { id: 'luxury-suv', name: 'Luxury SUV', basePrice: 63, pricePerKm: 0.94, passengers: 5, luggage: 5 },
+    { id: 'coach', name: 'Mini Coach', basePrice: 38, pricePerKm: 0.63, passengers: 15, luggage: 15 },
   ],
   trustIndicators: {
     rating: "4.9/5",
@@ -215,6 +234,13 @@ const AirportTransfersAdmin: React.FC = () => {
     });
   };
 
+  // Vehicle Pricing Management
+  const updateVehiclePricing = (index: number, field: keyof VehiclePricing, value: string | number) => {
+    const newPricing = [...(content.vehiclePricing || defaultContent.vehiclePricing)];
+    newPricing[index] = { ...newPricing[index], [field]: typeof value === 'string' && (field === 'basePrice' || field === 'pricePerKm' || field === 'passengers' || field === 'luggage') ? parseFloat(value) || 0 : value };
+    setContent({ ...content, vehiclePricing: newPricing });
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -247,11 +273,12 @@ const AirportTransfersAdmin: React.FC = () => {
       </div>
 
       <Tabs defaultValue="hero" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="hero">Hero Slides</TabsTrigger>
+          <TabsTrigger value="vehicles">Vehicle Pricing</TabsTrigger>
           <TabsTrigger value="services">Services</TabsTrigger>
-          <TabsTrigger value="pricing">Pricing</TabsTrigger>
-          <TabsTrigger value="trust">Trust Indicators</TabsTrigger>
+          <TabsTrigger value="pricing">Routes</TabsTrigger>
+          <TabsTrigger value="trust">Trust</TabsTrigger>
         </TabsList>
 
         {/* Hero Slides Tab */}
@@ -341,6 +368,100 @@ const AirportTransfersAdmin: React.FC = () => {
                 <Plus className="w-4 h-4 mr-2" />
                 Add New Slide
               </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Vehicle Pricing Tab */}
+        <TabsContent value="vehicles" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Car className="w-5 h-5" />
+                Vehicle Pricing Configuration
+              </CardTitle>
+              <CardDescription>
+                Set base prices (USD) and per-kilometer rates for each vehicle type. Total = Base Price + (Distance × Price per KM)
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-blue-50 p-4 rounded-lg mb-4">
+                <p className="text-sm text-blue-800">
+                  <strong>Pricing Formula:</strong> Total Price = Base Price + (Distance in km × Price per KM)
+                  <br />
+                  <strong>Example:</strong> Economy Sedan to Negombo (11km) = $11 + (11 × $0.25) = $13.75
+                </p>
+              </div>
+
+              <div className="grid gap-4">
+                {(content.vehiclePricing || defaultContent.vehiclePricing).map((vehicle, index) => (
+                  <Card key={vehicle.id} className="p-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="font-semibold flex items-center gap-2">
+                        <Car className="w-4 h-4 text-blue-600" />
+                        {vehicle.name}
+                      </h4>
+                      <span className="text-xs bg-gray-100 px-2 py-1 rounded">ID: {vehicle.id}</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div>
+                        <Label className="text-xs">Base Price (USD)</Label>
+                        <div className="relative">
+                          <DollarSign className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                          <Input
+                            type="number"
+                            step="0.01"
+                            value={vehicle.basePrice}
+                            onChange={(e) => updateVehiclePricing(index, 'basePrice', e.target.value)}
+                            className="pl-7"
+                            placeholder="11.00"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <Label className="text-xs">Price per KM (USD)</Label>
+                        <div className="relative">
+                          <DollarSign className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                          <Input
+                            type="number"
+                            step="0.01"
+                            value={vehicle.pricePerKm}
+                            onChange={(e) => updateVehiclePricing(index, 'pricePerKm', e.target.value)}
+                            className="pl-7"
+                            placeholder="0.25"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <Label className="text-xs">Max Passengers</Label>
+                        <Input
+                          type="number"
+                          value={vehicle.passengers}
+                          onChange={(e) => updateVehiclePricing(index, 'passengers', e.target.value)}
+                          placeholder="3"
+                        />
+                      </div>
+
+                      <div>
+                        <Label className="text-xs">Max Luggage</Label>
+                        <Input
+                          type="number"
+                          value={vehicle.luggage}
+                          onChange={(e) => updateVehiclePricing(index, 'luggage', e.target.value)}
+                          placeholder="2"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="mt-3 p-2 bg-green-50 rounded text-sm text-green-800">
+                      <strong>Sample pricing (50km trip):</strong> ${vehicle.basePrice} + (50 × ${vehicle.pricePerKm}) = ${(vehicle.basePrice + (50 * vehicle.pricePerKm)).toFixed(2)}
+                    </div>
+                  </Card>
+                ))}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

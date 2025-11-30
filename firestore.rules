@@ -114,6 +114,20 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    // Beach Tours Collection - Public read, admin write
+    match /beach_tours/{tourId} {
+      allow read: if resource.data.is_active == true || isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Beach Bookings - Authenticated create, admin full
+    match /beach_bookings/{bookingId} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      // Allow guest bookings if userId is 'guest' or authenticated user
+      allow create: if (isAuthenticated() && request.resource.data.userId == request.auth.uid) || request.resource.data.userId == 'guest';
+      allow update, delete: if isAdmin();
+    }
+
     // Ramayana Reviews - Public read, authenticated create
     match /ramayana_reviews/{reviewId} {
       allow read: if true;
@@ -730,6 +744,12 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Site Settings (hyphenated) - Public read, admin write
+    match /site-settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // Settings Collection (Social Media config, etc.) - Public read, admin write
     match /settings/{settingId} {
       allow read: if true;
@@ -762,6 +782,483 @@ service cloud.firestore {
 
     // Destination Content - Public read, admin write
     match /destinationContent/{contentId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ==========================================
+    // AIRPORT TRANSFER BOOKINGS
+    // ==========================================
+
+    // Airport Transfer Bookings - Public create, admin manage
+    match /airportTransferBookings/{bookingId} {
+      // Anyone can read their own booking (by email match), admin can read all
+      allow read: if isAdmin() || resource.data.customerInfo.email == request.auth.token.email;
+
+      // Anyone can create a booking (no authentication required for transfers)
+      allow create: if true;
+
+      // Only admins can update or delete bookings
+      allow update, delete: if isAdmin();
+    }
+
+    // Counters - For sequential booking numbers (RT01205, RT01206, etc.)
+    match /counters/{counterId} {
+      // Anyone can read counters (needed for booking reference generation)
+      allow read: if true;
+      // Anyone can write counters (for transaction-based increments during booking)
+      allow write: if true;
+    }
+
+    // ==========================================
+    // CUSTOMERS CRM
+    // ==========================================
+
+    // Customer Profiles - Store all customer data
+    match /customers/{customerId} {
+      // Admin can read all customers, users can read their own profile
+      allow read: if isAdmin() || request.auth != null && request.auth.uid == customerId;
+      // Anyone can create a customer profile (during first booking)
+      allow create: if true;
+      // Only admins can update or delete customer profiles
+      allow update, delete: if isAdmin();
+    }
+
+    // ==========================================
+    // LUXURY PAGES & INQUIRIES
+    // ==========================================
+
+    // Luxury Pages Content - Public read, admin write
+    match /luxuryPages/{pageId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Helicopter Fleet - Public read, admin write
+    match /helicopterFleet/{helicopterId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Helicopter Routes - Public read, admin write
+    match /helicopterRoutes/{routeId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Helicopter Inquiries - Public create, admin manage
+    match /helicopterInquiries/{inquiryId} {
+      allow read: if isAdmin();
+      allow create: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // Yacht Fleet - Public read, admin write
+    match /yachtFleet/{yachtId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Yacht Destinations - Public read, admin write
+    match /yachtDestinations/{destinationId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Yacht Inquiries - Public create, admin manage
+    match /yachtInquiries/{inquiryId} {
+      allow read: if isAdmin();
+      allow create: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // Jet Fleet - Public read, admin write
+    match /jetFleet/{jetId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Jet Routes - Public read, admin write
+    match /jetRoutes/{routeId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Jet Inquiries - Public create, admin manage
+    match /jetInquiries/{inquiryId} {
+      allow read: if isAdmin();
+      allow create: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // Villa Collection - Public read, admin write
+    match /villaCollection/{villaId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Villa Inquiries - Public create, admin manage
+    match /villaInquiries/{inquiryId} {
+      allow read: if isAdmin();
+      allow create: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // Vehicle Fleet - Public read, admin write
+    match /vehicleFleet/{vehicleId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Vehicle Inquiries - Public create, admin manage
+    match /vehicleInquiries/{inquiryId} {
+      allow read: if isAdmin();
+      allow create: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // Dream Journey Inquiries - VIP public create, admin manage
+    match /dreamJourneyInquiries/{inquiryId} {
+      allow read: if isAdmin();
+      allow create: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // VIP Concierge Inquiries - Public create, admin manage
+    match /vipConciergeInquiries/{inquiryId} {
+      allow read: if isAdmin();
+      allow create: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // Exclusive Access Inquiries - Public create, admin manage
+    match /exclusiveAccessInquiries/{inquiryId} {
+      allow read: if isAdmin();
+      allow create: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // ==========================================
+    // PRIVATE TOURS COLLECTIONS
+    // ==========================================
+
+    // Private Tours CMS Content - Public read, admin write
+    match /cmsContent/privateToursContent {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Private Tour Destinations - Public read, admin write
+    match /privateTourDestinations/{destinationId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Private Tour Vehicles - Public read, admin write
+    match /privateTourVehicles/{vehicleId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Private Tour Drivers - Public read, admin write
+    match /privateTourDrivers/{driverId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Private Tour Packages - Public read, admin write
+    match /privateTourPackages/{packageId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Private Tour Extras - Public read, admin write
+    match /privateTourExtras/{extraId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Private Tour Bookings - Public create, admin manage
+    match /privateTourBookings/{bookingId} {
+      // Anyone can read their own booking (by email match), admin can read all
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.customerEmail == request.auth.token.email);
+
+      // Anyone can create a booking (no authentication required)
+      allow create: if true;
+
+      // Only admins can update or delete bookings
+      allow update, delete: if isAdmin();
+    }
+
+    // ==========================================
+    // GROUP TRANSPORT COLLECTIONS
+    // ==========================================
+
+    // Group Transport Vehicles - Public read, admin write
+    match /groupTransportVehicles/{vehicleId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Group Transport Hero Slides - Public read, admin write
+    match /groupTransportHeroSlides/{slideId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Group Transport Driver Charges - Public read, admin write
+    match /groupTransportDriverCharges/{chargeId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Group Transport Settings (in cmsContent)
+    match /cmsContent/groupTransportSettings {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Group Transport Bookings - Public create, admin manage
+    match /groupTransportBookings/{bookingId} {
+      // Anyone can read their own booking (by email match), admin can read all
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.customerEmail == request.auth.token.email);
+
+      // Anyone can create a booking (no authentication required)
+      allow create: if true;
+
+      // Only admins can update or delete bookings
+      allow update, delete: if isAdmin();
+    }
+
+    // ==========================================
+    // AYURVEDA WELLNESS COLLECTIONS
+    // ==========================================
+
+    // Ayurveda Treatments - Public read, admin write
+    match /ayurvedaTreatments/{treatmentId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Ayurveda Retreats - Public read, admin write
+    match /ayurvedaRetreats/{retreatId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Ayurveda Testimonials - Public read, admin write
+    match /ayurvedaTestimonials/{testimonialId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Ayurveda Resorts - Public read, admin write
+    match /ayurvedaResorts/{resortId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Ayurveda Page Settings (in cmsContent)
+    match /cmsContent/ayurvedaPageSettings {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ==========================================
+    // WELLNESS & SPA COLLECTIONS
+    // ==========================================
+
+    // Wellness Packages - Public read, admin write
+    match /wellnessPackages/{packageId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Wellness Spa Services - Public read, admin write
+    match /wellnessSpaServices/{serviceId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Wellness Resorts - Public read, admin write
+    match /wellnessResorts/{resortId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Wellness Testimonials - Public read, admin write
+    match /wellnessTestimonials/{testimonialId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Wellness Page Settings (in cmsContent)
+    match /cmsContent/wellnessPageSettings {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ==========================================
+    // ROMANCE (WEDDINGS & HONEYMOONS) COLLECTIONS
+    // ==========================================
+
+    // Romance Wedding Packages - Public read, admin write
+    match /romanceWeddingPackages/{packageId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Romance Honeymoon Packages - Public read, admin write
+    match /romanceHoneymoonPackages/{packageId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Romance Venues - Public read, admin write
+    match /romanceVenues/{venueId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Romance Testimonials - Public read, admin write
+    match /romanceTestimonials/{testimonialId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Romance FAQs - Public read, admin write
+    match /romanceFAQs/{faqId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Romance Page Settings (in cmsContent)
+    match /cmsContent/romancePageSettings {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Romance Bookings - Public create, admin read/write
+    match /romanceBookings/{bookingId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // ==========================================
+    // CUSTOM EXPERIENCE COLLECTIONS
+    // ==========================================
+
+    // Custom Experience Page Content - Public read, admin write
+    match /customExperiencePage/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Custom Experience Submissions - Public create, admin read/write
+    match /customExperienceSubmissions/{submissionId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // ==========================================
+    // GLOBAL TOURS COLLECTIONS
+    // ==========================================
+
+    // Global Tours - Public read, admin write
+    match /globalTours/{tourId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Global Tour Bookings - Public create, admin read/write
+    match /globalTourBookings/{bookingId} {
+      allow create: if true;
+      allow read: if isAdmin() || (request.auth != null && resource.data.customerEmail == request.auth.token.email);
+      allow update, delete: if isAdmin();
+    }
+
+    // Global Tour Reviews - Public read approved, public create, admin manage
+    match /globalTourReviews/{reviewId} {
+      allow read: if resource.data.isApproved == true || isAdmin();
+      allow create: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // Culinary Tours - Public read, admin write
+    match /culinary_tours/{tourId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Culinary Reviews - Public read, public create, admin manage
+    match /culinary_reviews/{reviewId} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // Culinary Bookings - Public create, admin read/write
+    match /culinary_bookings/{bookingId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // ==========================================
+    // NOTIFICATION QUEUES (For Cloud Functions)
+    // ==========================================
+
+    // Email Queue - Admin only (Cloud Functions write)
+    match /emailQueue/{emailId} {
+      allow read, write: if isAdmin();
+    }
+
+    // WhatsApp Queue - Admin only (Cloud Functions write)
+    match /whatsappQueue/{messageId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Stripe Checkouts - Public create, admin read
+    match /stripeCheckouts/{checkoutId} {
+      allow create: if true;
+      allow read, update: if isAdmin();
+    }
+
+    // ==========================================
+    // TRAIN BOOKING COLLECTIONS
+    // ==========================================
+
+    // Train Hero Slides - Public read, admin write
+    match /trainHeroSlides/{slideId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Train Scenic Routes - Public read, admin write
+    match /trainScenicRoutes/{routeId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Train Bookings - Public create, admin manage
+    match /trainBookings/{bookingId} {
+      // Anyone can read their own booking (by email match), admin can read all
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.customerInfo.email == request.auth.token.email);
+
+      // Anyone can create a booking (no authentication required)
+      allow create: if true;
+
+      // Only admins can update or delete bookings
+      allow update, delete: if isAdmin();
+    }
+
+    // Train Routes (legacy collection) - Public read, admin write
+    match /trainRoutes/{routeId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Train Booking Settings (in cmsContent)
+    match /cmsContent/trainBookingSettings {
       allow read: if true;
       allow write: if isAdmin();
     }

@@ -60,7 +60,7 @@ const ALL_DESTINATIONS: Omit<Destination, 'selectedAttractions'>[] = [
         lat: 5.9483,
         lng: 80.4716,
         description: 'Whale Watching Paradise',
-        image: 'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=400&h=300&fit=crop',
+        image: 'https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?w=400&h=300&fit=crop',
         category: 'beach',
         icon: '🏖️',
         attractions: [
@@ -76,7 +76,7 @@ const ALL_DESTINATIONS: Omit<Destination, 'selectedAttractions'>[] = [
         lat: 6.0174,
         lng: 80.2497,
         description: 'Best Beach in Sri Lanka',
-        image: 'https://images.unsplash.com/photo-1586375300773-8384e3e4916f?w=400&h=300&fit=crop',
+        image: 'https://images.unsplash.com/photo-1559494007-9f5847c49d94?w=400&h=300&fit=crop',
         category: 'beach',
         icon: '🌴',
         attractions: [
@@ -91,7 +91,7 @@ const ALL_DESTINATIONS: Omit<Destination, 'selectedAttractions'>[] = [
         lat: 6.4271,
         lng: 79.9978,
         description: 'Water Sports Haven',
-        image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=300&fit=crop',
+        image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&h=300&fit=crop',
         category: 'beach',
         icon: '🏄',
         attractions: [
@@ -107,7 +107,7 @@ const ALL_DESTINATIONS: Omit<Destination, 'selectedAttractions'>[] = [
         lat: 7.9570,
         lng: 80.7603,
         description: 'Ancient Lion Rock Fortress',
-        image: 'https://images.unsplash.com/photo-1586613835341-99f93b93809c?w=400&h=300&fit=crop',
+        image: 'https://images.unsplash.com/photo-1603852452378-a4e8d84324a2?w=400&h=300&fit=crop',
         category: 'culture',
         icon: '🦁',
         attractions: [
@@ -122,7 +122,7 @@ const ALL_DESTINATIONS: Omit<Destination, 'selectedAttractions'>[] = [
         lat: 7.2906,
         lng: 80.6337,
         description: 'Cultural Capital of Sri Lanka',
-        image: 'https://images.unsplash.com/photo-1588598198321-4c8c6d733293?w=400&h=300&fit=crop',
+        image: 'https://images.unsplash.com/photo-1546587348-d12660c30c50?w=400&h=300&fit=crop',
         category: 'culture',
         icon: '🏛️',
         attractions: [
@@ -138,7 +138,7 @@ const ALL_DESTINATIONS: Omit<Destination, 'selectedAttractions'>[] = [
         lat: 7.9403,
         lng: 81.0188,
         description: 'Ancient Kingdom Ruins',
-        image: 'https://images.unsplash.com/photo-1590123715937-e3ae9d56c618?w=400&h=300&fit=crop',
+        image: 'https://images.unsplash.com/photo-1605649487212-47bdab064df7?w=400&h=300&fit=crop',
         category: 'culture',
         icon: '🏰',
         attractions: [
@@ -153,7 +153,7 @@ const ALL_DESTINATIONS: Omit<Destination, 'selectedAttractions'>[] = [
         lat: 8.3114,
         lng: 80.4037,
         description: 'Sacred Buddhist City',
-        image: 'https://images.unsplash.com/photo-1578469550956-0e16b69c6a3d?w=400&h=300&fit=crop',
+        image: 'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?w=400&h=300&fit=crop',
         category: 'culture',
         icon: '🙏',
         attractions: [
@@ -168,7 +168,7 @@ const ALL_DESTINATIONS: Omit<Destination, 'selectedAttractions'>[] = [
         lat: 6.0535,
         lng: 80.2210,
         description: 'Historic Dutch Fort',
-        image: 'https://images.unsplash.com/photo-1578469550956-0e16b69c6a3d?w=400&h=300&fit=crop',
+        image: 'https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?w=400&h=300&fit=crop',
         category: 'culture',
         icon: '🏰',
         attractions: [
@@ -185,7 +185,7 @@ const ALL_DESTINATIONS: Omit<Destination, 'selectedAttractions'>[] = [
         lat: 6.8667,
         lng: 81.0466,
         description: 'Scenic Mountain Village',
-        image: 'https://images.unsplash.com/photo-1571296251827-6e6ce8929b48?w=400&h=300&fit=crop',
+        image: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400&h=300&fit=crop',
         category: 'mountain',
         icon: '⛰️',
         attractions: [
@@ -202,7 +202,7 @@ const ALL_DESTINATIONS: Omit<Destination, 'selectedAttractions'>[] = [
         lat: 6.9497,
         lng: 80.7891,
         description: 'Little England Tea Country',
-        image: 'https://images.unsplash.com/photo-1590502160462-58b41354f588?w=400&h=300&fit=crop',
+        image: 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=400&h=300&fit=crop',
         category: 'tea',
         icon: '🍵',
         attractions: [
@@ -218,7 +218,7 @@ const ALL_DESTINATIONS: Omit<Destination, 'selectedAttractions'>[] = [
         lat: 6.8095,
         lng: 80.4994,
         description: 'Sacred Sunrise Pilgrimage',
-        image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop',
+        image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400&h=300&fit=crop',
         category: 'mountain',
         icon: '🌅',
         attractions: [
@@ -232,7 +232,7 @@ const ALL_DESTINATIONS: Omit<Destination, 'selectedAttractions'>[] = [
         lat: 6.3716,
         lng: 81.5168,
         description: 'Best Leopard Spotting',
-        image: 'https://images.unsplash.com/photo-1574870111867-089730e5a72b?w=400&h=300&fit=crop',
+        image: 'https://images.unsplash.com/photo-1456926631375-92c8ce872def?w=400&h=300&fit=crop',
         category: 'wildlife',
         icon: '🐆',
         attractions: [
@@ -246,7 +246,7 @@ const ALL_DESTINATIONS: Omit<Destination, 'selectedAttractions'>[] = [
         lat: 6.4389,
         lng: 80.8886,
         description: 'Elephant Paradise',
-        image: 'https://images.unsplash.com/photo-1581852017103-68ac65514cf3?w=400&h=300&fit=crop',
+        image: 'https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?w=400&h=300&fit=crop',
         category: 'wildlife',
         icon: '🐘',
         attractions: [
@@ -260,7 +260,7 @@ const ALL_DESTINATIONS: Omit<Destination, 'selectedAttractions'>[] = [
         lat: 8.0348,
         lng: 80.8972,
         description: 'The Gathering of Elephants',
-        image: 'https://images.unsplash.com/photo-1549366021-9f761d450615?w=400&h=300&fit=crop',
+        image: 'https://images.unsplash.com/photo-1564760055775-d63b17a55c44?w=400&h=300&fit=crop',
         category: 'wildlife',
         icon: '🐘',
         attractions: [
@@ -274,7 +274,7 @@ const ALL_DESTINATIONS: Omit<Destination, 'selectedAttractions'>[] = [
         lat: 6.9271,
         lng: 79.8612,
         description: 'Vibrant Capital City',
-        image: 'https://images.unsplash.com/photo-1578469550956-0e16b69c6a3d?w=400&h=300&fit=crop',
+        image: 'https://images.unsplash.com/photo-1567157577867-05ccb1388e66?w=400&h=300&fit=crop',
         category: 'city',
         icon: '🏙️',
         attractions: [
@@ -293,7 +293,7 @@ const ALL_DESTINATIONS: Omit<Destination, 'selectedAttractions'>[] = [
         lat: 6.4167,
         lng: 80.4500,
         description: 'UNESCO Rainforest',
-        image: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=400&h=300&fit=crop',
+        image: 'https://images.unsplash.com/photo-1511497584788-876760111969?w=400&h=300&fit=crop',
         category: 'nature',
         icon: '🌳',
         attractions: [
@@ -307,7 +307,7 @@ const ALL_DESTINATIONS: Omit<Destination, 'selectedAttractions'>[] = [
         lat: 6.8406,
         lng: 81.8356,
         description: 'Surfer\'s Paradise',
-        image: 'https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=400&h=300&fit=crop',
+        image: 'https://images.unsplash.com/photo-1455729552865-3658a5d39692?w=400&h=300&fit=crop',
         category: 'beach',
         icon: '🏄',
         attractions: [
@@ -322,7 +322,7 @@ const ALL_DESTINATIONS: Omit<Destination, 'selectedAttractions'>[] = [
         lat: 8.5874,
         lng: 81.2152,
         description: 'East Coast Gem',
-        image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&h=300&fit=crop',
+        image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=300&fit=crop',
         category: 'beach',
         icon: '🐋',
         attractions: [
@@ -339,7 +339,7 @@ const ALL_DESTINATIONS: Omit<Destination, 'selectedAttractions'>[] = [
         lat: 9.6615,
         lng: 80.0255,
         description: 'Cultural Northern Capital',
-        image: 'https://images.unsplash.com/photo-1590123715937-e3ae9d56c618?w=400&h=300&fit=crop',
+        image: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=400&h=300&fit=crop',
         category: 'culture',
         icon: '🛕',
         attractions: [
@@ -357,7 +357,7 @@ const ALL_DESTINATIONS: Omit<Destination, 'selectedAttractions'>[] = [
         lat: 9.2671,
         lng: 80.8142,
         description: 'Serene Northern Beaches',
-        image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=300&fit=crop',
+        image: 'https://images.unsplash.com/photo-1519046904884-53103b34b206?w=400&h=300&fit=crop',
         category: 'beach',
         icon: '🌊',
         attractions: [
@@ -743,7 +743,7 @@ const InteractiveTripBuilder: React.FC = () => {
                                             placeholder="Search places... (e.g., Ella, beach, safari, temple)"
                                             value={searchQuery}
                                             onChange={(e) => setSearchQuery(e.target.value)}
-                                            className="pl-12 pr-4 py-6 text-lg rounded-2xl border-2 border-gray-200 focus:border-teal-500 bg-white shadow-sm"
+                                            className="pl-12 pr-4 py-6 text-lg text-gray-900 rounded-2xl border-2 border-gray-200 focus:border-teal-500 bg-white shadow-sm placeholder:text-gray-400"
                                         />
                                         {searchQuery && (
                                             <button

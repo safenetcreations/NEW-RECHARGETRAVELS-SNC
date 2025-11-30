@@ -3,8 +3,8 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { MapPin, Clock, Users, Star, Calendar, Sparkles, Badge, Heart, ArrowUpRight } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { MapPin, Clock, Users, Star, Calendar, Sparkles, Badge, Heart, ArrowUpRight, Compass, Landmark, TreePine, Camera, GemIcon } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
 import { useTours } from '@/hooks/useTours'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import BookingModal from '@/components/BookingModal'
@@ -12,8 +12,10 @@ import { SEOMetaTags } from '@/components/seo/SEOMetaTags'
 import { SEOSchema } from '@/components/seo/SEOSchema'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
+import { toursByCategory } from '@/components/header/navigation/menuData'
 
 const Tours = () => {
+  const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
   const [priceRange, setPriceRange] = useState('')
   const [duration, setDuration] = useState('')
@@ -85,7 +87,7 @@ const Tours = () => {
       {/* Enhanced Hero Section */}
       <section className="relative bg-gradient-to-br from-emerald-600 via-green-700 to-teal-800 text-white py-20 overflow-hidden">
         {/* Background Elements */}
-        <div className="absolute inset-0">
+        <div className="absolute inset-0 pointer-events-none">
           <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-indigo-600/20 rounded-full blur-3xl animate-pulse"></div>
           <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-tr from-purple-400/10 to-pink-600/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
         </div>
@@ -106,24 +108,27 @@ const Tours = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
-            <Button
-              size="lg"
-              className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-8 py-4 rounded-xl text-lg font-semibold shadow-xl transform hover:scale-105 transition-all duration-300"
-              onClick={() => document.getElementById('tours-grid')?.scrollIntoView({ behavior: 'smooth' })}
+            <button
+              type="button"
+              onClick={() => {
+                const element = document.getElementById('tours-grid')
+                if (element) {
+                  element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                }
+              }}
+              className="inline-flex items-center bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-8 py-4 rounded-xl text-lg font-semibold shadow-xl transform hover:scale-105 transition-all duration-300 cursor-pointer"
             >
               <Calendar className="w-5 h-5 mr-2" />
               Browse Our Tours
-            </Button>
-            <Link to="/tours/tripadvisor">
-              <Button
-                variant="outline"
-                size="lg"
-                className="border-2 border-white text-white hover:bg-white hover:text-green-800 px-8 py-4 rounded-xl text-lg font-semibold backdrop-blur-sm"
-              >
-                View on TripAdvisor
-                <ArrowUpRight className="w-5 h-5 ml-2" />
-              </Button>
-            </Link>
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/tours/tripadvisor')}
+              className="inline-flex items-center border-2 border-white text-white hover:bg-white hover:text-green-800 px-8 py-4 rounded-xl text-lg font-semibold backdrop-blur-sm transition-all duration-300 cursor-pointer"
+            >
+              View on TripAdvisor
+              <ArrowUpRight className="w-5 h-5 ml-2" />
+            </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
@@ -144,6 +149,136 @@ const Tours = () => {
               <div className="text-green-100 text-sm">Certified</div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* All Tour Categories Section */}
+      <section id="tours-grid" className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Explore All Sri Lanka Tours
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Browse our complete collection of handcrafted tour experiences across Sri Lanka
+            </p>
+          </div>
+
+          {/* Tour Categories */}
+          {Object.entries(toursByCategory).map(([categoryKey, category]) => {
+            const categoryIcons: Record<string, React.ReactNode> = {
+              adventure: <Compass className="w-6 h-6" />,
+              cultural: <Landmark className="w-6 h-6" />,
+              nature: <TreePine className="w-6 h-6" />,
+              specialty: <Camera className="w-6 h-6" />,
+              luxury: <GemIcon className="w-6 h-6" />
+            };
+
+            const categoryColors: Record<string, string> = {
+              adventure: "from-orange-500 to-red-500",
+              cultural: "from-purple-500 to-indigo-500",
+              nature: "from-green-500 to-emerald-500",
+              specialty: "from-blue-500 to-cyan-500",
+              luxury: "from-amber-500 to-yellow-500"
+            };
+
+            // Unique images for each tour
+            const tourImages: Record<string, string> = {
+              // Adventure & Wildlife
+              "Wildlife Safaris": "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=400&h=300&fit=crop",
+              "National Parks": "https://images.unsplash.com/photo-1516426122078-c23e76319801?w=400&h=300&fit=crop",
+              "Whale Watching": "https://images.unsplash.com/photo-1568430462989-44163eb1752f?w=400&h=300&fit=crop",
+              "Water Sports": "https://images.unsplash.com/photo-1530053969600-caed2596d242?w=400&h=300&fit=crop",
+              // Cultural & Heritage
+              "Cultural Tours": "https://images.unsplash.com/photo-1588598198321-9735fd52dc37?w=400&h=300&fit=crop",
+              "Ramayana Trail": "https://images.unsplash.com/photo-1609766857041-ed402ea8069a?w=400&h=300&fit=crop",
+              "Pilgrimage Tours": "https://images.unsplash.com/photo-1590123292671-ea32fa193ebe?w=400&h=300&fit=crop",
+              "Cooking Classes": "https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=400&h=300&fit=crop",
+              // Nature & Scenic
+              "Hill Country Tours": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop",
+              "Beach Tours": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=300&fit=crop",
+              "Eco-Tourism": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=300&fit=crop",
+              "Tea Trails": "https://images.unsplash.com/photo-1582650625119-3a31f8fa2699?w=400&h=300&fit=crop",
+              // Special Interest
+              "Photography Tours": "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=400&h=300&fit=crop",
+              "Culinary Tours": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=300&fit=crop",
+              "Train Journeys": "https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=400&h=300&fit=crop",
+              "Hot Air Balloon": "https://images.unsplash.com/photo-1507608616759-54f48f0af0ee?w=400&h=300&fit=crop",
+              "TripAdvisor Tours": "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=400&h=300&fit=crop",
+              // Luxury & Wellness
+              "Luxury Tours": "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=300&fit=crop",
+              "Private Charters": "https://images.unsplash.com/photo-1540946485063-a40da27545f8?w=400&h=300&fit=crop",
+              "Ayurveda Wellness": "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=400&h=300&fit=crop",
+              "Honeymoon Tours": "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=400&h=300&fit=crop",
+              "Private Tours": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop"
+            };
+
+            return (
+              <div key={categoryKey} className="mb-12">
+                {/* Category Header */}
+                <div className="flex items-center gap-3 mb-6">
+                  <div className={`p-3 rounded-xl bg-gradient-to-r ${categoryColors[categoryKey]} text-white`}>
+                    {categoryIcons[categoryKey]}
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900">{category.title}</h3>
+                  <div className="flex-1 h-px bg-gradient-to-r from-gray-300 to-transparent ml-4"></div>
+                </div>
+
+                {/* Tour Cards Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {category.tours.map((tour) => (
+                    <Link key={tour.href} to={tour.href}>
+                      <Card className="group h-full overflow-hidden hover:shadow-2xl transition-all duration-300 border-0 shadow-lg hover:scale-[1.02] cursor-pointer">
+                        <div className="relative h-44 overflow-hidden">
+                          <img
+                            src={tourImages[tour.title] || "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop"}
+                            alt={tour.title}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+
+                          {/* Category Badge */}
+                          <div className="absolute top-3 left-3">
+                            <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold text-white bg-gradient-to-r ${categoryColors[categoryKey]}`}>
+                              {categoryIcons[categoryKey]}
+                              {category.title.split(' ')[0]}
+                            </span>
+                          </div>
+
+                          {/* Tour Title Overlay */}
+                          <div className="absolute bottom-3 left-3 right-3">
+                            <h4 className="text-lg font-bold text-white drop-shadow-lg">
+                              {tour.title}
+                            </h4>
+                          </div>
+                        </div>
+
+                        <CardContent className="p-4">
+                          <p className="text-gray-600 text-sm line-clamp-2 mb-3">
+                            {tour.description}
+                          </p>
+
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-1 text-sm text-gray-500">
+                              <MapPin className="w-4 h-4 text-green-600" />
+                              <span>Sri Lanka</span>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-green-600 hover:text-green-700 hover:bg-green-50 p-0"
+                            >
+                              Explore →
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </section>
 
@@ -194,7 +329,7 @@ const Tours = () => {
       </section>
 
       {/* Tours Grid */}
-      <section id="tours-grid" className="py-12 bg-gray-50">
+      <section id="filtered-tours" className="py-12 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {locallyFilteredTours.map((tour) => (

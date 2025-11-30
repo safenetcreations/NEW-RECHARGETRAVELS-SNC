@@ -173,55 +173,55 @@ export interface PrivateChartersPageContent {
 
 const defaultContent: PrivateChartersPageContent = {
   hero: {
-    badge: 'Ultra-Private Concierge',
-    title: 'Where Billionaires Escape',
+    badge: 'Private Charter Desk',
+    title: 'Indian Ocean Private Charters',
     subtitle:
-      'Superyachts. Gulfstreams. Helicopters. Palatial villas. Your Indian Ocean odyssey begins with a single message to our 24/7 billionaire desk.',
-    ctaText: 'Summon the Concierge',
+      'Superyachts, Gulfstream jets, and twin-engine helicopters on 24/7 standby for bespoke Sri Lankan journeys.',
+    ctaText: 'Request a charter plan',
     videoUrl: 'https://cdn.coverr.co/videos/coverr-super-yacht-at-sunset-9339/1080p.mp4',
     videoPoster: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=2000&q=80',
     images: [
       {
         id: 'hero-1',
         image: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=2000&q=80',
-        caption: 'Golden hour departures from Colombo Port City',
-        tag: 'Superyacht Fleet'
+        caption: 'Sunset departures from Colombo Port City',
+        tag: 'Superyacht fleet'
       },
       {
         id: 'hero-2',
         image: 'https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=2000&q=80',
-        caption: 'Gulfstream G700 awaiting your command',
-        tag: 'Private Aviation'
+        caption: 'Dassault and Gulfstream ready rampside',
+        tag: 'Private jets'
       },
       {
         id: 'hero-3',
         image: 'https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=2000&q=80',
-        caption: 'Night-vision heli to your private villa',
-        tag: 'Executive Shuttle'
+        caption: 'Twin-engine heli transfers to south coast villas',
+        tag: 'Helicopter shuttle'
       }
     ],
     microForm: {
-      heading: 'Your Manifest Awaits',
-      subheading: 'Three details. One message. Your asset held within minutes.',
-      submitLabel: 'Dispatch Now',
-      successMessage: 'Merci — Your dedicated concierge is preparing your manifest. Expect contact within 12 minutes.',
+      heading: 'Need a manifest in motion?',
+      subheading: 'Share three details and our desk will hold the right asset while you finish this page.',
+      submitLabel: 'Send to concierge',
+      successMessage: 'Merci — concierge desk received your manifest and will respond within 15 minutes.',
       fields: [
         {
           id: 'date',
-          label: 'Departure window',
+          label: 'Preferred date',
           type: 'date',
-          placeholder: 'When shall we ready the fleet?'
+          placeholder: 'Select a target departure'
         },
         {
           id: 'asset',
-          label: 'Primary asset',
+          label: 'Asset focus',
           type: 'select',
-          options: ['Superyacht', 'Gulfstream Jet', 'Executive Helicopter', 'Multi-Asset Journey'],
+          options: ['Superyacht', 'Private Jet', 'Helicopter', 'Multi-modal'],
           defaultValue: 'Superyacht'
         },
         {
           id: 'guests',
-          label: 'Party size',
+          label: 'Guests',
           type: 'number',
           placeholder: 'e.g. 8'
         }
@@ -230,117 +230,96 @@ const defaultContent: PrivateChartersPageContent = {
   },
   overview: {
     summary:
-      'For those who measure time in experiences, not hours. Recharge commands a private armada across the Indian Ocean—superyachts, Gulfstream jets, executive helicopters, and palatial residences—all orchestrated by a single concierge who answers only to you. From wheels-up to champagne sabrage, every detail is choreographed to perfection.',
+      'Recharge Travels maintains a vetted fleet of yachts, jets, helicopters, and VIP ground assets stationed across Sri Lanka, the Maldives, and Southern India. Our concierge pilots every itinerary from manifest to customs fast-track so you only focus on arrival playlists and champagne toasts.',
     highlights: [
       {
         id: 'hl-1',
-        label: 'Instant Dispatch Protocol',
-        description: 'Marine and aviation teams on 45-minute standby. Your jet fueled. Your yacht provisioned. Your helicopter crewed.'
+        label: '24/7 charter desk',
+        description: 'Marine and aviation ops teams on-call with 45-minute dispatch windows for urgent missions.'
       },
       {
         id: 'hl-2',
-        label: 'Seamless Multi-Modal Journeys',
-        description: 'Yacht to jet to villa—one invoice, zero friction. We architect impossible itineraries across sea, sky, and land.'
+        label: 'Design-first itineraries',
+        description: 'Combine yachts, seaplanes, sleeper trains, and jungle lodges under one concierge invoice.'
       },
       {
         id: 'hl-3',
-        label: 'White-Glove Hospitality',
-        description: 'Michelin chefs, master sommeliers, wellness physicians, and security details—curated to your exact specifications.'
+        label: 'Bespoke hospitality',
+        description: 'Onboard butlers, mixologists, and wellness coaches curated per guest preferences.'
       }
     ]
   },
   stats: [
-    { id: 'stat-1', iconName: 'Ship', label: 'Superyachts', value: '12' },
-    { id: 'stat-2', iconName: 'Plane', label: 'Jet Fleet', value: '8' },
-    { id: 'stat-3', iconName: 'Clock', label: 'Dispatch Time', value: '<45 min' },
-    { id: 'stat-4', iconName: 'Crown', label: 'UHNW Clients', value: '5,800+' }
+    { id: 'stat-1', iconName: 'Ship', label: 'Superyachts on call', value: '12' },
+    { id: 'stat-2', iconName: 'Plane', label: 'Jet categories', value: '5' },
+    { id: 'stat-3', iconName: 'Clock', label: 'Average dispatch', value: '45 min' },
+    { id: 'stat-4', iconName: 'Users', label: 'Guest satisfaction', value: '4.97/5' }
   ],
   fleet: [
     {
       id: 'fleet-yacht',
       name: 'MY Serendipity',
-      vesselType: '40m Benetti Superyacht',
+      vesselType: '40m Benetti superyacht',
       capacity: '10 guests · 7 crew',
-      range: '1,500 nm · 12 kts cruise',
-      priceLabel: 'USD 18,500/day',
+      range: 'Cruising 12 kts · 1,500 nm',
+      priceLabel: 'USD 16,000 per day + APA',
       iconName: 'Anchor',
       image: 'https://images.unsplash.com/photo-1493558103817-58b2924bce98?auto=format&fit=crop&w=1600&q=80',
-      highlights: ['4 palatial staterooms with ocean views', 'Beach club with Seabobs & e-foils', 'Williams tender + chase boat for island hops'],
-      hospitality: ['Michelin-trained executive chef', 'Master sommelier with 500-bottle cellar', 'IV therapy & wellness physician onboard']
+      highlights: ['4 ensuite staterooms', 'Beach club with Seabobs + e-foils', 'Williams tender + chase boat'],
+      hospitality: ['Executive chef + pastry team', 'Onboard mixologist', 'Wellness therapist & IV lounge']
     },
     {
       id: 'fleet-jet',
-      name: 'Gulfstream G700',
-      vesselType: 'Ultra-Long-Range Jet',
-      capacity: '19 passengers',
-      range: '7,500 nm nonstop',
-      priceLabel: 'USD 12,800/hour',
+      name: 'Gulfstream G600',
+      vesselType: 'Ultra-long-range jet',
+      capacity: '13 passengers',
+      range: '6,600 nm nonstop',
+      priceLabel: 'USD 9,800 per block hour',
       iconName: 'Plane',
       image: 'https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&w=1600&q=80',
-      highlights: ['Full galley with live chef plating', 'Ka-band Wi-Fi for seamless connectivity', 'Lie-flat suites with Hermès bedding'],
-      hospitality: ['ISS-certified cabin crew', 'Dom Pérignon & vintage cellar', 'Bespoke wellness menu by nutritionist']
+      highlights: ['Full-size galley with chef plating', 'Ka-band Wi-Fi + video conferencing', ' lie-flat suites'],
+      hospitality: ['ISS-certified cabin crew', 'Onboard sommelier cellar', 'Signature Sri Lankan wellness menu']
     },
     {
       id: 'fleet-heli',
-      name: 'Airbus H160 VIP',
-      vesselType: 'Executive Helicopter',
+      name: 'Airbus H145 Luxury Shuttle',
+      vesselType: 'Twin-engine helicopter',
       capacity: '8 passengers',
-      range: '450 nm · IFR certified',
-      priceLabel: 'USD 6,200/hour',
+      range: '370 nm · IFR capable',
+      priceLabel: 'USD 5,400 per flight hour',
       iconName: 'Navigation',
       image: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1600&q=80',
-      highlights: ['Whisper-quiet cabin technology', 'Climate-controlled leather interior', 'Night-vision equipped crew for 24/7 ops'],
-      hospitality: ['Customs pre-clearance protocol', 'Chilled champagne service', 'Maybach crossover on landing']
-    },
-    {
-      id: 'fleet-villa',
-      name: 'Aman Private Villa',
-      vesselType: 'Oceanfront Estate',
-      capacity: '16 guests · 8 staff',
-      range: 'Southern Sri Lanka',
-      priceLabel: 'USD 8,500/night',
-      iconName: 'Hotel',
-      image: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=1600&q=80',
-      highlights: ['Infinity pool overlooking Indian Ocean', 'Private beach with butler service', 'Helipad for seamless arrivals'],
-      hospitality: ['24/7 private chef & butler team', 'In-villa spa & wellness center', 'Security detail & concierge']
+      highlights: ['Noise-cancelling interiors', 'Oversized baggage hold', 'Night-vision equipped crew'],
+      hospitality: ['Concierge manifests & customs', 'Cold-pressed juice program', 'Luxury vehicle crossover on landing']
     }
   ],
   journeys: [
     {
       id: 'journey-1',
-      title: 'The Maharaja Circuit',
-      duration: '5 days',
-      route: 'Colombo → Tea Trails → Maldives',
+      title: 'Tea Country to Atoll Weekender',
+      duration: '4 days',
+      route: 'Colombo → Castlereagh → Maldives',
       description:
-        'Helicopter to Ceylon Tea Trails at dawn, Gulfstream hop to Malé at sunset, superyacht odyssey between private atolls with Michelin chef collaborations and underwater dining.',
-      services: ['Executive helicopter transfer', 'Heritage bungalow buyout', 'G700 charter to Maldives', 'Benetti yacht with spa & dive crew']
+        'Sunrise helicopter from Colombo to Ceylon Tea Trails, sunset Gulfstream hop to Malé, and superyacht hop between private atolls with onboard chef collaborations.',
+      services: ['Helicopter transfer', 'Heritage bungalow buyout', 'Gulfstream charter', 'Benetti yacht with spa crew']
     },
     {
       id: 'journey-2',
-      title: 'Wild Kingdom Expedition',
+      title: 'Wild Coast Grand Circle',
       duration: '7 days',
       route: 'Colombo → Yala → Trincomalee → Sigiriya',
       description:
-        'Night-vision heli to exclusive safari lodge, coastal yacht convoy to pristine east coast, catamaran dive expeditions, and private hot-air balloon over Lion Rock at sunrise.',
-      services: ['Heli safari logistics', 'Yacht convoy with dive masters', 'Seaplane night transfer', 'Private balloon with champagne proposal setup']
+        'Twin-engine heli to safari lodge, coastal yacht convoy to east coast, catamaran dive days, and private hot-air balloon over Lion Rock.',
+      services: ['Heli + safari logistics', 'Yacht convoy + dive masters', 'Seaplane night transfer', 'Balloon charter + proposal setups']
     },
     {
       id: 'journey-3',
-      title: 'Boardroom Express',
+      title: 'Executive Roadshow Express',
       duration: '48 hours',
-      route: 'Singapore → Colombo → Galle → Dubai',
+      route: 'Chennai → Colombo → Galle → Bangalore',
       description:
-        'Corporate itinerary for board meetings, site inspections, and partner dinners—executed via Gulfstream, armored convoy, and floating boardroom on superyacht.',
-      services: ['Gulfstream intercontinental shuttle', 'Armored S-Class fleet', 'Yacht boardroom configuration', 'Security detail & customs fast-track']
-    },
-    {
-      id: 'journey-4',
-      title: 'Honeymoon Odyssey',
-      duration: '10 days',
-      route: 'Colombo → Galle → Maldives → Seychelles',
-      description:
-        'The ultimate romantic escape—private villa in Galle, superyacht to Maldives with underwater suite, seaplane to Seychelles private island with dedicated butler for two.',
-      services: ['Oceanfront villa buyout', 'Superyacht with underwater suite', 'Seaplane island hopping', 'Private island finale with fireworks']
+        'Corporate deck schedules for board meetings, site inspections, and partner dinners executed via jet, heli, and armored convoys with rolling boardrooms.',
+      services: ['Gulfstream shuttle', 'Armored Mercedes fleet', 'Onboard boardroom fitout', 'Concierge security + customs fast-track']
     }
   ],
   serviceTiers: [
@@ -448,117 +427,94 @@ const defaultContent: PrivateChartersPageContent = {
   ],
   booking: {
     conciergeNote:
-      'One message to summon the fleet. Share your travel window, party size, and lifestyle preferences. Your dedicated concierge returns within 12 minutes with asset options, flight plans, and provisional holds—ready for your command.',
+      'Email or WhatsApp our charter desk with preferred dates, passenger manifest, and lifestyle notes. We return within 15 minutes with proposed assets, flight plans, and provisional holds.',
     contactPhone: '+94 77 772 1999',
     whatsapp: 'https://wa.me/94777721999',
-    email: 'elite@rechargetravels.com',
-    responseTime: 'Response in <12 minutes · 24/7 Global Ops',
+    email: 'charters@rechargetravels.com',
+    responseTime: 'Replies within 15 minutes · 24/7 ops desk',
     isLive: true,
-    nextAvailabilityWindow: 'Next dispatch window: Immediate',
-    depositNote: '50% to secure your manifest · Balance due 72 hours prior or on dispatch for same-day requests.',
-    contractNote: 'Digital contracts via DocuSign · Full insurance certificates & crew manifests attached.'
+    nextAvailabilityWindow: 'Sunrise dispatch window · 05:30 GMT+5:30',
+    depositNote: '50% deposit to release charter order · balance due 7 days prior or on dispatch for short-notice trips.',
+    contractNote: 'Contracts issued electronically with DocuSign + insurance certificates attached.'
   },
   pricing: {
     currency: 'USD',
-    yachtMinimum: 18500,
-    jetMinimum: 12800,
-    helicopterMinimum: 6200,
-    addOns: ['Michelin guest chef residencies', 'Celebrity DJ & entertainment', 'Bio-hacking wellness labs', 'Private security detail', 'Documentary film crew']
+    yachtMinimum: 16000,
+    jetMinimum: 9800,
+    helicopterMinimum: 5400,
+    addOns: ['Michelin guest chef residencies', 'Live entertainment or DJ sets', 'Pop-up wellness labs', 'Destination content crew']
   },
   gallery: [
     {
       id: 'gal-1',
       image: 'https://images.unsplash.com/photo-1510070009289-b5bc34383727?auto=format&fit=crop&w=1200&q=80',
-      caption: 'Private dinner on the high seas'
+      caption: 'Mid-ocean dinner staging'
     },
     {
       id: 'gal-2',
       image: 'https://images.unsplash.com/photo-1498079022511-d15614cb1c02?auto=format&fit=crop&w=1200&q=80',
-      caption: 'Gulfstream cabin with fresh orchids'
+      caption: 'Jet cabin with bespoke florals'
     },
     {
       id: 'gal-3',
       image: 'https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=1200&q=80',
-      caption: 'Night-vision heli to your villa'
+      caption: 'Helicopter transfer to south coast villa'
     },
     {
       id: 'gal-4',
       image: 'https://images.unsplash.com/photo-1469478715127-6d347c4a32c7?auto=format&fit=crop&w=1200&q=80',
-      caption: 'Dawn meditation on the sundeck'
-    },
-    {
-      id: 'gal-5',
-      image: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=1200&q=80',
-      caption: 'Oceanfront villa infinity pool'
-    },
-    {
-      id: 'gal-6',
-      image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80',
-      caption: 'Champagne sabrage at sunset'
+      caption: 'Sunrise yoga on flybridge'
     }
   ],
   testimonials: [
     {
       quote:
-        'Recharge executed a Colombo-to-Maldives escape with 90 minutes notice. The Michelin chef, master sommelier, and pilot brief were flawless. This is how billionaires should travel.',
-      author: 'Amara & Devan K. · Zurich'
+        'Recharge choreographed a Colombo-to-Maldives escape with minutes-notice. Chef, sommelier, and pilot brief were immaculate.',
+      author: 'Amara & Devan (Zurich)'
     },
     {
       quote:
-        'Boardroom on the Gulfstream, seaplane to the catamaran, IV therapy on deck, underwater dining in the Maldives—all in 48 hours. Unprecedented.',
-      author: 'Charles W. · Venture Capital Partner'
+        'Boardroom setup on the Gulfstream, seaplane transfer to the catamaran, and IV lounge on deck—flawless execution.',
+      author: 'C. Wellington, Venture Partner'
     },
     {
       quote:
-        'Night-vision helicopter into Yala, sunrise balloon over Sigiriya, yacht brunch by noon. No other concierge operates at this level.',
-      author: 'Helena O. · Creative Director, Fortune 100'
-    },
-    {
-      quote:
-        'We needed a proposal setup on a private atoll with 6 hours notice. Recharge delivered fireworks, a string quartet, and a Michelin dinner. She said yes.',
-      author: 'Anonymous UHNW Client'
+        'Night-vision heli into Yala, sunrise balloon over Lion Rock, and yacht brunch within 24 hours. No one else runs ops like this.',
+      author: 'Helena Ortiz, Creative Director'
     }
   ],
-  partners: ['Benetti', 'Gulfstream', 'Airbus Corporate Jets', 'VistaJet', 'Aman Resorts', 'Four Seasons', 'Relais & Châteaux'],
+  partners: ['Benetti', 'Gulfstream', 'Airbus', 'VistaJet', 'Relais & Châteaux'],
   faqs: [
     {
       id: 'faq-1',
-      question: 'How quickly can you dispatch an asset?',
-      answer: 'Aviation and helicopter assets can launch within 45 minutes of contract signature. Superyachts require 12–24 hours for provisioning unless already crewed in position. For same-day requests, we maintain standby assets.'
+      question: 'How quickly can you dispatch a charter?',
+      answer: 'Aviation and heli assets can launch within 45 minutes of contract sign; yachts require 12–24 hours for provisioning unless already crewed nearby.'
     },
     {
       id: 'faq-2',
-      question: 'Can you orchestrate multi-country journeys?',
-      answer: 'Absolutely. We routinely clear customs for Maldives, Seychelles, Lakshadweep, Dubai, and Singapore. All permits, handlers, and concierge visas are managed seamlessly.'
+      question: 'Can we combine Sri Lanka with the Maldives or India?',
+      answer: 'Yes, we routinely clear customs for Maldives atolls, Lakshadweep, and Chennai. We manage all permits, handlers, and concierge visas.'
     },
     {
       id: 'faq-3',
-      question: 'What security and insurance do you provide?',
-      answer: 'Every charter includes USD 50M liability coverage. We coordinate armored convoys, executive protection details, and secure communications as standard for UHNW clients.'
+      question: 'Do you handle security and insurance?',
+      answer: 'We coordinate armored convoys, onboard executive protection, and comprehensive passenger insurance per charter regulations.'
     },
     {
       id: 'faq-4',
-      question: 'What information do you need to begin?',
-      answer: 'Travel window, party size, passport nationalities, preferred experiences, dietary requirements, and any wellness or security preferences. Your concierge handles everything else.'
-    },
-    {
-      id: 'faq-5',
-      question: 'Do you accommodate special requests?',
-      answer: 'From Michelin pop-ups to celebrity entertainment, rare wine acquisitions to emergency medical evacuations—if it can be done, we will make it happen.'
+      question: 'What information do you need to start?',
+      answer: 'Travel window, group size, passport nationality, preferred experiences, and any dietary/wellness requests help us tailor the asset manifest.'
     }
   ],
   seo: {
-    title: 'Billionaire Concierge Sri Lanka | Superyacht, Private Jet & Helicopter Charter',
+    title: 'Private Charters Sri Lanka | Superyacht, Jet & Helicopter Concierge',
     description:
-      'The ultimate private concierge for UHNW travelers. Superyachts, Gulfstream jets, executive helicopters, and palatial villas—orchestrated by a single desk that answers only to you.',
+      'Book bespoke Sri Lankan private charters with superyachts, Gulfstream jets, and helicopters under one luxury concierge desk.',
     keywords: [
-      'billionaire travel Sri Lanka',
-      'UHNW concierge service',
-      'private yacht charter Indian Ocean',
-      'Gulfstream charter Sri Lanka',
-      'luxury helicopter transfer',
-      'ultra-luxury travel concierge',
-      'private villa rental Sri Lanka'
+      'Sri Lanka private yacht charter',
+      'Sri Lanka private jet concierge',
+      'helicopter charter Sri Lanka',
+      'luxury travel Sri Lanka charters'
     ],
     ogImage: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=1200&q=630'
   }

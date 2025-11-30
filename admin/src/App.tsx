@@ -78,6 +78,12 @@ function App() {
                 <Route path="/kalpitiya-kitesurfing" element={<AdminPanelWithSection section="kalpitiya-kitesurfing" />} />
                 <Route path="/private-charters" element={<AdminPanelWithSection section="private-charters" />} />
                 <Route path="/sea-cucumber-farming" element={<AdminPanelWithSection section="sea-cucumber-farming" />} />
+                <Route path="/private-tours" element={<AdminPanelWithSection section="private-tours" />} />
+                <Route path="/group-transport" element={<AdminPanelWithSection section="group-transport" />} />
+                <Route path="/train-booking" element={<AdminPanelWithSection section="train-booking" />} />
+                <Route path="/ayurveda-wellness" element={<AdminPanelWithSection section="ayurveda-wellness" />} />
+                <Route path="/tea-trails" element={<AdminPanelWithSection section="tea-trails" />} />
+                <Route path="/pilgrimage-tours" element={<AdminPanelWithSection section="pilgrimage-tours" />} />
                 <Route path="/why-choose-us" element={<AdminPanelWithSection section="why-choose-us" />} />
                 <Route path="/homepage-stats" element={<AdminPanelWithSection section="homepage-stats" />} />
 
@@ -104,6 +110,7 @@ function App() {
                 {/* Management */}
                 <Route path="/bookings" element={<AdminPanelWithSection section="bookings" />} />
                 <Route path="/group-transport-bookings" element={<AdminPanelWithSection section="group-transport-bookings" />} />
+                <Route path="/customers" element={<AdminPanelWithSection section="customers" />} />
                 <Route path="/reviews" element={<AdminPanelWithSection section="reviews" />} />
                 <Route path="/users" element={<AdminPanelWithSection section="users" />} />
 

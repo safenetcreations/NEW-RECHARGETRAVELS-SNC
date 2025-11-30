@@ -1,4 +1,96 @@
 
+// ===========================================
+// LUXURY COLLECTION - Premium Experiences
+// ===========================================
+export const luxuryNavigation = {
+  // Ultimate Experiences (Top Tier VIP)
+  ultimate: {
+    title: "Ultimate Experiences",
+    description: "For the most discerning travelers",
+    items: [
+      {
+        title: "Dream Journeys",
+        href: "/experiences/luxury/dream-journeys",
+        description: "Multi-day curated adventures with helicopters, yachts & exclusive access",
+        badge: "Signature"
+      },
+      {
+        title: "VIP Concierge",
+        href: "/experiences/luxury/vip-concierge",
+        description: "Private chefs, security, event planning & bespoke celebrations",
+        badge: "24/7"
+      },
+      {
+        title: "Exclusive Access",
+        href: "/experiences/luxury/exclusive-access",
+        description: "Private temple blessings, museum openings & cultural immersions",
+        badge: "VIP"
+      }
+    ]
+  },
+  // Private Transport
+  transport: {
+    title: "Private Transport",
+    description: "Travel in absolute style",
+    items: [
+      {
+        title: "Helicopter Charters",
+        href: "/experiences/luxury/helicopter-charters",
+        description: "Scenic flights & exclusive transfers"
+      },
+      {
+        title: "Private Yachts",
+        href: "/experiences/luxury/private-yachts",
+        description: "Crewed luxury vessels & ocean adventures"
+      },
+      {
+        title: "Private Jets",
+        href: "/experiences/luxury/private-jets",
+        description: "Charter flights & VIP aviation"
+      },
+      {
+        title: "Luxury Vehicles",
+        href: "/experiences/luxury/luxury-vehicles",
+        description: "Rolls-Royce, Bentley, Maybach with chauffeur"
+      }
+    ]
+  },
+  // Luxury Stays
+  stays: {
+    title: "Luxury Stays",
+    description: "Exceptional accommodations",
+    items: [
+      {
+        title: "Luxury Hotels",
+        href: "/experiences/luxury/luxury-hotels",
+        description: "5-star resorts across Sri Lanka"
+      },
+      {
+        title: "Luxury Apartments",
+        href: "/experiences/luxury/luxury-apartments",
+        description: "Penthouses & serviced residences in Colombo"
+      },
+      {
+        title: "Luxury Houses",
+        href: "/experiences/luxury/luxury-houses",
+        description: "Private villas with full staff"
+      },
+      {
+        title: "Exclusive Villas",
+        href: "/experiences/luxury/exclusive-villas",
+        description: "Beachfront & hillside private estates"
+      }
+    ]
+  }
+};
+
+// Flat list for backward compatibility
+export const luxuryItems = [
+  ...luxuryNavigation.ultimate.items,
+  ...luxuryNavigation.transport.items,
+  ...luxuryNavigation.stays.items
+];
+
 export const aboutItems = [
   {
     title: "About Us",
@@ -727,12 +819,12 @@ export const experiencesByCategory = {
     ]
   },
   luxury: {
-    title: "Luxury & Custom",
+    title: "Wellness & Custom",
     experiences: [
       {
-        title: "Luxury Experiences",
-        href: "/experiences",
-        description: "Curated luxury journeys for travelers"
+        title: "Ayurveda Wellness",
+        href: "/experiences/ayurveda",
+        description: "Traditional healing and spa retreats"
       },
       {
         title: "Custom Experience",
@@ -740,14 +832,14 @@ export const experiencesByCategory = {
         description: "Create your dream journey"
       },
       {
-        title: "Ayurveda Wellness",
-        href: "/experiences/ayurveda",
-        description: "Traditional healing and spa retreats"
+        title: "Wellness Packages",
+        href: "/experiences/wellness",
+        description: "Rejuvenating retreats for body & mind"
       },
       {
-        title: "Private Charters",
-        href: "/experiences/private-charters",
-        description: "Superyachts, jets, and helicopters on standby"
+        title: "Honeymoons & Weddings",
+        href: "/romance/honeymoons-weddings",
+        description: "Romantic escapes and celebrations"
       }
     ]
   }

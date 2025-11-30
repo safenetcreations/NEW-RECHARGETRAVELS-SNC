@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { GoogleMapsLoader } from '@/components/map/GoogleMapsLoader';
-import { useGoogleMapsApi } from '@/hooks/useGoogleMapsApi';
+import { useJsApiLoader } from '@react-google-maps/api';
+import { getEffectiveApiKey, isDemoMode, googleMapsLibraries } from '@/lib/googleMapsConfig';
 import { Destination } from './InteractiveTripBuilder';
 
 interface TripMapProps {
@@ -8,12 +8,18 @@ interface TripMapProps {
 }
 
 const TripMap: React.FC<TripMapProps> = ({ destinations }) => {
-    const { apiKey, isLoading } = useGoogleMapsApi();
+    const apiKey = getEffectiveApiKey();
+    const { isLoaded: mapsReady, loadError } = useJsApiLoader({
+        id: 'google-map-script',  // Same ID as other components
+        googleMapsApiKey: apiKey || '',
+        libraries: googleMapsLibraries
+    });
+    const isLoading = !mapsReady && !loadError;
+
     const mapRef = useRef<HTMLDivElement>(null);
     const [map, setMap] = useState<google.maps.Map | null>(null);
     const [directionsRenderer, setDirectionsRenderer] = useState<google.maps.DirectionsRenderer | null>(null);
     const [markers, setMarkers] = useState<google.maps.Marker[]>([]);
-    const [mapsReady, setMapsReady] = useState(false);
 
     // Leaflet State
     const [L, setL] = useState<any>(null);
@@ -38,14 +44,17 @@ const TripMap: React.FC<TripMapProps> = ({ destinations }) => {
         }
     }, [isLoading, apiKey]);
 
-    // Google Maps Effect
+    // Google Maps Effect - initialize map when ready
     useEffect(() => {
-        if (!mapsReady || map || !mapRef.current || !apiKey) return;
+        if (!mapsReady || map || !mapRef.current || !apiKey || isDemoMode()) return;
 
-        const g = (window as any).google;
-        if (!g || !g.maps) return;
+        // Verify Google Maps is fully available
+        if (!window.google?.maps?.Map) {
+            console.warn('Google Maps not fully loaded yet');
+            return;
+        }
 
-        const newMap = new g.maps.Map(mapRef.current, {
+        const newMap = new window.google.maps.Map(mapRef.current, {
             center: { lat: 7.8731, lng: 80.7718 },
             zoom: 7,
             mapTypeControl: false,
@@ -61,7 +70,7 @@ const TripMap: React.FC<TripMapProps> = ({ destinations }) => {
         });
         setMap(newMap);
 
-        const renderer = new g.maps.DirectionsRenderer({
+        const renderer = new window.google.maps.DirectionsRenderer({
             map: newMap,
             suppressMarkers: true,
             polylineOptions: {
@@ -186,11 +195,17 @@ const TripMap: React.FC<TripMapProps> = ({ destinations }) => {
         );
     }
 
-    // Render Google Maps if API key exists
+    // Render Google Maps if API key exists and loaded
+    if (loadError) {
+        return (
+            <div className="w-full h-full min-h-[400px] bg-gray-100 flex items-center justify-center">
+                <div className="text-red-500">Error loading maps</div>
+            </div>
+        );
+    }
+
     return (
-        <GoogleMapsLoader apiKey={apiKey} onLoad={() => setMapsReady(true)}>
-            <div ref={mapRef} className="w-full h-full min-h-[400px] bg-gray-100" />
-        </GoogleMapsLoader>
+        <div ref={mapRef} className="w-full h-full min-h-[400px] bg-gray-100" />
     );
 };
 

@@ -172,28 +172,28 @@ export interface AdminPrivateChartersContent {
 
 export const defaultPrivateChartersAdminContent: AdminPrivateChartersContent = {
   hero: {
-    badge: 'Ultra-Private Concierge',
-    title: 'Where Billionaires Escape',
+    badge: 'Private Charter Desk',
+    title: 'Indian Ocean Private Charters',
     subtitle:
-      'Superyachts. Gulfstreams. Helicopters. Palatial villas. Your Indian Ocean odyssey begins with a single message to our 24/7 billionaire desk.',
-    ctaText: 'Summon the Concierge',
+      'Superyachts, Gulfstream jets, and twin-engine helicopters on 24/7 standby for bespoke Sri Lankan journeys.',
+    ctaText: 'Request a charter plan',
     videoUrl: '',
     videoPoster: '',
     images: [],
     microForm: {
-      heading: 'Your Manifest Awaits',
-      subheading: 'Three details. One message. Your asset held within minutes.',
-      submitLabel: 'Dispatch Now',
-      successMessage: 'Merci — Your dedicated concierge is preparing your manifest. Expect contact within 12 minutes.',
+      heading: 'Need a manifest in motion?',
+      subheading: 'Share three details and our desk will hold the right asset while you finish this page.',
+      submitLabel: 'Send to concierge',
+      successMessage: 'Merci — concierge desk received your manifest and will respond within 15 minutes.',
       fields: [
-        { id: 'date', label: 'Departure window', type: 'date', placeholder: 'When shall we ready the fleet?' },
-        { id: 'asset', label: 'Primary asset', type: 'select', options: ['Superyacht', 'Gulfstream Jet', 'Executive Helicopter', 'Multi-Asset Journey'], defaultValue: 'Superyacht' },
-        { id: 'guests', label: 'Party size', type: 'number', placeholder: 'e.g. 8' }
+        { id: 'date', label: 'Preferred date', type: 'date' },
+        { id: 'asset', label: 'Asset focus', type: 'select', options: ['Superyacht', 'Private Jet', 'Helicopter', 'Multi-modal'], defaultValue: 'Superyacht' },
+        { id: 'guests', label: 'Guests', type: 'number', placeholder: 'e.g. 8' }
       ]
     }
   },
   overview: {
-    summary: 'For those who measure time in experiences, not hours. Recharge commands a private armada across the Indian Ocean—superyachts, Gulfstream jets, executive helicopters, and palatial residences—all orchestrated by a single concierge who answers only to you.',
+    summary: '',
     highlights: []
   },
   stats: [],
@@ -204,31 +204,31 @@ export const defaultPrivateChartersAdminContent: AdminPrivateChartersContent = {
   crew: [],
   rituals: [],
   booking: {
-    conciergeNote: 'One message to summon the fleet. Share your travel window, party size, and lifestyle preferences. Your dedicated concierge returns within 12 minutes with asset options, flight plans, and provisional holds—ready for your command.',
+    conciergeNote: '',
     contactPhone: '+94 77 772 1999',
     whatsapp: 'https://wa.me/94777721999',
-    email: 'elite@rechargetravels.com',
-    responseTime: 'Response in <12 minutes · 24/7 Global Ops',
+    email: 'charters@rechargetravels.com',
+    responseTime: 'Replies within 15 minutes · 24/7 ops desk',
     isLive: true,
-    nextAvailabilityWindow: 'Next dispatch window: Immediate',
-    depositNote: '50% to secure your manifest · Balance due 72 hours prior or on dispatch for same-day requests.',
-    contractNote: 'Digital contracts via DocuSign · Full insurance certificates & crew manifests attached.'
+    nextAvailabilityWindow: 'Sunrise dispatch window · 05:30 GMT+5:30',
+    depositNote: '50% deposit required to release charter order.',
+    contractNote: ''
   },
   pricing: {
     currency: 'USD',
-    yachtMinimum: 18500,
-    jetMinimum: 12800,
-    helicopterMinimum: 6200,
-    addOns: ['Michelin guest chef residencies', 'Celebrity DJ & entertainment', 'Bio-hacking wellness labs', 'Private security detail', 'Documentary film crew']
+    yachtMinimum: 0,
+    jetMinimum: 0,
+    helicopterMinimum: 0,
+    addOns: []
   },
   gallery: [],
   testimonials: [],
-  partners: ['Benetti', 'Gulfstream', 'Airbus Corporate Jets', 'VistaJet', 'Aman Resorts', 'Four Seasons'],
+  partners: [],
   faqs: [],
   seo: {
-    title: 'Billionaire Concierge Sri Lanka | Superyacht, Private Jet & Helicopter Charter',
-    description: 'The ultimate private concierge for UHNW travelers. Superyachts, Gulfstream jets, executive helicopters, and palatial villas—orchestrated by a single desk that answers only to you.',
-    keywords: ['billionaire travel Sri Lanka', 'UHNW concierge service', 'private yacht charter Indian Ocean', 'Gulfstream charter Sri Lanka'],
+    title: 'Private Charters Sri Lanka | Superyacht, Jet & Helicopter Concierge',
+    description: '',
+    keywords: [],
     ogImage: ''
   }
 };

@@ -423,7 +423,15 @@ const NationalParksToursNew = () => {
                             </p>
                         </div>
 
-                        <TourGrid tours={filteredTours} onSelectTour={setSelectedTour} wishlist={wishlist} onToggleWishlist={toggleWishlist} />
+                        <TourGrid
+                            tours={filteredTours}
+                            onSelectTour={(tour: NationalParksTour) => {
+                                setSelectedTour(tour);
+                                setBookingDialogOpen(true);
+                            }}
+                            wishlist={wishlist}
+                            onToggleWishlist={toggleWishlist}
+                        />
                     </div>
                 </section>
 
@@ -644,17 +652,12 @@ const TourGrid = ({ tours, onSelectTour, wishlist, onToggleWishlist }: any) => {
                                 ${tour.price}
                                 <span className="text-sm font-normal text-gray-500">/person</span>
                             </div>
-                            <Dialog>
-                                <DialogTrigger asChild>
-                                    <Button
-                                        className="bg-gradient-to-r from-green-600 to-amber-600 hover:from-green-700 hover:to-amber-700 text-white rounded-full px-6 shadow-lg transform hover:scale-105 transition-all duration-300"
-                                        onClick={() => onSelectTour(tour)}
-                                    >
-                                        Reserve Now
-                                    </Button>
-                                </DialogTrigger>
-                                <BookingDialogContent tour={tour} />
-                            </Dialog>
+                            <Button
+                                className="bg-gradient-to-r from-green-600 to-amber-600 hover:from-green-700 hover:to-amber-700 text-white rounded-full px-6 shadow-lg transform hover:scale-105 transition-all duration-300"
+                                onClick={() => onSelectTour(tour)}
+                            >
+                                Reserve Now
+                            </Button>
                         </div>
                     </CardContent>
                 </Card>
@@ -664,15 +667,16 @@ const TourGrid = ({ tours, onSelectTour, wishlist, onToggleWishlist }: any) => {
 };
 
 // Booking Dialog Component
-const BookingDialogContent = ({ tour }: { tour: NationalParksTour }) => {
+const BookingDialogContent = ({ tour, onBook }: { tour: NationalParksTour; onBook?: (data: any) => void }) => {
     const [bookingData, setBookingData] = useState({
         date: '',
         guests: 2,
         contactName: '',
         contactEmail: '',
         contactPhone: '',
-        specialRequests: '',
-        pickupLocation: tour.startLocation || tour.location
+        country: '',
+        pickupLocation: tour.startLocation || tour.location,
+        specialRequests: ''
     });
 
     const totalPrice = tour.price * (bookingData.guests || 1);
@@ -680,112 +684,50 @@ const BookingDialogContent = ({ tour }: { tour: NationalParksTour }) => {
     const startLocation = tour.startLocation || tour.location;
     const transportNote = tour.transportNote || "We provide pickup from your hotel in Yala, Tissamaharama, or Kataragama. Colombo transfers available on request.";
 
+    const handleSubmit = () => {
+        if (!onBook) return;
+
+        // Basic Validation
+        if (!bookingData.date) {
+            alert("Please select a date.");
+            return;
+        }
+        if (!bookingData.contactName || !bookingData.contactEmail || !bookingData.contactPhone) {
+            alert("Please fill in your contact details.");
+            return;
+        }
+        if (!bookingData.guests || isNaN(bookingData.guests) || bookingData.guests < 1) {
+            alert("Please enter a valid number of guests.");
+            return;
+        }
+
+        onBook({
+            tourId: tour.id,
+            tourTitle: tour.title,
+            ...bookingData,
+            guests: Number(bookingData.guests)
+        });
+    };
+
     return (
-        <DialogContent className="max-w-5xl p-0 overflow-hidden border-none bg-transparent shadow-none">
-            <div className="grid lg:grid-cols-[1.05fr_0.95fr] gap-0 rounded-3xl border border-emerald-100 bg-white/95 shadow-2xl">
-                <div className="relative bg-gradient-to-b from-slate-50 to-white">
-                    <div className="relative h-56 w-full overflow-hidden rounded-t-3xl lg:rounded-tr-none">
+        <DialogContent className="max-w-5xl w-[95vw] max-h-[85vh] overflow-y-auto p-0 border-none bg-transparent shadow-none top-12 translate-y-0 sm:top-24">
+            <div className="grid lg:grid-cols-[1.05fr_0.95fr] gap-0 rounded-3xl border border-emerald-100 bg-white shadow-2xl">
+                <div className="relative bg-gradient-to-b from-slate-50 to-white hidden lg:block">
+                    <div className="relative h-full w-full overflow-hidden rounded-l-3xl">
                         <img
                             src={tour.image}
                             alt={tour.title}
                             className="h-full w-full object-cover"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-                        <div className="absolute bottom-4 left-4 right-4 flex flex-wrap items-center justify-between text-white">
-                            <div>
-                                <p className="text-xs uppercase tracking-[0.3em] text-white/60">Wildlife Safari</p>
-                                <p className="text-lg font-semibold">{tour.title}</p>
-                            </div>
-                            <div className="text-right">
-                                <p className="text-xs text-white/70">From</p>
-                                <p className="text-2xl font-bold">${tour.price} <span className="text-sm font-normal text-white/70">per guest</span></p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="space-y-5 p-6 lg:p-8">
-                        <div className="flex flex-wrap gap-3 text-sm text-slate-600">
-                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-emerald-700">
-                                <Clock className="h-4 w-4" />
-                                {tour.duration}
-                            </span>
-                            <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1 text-amber-700">
-                                <Users className="h-4 w-4" />
-                                Max {tour.maxGroupSize}
-                            </span>
-                            <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-slate-700">
-                                <Star className="h-4 w-4" />
-                                {tour.rating} ({tour.reviews}+ reviews)
-                            </span>
-                        </div>
-
-                        <div className="space-y-3 rounded-2xl border border-emerald-100 bg-white p-4 shadow-sm">
-                            <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
-                                <Car className="h-4 w-4 text-emerald-600" />
-                                Departure logistics
-                            </div>
-                            <p className="text-sm text-slate-600">
-                                {`Primary departure: ${startLocation}.`}
-                            </p>
-                            <div className="text-xs text-slate-500">
-                                {transportNote}
-                            </div>
-                        </div>
-
-                        <div className="space-y-4">
-                            <div>
-                                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Highlights</p>
-                                <div className="mt-3 flex flex-wrap gap-2">
-                                    {tour.highlights?.slice(0, 6).map((highlight, i) => (
-                                        <span key={i} className="inline-flex items-center gap-1 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-xs text-emerald-700">
-                                            <Check className="h-3.5 w-3.5" />
-                                            {highlight}
-                                        </span>
-                                    ))}
-                                </div>
-                                <p className="mt-4 text-sm leading-relaxed text-slate-600">
-                                    {tour.description}
-                                </p>
-                            </div>
-
-                            <div className="grid gap-4 md:grid-cols-2">
-                                <div className="rounded-2xl border border-slate-200 bg-white/70 p-4">
-                                    <p className="text-sm font-semibold text-slate-800 flex items-center gap-2">
-                                        <Shield className="h-4 w-4 text-emerald-600" />
-                                        Included
-                                    </p>
-                                    <ul className="mt-3 space-y-1 text-sm text-slate-600">
-                                        {tour.included?.map((item, index) => (
-                                            <li key={index} className="flex items-start gap-2">
-                                                <span className="mt-1 h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                                                {item}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                                <div className="rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50 to-white p-4">
-                                    <p className="text-sm font-semibold text-amber-800 flex items-center gap-2">
-                                        <AlertTriangle className="h-4 w-4 text-amber-600" />
-                                        Important notes
-                                    </p>
-                                    <ul className="mt-3 space-y-1.5 text-sm text-amber-900/80">
-                                        {(tour.importantInfo || [
-                                            "National park permits require passport/NIC copies.",
-                                            "Weather or animal movements can alter the routing.",
-                                        ]).map((note, index) => (
-                                            <li key={index} className="flex items-start gap-2">
-                                                <span className="mt-1 h-1.5 w-1.5 rounded-full bg-amber-500/70" />
-                                                {note}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            </div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                        <div className="absolute bottom-8 left-8 text-white">
+                            <p className="text-sm uppercase tracking-widest mb-2 opacity-80">Confirm Booking</p>
+                            <h3 className="text-3xl font-serif font-bold">{tour.title}</h3>
                         </div>
                     </div>
                 </div>
 
-                <div className="space-y-6 border-t border-emerald-100 bg-white/90 p-6 lg:border-l lg:border-t-0 lg:p-8">
+                <div className="space-y-6 bg-white p-6 lg:p-8">
                     <DialogHeader className="text-left space-y-2">
                         <DialogTitle className="text-2xl font-semibold text-slate-900">Reserve your spot</DialogTitle>
                         <DialogDescription className="text-sm text-slate-500">
@@ -811,7 +753,7 @@ const BookingDialogContent = ({ tour }: { tour: NationalParksTour }) => {
                                     min="1"
                                     max={tour.maxGroupSize}
                                     value={bookingData.guests}
-                                    onChange={(e) => setBookingData({ ...bookingData, guests: parseInt(e.target.value) })}
+                                    onChange={(e) => setBookingData({ ...bookingData, guests: parseInt(e.target.value) || 0 })}
                                     className="border-slate-200 focus:border-emerald-500 focus:ring-emerald-500"
                                 />
                             </div>
@@ -850,6 +792,27 @@ const BookingDialogContent = ({ tour }: { tour: NationalParksTour }) => {
                             </div>
                         </div>
 
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-slate-600">Country</label>
+                                <Input
+                                    placeholder="Your Country"
+                                    value={bookingData.country}
+                                    onChange={(e) => setBookingData({ ...bookingData, country: e.target.value })}
+                                    className="border-slate-200 focus:border-emerald-500 focus:ring-emerald-500"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-slate-600">Pickup Location</label>
+                                <Input
+                                    placeholder="Hotel or Airport"
+                                    value={bookingData.pickupLocation}
+                                    onChange={(e) => setBookingData({ ...bookingData, pickupLocation: e.target.value })}
+                                    className="border-slate-200 focus:border-emerald-500 focus:ring-emerald-500"
+                                />
+                            </div>
+                        </div>
+
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-slate-600">Special Requests</label>
                             <Textarea
@@ -883,7 +846,10 @@ const BookingDialogContent = ({ tour }: { tour: NationalParksTour }) => {
                             </div>
                         </div>
 
-                        <Button className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white py-6 text-lg rounded-xl shadow-lg transition-all duration-300 transform hover:scale-[1.02]">
+                        <Button
+                            className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white py-6 text-lg rounded-xl shadow-lg transition-all duration-300 transform hover:scale-[1.02]"
+                            onClick={handleSubmit}
+                        >
                             Request Booking
                         </Button>
                     </div>
@@ -894,7 +860,11 @@ const BookingDialogContent = ({ tour }: { tour: NationalParksTour }) => {
 };
 
 const BookingDialog = ({ tour, open, onOpenChange, onBook }: any) => {
-    return null;
+    return (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <BookingDialogContent tour={tour} onBook={onBook} />
+        </Dialog>
+    );
 };
 
 // Default data

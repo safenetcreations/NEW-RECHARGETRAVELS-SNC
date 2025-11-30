@@ -157,6 +157,208 @@ const emailTemplates = {
     `
   }),
 
+  // Airport Transfer Booking Confirmation
+  airportTransferConfirmation: (data: any) => ({
+    subject: `✈️ Airport Transfer Confirmed - ${data.confirmationNumber}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+          <!-- Header -->
+          <div style="background: linear-gradient(135deg, #0d5c46 0%, #0a4a38 100%); padding: 30px; text-align: center;">
+            <h1 style="color: #ffffff; margin: 0; font-size: 28px;">✈️ Transfer Confirmed!</h1>
+            <p style="color: #a7f3d0; margin: 10px 0 0;">Your Airport Transfer is Booked</p>
+          </div>
+
+          <!-- Content -->
+          <div style="padding: 40px 30px;">
+            <h2 style="color: #333; margin-top: 0;">Hello ${data.customerName}! 👋</h2>
+            <p style="color: #666; font-size: 16px; line-height: 1.6;">
+              Thank you for booking your airport transfer with Recharge Travels. Your booking has been confirmed and we're excited to assist you!
+            </p>
+
+            <!-- Booking Details Card -->
+            <div style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-radius: 12px; padding: 25px; margin: 25px 0; border-left: 4px solid #0d5c46;">
+              <h3 style="color: #0d5c46; margin-top: 0; font-size: 18px;">📋 Transfer Details</h3>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 10px 0; color: #666;">Confirmation #:</td>
+                  <td style="padding: 10px 0; color: #0d5c46; font-weight: bold; text-align: right;">${data.confirmationNumber}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; color: #666;">Pickup Date:</td>
+                  <td style="padding: 10px 0; color: #333; text-align: right;">${data.pickupDate}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; color: #666;">Pickup Time:</td>
+                  <td style="padding: 10px 0; color: #333; text-align: right;">${data.pickupTime}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; color: #666;">From:</td>
+                  <td style="padding: 10px 0; color: #333; text-align: right;">${data.pickupLocation}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; color: #666;">To:</td>
+                  <td style="padding: 10px 0; color: #333; text-align: right;">${data.dropoffLocation}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; color: #666;">Distance:</td>
+                  <td style="padding: 10px 0; color: #333; text-align: right;">${data.distance || 'Calculated'}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; color: #666;">Duration:</td>
+                  <td style="padding: 10px 0; color: #333; text-align: right;">${data.duration || 'Est. TBD'}</td>
+                </tr>
+              </table>
+            </div>
+
+            <!-- Vehicle & Passengers -->
+            <div style="background-color: #f8fafc; border-radius: 12px; padding: 25px; margin: 25px 0;">
+              <h3 style="color: #333; margin-top: 0; font-size: 18px;">🚗 Vehicle & Passengers</h3>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; color: #666;">Vehicle:</td>
+                  <td style="padding: 8px 0; color: #333; text-align: right;">${data.vehicleType}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #666;">Passengers:</td>
+                  <td style="padding: 8px 0; color: #333; text-align: right;">${data.passengers} ${data.passengers === 1 ? 'Person' : 'Persons'}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #666;">Luggage:</td>
+                  <td style="padding: 8px 0; color: #333; text-align: right;">${data.luggage} ${data.luggage === 1 ? 'Bag' : 'Bags'}</td>
+                </tr>
+              </table>
+            </div>
+
+            ${data.flightNumber ? `
+            <!-- Flight Info -->
+            <div style="background-color: #eff6ff; border-radius: 12px; padding: 25px; margin: 25px 0; border-left: 4px solid #3b82f6;">
+              <h3 style="color: #1e40af; margin-top: 0; font-size: 18px;">✈️ Flight Information</h3>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; color: #666;">Flight Number:</td>
+                  <td style="padding: 8px 0; color: #1e40af; font-weight: bold; text-align: right;">${data.flightNumber}</td>
+                </tr>
+                ${data.arrivalTime ? `
+                <tr>
+                  <td style="padding: 8px 0; color: #666;">Arrival Time:</td>
+                  <td style="padding: 8px 0; color: #333; text-align: right;">${data.arrivalTime}</td>
+                </tr>
+                ` : ''}
+              </table>
+            </div>
+            ` : ''}
+
+            ${data.extras && data.extras.length > 0 ? `
+            <!-- Extras -->
+            <div style="background-color: #fef3c7; border-radius: 12px; padding: 25px; margin: 25px 0;">
+              <h3 style="color: #92400e; margin-top: 0; font-size: 18px;">🎁 Selected Extras</h3>
+              <ul style="color: #78350f; padding-left: 20px; margin: 0;">
+                ${data.extras.map((extra: string) => `<li style="padding: 5px 0;">${extra}</li>`).join('')}
+              </ul>
+            </div>
+            ` : ''}
+
+            ${data.specialRequests ? `
+            <div style="background-color: #fff3cd; border-radius: 8px; padding: 15px; margin: 20px 0;">
+              <p style="color: #856404; margin: 0;"><strong>Special Requests:</strong> ${data.specialRequests}</p>
+            </div>
+            ` : ''}
+
+            <!-- Price Summary -->
+            <div style="background: linear-gradient(135deg, #0d5c46 0%, #0a4a38 100%); border-radius: 12px; padding: 25px; margin: 25px 0; color: #ffffff;">
+              <h3 style="color: #ffffff; margin-top: 0; font-size: 18px;">💰 Payment Summary</h3>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; color: #a7f3d0;">Base Fare:</td>
+                  <td style="padding: 8px 0; color: #ffffff; text-align: right;">$${data.baseFare || data.totalAmount}</td>
+                </tr>
+                ${data.extrasTotal ? `
+                <tr>
+                  <td style="padding: 8px 0; color: #a7f3d0;">Extras:</td>
+                  <td style="padding: 8px 0; color: #ffffff; text-align: right;">$${data.extrasTotal}</td>
+                </tr>
+                ` : ''}
+                <tr style="border-top: 2px solid #a7f3d0;">
+                  <td style="padding: 12px 0 0; color: #ffffff; font-weight: bold; font-size: 18px;">Total:</td>
+                  <td style="padding: 12px 0 0; color: #f0b429; font-weight: bold; font-size: 22px; text-align: right;">$${data.totalAmount}</td>
+                </tr>
+              </table>
+            </div>
+
+            <p style="color: #666; font-size: 16px; line-height: 1.6;">
+              Your driver will meet you at the pickup location. For airport arrivals, look for our driver holding a sign with your name at the arrival hall.
+            </p>
+
+            <!-- Important Notice -->
+            <div style="background-color: #fef2f2; border-radius: 8px; padding: 20px; margin: 25px 0; border-left: 4px solid #ef4444;">
+              <h4 style="color: #dc2626; margin-top: 0;">⚠️ Important Information</h4>
+              <ul style="color: #7f1d1d; padding-left: 20px; margin: 0; line-height: 1.8;">
+                <li>Please be ready 10 minutes before pickup time</li>
+                <li>For flight arrivals, your driver will track your flight status</li>
+                <li>Free waiting time: 60 mins for airport, 15 mins for other locations</li>
+                <li>Contact us immediately if there are any changes</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Contact Info -->
+          <div style="background-color: #ecfdf5; padding: 25px 30px; text-align: center;">
+            <p style="color: #666; margin: 0 0 10px; font-size: 14px;">Questions about your transfer?</p>
+            <p style="color: #333; margin: 0;">
+              📧 <a href="mailto:info@rechargetravels.com" style="color: #0d5c46; text-decoration: none;">info@rechargetravels.com</a>
+            </p>
+            <p style="color: #333; margin: 10px 0 0;">
+              <a href="https://wa.me/94777721999" style="color: #25D366; text-decoration: none;">📱 WhatsApp: +94 77 772 1999</a>
+            </p>
+          </div>
+
+          <!-- Footer -->
+          <div style="background-color: #0d5c46; padding: 20px 30px; text-align: center;">
+            <p style="color: #a7f3d0; margin: 0; font-size: 12px;">
+              © ${new Date().getFullYear()} Recharge Travels. All rights reserved.<br>
+              Sri Lanka | <a href="https://www.rechargetravels.com" style="color: #f0b429; text-decoration: none;">www.rechargetravels.com</a>
+            </p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+    text: `
+      Airport Transfer Confirmation - ${data.confirmationNumber}
+
+      Dear ${data.customerName},
+
+      Your airport transfer has been confirmed!
+
+      Transfer Details:
+      - Confirmation #: ${data.confirmationNumber}
+      - Pickup Date: ${data.pickupDate}
+      - Pickup Time: ${data.pickupTime}
+      - From: ${data.pickupLocation}
+      - To: ${data.dropoffLocation}
+      - Vehicle: ${data.vehicleType}
+      - Passengers: ${data.passengers}
+      - Total: $${data.totalAmount}
+      ${data.flightNumber ? `- Flight: ${data.flightNumber}` : ''}
+
+      Your driver will meet you at the pickup location.
+
+      Contact us:
+      - Email: info@rechargetravels.com
+      - WhatsApp: +94 77 772 1999
+
+      Best regards,
+      Recharge Travels Team
+    `
+  }),
+
   inquiryReply: (data: any) => ({
     subject: `Re: ${data.subject || 'Your Inquiry'} - Recharge Travels`,
     html: `
@@ -1197,6 +1399,483 @@ const emailTemplates = {
       </html>
     `,
     text: `New Booking Alert!\n\nHello ${data.vendorName},\n\nYou have a new booking for ${data.serviceName}!\n\nCustomer: ${data.customerName}\nDate: ${data.bookingDate}\nGuests: ${data.guestCount || 1}\nAmount: ${data.amount} ${data.currency || 'USD'}\n\nView in dashboard: https://recharge-travels-73e76.web.app/vendor/dashboard`
+  }),
+
+  // Train Booking Confirmation Email Template
+  trainBookingConfirmation: (data: any) => ({
+    subject: `🚂 Train Booking Confirmed - ${data.bookingReference}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="margin: 0; padding: 0; background-color: #f4f4f4; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+          <!-- Header -->
+          <div style="background: linear-gradient(135deg, #2563eb 0%, #059669 100%); padding: 30px; text-align: center;">
+            <img src="https://www.rechargetravels.com/logo-v2.png" alt="Recharge Travels" style="height: 50px; margin-bottom: 10px;">
+            <h1 style="color: #ffffff; margin: 0; font-size: 28px;">🚂 Booking Confirmed!</h1>
+            <p style="color: #bfdbfe; margin: 10px 0 0;">Your Train Ticket is Ready</p>
+          </div>
+
+          <!-- Booking Reference -->
+          <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); padding: 25px; text-align: center; border-bottom: 3px solid #2563eb;">
+            <p style="color: #6b7280; margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Booking Reference</p>
+            <h2 style="color: #2563eb; margin: 10px 0 0; font-size: 32px; font-family: monospace;">${data.bookingReference}</h2>
+          </div>
+
+          <!-- Content -->
+          <div style="padding: 30px;">
+            <p style="color: #374151; font-size: 16px; margin-top: 0;">
+              Dear <strong>${data.customerName}</strong>,
+            </p>
+            <p style="color: #6b7280; font-size: 15px; line-height: 1.6;">
+              Thank you for booking with Recharge Travels! Your Sri Lanka Railways ticket has been confirmed.
+            </p>
+
+            <!-- Train Card -->
+            <div style="background: #1f2937; border-radius: 12px; padding: 20px; margin: 25px 0; color: white;">
+              <h3 style="margin: 0 0 5px; font-size: 20px;">${data.trainName}</h3>
+              <p style="margin: 0; color: #9ca3af; font-size: 14px;">${data.trainNumber}</p>
+            </div>
+
+            <!-- Journey Details -->
+            <div style="background: #f9fafb; border-radius: 12px; padding: 20px; margin: 20px 0;">
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="text-align: center; padding: 15px; width: 40%;">
+                    <p style="color: #2563eb; font-size: 12px; margin: 0 0 5px; text-transform: uppercase;">Departure</p>
+                    <p style="color: #1f2937; font-size: 24px; font-weight: bold; margin: 0;">${data.departureTime}</p>
+                    <p style="color: #6b7280; font-size: 14px; margin: 5px 0 0;">${data.departureStation}</p>
+                  </td>
+                  <td style="text-align: center; width: 20%;">
+                    <p style="color: #059669; font-size: 24px;">→</p>
+                  </td>
+                  <td style="text-align: center; padding: 15px; width: 40%;">
+                    <p style="color: #059669; font-size: 12px; margin: 0 0 5px; text-transform: uppercase;">Arrival</p>
+                    <p style="color: #1f2937; font-size: 24px; font-weight: bold; margin: 0;">${data.arrivalTime}</p>
+                    <p style="color: #6b7280; font-size: 14px; margin: 5px 0 0;">${data.arrivalStation}</p>
+                  </td>
+                </tr>
+              </table>
+
+              <div style="text-align: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e7eb;">
+                <span style="background: #dbeafe; color: #1e40af; padding: 8px 20px; border-radius: 20px; font-size: 14px; font-weight: 600;">
+                  📅 ${data.travelDate}
+                </span>
+              </div>
+            </div>
+
+            <!-- Ticket Details -->
+            <table style="width: 100%; margin: 20px 0; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 12px; background: #f9fafb; border-radius: 8px 0 0 0;">
+                  <p style="color: #6b7280; font-size: 12px; margin: 0;">Class</p>
+                  <p style="color: #1f2937; font-size: 15px; font-weight: 600; margin: 5px 0 0;">${data.selectedClass}</p>
+                </td>
+                <td style="padding: 12px; background: #f9fafb; border-radius: 0 8px 0 0;">
+                  <p style="color: #6b7280; font-size: 12px; margin: 0;">Passengers</p>
+                  <p style="color: #1f2937; font-size: 15px; font-weight: 600; margin: 5px 0 0;">${data.passengers}</p>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2" style="padding: 12px; background: #ecfdf5; border-radius: 0 0 8px 8px;">
+                  <p style="color: #059669; font-size: 12px; margin: 0;">Total Paid</p>
+                  <p style="color: #059669; font-size: 22px; font-weight: bold; margin: 5px 0 0;">LKR ${data.totalPrice?.toLocaleString() || data.totalPrice}</p>
+                </td>
+              </tr>
+            </table>
+
+            <!-- CTA Button -->
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="https://www.rechargetravels.com/transport/train-booking/confirmation/${data.bookingId}"
+                 style="display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #059669 100%); color: #ffffff;
+                        text-decoration: none; padding: 15px 35px; border-radius: 8px; font-weight: bold; font-size: 16px;">
+                View Your Ticket
+              </a>
+            </div>
+
+            <!-- WhatsApp Share -->
+            <div style="text-align: center; margin: 20px 0;">
+              <a href="https://wa.me/${data.customerPhone?.replace(/\\D/g, '')}?text=${encodeURIComponent('🚂 Train Booking Confirmed!\\n\\nRef: ' + data.bookingReference + '\\nRoute: ' + data.departureStation + ' → ' + data.arrivalStation + '\\nDate: ' + data.travelDate + '\\nTime: ' + data.departureTime + '\\n\\nView: https://www.rechargetravels.com/transport/train-booking/confirmation/' + data.bookingId)}"
+                 style="display: inline-block; background: #25D366; color: #ffffff;
+                        text-decoration: none; padding: 12px 25px; border-radius: 8px; font-weight: 600; font-size: 14px;">
+                📱 Save to WhatsApp
+              </a>
+            </div>
+
+            <!-- Important Info -->
+            <div style="background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 20px; margin: 25px 0;">
+              <h4 style="color: #92400e; margin: 0 0 10px; font-size: 16px;">⚠️ Important Information</h4>
+              <ul style="color: #92400e; margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.8;">
+                <li>Arrive at the station at least 30 minutes before departure</li>
+                <li>Carry a valid photo ID along with this confirmation</li>
+                <li>Show this email (printed or on mobile) to station staff</li>
+                <li>Your booking reference: <strong>${data.bookingReference}</strong></li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Contact Info -->
+          <div style="background: #f9fafb; padding: 25px; text-align: center;">
+            <p style="color: #6b7280; margin: 0 0 10px; font-size: 14px;">Need help? We're here for you!</p>
+            <p style="margin: 5px 0;">
+              📧 <a href="mailto:trains@rechargetravels.com" style="color: #2563eb; text-decoration: none;">trains@rechargetravels.com</a>
+            </p>
+            <p style="margin: 5px 0;">
+              <a href="https://wa.me/94777721999" style="color: #25D366; text-decoration: none;">📱 WhatsApp: +94 77 772 1999</a>
+            </p>
+          </div>
+
+          <!-- Footer -->
+          <div style="background: #1f2937; padding: 20px; text-align: center;">
+            <p style="color: #9ca3af; margin: 0; font-size: 12px;">
+              © ${new Date().getFullYear()} Recharge Travels | Sri Lanka Railways Partner<br>
+              <a href="https://www.rechargetravels.com" style="color: #60a5fa; text-decoration: none;">www.rechargetravels.com</a>
+            </p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+    text: `
+Train Booking Confirmation - ${data.bookingReference}
+
+Dear ${data.customerName},
+
+Your train ticket has been confirmed!
+
+BOOKING DETAILS
+===============
+Reference: ${data.bookingReference}
+Train: ${data.trainName} (${data.trainNumber})
+Route: ${data.departureStation} → ${data.arrivalStation}
+Date: ${data.travelDate}
+Time: ${data.departureTime} - ${data.arrivalTime}
+Class: ${data.selectedClass}
+Passengers: ${data.passengers}
+Total Paid: LKR ${data.totalPrice}
+
+IMPORTANT
+=========
+• Arrive 30 minutes before departure
+• Bring valid photo ID
+• Show this confirmation at the station
+
+View your ticket: https://www.rechargetravels.com/transport/train-booking/confirmation/${data.bookingId}
+
+Need help? Contact us:
+Email: trains@rechargetravels.com
+WhatsApp: +94 77 772 1999
+
+Thank you for booking with Recharge Travels!
+    `
+  }),
+
+  // Train Booking Admin Notification
+  trainBookingAdminNotification: (data: any) => ({
+    subject: `🚂 New Train Booking - ${data.bookingReference}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="margin: 0; padding: 0; background-color: #f4f4f4; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+          <div style="background: linear-gradient(135deg, #1f2937 0%, #111827 100%); padding: 25px; text-align: center;">
+            <h1 style="color: #ffffff; margin: 0; font-size: 22px;">🚂 New Train Booking Alert</h1>
+          </div>
+
+          <div style="padding: 25px;">
+            <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin-bottom: 20px;">
+              <p style="margin: 0; color: #92400e; font-weight: bold;">Reference: ${data.bookingReference}</p>
+            </div>
+
+            <h3 style="color: #374151; margin-top: 0;">Customer Details</h3>
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+              <tr><td style="padding: 8px 0; color: #6b7280;">Name:</td><td style="padding: 8px 0; font-weight: 600;">${data.customerName}</td></tr>
+              <tr><td style="padding: 8px 0; color: #6b7280;">Email:</td><td style="padding: 8px 0;">${data.customerEmail}</td></tr>
+              <tr><td style="padding: 8px 0; color: #6b7280;">Phone:</td><td style="padding: 8px 0;">${data.customerPhone}</td></tr>
+            </table>
+
+            <h3 style="color: #374151;">Journey Details</h3>
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+              <tr><td style="padding: 8px 0; color: #6b7280;">Train:</td><td style="padding: 8px 0; font-weight: 600;">${data.trainName} (${data.trainNumber})</td></tr>
+              <tr><td style="padding: 8px 0; color: #6b7280;">Route:</td><td style="padding: 8px 0;">${data.departureStation} → ${data.arrivalStation}</td></tr>
+              <tr><td style="padding: 8px 0; color: #6b7280;">Date:</td><td style="padding: 8px 0;">${data.travelDate}</td></tr>
+              <tr><td style="padding: 8px 0; color: #6b7280;">Time:</td><td style="padding: 8px 0;">${data.departureTime} - ${data.arrivalTime}</td></tr>
+              <tr><td style="padding: 8px 0; color: #6b7280;">Class:</td><td style="padding: 8px 0;">${data.selectedClass}</td></tr>
+              <tr><td style="padding: 8px 0; color: #6b7280;">Passengers:</td><td style="padding: 8px 0;">${data.passengers}</td></tr>
+            </table>
+
+            <div style="background: #ecfdf5; border-radius: 8px; padding: 15px; text-align: center;">
+              <p style="color: #059669; margin: 0; font-size: 14px;">Total Amount</p>
+              <p style="color: #059669; margin: 5px 0 0; font-size: 28px; font-weight: bold;">LKR ${data.totalPrice?.toLocaleString() || data.totalPrice}</p>
+            </div>
+
+            ${data.specialRequests ? `
+            <div style="background: #fef3c7; border-radius: 8px; padding: 15px; margin-top: 15px;">
+              <p style="color: #92400e; margin: 0; font-size: 14px;"><strong>Special Requests:</strong> ${data.specialRequests}</p>
+            </div>
+            ` : ''}
+          </div>
+
+          <div style="background: #f9fafb; padding: 20px; text-align: center;">
+            <a href="https://wa.me/${data.customerPhone?.replace(/\\D/g, '')}"
+               style="display: inline-block; background: #25D366; color: white; text-decoration: none; padding: 12px 25px; border-radius: 8px; margin: 5px;">
+              WhatsApp Customer
+            </a>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+    text: `New Train Booking - ${data.bookingReference}\n\nCustomer: ${data.customerName}\nEmail: ${data.customerEmail}\nPhone: ${data.customerPhone}\n\nTrain: ${data.trainName} (${data.trainNumber})\nRoute: ${data.departureStation} → ${data.arrivalStation}\nDate: ${data.travelDate}\nTime: ${data.departureTime}\nClass: ${data.selectedClass}\nPassengers: ${data.passengers}\n\nTotal: LKR ${data.totalPrice}`
+  }),
+
+  // Global Tour Booking Confirmation Email
+  globalTourBookingConfirmation: (data: any) => ({
+    subject: `🌏 Tour Booking Confirmed - ${data.bookingReference}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+          <!-- Header -->
+          <div style="background: linear-gradient(135deg, #0d5c46 0%, #0a4a38 100%); padding: 30px; text-align: center;">
+            <img src="https://www.rechargetravels.com/logo-v2.png" alt="Recharge Travels" style="height: 50px; margin-bottom: 10px;">
+            <h1 style="color: #ffffff; margin: 0; font-size: 28px;">🌏 Tour Booking Confirmed!</h1>
+            <p style="color: #a7f3d0; margin: 10px 0 0;">Your Adventure Awaits!</p>
+          </div>
+
+          <!-- Content -->
+          <div style="padding: 40px 30px;">
+            <h2 style="color: #333; margin-top: 0;">Hello ${data.customerName}! 👋</h2>
+            <p style="color: #666; font-size: 16px; line-height: 1.6;">
+              Thank you for booking with Recharge Travels! We're thrilled to confirm your tour reservation. Get ready for an unforgettable experience!
+            </p>
+
+            <!-- Tour Details Card -->
+            <div style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-radius: 12px; padding: 25px; margin: 25px 0; border-left: 4px solid #0d5c46;">
+              <h3 style="color: #0d5c46; margin-top: 0; font-size: 20px;">📋 Tour Details</h3>
+              <p style="font-size: 18px; font-weight: bold; color: #0d5c46; margin: 10px 0;">${data.tourTitle}</p>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 10px 0; color: #666;">Booking Reference:</td>
+                  <td style="padding: 10px 0; color: #0d5c46; font-weight: bold; text-align: right; font-family: monospace; font-size: 16px;">${data.bookingReference}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; color: #666;">Duration:</td>
+                  <td style="padding: 10px 0; color: #333; text-align: right;">${data.duration}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; color: #666;">Travel Date:</td>
+                  <td style="padding: 10px 0; color: #333; text-align: right;">${data.travelDate}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; color: #666;">End Date:</td>
+                  <td style="padding: 10px 0; color: #333; text-align: right;">${data.endDate}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; color: #666;">Travelers:</td>
+                  <td style="padding: 10px 0; color: #333; text-align: right;">${data.travelers}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; color: #666;">Pickup Location:</td>
+                  <td style="padding: 10px 0; color: #333; text-align: right;">${data.pickupLocation}</td>
+                </tr>
+                <tr style="border-top: 2px solid #0d5c46;">
+                  <td style="padding: 15px 0 0; color: #333; font-weight: bold; font-size: 18px;">Total Amount:</td>
+                  <td style="padding: 15px 0 0; color: #0d5c46; font-weight: bold; font-size: 24px; text-align: right;">$${data.totalAmount}</td>
+                </tr>
+              </table>
+            </div>
+
+            ${data.specialRequests ? `
+            <div style="background-color: #fef3c7; border-radius: 8px; padding: 15px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+              <p style="color: #92400e; margin: 0;"><strong>📝 Special Requests:</strong></p>
+              <p style="color: #78350f; margin: 10px 0 0;">${data.specialRequests}</p>
+            </div>
+            ` : ''}
+
+            <!-- What's Next -->
+            <div style="background-color: #eff6ff; border-radius: 12px; padding: 20px; margin: 25px 0;">
+              <h4 style="color: #1e40af; margin: 0 0 15px;">📌 What Happens Next?</h4>
+              <ul style="color: #1e3a8a; margin: 0; padding-left: 20px; line-height: 1.8;">
+                <li>Our team will review your booking within 24 hours</li>
+                <li>You'll receive a detailed itinerary and tour guide information</li>
+                <li>Payment instructions will be shared shortly</li>
+                <li>Feel free to reach out if you have any questions!</li>
+              </ul>
+            </div>
+
+            <!-- CTA Button -->
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="https://www.rechargetravels.com/booking/tour-confirmation/${data.bookingId}"
+                 style="display: inline-block; background: linear-gradient(135deg, #0d5c46 0%, #0a4a38 100%); color: #ffffff;
+                        text-decoration: none; padding: 15px 35px; border-radius: 30px; font-weight: bold; font-size: 16px;">
+                View Booking Details
+              </a>
+            </div>
+          </div>
+
+          <!-- Contact Info -->
+          <div style="background-color: #ecfdf5; padding: 25px 30px; text-align: center;">
+            <p style="color: #666; margin: 0 0 10px; font-size: 14px;">Need help? Contact us anytime:</p>
+            <p style="color: #333; margin: 0;">
+              📧 <a href="mailto:info@rechargetravels.com" style="color: #0d5c46; text-decoration: none;">info@rechargetravels.com</a>
+            </p>
+            <p style="color: #333; margin: 10px 0 0;">
+              <a href="https://wa.me/94777721999" style="color: #25D366; text-decoration: none;">📱 WhatsApp: +94 77 772 1999</a>
+            </p>
+          </div>
+
+          <!-- Footer -->
+          <div style="background-color: #0d5c46; padding: 20px 30px; text-align: center;">
+            <p style="color: #a7f3d0; margin: 0; font-size: 12px;">
+              © ${new Date().getFullYear()} Recharge Travels. All rights reserved.<br>
+              Sri Lanka | <a href="https://www.rechargetravels.com" style="color: #f0b429; text-decoration: none;">www.rechargetravels.com</a>
+            </p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+    text: `
+Tour Booking Confirmed - ${data.bookingReference}
+
+Hello ${data.customerName}!
+
+Thank you for booking with Recharge Travels! Your tour has been confirmed.
+
+Tour Details:
+- Tour: ${data.tourTitle}
+- Reference: ${data.bookingReference}
+- Duration: ${data.duration}
+- Travel Date: ${data.travelDate} to ${data.endDate}
+- Travelers: ${data.travelers}
+- Pickup: ${data.pickupLocation}
+- Total: $${data.totalAmount}
+
+Our team will contact you within 24 hours with your detailed itinerary.
+
+Best regards,
+Recharge Travels Team
+    `
+  }),
+
+  // Global Tour Booking Admin Notification
+  globalTourBookingAdminNotification: (data: any) => ({
+    subject: `🌏 NEW Tour Booking - ${data.bookingReference} - ${data.tourTitle}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+          <!-- Header -->
+          <div style="background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%); padding: 25px; text-align: center;">
+            <h1 style="color: #ffffff; margin: 0; font-size: 24px;">🌏 New Tour Booking!</h1>
+            <p style="color: #e9d5ff; margin: 8px 0 0;">${data.bookingReference}</p>
+          </div>
+
+          <!-- Content -->
+          <div style="padding: 30px;">
+            <!-- Tour Info -->
+            <div style="background: linear-gradient(135deg, #faf5ff 0%, #ede9fe 100%); border-radius: 12px; padding: 20px; margin-bottom: 20px; border-left: 4px solid #7c3aed;">
+              <h3 style="color: #5b21b6; margin: 0 0 15px;">Tour Details</h3>
+              <p style="font-size: 18px; font-weight: bold; color: #5b21b6; margin: 0 0 10px;">${data.tourTitle}</p>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; color: #666;">Duration:</td>
+                  <td style="padding: 8px 0; color: #333; text-align: right;">${data.duration}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #666;">Travel Date:</td>
+                  <td style="padding: 8px 0; color: #333; text-align: right;">${data.travelDate} → ${data.endDate}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #666;">Travelers:</td>
+                  <td style="padding: 8px 0; color: #333; text-align: right;">${data.travelers}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #666;">Pickup:</td>
+                  <td style="padding: 8px 0; color: #333; text-align: right;">${data.pickupLocation}</td>
+                </tr>
+                <tr style="border-top: 2px solid #7c3aed;">
+                  <td style="padding: 12px 0 0; color: #333; font-weight: bold;">Total:</td>
+                  <td style="padding: 12px 0 0; color: #7c3aed; font-weight: bold; font-size: 22px; text-align: right;">$${data.totalAmount}</td>
+                </tr>
+              </table>
+            </div>
+
+            <!-- Customer Info -->
+            <div style="background-color: #f0fdf4; border-radius: 12px; padding: 20px; margin-bottom: 20px; border-left: 4px solid #22c55e;">
+              <h3 style="color: #15803d; margin: 0 0 15px;">Customer Information</h3>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; color: #666;">Name:</td>
+                  <td style="padding: 8px 0; color: #333; font-weight: bold; text-align: right;">${data.customerName}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #666;">Email:</td>
+                  <td style="padding: 8px 0; text-align: right;"><a href="mailto:${data.customerEmail}" style="color: #15803d;">${data.customerEmail}</a></td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #666;">Phone:</td>
+                  <td style="padding: 8px 0; text-align: right;"><a href="tel:${data.customerPhone}" style="color: #15803d;">${data.customerPhone}</a></td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #666;">Nationality:</td>
+                  <td style="padding: 8px 0; color: #333; text-align: right;">${data.nationality}</td>
+                </tr>
+              </table>
+            </div>
+
+            ${data.specialRequests ? `
+            <div style="background-color: #fef3c7; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+              <p style="color: #92400e; margin: 0;"><strong>📝 Special Requests:</strong></p>
+              <p style="color: #78350f; margin: 10px 0 0;">${data.specialRequests}</p>
+            </div>
+            ` : ''}
+
+            ${data.flightDetails ? `
+            <div style="background-color: #e0f2fe; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+              <p style="color: #0369a1; margin: 0;"><strong>✈️ Flight Details:</strong></p>
+              <p style="color: #0c4a6e; margin: 10px 0 0;">${data.flightDetails}</p>
+            </div>
+            ` : ''}
+
+            <!-- Action Buttons -->
+            <div style="text-align: center; margin: 25px 0;">
+              <a href="https://recharge-travels-73e76.web.app/global-tour-bookings"
+                 style="display: inline-block; background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%); color: #ffffff;
+                        text-decoration: none; padding: 12px 30px; border-radius: 25px; font-weight: bold; margin: 5px;">
+                View in Admin
+              </a>
+              <a href="https://wa.me/${data.customerPhone?.replace(/\D/g, '')}?text=Hi%20${encodeURIComponent(data.customerName)}!%20Regarding%20your%20tour%20booking%20${data.bookingReference}..."
+                 style="display: inline-block; background: #25D366; color: #ffffff;
+                        text-decoration: none; padding: 12px 30px; border-radius: 25px; font-weight: bold; margin: 5px;">
+                WhatsApp Customer
+              </a>
+            </div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+    text: `New Tour Booking - ${data.bookingReference}\n\nTour: ${data.tourTitle}\nDuration: ${data.duration}\nDates: ${data.travelDate} to ${data.endDate}\nTravelers: ${data.travelers}\nPickup: ${data.pickupLocation}\nTotal: $${data.totalAmount}\n\nCustomer: ${data.customerName}\nEmail: ${data.customerEmail}\nPhone: ${data.customerPhone}\nNationality: ${data.nationality}`
   })
 };
 
@@ -1279,9 +1958,9 @@ const handleBookingConfirmation = async (snap: functions.firestore.QueryDocument
 
   try {
     // Handle various data structures from different booking forms
-    const customerEmail = booking.personal_info?.email || booking.email || booking.contactEmail || booking.user_email;
+    const customerEmail = booking.personal_info?.email || booking.email || booking.customerEmail || booking.contactEmail || booking.user_email;
 
-    let customerName = booking.name || booking.user_name || 'Valued Customer';
+    let customerName = booking.name || booking.customerName || booking.user_name || 'Valued Customer';
     if (booking.personal_info) {
       customerName = `${booking.personal_info.firstName} ${booking.personal_info.lastName}`;
     } else if (booking.firstName && booking.lastName) {
@@ -1300,10 +1979,10 @@ const handleBookingConfirmation = async (snap: functions.firestore.QueryDocument
       customerName,
       confirmationNumber: booking.confirmation_number || booking.bookingRef || bookingId,
       bookingType: booking.booking_type || booking.type || booking.tourTitle || 'Travel Package',
-      travelDate: booking.check_in_date || booking.tour_start_date || booking.pickup_date || booking.travel_date || booking.tourDate || booking.date || 'TBD',
+      travelDate: booking.check_in_date || booking.tour_start_date || booking.pickup_date || booking.travel_date || booking.travelDate || booking.tourDate || booking.date || 'TBD',
       adults: booking.adults || booking.guests || 1,
       children: booking.children || 0,
-      totalAmount: booking.total_price || booking.amount || booking.totalPrice || 0,
+      totalAmount: booking.total_price || booking.amount || booking.totalPrice || booking.totalAmountUSD || 0,
       currency: booking.currency || 'USD',
       specialRequests: booking.special_requests || booking.specialRequests || ''
     };
@@ -1325,7 +2004,7 @@ const handleBookingConfirmation = async (snap: functions.firestore.QueryDocument
       type: 'Booking',
       customerName,
       customerEmail,
-      phone: booking.personal_info?.phone || booking.phone || booking.contactPhone,
+      phone: booking.personal_info?.phone || booking.phone || booking.customerPhone || booking.contactPhone,
       details: `
         <p><strong>Booking ID:</strong> ${templateData.confirmationNumber}</p>
         <p><strong>Type:</strong> ${templateData.bookingType}</p>
@@ -1351,6 +2030,22 @@ const handleBookingConfirmation = async (snap: functions.firestore.QueryDocument
       confirmationSent: true,
       confirmationSentAt: admin.firestore.FieldValue.serverTimestamp()
     });
+
+    // Queue WhatsApp notification
+    const phone = booking.personal_info?.phone || booking.phone || booking.customerPhone || booking.contactPhone;
+    if (phone) {
+      const message = `*Booking Confirmed!* 🎉\n\nRef: ${templateData.confirmationNumber}\nService: ${templateData.bookingType}\nDate: ${templateData.travelDate}\nAmount: ${templateData.currency} ${templateData.totalAmount}\n\nThank you for choosing Recharge Travels!`;
+
+      await db.collection('whatsappMessages').add({
+        to: phone,
+        message: message,
+        status: 'pending',
+        type: 'booking_confirmation',
+        bookingId: bookingId,
+        createdAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+      console.log('WhatsApp notification queued for:', bookingId);
+    }
 
     console.log('Booking confirmation sent for:', bookingId);
   } catch (error) {
@@ -1382,6 +2077,338 @@ export const sendHillCountryBookingConfirmation = functions.firestore
 export const sendRamayanaBookingConfirmation = functions.firestore
   .document('ramayana_bookings/{bookingId}')
   .onCreate(handleBookingConfirmation);
+
+export const sendBeachToursBookingConfirmation = functions.firestore
+  .document('beach_bookings/{bookingId}')
+  .onCreate(handleBookingConfirmation);
+
+export const sendCulinaryBookingConfirmation = functions.firestore
+  .document('culinary_bookings/{bookingId}')
+  .onCreate(handleBookingConfirmation);
+
+// Airport Transfer Booking Confirmation Handler
+const handleAirportTransferConfirmation = async (snap: functions.firestore.QueryDocumentSnapshot, context: functions.EventContext) => {
+  const booking = snap.data();
+  const bookingId = context.params.bookingId;
+
+  try {
+    const customerEmail = booking.customerInfo?.email;
+    const customerName = booking.customerInfo?.name || 'Valued Customer';
+
+    if (!customerEmail) {
+      console.log('No customer email found for airport transfer booking:', bookingId);
+      return;
+    }
+
+    // Prepare template data for airport transfer
+    const templateData = {
+      customerName,
+      confirmationNumber: booking.confirmationNumber || bookingId,
+      pickupDate: booking.routeInfo?.date || 'TBD',
+      pickupTime: booking.routeInfo?.time || 'TBD',
+      pickupLocation: booking.routeInfo?.pickup || 'TBD',
+      dropoffLocation: booking.routeInfo?.dropoff || 'TBD',
+      distance: booking.routeInfo?.distance || '',
+      duration: booking.routeInfo?.duration || '',
+      vehicleType: booking.vehicleInfo?.vehicleName || booking.vehicleInfo?.vehicleType || 'Standard Vehicle',
+      passengers: booking.vehicleInfo?.passengers || 1,
+      luggage: booking.vehicleInfo?.luggage || 0,
+      flightNumber: booking.flightInfo?.flightNumber || '',
+      arrivalTime: booking.flightInfo?.arrivalTime || '',
+      extras: booking.extras?.selectedExtras?.map((e: any) => e.name) || [],
+      extrasTotal: booking.extras?.extrasTotal || 0,
+      baseFare: booking.pricing?.baseFare || booking.pricing?.totalAmount || 0,
+      totalAmount: booking.pricing?.totalAmount || 0,
+      specialRequests: booking.customerInfo?.specialRequests || ''
+    };
+
+    // Send customer confirmation with airport transfer template
+    const customerTemplate = emailTemplates.airportTransferConfirmation(templateData);
+
+    await sgMail.send({
+      to: customerEmail,
+      from: { email: FROM_EMAIL, name: FROM_NAME },
+      replyTo: REPLY_TO_EMAIL,
+      subject: customerTemplate.subject,
+      html: customerTemplate.html,
+      text: customerTemplate.text
+    });
+
+    // Send admin notification
+    const adminTemplate = emailTemplates.adminNotification({
+      type: 'Airport Transfer Booking',
+      customerName,
+      customerEmail,
+      phone: booking.customerInfo?.phone,
+      details: `
+        <p><strong>Booking ID:</strong> ${templateData.confirmationNumber}</p>
+        <p><strong>Date:</strong> ${templateData.pickupDate} at ${templateData.pickupTime}</p>
+        <p><strong>Route:</strong> ${templateData.pickupLocation} → ${templateData.dropoffLocation}</p>
+        <p><strong>Distance:</strong> ${templateData.distance} | Duration: ${templateData.duration}</p>
+        <p><strong>Vehicle:</strong> ${templateData.vehicleType}</p>
+        <p><strong>Passengers:</strong> ${templateData.passengers} | Luggage: ${templateData.luggage} bags</p>
+        ${templateData.flightNumber ? `<p><strong>Flight:</strong> ${templateData.flightNumber}</p>` : ''}
+        <p><strong>Total Amount:</strong> $${templateData.totalAmount}</p>
+        <p><strong>Payment:</strong> ${booking.paymentInfo?.method || 'Pending'}</p>
+      `,
+      adminUrl: `https://recharge-travels-73e76.web.app/admin/airport-transfers`
+    });
+
+    await sgMail.send({
+      to: ADMIN_EMAIL,
+      from: { email: FROM_EMAIL, name: FROM_NAME },
+      subject: adminTemplate.subject,
+      html: adminTemplate.html,
+      text: adminTemplate.text
+    });
+
+    // Also send to info@rechargetravels.com
+    await sgMail.send({
+      to: 'info@rechargetravels.com',
+      from: { email: FROM_EMAIL, name: FROM_NAME },
+      subject: adminTemplate.subject,
+      html: adminTemplate.html,
+      text: adminTemplate.text
+    });
+
+    // Update booking with confirmation sent status
+    await snap.ref.update({
+      confirmationSent: true,
+      confirmationSentAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    console.log('Airport transfer confirmation sent for:', bookingId);
+  } catch (error) {
+    console.error('Error sending airport transfer confirmation:', error);
+  }
+};
+
+// Trigger: Send airport transfer confirmation when new booking is created
+export const sendAirportTransferConfirmation = functions.firestore
+  .document('airportTransferBookings/{bookingId}')
+  .onCreate(handleAirportTransferConfirmation);
+
+// ==========================================
+// TRAIN BOOKING EMAIL & WHATSAPP CONFIRMATION
+// ==========================================
+
+// Handler for train booking confirmation
+const handleTrainBookingConfirmation = async (snap: functions.firestore.QueryDocumentSnapshot, context: functions.EventContext) => {
+  const booking = snap.data();
+  const bookingId = context.params.bookingId;
+
+  console.log('Processing train booking confirmation for:', bookingId);
+
+  // Skip if already processed
+  if (booking.emailSent) {
+    console.log('Email already sent for booking:', bookingId);
+    return;
+  }
+
+  try {
+    // Prepare email data
+    const emailData = {
+      bookingId,
+      bookingReference: booking.bookingReference || `TRN-${bookingId.slice(-8).toUpperCase()}`,
+      trainName: booking.trainName || booking.train?.trainName || 'Sri Lanka Railways',
+      trainNumber: booking.trainNumber || booking.train?.trainNumber || '',
+      departureStation: booking.departureStation || booking.train?.departureStation || '',
+      arrivalStation: booking.arrivalStation || booking.train?.arrivalStation || '',
+      departureTime: booking.departureTime || booking.train?.departureTime || '',
+      arrivalTime: booking.arrivalTime || booking.train?.arrivalTime || '',
+      travelDate: booking.travelDate || booking.travelDetails?.travelDate || '',
+      selectedClass: booking.selectedClass || booking.travelDetails?.ticketClass || '',
+      passengers: booking.passengers || booking.travelDetails?.passengers || 1,
+      totalPrice: booking.totalPrice || booking.pricing?.totalPrice || 0,
+      customerName: booking.customerName || booking.customerInfo?.name || 'Valued Customer',
+      customerEmail: booking.customerEmail || booking.customerInfo?.email || '',
+      customerPhone: booking.customerPhone || booking.customerInfo?.phone || '',
+      specialRequests: booking.specialRequests || booking.travelDetails?.specialRequests || ''
+    };
+
+    // Send customer confirmation email
+    if (emailData.customerEmail) {
+      const customerTemplate = emailTemplates.trainBookingConfirmation(emailData);
+
+      await sgMail.send({
+        to: emailData.customerEmail,
+        from: { email: FROM_EMAIL, name: FROM_NAME },
+        replyTo: REPLY_TO_EMAIL,
+        subject: customerTemplate.subject,
+        html: customerTemplate.html,
+        text: customerTemplate.text
+      });
+
+      console.log('Train booking customer email sent to:', emailData.customerEmail);
+    }
+
+    // Send admin notification email
+    const adminTemplate = emailTemplates.trainBookingAdminNotification(emailData);
+
+    await sgMail.send({
+      to: ADMIN_EMAIL,
+      from: { email: FROM_EMAIL, name: FROM_NAME },
+      subject: adminTemplate.subject,
+      html: adminTemplate.html,
+      text: adminTemplate.text
+    });
+
+    console.log('Train booking admin notification sent');
+
+    // Update booking with email sent status
+    await snap.ref.update({
+      emailSent: true,
+      emailSentAt: admin.firestore.FieldValue.serverTimestamp(),
+      adminNotified: true,
+      adminNotifiedAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    // Log email to emailLogs collection
+    await db.collection('emailLogs').add({
+      type: 'trainBookingConfirmation',
+      bookingId,
+      bookingReference: emailData.bookingReference,
+      customerEmail: emailData.customerEmail,
+      customerName: emailData.customerName,
+      status: 'sent',
+      sentAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    console.log('Train booking confirmation completed for:', bookingId);
+  } catch (error: any) {
+    console.error('Error sending train booking confirmation:', error);
+
+    // Log error
+    await db.collection('emailLogs').add({
+      type: 'trainBookingConfirmation',
+      bookingId,
+      status: 'failed',
+      error: error?.message || 'Unknown error',
+      attemptedAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+  }
+};
+
+// Trigger: Send train booking confirmation when new booking is created
+export const sendTrainBookingConfirmation = functions.firestore
+  .document('trainBookings/{bookingId}')
+  .onCreate(handleTrainBookingConfirmation);
+
+// Callable function to resend train booking confirmation
+export const resendTrainBookingConfirmation = functions.https.onCall(async (data, context) => {
+  const { bookingId } = data;
+
+  if (!bookingId) {
+    throw new functions.https.HttpsError('invalid-argument', 'Booking ID is required');
+  }
+
+  try {
+    const bookingDoc = await db.collection('trainBookings').doc(bookingId).get();
+
+    if (!bookingDoc.exists) {
+      throw new functions.https.HttpsError('not-found', 'Booking not found');
+    }
+
+    const booking = bookingDoc.data()!;
+
+    // Prepare email data
+    const emailData = {
+      bookingId,
+      bookingReference: booking.bookingReference || `TRN-${bookingId.slice(-8).toUpperCase()}`,
+      trainName: booking.trainName || booking.train?.trainName || 'Sri Lanka Railways',
+      trainNumber: booking.trainNumber || booking.train?.trainNumber || '',
+      departureStation: booking.departureStation || booking.train?.departureStation || '',
+      arrivalStation: booking.arrivalStation || booking.train?.arrivalStation || '',
+      departureTime: booking.departureTime || booking.train?.departureTime || '',
+      arrivalTime: booking.arrivalTime || booking.train?.arrivalTime || '',
+      travelDate: booking.travelDate || booking.travelDetails?.travelDate || '',
+      selectedClass: booking.selectedClass || booking.travelDetails?.ticketClass || '',
+      passengers: booking.passengers || booking.travelDetails?.passengers || 1,
+      totalPrice: booking.totalPrice || booking.pricing?.totalPrice || 0,
+      customerName: booking.customerName || booking.customerInfo?.name || 'Valued Customer',
+      customerEmail: booking.customerEmail || booking.customerInfo?.email || '',
+      customerPhone: booking.customerPhone || booking.customerInfo?.phone || '',
+      specialRequests: booking.specialRequests || booking.travelDetails?.specialRequests || ''
+    };
+
+    if (!emailData.customerEmail) {
+      throw new functions.https.HttpsError('failed-precondition', 'Customer email not found');
+    }
+
+    // Send email
+    const customerTemplate = emailTemplates.trainBookingConfirmation(emailData);
+
+    await sgMail.send({
+      to: emailData.customerEmail,
+      from: { email: FROM_EMAIL, name: FROM_NAME },
+      replyTo: REPLY_TO_EMAIL,
+      subject: customerTemplate.subject,
+      html: customerTemplate.html,
+      text: customerTemplate.text
+    });
+
+    // Update booking
+    await bookingDoc.ref.update({
+      emailResent: true,
+      emailResentAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    return {
+      success: true,
+      message: `Confirmation email resent to ${emailData.customerEmail}`
+    };
+  } catch (error: any) {
+    console.error('Error resending train booking confirmation:', error);
+    throw new functions.https.HttpsError('internal', error?.message || 'Failed to resend email');
+  }
+});
+
+// Generate WhatsApp message link for train booking
+export const getTrainBookingWhatsAppLink = functions.https.onCall(async (data, context) => {
+  const { bookingId } = data;
+
+  if (!bookingId) {
+    throw new functions.https.HttpsError('invalid-argument', 'Booking ID is required');
+  }
+
+  try {
+    const bookingDoc = await db.collection('trainBookings').doc(bookingId).get();
+
+    if (!bookingDoc.exists) {
+      throw new functions.https.HttpsError('not-found', 'Booking not found');
+    }
+
+    const booking = bookingDoc.data()!;
+
+    const message = `🚂 *Train Booking Confirmed!*
+
+📋 *Reference:* ${booking.bookingReference || `TRN-${bookingId.slice(-8).toUpperCase()}`}
+
+🚉 *Route:* ${booking.departureStation || booking.train?.departureStation} → ${booking.arrivalStation || booking.train?.arrivalStation}
+🚂 *Train:* ${booking.trainName || booking.train?.trainName} (${booking.trainNumber || booking.train?.trainNumber})
+📅 *Date:* ${booking.travelDate || booking.travelDetails?.travelDate}
+⏰ *Time:* ${booking.departureTime || booking.train?.departureTime} - ${booking.arrivalTime || booking.train?.arrivalTime}
+🎫 *Class:* ${booking.selectedClass || booking.travelDetails?.ticketClass}
+👥 *Passengers:* ${booking.passengers || booking.travelDetails?.passengers}
+
+💰 *Total:* LKR ${(booking.totalPrice || booking.pricing?.totalPrice)?.toLocaleString()}
+
+📱 View ticket: https://www.rechargetravels.com/transport/train-booking/confirmation/${bookingId}
+
+Thank you for booking with Recharge Travels! 🙏`;
+
+    const customerPhone = (booking.customerPhone || booking.customerInfo?.phone || '').replace(/\D/g, '');
+
+    return {
+      success: true,
+      whatsappUrl: `https://wa.me/${customerPhone}?text=${encodeURIComponent(message)}`,
+      message
+    };
+  } catch (error: any) {
+    console.error('Error generating WhatsApp link:', error);
+    throw new functions.https.HttpsError('internal', error?.message || 'Failed to generate WhatsApp link');
+  }
+});
 
 // Trigger: Send notification when new inquiry is created
 export const sendBookingNotification = functions.firestore
@@ -2132,5 +3159,225 @@ export const sendDriverVerificationEmail = functions.https.onCall(async (data) =
   } catch (error: any) {
     console.error('Error sending driver verification email:', error);
     throw new functions.https.HttpsError('internal', error.message);
+  }
+});
+
+// ==========================================
+// GLOBAL TOUR BOOKING FUNCTIONS
+// ==========================================
+
+// Handler for global tour booking confirmation
+const handleGlobalTourBookingConfirmation = async (snap: functions.firestore.QueryDocumentSnapshot, context: functions.EventContext) => {
+  const booking = snap.data();
+  const bookingId = context.params.bookingId;
+
+  console.log('Processing global tour booking confirmation for:', bookingId);
+
+  // Skip if already processed
+  if (booking.emailConfirmationSent) {
+    console.log('Email already sent for booking:', bookingId);
+    return;
+  }
+
+  try {
+    // Prepare email data
+    const emailData = {
+      bookingId,
+      bookingReference: booking.bookingReference || `RT-${bookingId.slice(-8).toUpperCase()}`,
+      tourTitle: booking.tourTitle || 'Sri Lanka Tour',
+      duration: booking.tourDuration ? `${booking.tourDuration.days} Days / ${booking.tourDuration.nights} Nights` : '',
+      travelDate: booking.travelDate || '',
+      endDate: booking.endDate || '',
+      travelers: `${booking.travelers?.adults || 1} Adults${booking.travelers?.children ? `, ${booking.travelers.children} Children` : ''}${booking.travelers?.infants ? `, ${booking.travelers.infants} Infants` : ''}`,
+      pickupLocation: booking.pickupLocation || '',
+      totalAmount: (booking.payment?.totalAmountUSD || 0).toLocaleString(),
+      customerName: booking.customer ? `${booking.customer.firstName} ${booking.customer.lastName}` : 'Valued Customer',
+      customerEmail: booking.customer?.email || '',
+      customerPhone: booking.customer?.phone || '',
+      nationality: booking.customer?.nationality || '',
+      specialRequests: booking.additionalNotes || '',
+      flightDetails: booking.flightDetails || ''
+    };
+
+    // Send customer confirmation email
+    if (emailData.customerEmail) {
+      const customerTemplate = emailTemplates.globalTourBookingConfirmation(emailData);
+
+      await sgMail.send({
+        to: emailData.customerEmail,
+        from: { email: FROM_EMAIL, name: FROM_NAME },
+        replyTo: REPLY_TO_EMAIL,
+        subject: customerTemplate.subject,
+        html: customerTemplate.html,
+        text: customerTemplate.text
+      });
+
+      console.log('Global tour booking customer email sent to:', emailData.customerEmail);
+    }
+
+    // Send admin notification email
+    const adminTemplate = emailTemplates.globalTourBookingAdminNotification(emailData);
+
+    await sgMail.send({
+      to: ADMIN_EMAIL,
+      from: { email: FROM_EMAIL, name: FROM_NAME },
+      subject: adminTemplate.subject,
+      html: adminTemplate.html,
+      text: adminTemplate.text
+    });
+
+    console.log('Global tour booking admin notification sent');
+
+    // Update booking with email sent status
+    await snap.ref.update({
+      emailConfirmationSent: true,
+      emailConfirmationSentAt: admin.firestore.FieldValue.serverTimestamp(),
+      adminNotified: true,
+      adminNotifiedAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    // Log email to emailLogs collection
+    await db.collection('emailLogs').add({
+      type: 'globalTourBookingConfirmation',
+      bookingId,
+      bookingReference: emailData.bookingReference,
+      customerEmail: emailData.customerEmail,
+      customerName: emailData.customerName,
+      tourTitle: emailData.tourTitle,
+      status: 'sent',
+      sentAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    console.log('Global tour booking confirmation completed for:', bookingId);
+  } catch (error: any) {
+    console.error('Error sending global tour booking confirmation:', error);
+
+    // Log error
+    await db.collection('emailLogs').add({
+      type: 'globalTourBookingConfirmation',
+      bookingId,
+      status: 'failed',
+      error: error?.message || 'Unknown error',
+      attemptedAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+  }
+};
+
+// Trigger: Send global tour booking confirmation when new booking is created
+export const sendGlobalTourBookingConfirmation = functions.firestore
+  .document('globalTourBookings/{bookingId}')
+  .onCreate(handleGlobalTourBookingConfirmation);
+
+// Callable function to resend global tour booking confirmation
+export const resendGlobalTourBookingConfirmation = functions.https.onCall(async (data, context) => {
+  const { bookingId } = data;
+
+  if (!bookingId) {
+    throw new functions.https.HttpsError('invalid-argument', 'Booking ID is required');
+  }
+
+  try {
+    const bookingDoc = await db.collection('globalTourBookings').doc(bookingId).get();
+
+    if (!bookingDoc.exists) {
+      throw new functions.https.HttpsError('not-found', 'Booking not found');
+    }
+
+    const booking = bookingDoc.data()!;
+
+    // Prepare email data
+    const emailData = {
+      bookingId,
+      bookingReference: booking.bookingReference || `RT-${bookingId.slice(-8).toUpperCase()}`,
+      tourTitle: booking.tourTitle || 'Sri Lanka Tour',
+      duration: booking.tourDuration ? `${booking.tourDuration.days} Days / ${booking.tourDuration.nights} Nights` : '',
+      travelDate: booking.travelDate || '',
+      endDate: booking.endDate || '',
+      travelers: `${booking.travelers?.adults || 1} Adults${booking.travelers?.children ? `, ${booking.travelers.children} Children` : ''}${booking.travelers?.infants ? `, ${booking.travelers.infants} Infants` : ''}`,
+      pickupLocation: booking.pickupLocation || '',
+      totalAmount: (booking.payment?.totalAmountUSD || 0).toLocaleString(),
+      customerName: booking.customer ? `${booking.customer.firstName} ${booking.customer.lastName}` : 'Valued Customer',
+      customerEmail: booking.customer?.email || '',
+      customerPhone: booking.customer?.phone || '',
+      nationality: booking.customer?.nationality || '',
+      specialRequests: booking.additionalNotes || '',
+      flightDetails: booking.flightDetails || ''
+    };
+
+    if (!emailData.customerEmail) {
+      throw new functions.https.HttpsError('failed-precondition', 'Customer email not found');
+    }
+
+    // Send email
+    const customerTemplate = emailTemplates.globalTourBookingConfirmation(emailData);
+
+    await sgMail.send({
+      to: emailData.customerEmail,
+      from: { email: FROM_EMAIL, name: FROM_NAME },
+      replyTo: REPLY_TO_EMAIL,
+      subject: customerTemplate.subject,
+      html: customerTemplate.html,
+      text: customerTemplate.text
+    });
+
+    // Update booking
+    await bookingDoc.ref.update({
+      emailResent: true,
+      emailResentAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    return {
+      success: true,
+      message: `Confirmation email resent to ${emailData.customerEmail}`
+    };
+  } catch (error: any) {
+    console.error('Error resending global tour booking confirmation:', error);
+    throw new functions.https.HttpsError('internal', error?.message || 'Failed to resend email');
+  }
+});
+
+// Generate WhatsApp message link for global tour booking
+export const getGlobalTourBookingWhatsAppLink = functions.https.onCall(async (data, context) => {
+  const { bookingId } = data;
+
+  if (!bookingId) {
+    throw new functions.https.HttpsError('invalid-argument', 'Booking ID is required');
+  }
+
+  try {
+    const bookingDoc = await db.collection('globalTourBookings').doc(bookingId).get();
+
+    if (!bookingDoc.exists) {
+      throw new functions.https.HttpsError('not-found', 'Booking not found');
+    }
+
+    const booking = bookingDoc.data()!;
+
+    const message = `🌏 *Tour Booking Confirmed!*
+
+📋 *Reference:* ${booking.bookingReference || `RT-${bookingId.slice(-8).toUpperCase()}`}
+
+🎯 *Tour:* ${booking.tourTitle}
+📅 *Dates:* ${booking.travelDate} → ${booking.endDate}
+⏱️ *Duration:* ${booking.tourDuration?.days || 0} Days / ${booking.tourDuration?.nights || 0} Nights
+👥 *Travelers:* ${booking.travelers?.adults || 1} Adults${booking.travelers?.children ? `, ${booking.travelers.children} Children` : ''}
+📍 *Pickup:* ${booking.pickupLocation}
+
+💰 *Total:* $${(booking.payment?.totalAmountUSD || 0).toLocaleString()}
+
+📱 View details: https://www.rechargetravels.com/booking/tour-confirmation/${bookingId}
+
+Thank you for booking with Recharge Travels! 🙏`;
+
+    const customerPhone = (booking.customer?.phone || booking.customer?.whatsappNumber || '').replace(/\D/g, '');
+
+    return {
+      success: true,
+      whatsappUrl: `https://wa.me/${customerPhone}?text=${encodeURIComponent(message)}`,
+      message
+    };
+  } catch (error: any) {
+    console.error('Error generating WhatsApp link:', error);
+    throw new functions.https.HttpsError('internal', error?.message || 'Failed to generate WhatsApp link');
   }
 });

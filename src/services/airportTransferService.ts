@@ -1,6 +1,7 @@
 import { dbService } from '@/lib/firebase-services';
-import { collection, addDoc, getDocs, query, where, orderBy, serverTimestamp, doc, updateDoc, getDoc, setDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, where, orderBy, serverTimestamp, doc, updateDoc, getDoc, setDoc, runTransaction } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { customerCrmService } from './customerCrmService';
 
 // Sri Lanka Airports Only
 export const SRI_LANKA_AIRPORTS = [
@@ -390,6 +391,71 @@ export const calculateTotalWithExtras = (
   };
 };
 
+// NEW: Calculate total with extras using dynamic pricing (USD)
+export const calculateTotalWithExtrasUSD = (
+  distance: number,
+  vehicleType: string,
+  selectedExtras: string[],
+  childSeatCount: number = 0,
+  isRoundTrip: boolean = false,
+  vehiclePricing?: VehiclePricing[]
+): PriceBreakdown => {
+  // Use dynamic pricing from admin panel or fall back to defaults
+  const pricing = vehiclePricing || DEFAULT_VEHICLE_PRICING;
+  const vehicle = pricing.find(v => v.id === vehicleType) || pricing[0];
+
+  // Base calculations in USD
+  const basePrice = vehicle.basePrice;
+  const distancePrice = distance * vehicle.pricePerKm;
+
+  // Extras calculation in USD
+  const extrasDetails: { name: string; price: number }[] = [];
+  let extrasPrice = 0;
+  selectedExtras.forEach(extraId => {
+    const extra = TRANSFER_EXTRAS.find(e => e.id === extraId);
+    if (extra && extra.priceUSD > 0) {
+      extrasPrice += extra.priceUSD;
+      extrasDetails.push({ name: extra.name, price: extra.priceUSD });
+    }
+  });
+
+  // Child seats in USD ($5 per seat)
+  const childSeatPrice = childSeatCount * 5;
+  if (childSeatCount > 0) {
+    extrasDetails.push({ name: `Child Seats (×${childSeatCount})`, price: childSeatPrice });
+  }
+
+  // Subtotal
+  let subtotal = basePrice + distancePrice + extrasPrice + childSeatPrice;
+
+  // Round trip discount (10% off)
+  let roundTripDiscount = 0;
+  if (isRoundTrip) {
+    subtotal = subtotal * 2;
+    roundTripDiscount = Math.round(subtotal * 0.1);
+    subtotal = subtotal - roundTripDiscount;
+  }
+
+  const total = Math.round(subtotal);
+
+  return {
+    basePrice: Math.round(basePrice),
+    distancePrice: Math.round(distancePrice),
+    extrasPrice: Math.round(extrasPrice),
+    childSeatPrice,
+    subtotal: total,
+    roundTripDiscount: Math.round(roundTripDiscount),
+    total,
+    totalUSD: total,
+    currency: 'USD',
+    distance,
+    duration: calculateDuration(distance),
+    vehicleName: vehicle.name,
+    isRoundTrip,
+    extras: extrasDetails
+  };
+};
+
 // Search hotels
 export const searchHotels = (query: string): HotelLocation[] => {
   if (!query || query.length < 2) return PRELOADED_HOTELS.slice(0, 8);
@@ -425,7 +491,7 @@ export const searchDestinations = (query: string): typeof SRI_LANKA_DESTINATIONS
   ).slice(0, 10);
 };
 
-// Calculate price
+// Calculate price (legacy - uses LKR from hard-coded VEHICLE_TYPES)
 export const calculateTransferPrice = (
   distance: number,
   vehicleType: string,
@@ -449,6 +515,43 @@ export const calculateTransferPrice = (
       basePrice: Math.round(vehicle.basePrice / 320),
       distancePrice: Math.round(distancePrice / 320),
       totalLKR: totalPrice,
+      distance: distance,
+      vehicleType: vehicle.name,
+      isReturn
+    }
+  };
+};
+
+// NEW: Calculate price with dynamic pricing from admin panel (USD)
+export const calculateDynamicPrice = (
+  distance: number,
+  vehicleType: string,
+  vehiclePricing: VehiclePricing[] | undefined,
+  isReturn: boolean = false
+): { price: number; currency: string; breakdown: any } => {
+  // Use dynamic pricing from admin panel or fall back to defaults
+  const pricing = vehiclePricing || DEFAULT_VEHICLE_PRICING;
+  const vehicle = pricing.find(v => v.id === vehicleType) || pricing[0];
+
+  // Calculate price in USD directly
+  const basePrice = vehicle.basePrice;
+  const distancePrice = distance * vehicle.pricePerKm;
+  let totalPrice = basePrice + distancePrice;
+
+  // Round trip: double the price with 10% discount
+  if (isReturn) {
+    totalPrice = totalPrice * 2 * 0.9;
+  }
+
+  const roundedTotal = Math.round(totalPrice);
+
+  return {
+    price: roundedTotal,
+    currency: 'USD',
+    breakdown: {
+      basePrice: Math.round(basePrice),
+      distancePrice: Math.round(distancePrice),
+      total: roundedTotal,
       distance: distance,
       vehicleType: vehicle.name,
       isReturn
@@ -524,6 +627,27 @@ export interface AirportTransferBooking {
   updatedAt?: any;
 }
 
+// Vehicle Pricing interface (for admin panel configuration)
+export interface VehiclePricing {
+  id: string;
+  name: string;
+  basePrice: number; // USD
+  pricePerKm: number; // USD per km
+  passengers: number;
+  luggage: number;
+}
+
+// Default vehicle pricing (USD)
+export const DEFAULT_VEHICLE_PRICING: VehiclePricing[] = [
+  { id: 'economy', name: 'Economy Sedan', basePrice: 11, pricePerKm: 0.25, passengers: 3, luggage: 2 },
+  { id: 'sedan', name: 'Premium Sedan', basePrice: 14, pricePerKm: 0.31, passengers: 3, luggage: 3 },
+  { id: 'suv', name: 'SUV', basePrice: 23, pricePerKm: 0.47, passengers: 5, luggage: 4 },
+  { id: 'van', name: 'Mini Van', basePrice: 20, pricePerKm: 0.41, passengers: 8, luggage: 6 },
+  { id: 'luxury', name: 'Luxury Vehicle', basePrice: 47, pricePerKm: 0.78, passengers: 3, luggage: 3 },
+  { id: 'luxury-suv', name: 'Luxury SUV', basePrice: 63, pricePerKm: 0.94, passengers: 5, luggage: 5 },
+  { id: 'coach', name: 'Mini Coach', basePrice: 38, pricePerKm: 0.63, passengers: 15, luggage: 15 },
+];
+
 // Page content interface
 export interface AirportTransferPageContent {
   heroSlides: {
@@ -558,14 +682,54 @@ export interface AirportTransferPageContent {
     text: string;
     date: string;
   }[];
+  vehiclePricing?: VehiclePricing[]; // Dynamic pricing from admin panel
   seoTitle: string;
   seoDescription: string;
   seoKeywords: string[];
 }
 
-// Generate booking reference
+// Generate sequential booking reference (RT01205, RT01206, etc.)
+// Uses Firestore transaction to ensure unique sequential numbers
+const generateSequentialBookingReference = async (): Promise<string> => {
+  const counterRef = doc(db, 'counters', 'airportTransferBookings');
+
+  try {
+    const newNumber = await runTransaction(db, async (transaction) => {
+      const counterDoc = await transaction.get(counterRef);
+
+      let currentNumber: number;
+      if (!counterDoc.exists()) {
+        // Initialize counter starting at 1205 (first booking will be RT01205)
+        currentNumber = 1204;
+      } else {
+        currentNumber = counterDoc.data().lastNumber || 1204;
+      }
+
+      const nextNumber = currentNumber + 1;
+
+      // Update the counter
+      transaction.set(counterRef, {
+        lastNumber: nextNumber,
+        updatedAt: new Date()
+      });
+
+      return nextNumber;
+    });
+
+    // Format: RT + 5-digit padded number (e.g., RT01205, RT01206)
+    return `RT${newNumber.toString().padStart(5, '0')}`;
+  } catch (error) {
+    console.error('Error generating booking reference:', error);
+    // Fallback to timestamp-based reference if transaction fails
+    const timestamp = Date.now().toString(36).toUpperCase();
+    const random = Math.random().toString(36).substring(2, 4).toUpperCase();
+    return `RT${timestamp}${random}`;
+  }
+};
+
+// Legacy function for backwards compatibility
 const generateBookingReference = (): string => {
-  const prefix = 'AT';
+  const prefix = 'RT';
   const timestamp = Date.now().toString(36).toUpperCase();
   const random = Math.random().toString(36).substring(2, 6).toUpperCase();
   return `${prefix}${timestamp}${random}`;
@@ -598,9 +762,11 @@ class AirportTransferService {
     return calculateTransferPrice(distance, vehicleType, isReturn);
   }
 
-  // Create booking
-  async createBooking(data: Omit<AirportTransferBooking, 'id' | 'bookingReference' | 'createdAt' | 'updatedAt'>): Promise<AirportTransferBooking> {
-    const bookingReference = generateBookingReference();
+  // Create booking with sequential reference (RT01205, RT01206, etc.)
+  // Also creates/updates customer profile in CRM
+  async createBooking(data: Omit<AirportTransferBooking, 'id' | 'bookingReference' | 'createdAt' | 'updatedAt'>): Promise<AirportTransferBooking & { customerId?: string }> {
+    // Generate sequential booking reference
+    const bookingReference = await generateSequentialBookingReference();
 
     const booking = {
       ...data,
@@ -615,11 +781,33 @@ class AirportTransferService {
 
     const docRef = await addDoc(collection(db, this.bookingsCollection), booking);
 
+    // Create or update customer profile in CRM
+    let customerId: string | undefined;
+    try {
+      if (data.customerInfo?.email) {
+        const customer = await customerCrmService.createOrUpdateFromBooking({
+          firstName: data.customerInfo.firstName || '',
+          lastName: data.customerInfo.lastName || '',
+          email: data.customerInfo.email,
+          phone: data.customerInfo.phone || '',
+          whatsapp: data.customerInfo.whatsapp,
+          bookingReference: bookingReference,
+          bookingAmount: data.totalPrice || 0,
+          specialRequests: data.specialRequests
+        });
+        customerId = customer.customerId;
+        console.log(`Customer profile created/updated: ${customerId}`);
+      }
+    } catch (crmError) {
+      console.error('CRM update failed (booking still created):', crmError);
+    }
+
     return {
       id: docRef.id,
       ...booking,
-      bookingReference
-    } as AirportTransferBooking;
+      bookingReference,
+      customerId
+    } as AirportTransferBooking & { customerId?: string };
   }
 
   // Get booking by reference

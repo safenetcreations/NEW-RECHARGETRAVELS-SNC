@@ -248,9 +248,22 @@
         border: 2px solid rgba(12, 59, 46, 0.15);
         border-radius: 14px;
         padding: 0.85rem 1rem;
-        font-size: 1rem;
-        font-family: inherit;
+        font-size: 1rem !important;
+        font-family: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif !important;
+        color: #1a2e35 !important;
+        -webkit-text-fill-color: #1a2e35 !important;
+        background-color: #ffffff !important;
         transition: all 0.2s ease;
+        -webkit-appearance: none;
+        appearance: none;
+      }
+
+      input::placeholder,
+      select::placeholder,
+      textarea::placeholder {
+        color: rgba(26, 46, 53, 0.5) !important;
+        -webkit-text-fill-color: rgba(26, 46, 53, 0.5) !important;
+        opacity: 1 !important;
       }
 
       input:focus,

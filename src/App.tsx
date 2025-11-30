@@ -17,6 +17,7 @@ import GoogleAnalytics from '@/components/analytics/GoogleAnalytics';
 const Index = lazy(() => import('@/pages/Index'));
 const CulturalTours = lazy(() => import('@/pages/CulturalToursNew'));
 const WildTours = lazy(() => import('@/pages/WildToursNew'));
+const WildTourDetail = lazy(() => import('@/pages/WildTourDetail'));
 const NationalParksOverview = lazy(() => import('@/pages/NationalParksNew'));
 const ParkLandingPage = lazy(() => import('@/components/wildTours/ParkLandingPage'));
 const LuxurySafari = lazy(() => import('@/pages/LuxurySafari'));
@@ -37,7 +38,7 @@ const HillCountry = lazy(() => import('@/pages/HillCountryToursNew'));
 const CulinaryTours = lazy(() => import('@/pages/CulinaryToursNew'));
 const Honeymoon = lazy(() => import('@/pages/Honeymoon'));
 const HoneymoonsWeddings = lazy(() => import('@/pages/romance/HoneymoonsWeddings'));
-const WellnessPackages = lazy(() => import('@/pages/WellnessPackages'));
+const WellnessPackages = lazy(() => import('@/pages/WellnessPackagesNew'));
 const JoinUsDrivers = lazy(() => import('@/pages/JoinUsDrivers'));
 const DriversDirectory = lazy(() => import('@/pages/DriversDirectory'));
 const DriverPublicProfile = lazy(() => import('@/pages/DriverPublicProfile'));
@@ -78,9 +79,9 @@ const Batticaloa = lazy(() => import('@/pages/destinations/Batticaloa'));
 const DestinationDetail = lazy(() => import('@/pages/destinations/DestinationDetail'));
 const Destinations = lazy(() => import('@/pages/Destinations'));
 const AirportTransfers = lazy(() => import('@/pages/transport/AirportTransfers'));
-const PrivateTours = lazy(() => import('@/pages/transport/PrivateTours'));
-const GroupTransport = lazy(() => import('@/pages/transport/GroupTransport'));
-const TrainBooking = lazy(() => import('@/pages/TrainBooking'));
+const PrivateTours = lazy(() => import('@/pages/transport/PrivateToursNew'));
+const GroupTransport = lazy(() => import('@/pages/transport/GroupTransportNew'));
+const TrainBooking = lazy(() => import('@/pages/transport/TrainBookingNew'));
 const RestaurantGuide = lazy(() => import('@/pages/RestaurantGuide'));
 const WaterfallGuide = lazy(() => import('@/pages/WaterfallGuide'));
 const DriverGuideServices = lazy(() => import('@/pages/DriverGuideServices'));
@@ -127,13 +128,28 @@ const LagoonSafari = lazy(() => import('@/pages/experiences/LagoonSafari'));
 const CookingClass = lazy(() => import('@/pages/experiences/CookingClass'));
 const AyurvedaWellness = lazy(() => import('@/pages/experiences/AyurvedaWellness'));
 const AyurvedaBooking = lazy(() => import('@/pages/booking/AyurvedaBooking'));
+const RomanceBooking = lazy(() => import('@/pages/booking/RomanceBooking'));
 const TeaTrailsBooking = lazy(() => import('@/pages/booking/TeaTrailsBooking'));
 const PilgrimageBooking = lazy(() => import('@/pages/booking/PilgrimageBooking'));
 const ExperienceBooking = lazy(() => import('@/pages/booking/ExperienceBooking'));
 const ConciergeBooking = lazy(() => import('@/pages/booking/ConciergeBooking'));
+const TrainBookingConfirmation = lazy(() => import('@/pages/booking/TrainBookingConfirmation'));
 const LuxuryExperiences = lazy(() => import('@/pages/LuxuryExperiences'));
 const LuxuryExperienceDetail = lazy(() => import('@/pages/LuxuryExperienceDetail'));
 const CustomExperience = lazy(() => import('@/pages/CustomExperience'));
+
+// Luxury Experience Pages
+const HelicopterCharters = lazy(() => import('@/pages/experiences/luxury/HelicopterCharters'));
+const PrivateYachts = lazy(() => import('@/pages/experiences/luxury/PrivateYachts'));
+const PrivateJets = lazy(() => import('@/pages/experiences/luxury/PrivateJets'));
+const ExclusiveVillas = lazy(() => import('@/pages/experiences/luxury/ExclusiveVillas'));
+const LuxuryVehicles = lazy(() => import('@/pages/experiences/luxury/LuxuryVehicles'));
+const LuxuryHotels = lazy(() => import('@/pages/experiences/luxury/LuxuryHotels'));
+const LuxuryApartments = lazy(() => import('@/pages/experiences/luxury/LuxuryApartments'));
+const LuxuryHouses = lazy(() => import('@/pages/experiences/luxury/LuxuryHouses'));
+const DreamJourneys = lazy(() => import('@/pages/experiences/luxury/DreamJourneys'));
+const VIPConcierge = lazy(() => import('@/pages/experiences/luxury/VIPConcierge'));
+const ExclusiveAccess = lazy(() => import('@/pages/experiences/luxury/ExclusiveAccess'));
 
 // Family Activities
 const FamilyTrainJourneys = lazy(() => import('@/pages/family-activities/FamilyTrainJourneys'));
@@ -196,6 +212,18 @@ const VehicleNotificationPreferences = lazy(() => import('@/pages/vehicle-rental
 const VehicleReviewSubmit = lazy(() => import('@/pages/vehicle-rental/VehicleReviewSubmit'));
 const OwnerReviewResponses = lazy(() => import('@/pages/vehicle-rental/OwnerReviewResponses'));
 const AdminReviewManagement = lazy(() => import('@/pages/admin/AdminReviewManagement'));
+const AyurvedaAdmin = lazy(() => import('@/pages/admin/AyurvedaAdmin'));
+const WellnessAdmin = lazy(() => import('@/pages/admin/WellnessAdmin'));
+const RomanceAdmin = lazy(() => import('@/pages/admin/RomanceAdmin'));
+const CustomExperienceAdmin = lazy(() => import('@/pages/admin/CustomExperienceAdmin'));
+const GlobalToursAdmin = lazy(() => import('@/pages/admin/GlobalToursAdmin'));
+const BeachToursNew = lazy(() => import('./pages/BeachToursNew'));
+const BeachToursAdmin = lazy(() => import('./pages/admin/BeachToursAdmin'));
+const TourDetail = lazy(() => import('./pages/TourDetail'));
+
+// Global Tours Pages
+const GlobalToursListing = lazy(() => import('@/pages/tours/GlobalToursListing'));
+const GlobalTourPage = lazy(() => import('@/pages/tours/GlobalTourPage'));
 
 // Phase 5: Analytics & Reporting Dashboard
 const OwnerAnalytics = lazy(() => import('@/pages/vehicle-rental/OwnerAnalytics'));
@@ -238,6 +266,7 @@ function App() {
                 <Route path="/tours/tripadvisor" element={withSiteChrome(TripAdvisorTours)} />
                 <Route path="/tours/cultural" element={<CulturalTours />} />
                 <Route path="/tours/wildtours" element={<WildTours />} />
+                <Route path="/tours/wildtours/:id" element={<WildTourDetail />} />
                 <Route path="/wildtours" element={<WildTours />} /> {/* Alias route */}
                 <Route path="/tours/wildtours/parks" element={<NationalParksOverview />} />
                 <Route path="/wildtours/parks" element={<NationalParksOverview />} /> {/* Alias route */}
@@ -246,13 +275,17 @@ function App() {
                 <Route path="/tours/photography" element={<Photography />} />
                 <Route path="/tours/ramayana-trail" element={<RamayanaTrail />} />
                 <Route path="/tours/ecotourism" element={<Ecotourism />} />
-                <Route path="/tours/beach-tours" element={<BeachTours />} />
+                <Route path="/tours/beach-tours" element={<BeachToursNew />} />
+                <Route path="/tours/beach-tours/:id" element={<TourDetail />} />
+                <Route path="/admin/beach-tours" element={<BeachToursAdmin />} />
                 <Route path="/tours/hill-country" element={<HillCountry />} />
                 <Route path="/tours/culinary" element={<CulinaryTours />} />
                 <Route path="/tours/luxury-safari" element={<LuxurySafari />} />
                 <Route path="/tours/honeymoon" element={<Honeymoon />} />
                 <Route path="/romance/honeymoons-weddings" element={withSiteChrome(HoneymoonsWeddings)} />
                 <Route path="/tours/luxury" element={<LuxuryTours />} />
+                <Route path="/tours/global" element={<GlobalToursListing />} />
+                <Route path="/tours/global/:slug" element={<GlobalTourPage />} />
                 <Route path="/tours/restaurants" element={withSiteChrome(RestaurantGuide)} />
                 <Route path="/tours/waterfalls" element={withSiteChrome(WaterfallGuide)} />
                 <Route path="/tours/driver-guide" element={withSiteChrome(DriverGuideServices)} />
@@ -297,6 +330,7 @@ function App() {
                 <Route path="/transport/private-tours" element={<PrivateTours />} />
                 <Route path="/transport/group-transport" element={<GroupTransport />} />
                 <Route path="/transport/train-booking" element={<TrainBooking />} />
+                <Route path="/transport/train-booking/confirmation/:bookingId" element={<TrainBookingConfirmation />} />
                 <Route path="/experiences" element={withSiteChrome(LuxuryExperiences)} />
                 <Route path="/experiences/:slug" element={withSiteChrome(LuxuryExperienceDetail)} />
                 <Route path="/custom-experience" element={withSiteChrome(CustomExperience)} />
@@ -306,6 +340,17 @@ function App() {
                 <Route path="/experiences/island-getaways" element={<IslandGetaways />} />
                 <Route path="/experiences/whale-watching" element={<WhaleBookingPage />} />
                 <Route path="/experiences/private-charters" element={<PrivateCharters />} />
+                <Route path="/experiences/luxury/helicopter-charters" element={<HelicopterCharters />} />
+                <Route path="/experiences/luxury/private-yachts" element={<PrivateYachts />} />
+                <Route path="/experiences/luxury/private-jets" element={<PrivateJets />} />
+                <Route path="/experiences/luxury/exclusive-villas" element={<ExclusiveVillas />} />
+                <Route path="/experiences/luxury/luxury-vehicles" element={<LuxuryVehicles />} />
+                <Route path="/experiences/luxury/luxury-hotels" element={<LuxuryHotels />} />
+                <Route path="/experiences/luxury/luxury-apartments" element={<LuxuryApartments />} />
+                <Route path="/experiences/luxury/luxury-houses" element={<LuxuryHouses />} />
+                <Route path="/experiences/luxury/dream-journeys" element={<DreamJourneys />} />
+                <Route path="/experiences/luxury/vip-concierge" element={<VIPConcierge />} />
+                <Route path="/experiences/luxury/exclusive-access" element={<ExclusiveAccess />} />
                 <Route path="/experiences/sea-cucumber-farming" element={<SeaCucumberFarming />} />
                 <Route path="/experiences/hikkaduwa-water-sports" element={<HikkaduwaWaterSports />} />
                 <Route path="/experiences/hot-air-balloon-sigiriya" element={<HotAirBalloonSigiriya />} />
@@ -319,6 +364,8 @@ function App() {
                 <Route path="/booking/pilgrimage" element={<PilgrimageBooking />} />
                 <Route path="/booking/concierge" element={withSiteChrome(ConciergeBooking)} />
                 <Route path="/experiences/wellness" element={<WellnessPackages />} />
+                <Route path="/booking/wellness" element={<AyurvedaBooking />} />
+                <Route path="/booking/romance" element={<RomanceBooking />} />
                 <Route path="/booking/whale-watching" element={<Navigate to="/experiences/whale-watching" replace />} />
                 <Route path="/booking/:experienceSlug" element={<ExperienceBooking />} />
 
@@ -412,6 +459,11 @@ function App() {
                 <Route path="/admin/vehicle-rental/vehicles" element={<VehicleApproval />} />
                 <Route path="/admin/vehicle-rental/owners" element={<OwnerApproval />} />
                 <Route path="/admin/vehicle-rental/reviews" element={<AdminReviewManagement />} />
+                <Route path="/admin/ayurveda" element={<AyurvedaAdmin />} />
+                <Route path="/admin/wellness" element={<WellnessAdmin />} />
+                <Route path="/admin/romance" element={<RomanceAdmin />} />
+                <Route path="/admin/custom-experience" element={<CustomExperienceAdmin />} />
+                <Route path="/admin/global-tours" element={<GlobalToursAdmin />} />
                 {/* Admin panel is now at: https://recharge-travels-admin.web.app */}
                 <Route path="/admin" element={<AdminRedirect />} />
                 <Route path="/admin-panel" element={<AdminRedirect />} />

@@ -26,22 +26,22 @@ const EnhancedBookingModal = ({ isOpen, onClose, type, itemTitle, tourData }: En
     email: '',
     phone: '',
     guests: '2',
-    
+
     // Trip details
     startDate: '',
     endDate: '',
     budget: tourData?.price?.toString() || '',
     interests: [],
-    
+
     // Transport details
     pickup: '',
     destination: '',
-    
+
     // Preferences
     accommodation: '',
     dietaryRestrictions: '',
     message: '',
-    
+
     // Payment
     paymentMethod: undefined
   })
@@ -105,8 +105,8 @@ const EnhancedBookingModal = ({ isOpen, onClose, type, itemTitle, tourData }: En
       user_email: formData.email,
       user_name: formData.name,
       booking_type: type,
-      items: { 
-        ...formData, 
+      items: {
+        ...formData,
         routeDetails: type === 'transport' ? routeDetails : undefined,
         tourData: tourData || undefined
       },
@@ -114,52 +114,53 @@ const EnhancedBookingModal = ({ isOpen, onClose, type, itemTitle, tourData }: En
       currency: 'USD',
       status: 'pending' as const,
       travel_date: formData.startDate,
+      phone: formData.phone, // Add phone to top level for notifications
     }
 
     try {
       const booking = await dbService.create('bookings', bookingData)
       if (!booking) throw new Error('Failed to create booking')
-      
+
       // Process payment if wallet is selected
       if (formData.paymentMethod === 'wallet' && booking) {
         const userWallet = await walletService.getUserWallet(user.uid)
         if (!userWallet) {
           throw new Error('Wallet not found')
         }
-        
+
         // Calculate amount in LKR
         const amountInLKR = (tourData?.price || 0) * 300 // Assuming 1 USD = 300 LKR
-        
+
         // Check balance
         const hasBalance = await walletService.checkBalance(userWallet.id, amountInLKR)
         if (!hasBalance) {
           throw new Error('Insufficient wallet balance')
         }
-        
+
         // Create wallet payment
         const paymentSuccess = await walletService.createBookingPayment(
           userWallet.id,
           booking.id,
           amountInLKR
         )
-        
+
         if (!paymentSuccess) {
           throw new Error('Payment failed')
         }
-        
+
         // Update booking status
-        await dbService.update('bookings', booking.id, { 
-          status: 'confirmed', 
+        await dbService.update('bookings', booking.id, {
+          status: 'confirmed',
           payment_method: 'wallet',
           updated_at: new Date().toISOString()
         });
-        
+
         toast.success('Booking confirmed! Payment has been deducted from your wallet.')
       } else {
         // For card payments, just show success message
         toast.success('Your booking request has been sent successfully!')
       }
-      
+
       onClose()
       setStep(1)
     } catch (error) {
@@ -182,7 +183,7 @@ const EnhancedBookingModal = ({ isOpen, onClose, type, itemTitle, tourData }: En
       : [...formData.interests, interest]
     setFormData({ ...formData, interests })
   }
-  
+
   const handlePaymentMethodSelect = (method: 'wallet' | 'card') => {
     setFormData({ ...formData, paymentMethod: method })
   }
@@ -205,17 +206,17 @@ const EnhancedBookingModal = ({ isOpen, onClose, type, itemTitle, tourData }: En
           callback={directionsCallback}
         />
       )}
-      
+
       <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto border-0 shadow-2xl">
-          <ModalHeader 
+          <ModalHeader
             onClose={onClose}
             type={type}
             itemTitle={displayTitle}
             step={step}
             totalSteps={totalSteps}
           />
-          
+
           <CardContent className="p-6">
             {/* Show tour summary if tourData is available */}
             {tourData && (
@@ -236,7 +237,7 @@ const EnhancedBookingModal = ({ isOpen, onClose, type, itemTitle, tourData }: En
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              
+
               {/* Step 1: Basic Information */}
               {step === 1 && (
                 <ContactInfoSection
@@ -277,7 +278,7 @@ const EnhancedBookingModal = ({ isOpen, onClose, type, itemTitle, tourData }: En
                   routeDetails={routeDetails}
                 />
               )}
-              
+
               {/* Payment Step - Last step for all booking types */}
               {((step === 5 && type === 'custom') || (step === 4 && type !== 'custom')) && (
                 <PaymentStep

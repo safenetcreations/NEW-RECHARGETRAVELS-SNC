@@ -5,9 +5,8 @@ admin.initializeApp();
 
 // Import notification/email functions
 export {
-  sendEmail,
-  sendWhatsAppMessage,
   sendBookingConfirmation,
+  sendAirportTransferConfirmation,
   sendBookingNotification,
   sendWelcomeEmail,
   sendBookingReminders,
@@ -15,8 +14,21 @@ export {
   notifyBlogSubscribers,
   subscribeNewsletter,
   unsubscribeNewsletter,
-  getNewsletterStats
+  getNewsletterStats,
+  // Train booking email & WhatsApp functions
+  sendTrainBookingConfirmation,
+  resendTrainBookingConfirmation,
+  getTrainBookingWhatsAppLink,
+  sendBeachToursBookingConfirmation,
+  sendCulinaryBookingConfirmation,
+  // Global Tour booking email & WhatsApp functions
+  sendGlobalTourBookingConfirmation,
+  resendGlobalTourBookingConfirmation,
+  getGlobalTourBookingWhatsAppLink
 } from './notifications';
+
+export { sendWhatsAppMessage } from './whatsapp';
+export { createCheckoutSession, handleStripeWebhook } from './payments';
 
 // Import Yalu data functions
 export {
