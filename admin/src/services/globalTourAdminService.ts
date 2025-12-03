@@ -278,7 +278,7 @@ export const getAllBookingsAdmin = async (
   pageSize: number = 100
 ): Promise<GlobalTourBooking[]> => {
   try {
-    let q = query(
+    const q = query(
       collection(db, BOOKINGS_COLLECTION),
       orderBy('createdAt', 'desc'),
       limit(pageSize)

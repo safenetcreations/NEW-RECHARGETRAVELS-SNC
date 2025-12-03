@@ -125,7 +125,7 @@ const AdminMatara = () => {
     
     if (!content) return;
 
-    let newContent = { ...content };
+    const newContent = { ...content };
     let current: any = newContent;
 
     for (let i = 0; i < path.length - 1; i++) {

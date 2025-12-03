@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import DestinationMap from '@/components/destinations/DestinationMap';
+import WeatherWidget from '@/components/destinations/WeatherWidget';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Bird, 
@@ -43,7 +46,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import EnhancedBookingModal from '@/components/EnhancedBookingModal';
 import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { toast } from 'sonner';
@@ -132,26 +134,41 @@ interface MannarContent {
   travelTips: TravelTip[];
 }
 
+// Mannar center coordinates
+const MANNAR_CENTER = { lat: 8.9810, lng: 79.9044 };
+
 const defaultContent: MannarContent = {
   hero: {
     slides: [
       {
         id: '1',
-        image: "https://images.unsplash.com/photo-1564594985645-4427056e22e2?auto=format&fit=crop&q=80",
-        title: "Welcome to Mannar",
-        subtitle: "The Pearl Banks of Ancient Ceylon"
+        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80",
+        title: "Discover Mannar",
+        subtitle: "Island of Ancient Heritage"
       },
       {
         id: '2',
-        image: "https://images.unsplash.com/photo-1574482620826-40685ca5ebd2?auto=format&fit=crop&q=80",
-        title: "Bird Watching Paradise",
-        subtitle: "Home to Millions of Migratory Birds"
+        image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&q=80",
+        title: "Adam's Bridge",
+        subtitle: "Legendary Ram Setu"
       },
       {
         id: '3',
-        image: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&q=80",
-        title: "Unique Island Experience",
-        subtitle: "Where History Meets Natural Beauty"
+        image: "https://images.unsplash.com/photo-1559827291-72ee739d0d9a?auto=format&fit=crop&q=80",
+        title: "Baobab Trees",
+        subtitle: "Ancient Giants of Mannar"
+      },
+      {
+        id: '4',
+        image: "https://images.unsplash.com/photo-1583212292454-1fe6229603b7?auto=format&fit=crop&q=80",
+        title: "Mannar Fort",
+        subtitle: "Portuguese & Dutch Heritage"
+      },
+      {
+        id: '5',
+        image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&q=80",
+        title: "Flamingo Sanctuary",
+        subtitle: "Migratory Bird Haven"
       }
     ],
     title: "Mannar",
@@ -423,11 +440,10 @@ const defaultContent: MannarContent = {
 };
 
 const Mannar = () => {
+  const navigate = useNavigate();
   const [content, setContent] = useState<MannarContent>(defaultContent);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedTab, setSelectedTab] = useState('attractions');
-  const [showBookingModal, setShowBookingModal] = useState(false);
-  const [selectedService, setSelectedService] = useState<string>('');
   const [galleryIndex, setGalleryIndex] = useState(0);
 
   // Load content from Firebase and set up real-time listener
@@ -488,21 +504,60 @@ const Mannar = () => {
     { id: 'activities', label: 'Activities', count: content.activities.length },
     { id: 'itineraries', label: 'Tours', count: content.itineraries.length },
     { id: 'travel-tips', label: 'Travel Tips', count: content.travelTips.length },
-    { id: 'faqs', label: 'FAQs', count: content.faqs.length }
+    { id: 'faqs', label: 'FAQs', count: content.faqs.length },
+    { id: 'map', label: 'Map', count: null }
   ];
 
-  const handleBooking = (service: string) => {
-    setSelectedService(service);
-    setShowBookingModal(true);
+  const handleBooking = (service: string, tourData?: { id: string; name: string; description: string; duration: string; price: number; features: string[]; image?: string }) => {
+    const params = new URLSearchParams({
+      title: tourData?.name || service,
+      id: tourData?.id || service.toLowerCase().replace(/\s+/g, '-'),
+      duration: tourData?.duration || 'Full Day',
+      price: String(tourData?.price || 75),
+      image: tourData?.image || 'https://images.unsplash.com/photo-1564594985645-4427056e22e2?w=800',
+      subtitle: `Mannar - ${tourData?.name || service}`
+    });
+    navigate(`/book-tour?${params.toString()}`);
   };
 
   // JSON-LD Structured Data for SEO
+  const canonicalUrl = "https://www.rechargetravels.com/destinations/mannar";
+
+  const parsePrice = (price: string) => {
+    const match = price.match(/[\d.]+/);
+    if (!match) return null;
+    const value = parseFloat(match[0]);
+    return Number.isFinite(value) ? value : null;
+  };
+
+  const offerEntries = [...content.activities, ...content.itineraries]
+    .map(({ name, price }) => {
+      const parsedPrice = parsePrice(price);
+      if (parsedPrice === null) return null;
+      return {
+        "@type": "Offer",
+        "name": name,
+        "price": parsedPrice,
+        "priceCurrency": "USD",
+        "availability": "https://schema.org/InStock",
+        "url": canonicalUrl
+      };
+    })
+    .filter((offer): offer is { "@type": string; name: string; price: number; priceCurrency: string; availability: string; url: string } => Boolean(offer));
+
   const structuredData = {
     "@context": "https://schema.org",
-    "@type": "TouristDestination",
+    "@type": ["Product", "TouristDestination"],
     "name": "Mannar, Sri Lanka",
     "description": content.overview.description,
+    "url": canonicalUrl,
     "image": content.hero.slides.map(slide => slide.image),
+    "brand": {
+      "@type": "Organization",
+      "name": "Recharge Travels",
+      "url": "https://www.rechargetravels.com",
+      "logo": "https://www.rechargetravels.com/logo-v2.png"
+    },
     "touristType": ["Nature Tourism", "Bird Watching", "Cultural Tourism"],
     "geo": {
       "@type": "GeoCoordinates",
@@ -511,15 +566,12 @@ const Mannar = () => {
     },
     "aggregateRating": {
       "@type": "AggregateRating",
-      "ratingValue": "4.7",
-      "reviewCount": "892"
+      "ratingValue": 4.7,
+      "reviewCount": 892,
+      "bestRating": 5,
+      "worstRating": 1
     },
-    "offers": content.activities.map(activity => ({
-      "@type": "Offer",
-      "name": activity.name,
-      "price": activity.price,
-      "priceCurrency": "USD"
-    }))
+    "offers": offerEntries.length ? offerEntries : undefined
   };
 
   return (
@@ -533,7 +585,7 @@ const Mannar = () => {
         <meta property="og:title" content={content.seo.title} />
         <meta property="og:description" content={content.seo.description} />
         <meta property="og:image" content={content.hero.slides[0].image} />
-        <meta property="og:url" content="https://recharge-travels-73e76.web.app/destinations/mannar" />
+        <meta property="og:url" content={canonicalUrl} />
         <meta property="og:type" content="website" />
         
         {/* Twitter Card Tags */}
@@ -543,7 +595,7 @@ const Mannar = () => {
         <meta name="twitter:image" content={content.hero.slides[0].image} />
         
         {/* Canonical URL */}
-        <link rel="canonical" href="https://recharge-travels-73e76.web.app/destinations/mannar" />
+        <link rel="canonical" href={canonicalUrl} />
         
         {/* JSON-LD Structured Data */}
         <script type="application/ld+json">
@@ -555,7 +607,7 @@ const Mannar = () => {
       
       <main className="min-h-screen bg-background">
         {/* Hero Section with Video/Image Slideshow */}
-        <section className="relative h-[80vh] overflow-hidden" aria-label="Hero">
+        <section className="relative aspect-video max-h-[80vh] overflow-hidden" aria-label="Hero">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentSlide}
@@ -953,6 +1005,82 @@ const Mannar = () => {
                 </div>
               </motion.section>
             )}
+
+            {/* Map Tab */}
+            {selectedTab === 'map' && (
+              <motion.section
+                key="map"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                aria-label="Interactive Map"
+              >
+                <h3 className="text-3xl font-bold mb-8 text-center">Explore Mannar</h3>
+                <div className="grid lg:grid-cols-3 gap-8">
+                  <div className="lg:col-span-2">
+                    <DestinationMap
+                      destinationName="Mannar"
+                      center={MANNAR_CENTER}
+                      attractions={[
+                        { name: 'Mannar Town', description: 'Main town center', coordinates: { lat: 8.9810, lng: 79.9044 } },
+                        { name: 'Mannar Fort', description: 'Historic Portuguese fort from 1560', coordinates: { lat: 8.9753, lng: 79.9167 } },
+                        { name: "Adam's Bridge", description: 'Ancient limestone shoals to India', coordinates: { lat: 9.0833, lng: 79.7833 } },
+                        { name: 'Ancient Baobab Tree', description: '700-year-old African baobab', coordinates: { lat: 9.0147, lng: 79.8803 } },
+                        { name: 'Thiruketheeswaram Temple', description: 'Ancient Hindu temple', coordinates: { lat: 8.9500, lng: 79.8833 } },
+                        { name: 'Talaimannar Beach', description: 'Westernmost point of Sri Lanka', coordinates: { lat: 9.1000, lng: 79.7167 } },
+                        { name: 'Bird Sanctuary', description: 'Migratory bird watching area', coordinates: { lat: 8.9667, lng: 79.9500 } }
+                      ]}
+                      height="500px"
+                    />
+                  </div>
+                  <div className="space-y-6">
+                    <WeatherWidget
+                      locationName="Mannar"
+                      latitude={MANNAR_CENTER.lat}
+                      longitude={MANNAR_CENTER.lng}
+                    />
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <MapPin className="w-5 h-5 text-blue-600" />
+                          Key Locations
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="flex items-start gap-2">
+                          <Bird className="w-4 h-4 text-blue-600 mt-1" />
+                          <div>
+                            <p className="font-medium">Bird Sanctuary</p>
+                            <p className="text-sm text-muted-foreground">200+ species, Oct-Mar peak season</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <Globe className="w-4 h-4 text-blue-600 mt-1" />
+                          <div>
+                            <p className="font-medium">Adam's Bridge</p>
+                            <p className="text-sm text-muted-foreground">Mythological limestone shoals</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <Church className="w-4 h-4 text-blue-600 mt-1" />
+                          <div>
+                            <p className="font-medium">Historic Sites</p>
+                            <p className="text-sm text-muted-foreground">Fort, temples & baobab trees</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <Waves className="w-4 h-4 text-blue-600 mt-1" />
+                          <div>
+                            <p className="font-medium">Talaimannar Beach</p>
+                            <p className="text-sm text-muted-foreground">Westernmost point of Sri Lanka</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              </motion.section>
+            )}
           </AnimatePresence>
         </div>
 
@@ -1108,16 +1236,28 @@ const Mannar = () => {
           </div>
         </section>
 
+        {/* WhatsApp Float Button */}
+        <a
+          href="https://wa.me/94777123456?text=Hi!%20I%27m%20interested%20in%20visiting%20Mannar.%20Can%20you%20help%20me%20plan%20my%20trip?"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="fixed bottom-6 right-6 z-50 bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
+          aria-label="Chat on WhatsApp"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+          >
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+          </svg>
+        </a>
+
       </main>
 
       <Footer />
-
-      {/* Enhanced Booking Modal */}
-      <EnhancedBookingModal
-        isOpen={showBookingModal}
-        onClose={() => setShowBookingModal(false)}
-        preSelectedService={selectedService}
-      />
     </>
   );
 };

@@ -5,10 +5,11 @@ import Redis from 'ioredis';
 
 const db = admin.firestore();
 
-// SendGrid API Key - Set via: firebase functions:config:set sendgrid.apikey="YOUR_API_KEY"
-const SENDGRID_API_KEY = functions.config().sendgrid?.apikey || process.env.SENDGRID_API_KEY || '';
+// SendGrid API Key - Set via: firebase functions:config:set sendgrid.api_key="YOUR_API_KEY"
+const SENDGRID_API_KEY = functions.config().sendgrid?.api_key || functions.config().sendgrid?.apikey || process.env.SENDGRID_API_KEY || '';
 if (SENDGRID_API_KEY && SENDGRID_API_KEY.startsWith('SG.')) {
   sgMail.setApiKey(SENDGRID_API_KEY);
+  console.log('SendGrid API key configured successfully');
 } else {
   console.warn('SendGrid API key not set or invalid; email sending will be disabled until a valid key is configured.');
 }
@@ -16,7 +17,7 @@ if (SENDGRID_API_KEY && SENDGRID_API_KEY.startsWith('SG.')) {
 // Company email configuration
 const FROM_EMAIL = 'info@rechargetravels.com';
 const FROM_NAME = 'Recharge Travels';
-const ADMIN_EMAIL = 'nanthan77@gmail.com';
+const ADMIN_EMAIL = 'nanthan@rechargetravels.com';
 const REPLY_TO_EMAIL = 'info@rechargetravels.com';
 
 // Redis setup (optional). Configure via: firebase functions:config:set redis.url="redis://:password@host:port"
@@ -522,6 +523,140 @@ const emailTemplates = {
       - Loyalty rewards and points
 
       Start exploring at: https://recharge-travels-73e76.web.app
+
+      Best regards,
+      Recharge Travels Team
+    `
+  }),
+
+  // AI Trip Planner Confirmation
+  aiTripPlannerConfirmation: (data: any) => ({
+    subject: `🗺️ Your AI Trip Plan is Ready - ${data.tripTitle}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+          <!-- Header -->
+          <div style="background: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%); padding: 30px; text-align: center;">
+            <img src="https://www.rechargetravels.com/logo-v2.png" alt="Recharge Travels" style="height: 50px; margin-bottom: 10px;">
+            <h1 style="color: #ffffff; margin: 0; font-size: 28px;">🗺️ Your Trip Plan is Ready!</h1>
+            <p style="color: #e9d5ff; margin: 10px 0 0;">AI-Powered Sri Lanka Itinerary</p>
+          </div>
+
+          <!-- Content -->
+          <div style="padding: 40px 30px;">
+            <h2 style="color: #333; margin-top: 0;">Hello ${data.customerName}! 👋</h2>
+            <p style="color: #666; font-size: 16px; line-height: 1.6;">
+              Thank you for using our AI Trip Planner! We've received your personalized Sri Lanka itinerary request and our travel experts are reviewing it now.
+            </p>
+
+            <!-- Trip Summary Card -->
+            <div style="background: linear-gradient(135deg, #f3e8ff 0%, #ecfeff 100%); border-radius: 12px; padding: 25px; margin: 25px 0; border-left: 4px solid #8b5cf6;">
+              <h3 style="color: #6d28d9; margin-top: 0; font-size: 18px;">✨ ${data.tripTitle}</h3>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; color: #666;">Duration:</td>
+                  <td style="padding: 8px 0; color: #333; font-weight: bold; text-align: right;">${data.duration} Days</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #666;">Travel Dates:</td>
+                  <td style="padding: 8px 0; color: #333; text-align: right;">${data.travelDates}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #666;">Travelers:</td>
+                  <td style="padding: 8px 0; color: #333; text-align: right;">${data.travelers}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #666;">Budget Style:</td>
+                  <td style="padding: 8px 0; color: #333; text-align: right; text-transform: capitalize;">${data.budget}</td>
+                </tr>
+                <tr style="border-top: 1px solid #d8b4fe;">
+                  <td style="padding: 12px 0 0; color: #333; font-weight: bold;">Estimated Cost:</td>
+                  <td style="padding: 12px 0 0; color: #8b5cf6; font-weight: bold; font-size: 20px; text-align: right;">~$${data.estimatedCost}</td>
+                </tr>
+              </table>
+            </div>
+
+            <!-- Highlights -->
+            ${data.highlights ? `
+            <div style="background-color: #f0fdf4; border-radius: 8px; padding: 20px; margin: 20px 0;">
+              <h4 style="color: #15803d; margin-top: 0;">🌟 Trip Highlights</h4>
+              <ul style="color: #166534; margin: 0; padding-left: 20px;">
+                ${data.highlights.map((h: string) => `<li style="margin-bottom: 5px;">${h}</li>`).join('')}
+              </ul>
+            </div>
+            ` : ''}
+
+            ${data.specialRequests ? `
+            <div style="background-color: #fef3c7; border-radius: 8px; padding: 15px; margin: 20px 0;">
+              <p style="color: #92400e; margin: 0;"><strong>📝 Your Notes:</strong> ${data.specialRequests}</p>
+            </div>
+            ` : ''}
+
+            <p style="color: #666; font-size: 16px; line-height: 1.6;">
+              <strong>What happens next?</strong><br>
+              Our expert travel consultants will review your itinerary and contact you within 24 hours with a customized quote including:
+            </p>
+            <ul style="color: #666; line-height: 1.8;">
+              <li>Detailed day-by-day itinerary</li>
+              <li>Accommodation options</li>
+              <li>Transport arrangements</li>
+              <li>Activity bookings</li>
+              <li>Final pricing</li>
+            </ul>
+
+            <!-- CTA Button -->
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="https://www.rechargetravels.com/ai-trip-planner"
+                 style="display: inline-block; background: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%); color: #ffffff;
+                        text-decoration: none; padding: 15px 35px; border-radius: 30px; font-weight: bold; font-size: 16px;">
+                View Your Itinerary
+              </a>
+            </div>
+          </div>
+
+          <!-- Contact Info -->
+          <div style="background-color: #f3e8ff; padding: 25px 30px; text-align: center;">
+            <p style="color: #666; margin: 0 0 10px; font-size: 14px;">Questions? We're here to help:</p>
+            <p style="color: #333; margin: 0;">
+              📧 <a href="mailto:info@rechargetravels.com" style="color: #8b5cf6; text-decoration: none;">info@rechargetravels.com</a>
+            </p>
+            <p style="color: #333; margin: 10px 0 0;">
+              <a href="https://wa.me/94777721999" style="color: #25D366; text-decoration: none;">📱 WhatsApp: +94 77 772 1999</a>
+            </p>
+          </div>
+
+          <!-- Footer -->
+          <div style="background-color: #333; padding: 20px 30px; text-align: center;">
+            <p style="color: #999; margin: 0; font-size: 12px;">
+              © ${new Date().getFullYear()} Recharge Travels. All rights reserved.<br>
+              Sri Lanka | <a href="https://www.rechargetravels.com" style="color: #8b5cf6; text-decoration: none;">www.rechargetravels.com</a>
+            </p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+    text: `
+      Your AI Trip Plan is Ready - ${data.tripTitle}
+
+      Dear ${data.customerName},
+
+      Thank you for using our AI Trip Planner! Here's your trip summary:
+
+      Trip: ${data.tripTitle}
+      Duration: ${data.duration} Days
+      Dates: ${data.travelDates}
+      Travelers: ${data.travelers}
+      Budget: ${data.budget}
+      Estimated Cost: ~$${data.estimatedCost}
+
+      Our expert travel consultants will contact you within 24 hours with a customized quote.
 
       Best regards,
       Recharge Travels Team
@@ -3379,5 +3514,829 @@ Thank you for booking with Recharge Travels! 🙏`;
   } catch (error: any) {
     console.error('Error generating WhatsApp link:', error);
     throw new functions.https.HttpsError('internal', error?.message || 'Failed to generate WhatsApp link');
+  }
+});
+
+// ==================== EMAIL QUEUE PROCESSOR ====================
+// Universal email template for queued emails
+const universalEmailTemplate = (data: any) => {
+  const templateType = data.template || data.templateId || 'booking_confirmation';
+  const templateData = data.data || data.dynamicData || data;
+  
+  // Base template wrapper
+  const wrapInTemplate = (title: string, content: string, color: string = '#10b981') => `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+    <!-- Header -->
+    <div style="background: linear-gradient(135deg, ${color} 0%, ${adjustColor(color, -20)} 100%); padding: 30px; text-align: center;">
+      <img src="https://rechargetravels.com/images/logo.png" alt="Recharge Travels" style="height: 60px; margin-bottom: 15px;">
+      <h1 style="color: #ffffff; margin: 0; font-size: 24px;">${title}</h1>
+    </div>
+    
+    <!-- Content -->
+    <div style="padding: 40px 30px;">
+      ${content}
+    </div>
+    
+    <!-- Contact Info -->
+    <div style="background-color: #f0fdf4; padding: 25px 30px; text-align: center;">
+      <p style="color: #666; margin: 0 0 10px; font-size: 14px;">Need help? Contact us:</p>
+      <p style="color: #333; margin: 0;">
+        📧 <a href="mailto:info@rechargetravels.com" style="color: ${color}; text-decoration: none;">info@rechargetravels.com</a>
+      </p>
+      <p style="color: #333; margin: 10px 0 0;">
+        <a href="https://wa.me/94773401305" style="color: #25D366; text-decoration: none;">📱 WhatsApp: +94 77 340 1305</a>
+      </p>
+    </div>
+    
+    <!-- Footer -->
+    <div style="background-color: #1f2937; padding: 20px 30px; text-align: center;">
+      <p style="color: #9ca3af; margin: 0; font-size: 12px;">
+        © ${new Date().getFullYear()} Recharge Travels (Pvt) Ltd. All rights reserved.<br>
+        Sri Lanka | <a href="https://www.rechargetravels.com" style="color: ${color}; text-decoration: none;">www.rechargetravels.com</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+  // Generate content based on template type
+  switch (templateType) {
+    case 'booking_confirmation':
+    case 'tour_booking':
+      return {
+        subject: data.subject || `✅ Booking Confirmed - ${templateData.booking_ref || templateData.bookingRef || 'Your Booking'}`,
+        html: wrapInTemplate('🎉 Booking Confirmed!', `
+          <p style="color: #374151; font-size: 16px; line-height: 1.6;">
+            Dear ${templateData.customer_name || templateData.customerName || 'Valued Customer'},
+          </p>
+          <p style="color: #374151; font-size: 16px; line-height: 1.6;">
+            Thank you for booking with Recharge Travels! Your Sri Lanka adventure has been confirmed.
+          </p>
+          
+          <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-radius: 12px; padding: 25px; margin: 25px 0; border-left: 4px solid #10b981;">
+            <h3 style="color: #065f46; margin-top: 0;">📋 Booking Details</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px 0; color: #6b7280;">Reference:</td>
+                <td style="padding: 8px 0; color: #047857; font-weight: bold; text-align: right;">${templateData.booking_ref || templateData.bookingRef || 'N/A'}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #6b7280;">Tour:</td>
+                <td style="padding: 8px 0; color: #374151; text-align: right;">${templateData.tour_title || templateData.tourTitle || 'Sri Lanka Tour'}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #6b7280;">Date:</td>
+                <td style="padding: 8px 0; color: #374151; text-align: right;">${templateData.travel_date || templateData.travelDate || 'TBD'}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #6b7280;">Travelers:</td>
+                <td style="padding: 8px 0; color: #374151; text-align: right;">${templateData.travellers || templateData.travelers || '2'} person(s)</td>
+              </tr>
+              ${templateData.pickup_location ? `
+              <tr>
+                <td style="padding: 8px 0; color: #6b7280;">Pickup:</td>
+                <td style="padding: 8px 0; color: #374151; text-align: right;">${templateData.pickup_location}</td>
+              </tr>` : ''}
+              <tr style="border-top: 2px solid #d1fae5;">
+                <td style="padding: 12px 0 0; color: #374151; font-weight: bold;">Total:</td>
+                <td style="padding: 12px 0 0; color: #059669; font-weight: bold; font-size: 20px; text-align: right;">$${templateData.total_amount || templateData.totalAmount || '0'}</td>
+              </tr>
+            </table>
+          </div>
+          
+          <p style="color: #6b7280; font-size: 14px;">
+            Our team will contact you within 24 hours to finalize details. You can also reach us on WhatsApp for instant assistance.
+          </p>
+        `)
+      };
+
+    case 'train_booking_confirmation':
+      return {
+        subject: data.subject || `🚂 Train Booking Confirmed - ${templateData.bookingReference}`,
+        html: wrapInTemplate('🚂 Train Booking Confirmed!', `
+          <p style="color: #374151; font-size: 16px; line-height: 1.6;">
+            Dear ${templateData.customerName || 'Valued Customer'},
+          </p>
+          <p style="color: #374151; font-size: 16px; line-height: 1.6;">
+            Your scenic train journey in Sri Lanka has been booked successfully!
+          </p>
+          
+          <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-radius: 12px; padding: 25px; margin: 25px 0; border-left: 4px solid #3b82f6;">
+            <h3 style="color: #1e40af; margin-top: 0;">🎫 Train Details</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px 0; color: #6b7280;">Booking Ref:</td>
+                <td style="padding: 8px 0; color: #1d4ed8; font-weight: bold; text-align: right;">${templateData.bookingReference}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #6b7280;">Train:</td>
+                <td style="padding: 8px 0; color: #374151; text-align: right;">${templateData.trainName} (${templateData.trainNumber || ''})</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #6b7280;">Route:</td>
+                <td style="padding: 8px 0; color: #374151; text-align: right;">${templateData.departureStation} → ${templateData.arrivalStation}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #6b7280;">Date:</td>
+                <td style="padding: 8px 0; color: #374151; text-align: right;">${templateData.formattedDate || templateData.travelDate}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #6b7280;">Time:</td>
+                <td style="padding: 8px 0; color: #374151; text-align: right;">${templateData.departureTime} - ${templateData.arrivalTime}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #6b7280;">Class:</td>
+                <td style="padding: 8px 0; color: #374151; text-align: right;">${templateData.selectedClass}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #6b7280;">Passengers:</td>
+                <td style="padding: 8px 0; color: #374151; text-align: right;">${templateData.passengers}</td>
+              </tr>
+              <tr style="border-top: 2px solid #bfdbfe;">
+                <td style="padding: 12px 0 0; color: #374151; font-weight: bold;">Total:</td>
+                <td style="padding: 12px 0 0; color: #2563eb; font-weight: bold; font-size: 20px; text-align: right;">$${templateData.totalPrice}</td>
+              </tr>
+            </table>
+          </div>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${templateData.confirmationUrl || 'https://www.rechargetravels.com'}" style="display: inline-block; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: #ffffff; text-decoration: none; padding: 15px 35px; border-radius: 30px; font-weight: bold;">
+              View Booking Details
+            </a>
+          </div>
+        `, '#3b82f6')
+      };
+
+    case 'vehicle_booking':
+    case 'vehicle_rental_confirmation':
+      return {
+        subject: data.subject || `🚗 Vehicle Rental Confirmed - ${templateData.bookingReference}`,
+        html: wrapInTemplate('🚗 Vehicle Rental Confirmed!', `
+          <p style="color: #374151; font-size: 16px; line-height: 1.6;">
+            Dear ${templateData.customerName || 'Valued Customer'},
+          </p>
+          <p style="color: #374151; font-size: 16px; line-height: 1.6;">
+            Your vehicle rental has been confirmed. Here are your booking details:
+          </p>
+          
+          <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 25px; margin: 25px 0; border-left: 4px solid #f59e0b;">
+            <h3 style="color: #92400e; margin-top: 0;">🚙 Rental Details</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px 0; color: #6b7280;">Booking Ref:</td>
+                <td style="padding: 8px 0; color: #b45309; font-weight: bold; text-align: right;">${templateData.bookingReference}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #6b7280;">Vehicle:</td>
+                <td style="padding: 8px 0; color: #374151; text-align: right;">${templateData.vehicleName || templateData.vehicle}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #6b7280;">Pickup:</td>
+                <td style="padding: 8px 0; color: #374151; text-align: right;">${templateData.pickupDate} @ ${templateData.pickupTime || ''}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #6b7280;">Return:</td>
+                <td style="padding: 8px 0; color: #374151; text-align: right;">${templateData.returnDate} @ ${templateData.returnTime || ''}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #6b7280;">Location:</td>
+                <td style="padding: 8px 0; color: #374151; text-align: right;">${templateData.pickupLocation || 'TBD'}</td>
+              </tr>
+              <tr style="border-top: 2px solid #fcd34d;">
+                <td style="padding: 12px 0 0; color: #374151; font-weight: bold;">Total:</td>
+                <td style="padding: 12px 0 0; color: #d97706; font-weight: bold; font-size: 20px; text-align: right;">$${templateData.totalPrice || templateData.total}</td>
+              </tr>
+            </table>
+          </div>
+        `, '#f59e0b')
+      };
+
+    case 'admin_new_booking':
+      return {
+        subject: data.subject || `🔔 New Booking: ${templateData.booking_ref} - ${templateData.tour_title}`,
+        html: wrapInTemplate('🔔 New Booking Received!', `
+          <div style="background: #fef2f2; border-radius: 12px; padding: 25px; margin: 25px 0; border-left: 4px solid #ef4444;">
+            <h3 style="color: #991b1b; margin-top: 0;">⚡ Action Required</h3>
+            <p style="color: #7f1d1d;">New booking received - please process within 24 hours.</p>
+          </div>
+          
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 8px 0; color: #6b7280;">Reference:</td>
+              <td style="padding: 8px 0; color: #374151; font-weight: bold; text-align: right;">${templateData.booking_ref}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #6b7280;">Tour:</td>
+              <td style="padding: 8px 0; color: #374151; text-align: right;">${templateData.tour_title}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #6b7280;">Customer:</td>
+              <td style="padding: 8px 0; color: #374151; text-align: right;">${templateData.customer_name}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #6b7280;">Email:</td>
+              <td style="padding: 8px 0; color: #374151; text-align: right;">${templateData.customer_email}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #6b7280;">Phone:</td>
+              <td style="padding: 8px 0; color: #374151; text-align: right;">${templateData.customer_phone}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #6b7280;">Date:</td>
+              <td style="padding: 8px 0; color: #374151; text-align: right;">${templateData.travel_date}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #6b7280;">Travelers:</td>
+              <td style="padding: 8px 0; color: #374151; text-align: right;">${templateData.travellers}</td>
+            </tr>
+            <tr style="border-top: 2px solid #e5e7eb;">
+              <td style="padding: 12px 0 0; color: #374151; font-weight: bold;">Total:</td>
+              <td style="padding: 12px 0 0; color: #059669; font-weight: bold; font-size: 20px; text-align: right;">$${templateData.total_amount}</td>
+            </tr>
+          </table>
+        `, '#ef4444')
+      };
+
+    default:
+      return {
+        subject: data.subject || 'Recharge Travels Notification',
+        html: wrapInTemplate('Notification', `
+          <p style="color: #374151; font-size: 16px; line-height: 1.6;">
+            ${JSON.stringify(templateData, null, 2).replace(/\n/g, '<br>')}
+          </p>
+        `)
+      };
+  }
+};
+
+// Helper function to adjust color brightness
+function adjustColor(hex: string, percent: number): string {
+  const num = parseInt(hex.replace('#', ''), 16);
+  const amt = Math.round(2.55 * percent);
+  const R = (num >> 16) + amt;
+  const G = (num >> 8 & 0x00FF) + amt;
+  const B = (num & 0x0000FF) + amt;
+  return '#' + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+    (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+    (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
+}
+
+// Process pending emails from emailQueue collection
+export const processEmailQueue = functions.firestore
+  .document('emailQueue/{emailId}')
+  .onCreate(async (snap, context) => {
+    const emailData = snap.data();
+    const emailId = context.params.emailId;
+
+    console.log(`Processing email ${emailId}:`, emailData.to, emailData.template || emailData.templateId);
+
+    if (!SENDGRID_API_KEY || !SENDGRID_API_KEY.startsWith('SG.')) {
+      console.error('SendGrid API key not configured');
+      await snap.ref.update({ status: 'failed', error: 'SendGrid not configured', processedAt: admin.firestore.FieldValue.serverTimestamp() });
+      return;
+    }
+
+    try {
+      const template = universalEmailTemplate(emailData);
+      
+      await sgMail.send({
+        to: emailData.to,
+        from: { email: FROM_EMAIL, name: FROM_NAME },
+        replyTo: REPLY_TO_EMAIL,
+        subject: template.subject,
+        html: template.html
+      });
+
+      await snap.ref.update({
+        status: 'sent',
+        sentAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+
+      console.log(`Email sent successfully to ${emailData.to}`);
+    } catch (error: any) {
+      console.error(`Failed to send email ${emailId}:`, error);
+      await snap.ref.update({
+        status: 'failed',
+        error: error?.message || 'Unknown error',
+        processedAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+    }
+  });
+
+// Process pending emails from whatsappQueue for WhatsApp notifications
+export const processWhatsAppQueue = functions.firestore
+  .document('whatsappQueue/{messageId}')
+  .onCreate(async (snap, context) => {
+    const messageData = snap.data();
+    const messageId = context.params.messageId;
+
+    console.log(`Processing WhatsApp message ${messageId} to ${messageData.to}`);
+
+    try {
+      // Store in whatsappMessages collection for the existing WhatsApp function
+      await db.collection('whatsappMessages').add({
+        ...messageData,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        fromQueue: messageId
+      });
+
+      await snap.ref.update({
+        status: 'processed',
+        processedAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+
+      console.log(`WhatsApp message queued for ${messageData.to}`);
+    } catch (error: any) {
+      console.error(`Failed to process WhatsApp ${messageId}:`, error);
+      await snap.ref.update({
+        status: 'failed',
+        error: error?.message || 'Unknown error',
+        processedAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+    }
+  });
+
+// Property Listing Email Templates
+const propertyListingEmailTemplates = {
+  confirmation: (data: { ownerName: string; propertyName: string; listingId: string }) => ({
+    subject: `Property Listing Received - ${data.propertyName}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f8fafc; }
+          .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+          .header { background: linear-gradient(135deg, #0d9488 0%, #059669 100%); padding: 40px 30px; text-align: center; }
+          .header h1 { color: white; margin: 0; font-size: 28px; }
+          .content { padding: 40px 30px; }
+          .highlight-box { background: #f0fdfa; border-left: 4px solid #14b8a6; padding: 20px; margin: 20px 0; border-radius: 8px; }
+          .steps { margin: 30px 0; }
+          .step { display: flex; align-items: flex-start; margin-bottom: 16px; }
+          .step-number { background: #14b8a6; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 12px; flex-shrink: 0; }
+          .footer { background: #f1f5f9; padding: 30px; text-align: center; color: #64748b; font-size: 14px; }
+          .btn { display: inline-block; background: linear-gradient(135deg, #0d9488 0%, #059669 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 30px; font-weight: 600; margin: 20px 0; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>🏨 Application Received!</h1>
+          </div>
+          <div class="content">
+            <p>Dear <strong>${data.ownerName}</strong>,</p>
+            <p>Thank you for submitting your property <strong>"${data.propertyName}"</strong> to Recharge Travels! We're excited to review your listing.</p>
+            
+            <div class="highlight-box">
+              <strong>Your Reference ID:</strong> ${data.listingId}
+              <br><br>
+              Please save this ID for future reference.
+            </div>
+
+            <h3>What happens next?</h3>
+            <div class="steps">
+              <div class="step">
+                <div class="step-number">1</div>
+                <div>Our team will review your property details within 24-48 hours.</div>
+              </div>
+              <div class="step">
+                <div class="step-number">2</div>
+                <div>We may contact you for additional information or verification.</div>
+              </div>
+              <div class="step">
+                <div class="step-number">3</div>
+                <div>Once approved, your property will be live on our platform!</div>
+              </div>
+            </div>
+
+            <p>If you have any questions, feel free to reach out to us.</p>
+            
+            <p style="margin-top: 30px;">
+              Best regards,<br>
+              <strong>The Recharge Travels Team</strong>
+            </p>
+          </div>
+          <div class="footer">
+            <p>Recharge Travels | Sri Lanka's Premier Travel Partner</p>
+            <p>📞 +94 77 772 1999 | ✉️ info@rechargetravels.com</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `
+  }),
+
+  approved: (data: { ownerName: string; propertyName: string; listingId: string }) => ({
+    subject: `🎉 Property Approved - ${data.propertyName}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f8fafc; }
+          .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+          .header { background: linear-gradient(135deg, #059669 0%, #10b981 100%); padding: 40px 30px; text-align: center; }
+          .header h1 { color: white; margin: 0; font-size: 28px; }
+          .content { padding: 40px 30px; }
+          .success-box { background: #ecfdf5; border: 2px solid #10b981; padding: 20px; margin: 20px 0; border-radius: 12px; text-align: center; }
+          .footer { background: #f1f5f9; padding: 30px; text-align: center; color: #64748b; font-size: 14px; }
+          .btn { display: inline-block; background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 30px; font-weight: 600; margin: 20px 0; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>🎉 Congratulations!</h1>
+          </div>
+          <div class="content">
+            <p>Dear <strong>${data.ownerName}</strong>,</p>
+            
+            <div class="success-box">
+              <h2 style="color: #059669; margin: 0 0 10px 0;">Your Property is Now Live!</h2>
+              <p style="margin: 0; color: #065f46;"><strong>"${data.propertyName}"</strong> has been approved and is now visible to travelers worldwide.</p>
+            </div>
+
+            <p>Your property is now part of Sri Lanka's premier luxury travel network. Here's what you can expect:</p>
+            <ul>
+              <li>Access to high-value international travelers</li>
+              <li>Professional marketing and promotion</li>
+              <li>Secure booking and payment processing</li>
+              <li>Dedicated partner support</li>
+            </ul>
+
+            <p style="text-align: center;">
+              <a href="https://rechargetravels.com/hotels" class="btn">View Your Listing</a>
+            </p>
+
+            <p>Welcome to the Recharge Travels family!</p>
+            
+            <p style="margin-top: 30px;">
+              Best regards,<br>
+              <strong>The Recharge Travels Team</strong>
+            </p>
+          </div>
+          <div class="footer">
+            <p>Recharge Travels | Sri Lanka's Premier Travel Partner</p>
+            <p>📞 +94 77 772 1999 | ✉️ info@rechargetravels.com</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `
+  }),
+
+  rejected: (data: { ownerName: string; propertyName: string; listingId: string; reason?: string }) => ({
+    subject: `Property Listing Update - ${data.propertyName}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f8fafc; }
+          .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+          .header { background: linear-gradient(135deg, #64748b 0%, #475569 100%); padding: 40px 30px; text-align: center; }
+          .header h1 { color: white; margin: 0; font-size: 28px; }
+          .content { padding: 40px 30px; }
+          .info-box { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 20px; margin: 20px 0; border-radius: 8px; }
+          .footer { background: #f1f5f9; padding: 30px; text-align: center; color: #64748b; font-size: 14px; }
+          .btn { display: inline-block; background: linear-gradient(135deg, #0d9488 0%, #059669 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 30px; font-weight: 600; margin: 20px 0; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Listing Update</h1>
+          </div>
+          <div class="content">
+            <p>Dear <strong>${data.ownerName}</strong>,</p>
+            <p>Thank you for your interest in partnering with Recharge Travels. After reviewing your property <strong>"${data.propertyName}"</strong>, we were unable to approve it at this time.</p>
+            
+            ${data.reason ? `
+            <div class="info-box">
+              <strong>Reason:</strong><br>
+              ${data.reason}
+            </div>
+            ` : ''}
+
+            <p>This doesn't mean you can't try again! Here are some tips to improve your listing:</p>
+            <ul>
+              <li>Add high-quality, well-lit photos of your property</li>
+              <li>Provide a detailed and accurate description</li>
+              <li>Ensure all required documents are valid and readable</li>
+              <li>Verify your contact information is correct</li>
+            </ul>
+
+            <p style="text-align: center;">
+              <a href="https://rechargetravels.com/list-property" class="btn">Resubmit Your Property</a>
+            </p>
+
+            <p>If you have questions or need assistance, please don't hesitate to contact us.</p>
+            
+            <p style="margin-top: 30px;">
+              Best regards,<br>
+              <strong>The Recharge Travels Team</strong>
+            </p>
+          </div>
+          <div class="footer">
+            <p>Recharge Travels | Sri Lanka's Premier Travel Partner</p>
+            <p>📞 +94 77 772 1999 | ✉️ info@rechargetravels.com</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `
+  })
+};
+
+// Cloud Function to send property listing emails
+export const sendPropertyListingEmail = functions.https.onCall(async (data, context) => {
+  const { type, listingId, ownerEmail, ownerName, propertyName, reason } = data;
+
+  if (!ownerEmail || !ownerName || !propertyName || !listingId) {
+    throw new functions.https.HttpsError('invalid-argument', 'Missing required fields');
+  }
+
+  if (!SENDGRID_API_KEY || !SENDGRID_API_KEY.startsWith('SG.')) {
+    console.warn('SendGrid API key not configured, skipping email');
+    return { success: false, message: 'Email service not configured' };
+  }
+
+  let template;
+  switch (type) {
+    case 'confirmation':
+      template = propertyListingEmailTemplates.confirmation({ ownerName, propertyName, listingId });
+      break;
+    case 'approved':
+      template = propertyListingEmailTemplates.approved({ ownerName, propertyName, listingId });
+      break;
+    case 'rejected':
+      template = propertyListingEmailTemplates.rejected({ ownerName, propertyName, listingId, reason });
+      break;
+    default:
+      throw new functions.https.HttpsError('invalid-argument', 'Invalid email type');
+  }
+
+  try {
+    await sgMail.send({
+      to: ownerEmail,
+      from: { email: FROM_EMAIL, name: FROM_NAME },
+      replyTo: REPLY_TO_EMAIL,
+      subject: template.subject,
+      html: template.html
+    });
+
+    // Also notify admin for new listings
+    if (type === 'confirmation') {
+      await sgMail.send({
+        to: ADMIN_EMAIL,
+        from: { email: FROM_EMAIL, name: FROM_NAME },
+        subject: `🏨 New Property Listing: ${propertyName}`,
+        html: `
+          <p>A new property has been submitted for review:</p>
+          <ul>
+            <li><strong>Property:</strong> ${propertyName}</li>
+            <li><strong>Owner:</strong> ${ownerName}</li>
+            <li><strong>Email:</strong> ${ownerEmail}</li>
+            <li><strong>Listing ID:</strong> ${listingId}</li>
+          </ul>
+          <p><a href="https://recharge-travels-admin.web.app/property-listings">Review in Admin Panel</a></p>
+        `
+      });
+    }
+
+    console.log(`Property listing email (${type}) sent to ${ownerEmail}`);
+    return { success: true };
+  } catch (error: any) {
+    console.error('Failed to send property listing email:', error);
+    throw new functions.https.HttpsError('internal', 'Failed to send email');
+  }
+});
+
+// ==========================================
+// HOTEL BOOKING EMAIL NOTIFICATIONS
+// ==========================================
+
+const hotelBookingEmailTemplates = {
+  confirmation: (data: { 
+    guestName: string, 
+    bookingReference: string, 
+    hotelName: string, 
+    roomType: string,
+    checkIn: string, 
+    checkOut: string, 
+    nights: number,
+    totalAmount: number,
+    currency: string
+  }) => ({
+    subject: `🏨 Booking Confirmed - ${data.bookingReference} | ${data.hotelName}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%); color: white; padding: 30px; text-align: center; border-radius: 12px 12px 0 0; }
+          .header h1 { margin: 0; font-size: 24px; }
+          .content { background: #ffffff; padding: 30px; border: 1px solid #e5e7eb; }
+          .booking-details { background: #f0f9ff; border-radius: 8px; padding: 20px; margin: 20px 0; }
+          .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e5e7eb; }
+          .detail-row:last-child { border-bottom: none; }
+          .detail-label { color: #6b7280; }
+          .detail-value { font-weight: 600; color: #1f2937; }
+          .total-row { background: #1e3a5f; color: white; padding: 15px 20px; border-radius: 8px; margin-top: 20px; }
+          .footer { background: #f9fafb; padding: 20px; text-align: center; border-radius: 0 0 12px 12px; border: 1px solid #e5e7eb; border-top: none; }
+          .success-badge { background: #10b981; color: white; padding: 8px 16px; border-radius: 20px; display: inline-block; margin-bottom: 15px; }
+          .btn { display: inline-block; background: #f97316; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; margin-top: 15px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>🏨 Recharge Travels</h1>
+            <p>Your Sri Lanka Adventure Awaits!</p>
+          </div>
+          <div class="content">
+            <div class="success-badge">✓ Booking Confirmed</div>
+            <h2>Thank you, ${data.guestName}!</h2>
+            <p>Your hotel booking has been confirmed. Here are your booking details:</p>
+            
+            <div class="booking-details">
+              <div class="detail-row">
+                <span class="detail-label">Booking Reference</span>
+                <span class="detail-value">${data.bookingReference}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Hotel</span>
+                <span class="detail-value">${data.hotelName}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Room Type</span>
+                <span class="detail-value">${data.roomType}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Check-in</span>
+                <span class="detail-value">${data.checkIn}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Check-out</span>
+                <span class="detail-value">${data.checkOut}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Duration</span>
+                <span class="detail-value">${data.nights} night${data.nights > 1 ? 's' : ''}</span>
+              </div>
+            </div>
+            
+            <div class="total-row">
+              <strong>Total Amount: ${data.currency} ${data.totalAmount.toFixed(2)}</strong>
+            </div>
+            
+            <p style="margin-top: 20px;">
+              <strong>What's Next?</strong><br>
+              - Present your booking reference at check-in<br>
+              - Standard check-in time is 2:00 PM<br>
+              - Standard check-out time is 12:00 PM<br>
+              - Contact the hotel directly for early check-in requests
+            </p>
+            
+            <a href="https://recharge-travels-73e76.web.app/my-bookings" class="btn">
+              View My Bookings
+            </a>
+          </div>
+          <div class="footer">
+            <p><strong>Need Assistance?</strong></p>
+            <p>📧 info@rechargetravels.com | 📞 +94 77 772 1999</p>
+            <p style="color: #9ca3af; font-size: 12px;">© ${new Date().getFullYear()} Recharge Travels. All rights reserved.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `
+  }),
+
+  cancellation: (data: { 
+    guestName: string, 
+    bookingReference: string, 
+    hotelName: string 
+  }) => ({
+    subject: `Booking Cancelled - ${data.bookingReference} | Recharge Travels`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: #dc2626; color: white; padding: 30px; text-align: center; border-radius: 12px 12px 0 0; }
+          .content { background: #ffffff; padding: 30px; border: 1px solid #e5e7eb; }
+          .footer { background: #f9fafb; padding: 20px; text-align: center; border-radius: 0 0 12px 12px; border: 1px solid #e5e7eb; border-top: none; }
+          .btn { display: inline-block; background: #f97316; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; margin-top: 15px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Booking Cancelled</h1>
+          </div>
+          <div class="content">
+            <h2>Hi ${data.guestName},</h2>
+            <p>Your booking <strong>${data.bookingReference}</strong> for <strong>${data.hotelName}</strong> has been cancelled.</p>
+            <p>If you did not request this cancellation, please contact us immediately.</p>
+            <p>We hope to see you soon on your next trip to Sri Lanka!</p>
+            <a href="https://recharge-travels-73e76.web.app/hotels" class="btn">
+              Browse Hotels
+            </a>
+          </div>
+          <div class="footer">
+            <p>📧 info@rechargetravels.com | 📞 +94 77 772 1999</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `
+  })
+};
+
+export const sendHotelBookingEmail = functions.https.onCall(async (data, context) => {
+  const { 
+    type, bookingId, bookingReference, guestEmail, guestName, 
+    hotelName, roomType, checkIn, checkOut, nights, totalAmount, currency 
+  } = data;
+
+  if (!guestEmail || !bookingReference || !hotelName) {
+    throw new functions.https.HttpsError('invalid-argument', 'Missing required fields');
+  }
+
+  if (!SENDGRID_API_KEY || !SENDGRID_API_KEY.startsWith('SG.')) {
+    console.warn('SendGrid API key not configured, skipping email');
+    return { success: false, message: 'Email service not configured' };
+  }
+
+  let template;
+  switch (type) {
+    case 'confirmation':
+      template = hotelBookingEmailTemplates.confirmation({
+        guestName, bookingReference, hotelName, roomType,
+        checkIn, checkOut, nights, totalAmount, currency
+      });
+      break;
+    case 'cancellation':
+      template = hotelBookingEmailTemplates.cancellation({
+        guestName, bookingReference, hotelName
+      });
+      break;
+    default:
+      throw new functions.https.HttpsError('invalid-argument', 'Invalid email type');
+  }
+
+  try {
+    await sgMail.send({
+      to: guestEmail,
+      from: { email: FROM_EMAIL, name: FROM_NAME },
+      replyTo: REPLY_TO_EMAIL,
+      subject: template.subject,
+      html: template.html
+    });
+
+    // Notify admin for new bookings
+    if (type === 'confirmation') {
+      await sgMail.send({
+        to: ADMIN_EMAIL,
+        from: { email: FROM_EMAIL, name: FROM_NAME },
+        subject: `🏨 New Hotel Booking: ${bookingReference}`,
+        html: `
+          <h2>New Hotel Booking Received</h2>
+          <ul>
+            <li><strong>Reference:</strong> ${bookingReference}</li>
+            <li><strong>Hotel:</strong> ${hotelName}</li>
+            <li><strong>Guest:</strong> ${guestName} (${guestEmail})</li>
+            <li><strong>Check-in:</strong> ${checkIn}</li>
+            <li><strong>Check-out:</strong> ${checkOut}</li>
+            <li><strong>Total:</strong> ${currency} ${totalAmount}</li>
+          </ul>
+          <p><a href="https://recharge-travels-admin.web.app/hotel-bookings">View in Admin Panel</a></p>
+        `
+      });
+    }
+
+    console.log(`Hotel booking email (${type}) sent to ${guestEmail}`);
+    return { success: true };
+  } catch (error: any) {
+    console.error('Failed to send hotel booking email:', error);
+    throw new functions.https.HttpsError('internal', 'Failed to send email');
   }
 });

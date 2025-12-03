@@ -1,5 +1,6 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
+import { buildAggregateRating, buildBrand, buildOffersFromItems, getBaseUrl, parsePrice } from '@/utils/seoSchemaHelpers';
 
 interface SEOSchemaProps {
     type: 'LocalBusiness' | 'TouristAttraction' | 'TouristTrip' | 'Product';
@@ -30,10 +31,8 @@ interface SEOSchemaProps {
  * Adds structured data for better Google indexing
  */
 export const SEOSchema: React.FC<SEOSchemaProps> = ({ type, data }) => {
-    const baseUrl =
-        typeof window !== 'undefined'
-            ? window.location.origin
-            : 'https://recharge-travels-73e76.web.app'
+    const baseUrl = getBaseUrl();
+    const brand = buildBrand(baseUrl);
 
     const generateSchema = () => {
         const baseSchema = {
@@ -63,7 +62,7 @@ export const SEOSchema: React.FC<SEOSchemaProps> = ({ type, data }) => {
                         latitude: 6.9271,
                         longitude: 79.8612,
                     },
-                    url: 'https://www.rechargetravels.com',
+                    url: baseUrl,
                     priceRange: '$$-$$$',
                     sameAs: [
                         'https://www.facebook.com/rechargetravels',
@@ -84,11 +83,7 @@ export const SEOSchema: React.FC<SEOSchemaProps> = ({ type, data }) => {
                         latitude: data.location.latitude,
                         longitude: data.location.longitude,
                     } : undefined,
-                    aggregateRating: data.rating ? {
-                        '@type': 'AggregateRating',
-                        ratingValue: data.rating.value,
-                        reviewCount: data.rating.count,
-                    } : undefined,
+                    aggregateRating: buildAggregateRating(data.rating?.value, data.rating?.count),
                 };
 
             case 'TouristTrip':
@@ -110,22 +105,20 @@ export const SEOSchema: React.FC<SEOSchemaProps> = ({ type, data }) => {
                             },
                         })),
                     } : undefined,
-                    offers: data.price ? {
+                    offers: parsePrice(data.price) !== null ? {
                         '@type': 'Offer',
-                        price: data.price,
+                        price: parsePrice(data.price),
                         priceCurrency: data.currency || 'USD',
                         availability: 'https://schema.org/InStock',
+                        url: baseUrl,
+                        seller: brand
                     } : undefined,
                     provider: {
                         '@type': 'TravelAgency',
                         name: 'Recharge Travels',
-                        url: 'https://www.rechargetravels.com',
+                        url: baseUrl,
                     },
-                    aggregateRating: data.rating ? {
-                        '@type': 'AggregateRating',
-                        ratingValue: data.rating.value,
-                        reviewCount: data.rating.count,
-                    } : undefined,
+                    aggregateRating: buildAggregateRating(data.rating?.value, data.rating?.count),
                 };
 
             case 'Product':
@@ -135,21 +128,9 @@ export const SEOSchema: React.FC<SEOSchemaProps> = ({ type, data }) => {
                     name: data.name,
                     description: data.description,
                     image: data.image,
-                    offers: {
-                        '@type': 'Offer',
-                        price: data.price,
-                        priceCurrency: data.currency || 'USD',
-                        availability: 'https://schema.org/InStock',
-                        seller: {
-                            '@type': 'Organization',
-                            name: 'Recharge Travels',
-                        },
-                    },
-                    aggregateRating: data.rating ? {
-                        '@type': 'AggregateRating',
-                        ratingValue: data.rating.value,
-                        reviewCount: data.rating.count,
-                    } : undefined,
+                    offers: buildOffersFromItems([{ name: data.name, price: data.price }], baseUrl),
+                    aggregateRating: buildAggregateRating(data.rating?.value, data.rating?.count),
+                    brand
                 };
 
             default:

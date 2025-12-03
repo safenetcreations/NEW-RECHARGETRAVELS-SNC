@@ -19,6 +19,8 @@ const TransportDropdown = ({ animatingItem, onMenuClick, isScrolled }: Transport
       isScrolled={isScrolled}
       hoverColorClass="group-hover:text-[#f39c12]"
       gradientClass="hover:from-orange-50 hover:to-orange-100"
+      primaryHref="/transport"
+      primaryLabel="Transport Overview"
     />
   )
 }

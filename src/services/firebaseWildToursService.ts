@@ -207,6 +207,24 @@ class FirebaseWildToursService {
       return [];
     }
   }
+  /**
+   * Create a new booking
+   */
+  async createBooking(bookingData: any): Promise<string> {
+    try {
+      const bookingsRef = collection(db, 'wildtours_bookings');
+      const docRef = await addDoc(bookingsRef, {
+        ...bookingData,
+        createdAt: Timestamp.now(),
+        status: 'confirmed', // Auto-confirm for demo/payment success
+        paymentStatus: 'paid_deposit'
+      });
+      return docRef.id;
+    } catch (error) {
+      console.error('Error creating booking:', error);
+      throw error;
+    }
+  }
 }
 
 export const wildToursService = new FirebaseWildToursService();

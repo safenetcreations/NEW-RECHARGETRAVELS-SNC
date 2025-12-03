@@ -28,6 +28,7 @@ import {
   CheckCircle,
   TrendingUp,
   Globe,
+  Building2,
   ChevronLeft,
   ChevronRight,
   Pin,
@@ -165,6 +166,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           path: `/destinations?destination=${dest.slug}`
         })),
         { id: 'luxury-experiences', label: 'Luxury Experiences', icon: Sparkles, path: '/luxury-experiences' },
+        { id: 'luxury-content', label: 'Luxury Content Manager', icon: Crown, path: '/luxury-content' },
         { id: 'travel-packages', label: 'Travel Packages', icon: Sparkles, path: '/travel-packages' },
         { id: 'testimonials', label: 'Testimonials', icon: MessageCircle, path: '/testimonials' },
         { id: 'about-section', label: 'About Section', icon: Info, path: '/about-section' },
@@ -182,6 +184,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
         { id: 'ayurveda-wellness', label: 'Ayurveda & Wellness', icon: Leaf, path: '/ayurveda-wellness' },
         { id: 'tea-trails', label: 'Tea Trails', icon: Leaf, path: '/tea-trails' },
         { id: 'pilgrimage-tours', label: 'Pilgrimage Tours', icon: Mountain, path: '/pilgrimage-tours' },
+        { id: 'hikkaduwa-water-sports', label: 'Hikkaduwa Water Sports', icon: Waves, path: '/hikkaduwa-water-sports' },
+        { id: 'island-getaways', label: 'Island Getaways', icon: Navigation, path: '/island-getaways' },
+        { id: 'train-journeys', label: 'Train Journeys', icon: Train, path: '/train-journeys' },
+        { id: 'waterfalls', label: 'Waterfalls', icon: Droplets, path: '/waterfalls' },
+        { id: 'lagoon-safari', label: 'Lagoon Safari', icon: TreePine, path: '/lagoon-safari' },
         { id: 'private-tours', label: 'Private Tours', icon: Car, path: '/private-tours' },
         { id: 'group-transport', label: 'Group Transport', icon: Bus, path: '/group-transport' },
         { id: 'train-booking', label: 'Train Booking', icon: Train, path: '/train-booking' },
@@ -212,7 +219,10 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
       items: [
         { id: 'global-tours', label: 'Global Tours', icon: Globe, path: '/global-tours' },
         { id: 'global-tour-bookings', label: 'Tour Bookings', icon: Calendar, path: '/global-tour-bookings' },
+        { id: 'tripadvisor-tours', label: 'TripAdvisor Tours', icon: Star, path: '/tripadvisor-tours' },
+        { id: 'vip-concierge', label: 'VIP Concierge', icon: Crown, path: '/vip-concierge' },
         { id: 'hotels', label: 'Hotels & Lodges', icon: Hotel, path: '/hotels' },
+        { id: 'property-listings', label: 'Property Listings', icon: Building2, path: '/property-listings' },
         { id: 'tours', label: 'Tours & Packages', icon: MapPin, path: '/tours' },
         { id: 'nationalparks', label: 'National Parks', icon: TreePine, path: '/nationalparks' },
         { id: 'cultural-tours', label: 'Cultural Tours', icon: Mountain, path: '/cultural-tours' },
@@ -220,6 +230,25 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
         { id: 'drivers', label: 'Drivers', icon: Car, path: '/drivers' },
         { id: 'driver-verification', label: 'Driver Verification', icon: Shield, path: '/driver-verification' },
         { id: 'vendor-approvals', label: 'Vendor Approvals', icon: CheckCircle, path: '/vendor-approvals' },
+      ]
+    },
+    {
+      title: 'B2B Portal',
+      items: [
+        { id: 'b2b-dashboard', label: 'B2B Dashboard', icon: Home, path: '/b2b-dashboard' },
+        { id: 'b2b-agencies', label: 'Agencies', icon: Users, path: '/b2b-agencies' },
+        { id: 'b2b-bookings', label: 'B2B Bookings', icon: Calendar, path: '/b2b-bookings' },
+        { id: 'b2b-tours', label: 'B2B Tours', icon: Globe, path: '/b2b-tours' },
+        { id: 'b2b-analytics', label: 'B2B Analytics', icon: BarChart3, path: '/b2b-analytics' },
+      ]
+    },
+    {
+      title: 'AI Tools',
+      items: [
+        { id: 'ai-content-generator', label: 'Content Generator', icon: Sparkles, path: '/ai-content-generator' },
+        { id: 'ai-content-hub', label: 'AI Content Hub', icon: Sparkles, path: '/ai-content-hub' },
+        { id: 'yalu-manager', label: 'Yalu AI Assistant', icon: MessageCircle, path: '/yalu-manager' },
+        { id: 'ai-test', label: 'AI Playground', icon: Sparkles, path: '/ai-test' },
       ]
     },
     {
@@ -245,8 +274,8 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
       title: 'System',
       items: [
         { id: 'email-templates', label: 'Email Templates', icon: Mail, path: '/email-templates' },
+        { id: 'email-queue', label: 'Email Queue', icon: Mail, path: '/email-queue' },
         { id: 'settings', label: 'Settings', icon: Settings, path: '/settings' },
-        { id: 'ai-test', label: 'AI Test', icon: Sparkles, path: '/ai-test' },
       ]
     }
   ];

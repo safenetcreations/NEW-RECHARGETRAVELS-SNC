@@ -86,6 +86,13 @@ function App() {
                 <Route path="/pilgrimage-tours" element={<AdminPanelWithSection section="pilgrimage-tours" />} />
                 <Route path="/why-choose-us" element={<AdminPanelWithSection section="why-choose-us" />} />
                 <Route path="/homepage-stats" element={<AdminPanelWithSection section="homepage-stats" />} />
+                <Route path="/hikkaduwa-water-sports" element={<AdminPanelWithSection section="hikkaduwa-water-sports" />} />
+                <Route path="/island-getaways" element={<AdminPanelWithSection section="island-getaways" />} />
+                <Route path="/train-journeys" element={<AdminPanelWithSection section="train-journeys" />} />
+                <Route path="/waterfalls" element={<AdminPanelWithSection section="waterfalls" />} />
+                <Route path="/lagoon-safari" element={<AdminPanelWithSection section="lagoon-safari" />} />
+                <Route path="/cooking-class" element={<AdminPanelWithSection section="cooking-class" />} />
+                <Route path="/custom-experience" element={<AdminPanelWithSection section="custom-experience" />} />
 
                 {/* Blog System */}
                 <Route path="/blog-manager" element={<AdminPanelWithSection section="blog-manager" />} />
@@ -100,12 +107,17 @@ function App() {
                 <Route path="/trip-builder" element={<AdminPanelWithSection section="trip-builder" />} />
 
                 {/* Services */}
+                <Route path="/global-tours" element={<AdminPanelWithSection section="global-tours" />} />
+                <Route path="/global-tour-bookings" element={<AdminPanelWithSection section="global-tour-bookings" />} />
+                <Route path="/tripadvisor-tours" element={<AdminPanelWithSection section="tripadvisor-tours" />} />
                 <Route path="/hotels" element={<AdminPanelWithSection section="hotels" />} />
+                <Route path="/fleet-vehicles" element={<AdminPanelWithSection section="fleet-vehicles" />} />
                 <Route path="/tours" element={<AdminPanelWithSection section="tours" />} />
                 <Route path="/activities" element={<AdminPanelWithSection section="activities" />} />
                 <Route path="/drivers" element={<AdminPanelWithSection section="drivers" />} />
                 <Route path="/driver-verification" element={<AdminPanelWithSection section="driver-verification" />} />
                 <Route path="/vendor-approvals" element={<AdminPanelWithSection section="vendor-approvals" />} />
+                <Route path="/luxury-content" element={<AdminPanelWithSection section="luxury-content" />} />
 
                 {/* Management */}
                 <Route path="/bookings" element={<AdminPanelWithSection section="bookings" />} />
@@ -120,10 +132,27 @@ function App() {
                 <Route path="/payment-settlements" element={<AdminPanelWithSection section="payment-settlements" />} />
                 <Route path="/driver-wallets" element={<AdminPanelWithSection section="driver-wallets" />} />
 
+                {/* Property Management */}
+                <Route path="/property-listings" element={<AdminPanelWithSection section="property-listings" />} />
+
                 {/* System */}
                 <Route path="/email-templates" element={<AdminPanelWithSection section="email-templates" />} />
+                <Route path="/email-queue" element={<AdminPanelWithSection section="email-queue" />} />
                 <Route path="/settings" element={<AdminPanelWithSection section="settings" />} />
                 <Route path="/ai-test" element={<AdminPanelWithSection section="ai-test" />} />
+
+                {/* B2B Portal */}
+                <Route path="/b2b-dashboard" element={<AdminPanelWithSection section="b2b-dashboard" />} />
+                <Route path="/b2b-agencies" element={<AdminPanelWithSection section="b2b-agencies" />} />
+                <Route path="/b2b-bookings" element={<AdminPanelWithSection section="b2b-bookings" />} />
+                <Route path="/b2b-tours" element={<AdminPanelWithSection section="b2b-tours" />} />
+                <Route path="/b2b-analytics" element={<AdminPanelWithSection section="b2b-analytics" />} />
+
+                {/* AI Tools */}
+                <Route path="/ai-content-hub" element={<AdminPanelWithSection section="ai-hub" />} />
+                <Route path="/ai-image-generator" element={<AdminPanelWithSection section="ai-image-generator" />} />
+                <Route path="/ai-seo-optimizer" element={<AdminPanelWithSection section="ai-seo-optimizer" />} />
+                <Route path="/ai-chatbot" element={<AdminPanelWithSection section="ai-chatbot" />} />
 
                 {/* Standalone pages */}
                 <Route path="/wildlife" element={<WildlifeAdmin />} />

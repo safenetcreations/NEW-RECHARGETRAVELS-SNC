@@ -2,8 +2,6 @@ import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AdminGuard } from '@/components/admin/AdminGuard';
-import AdminSidebar from '@/components/admin/panel/AdminSidebar';
-import AdminHeader from '@/components/admin/panel/AdminHeader';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
 const DashboardSection = lazy(() => import('@/components/admin/panel/DashboardSection'));
@@ -77,6 +75,15 @@ const GroupTransportManager = lazy(() => import('@/components/admin/panel/GroupT
 const TrainBookingManager = lazy(() => import('@/components/admin/panel/TrainBookingManager'));
 const GlobalToursManager = lazy(() => import('@/components/admin/panel/GlobalToursManager'));
 const GlobalTourBookingsManager = lazy(() => import('@/components/admin/panel/GlobalTourBookingsManager'));
+const EnhancedDashboard = lazy(() => import('@/components/admin/panel/EnhancedDashboard'));
+const B2BDashboard = lazy(() => import('@/components/admin/panel/B2BDashboard'));
+const AIContentHub = lazy(() => import('@/components/admin/panel/AIContentHub'));
+const EmailQueueManager = lazy(() => import('@/components/admin/panel/EmailQueueManager'));
+const ModernNavigation = lazy(() => import('@/components/admin/panel/ModernNavigation'));
+const PropertyListingsManager = lazy(() => import('@/components/admin/panel/PropertyListingsManager'));
+const FleetVehiclesManager = lazy(() => import('@/components/admin/panel/FleetVehiclesManager'));
+const YaluManager = lazy(() => import('@/components/admin/panel/YaluManager'));
+const WildToursManager = lazy(() => import('@/components/cms/WildToursManager'));
 
 interface AdminPanelProps {
   initialSection?: string;
@@ -86,7 +93,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ initialSection }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [activeSection, setActiveSection] = useState(initialSection || 'dashboard');
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Sync active section with URL/initialSection
   useEffect(() => {
@@ -134,6 +140,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ initialSection }) => {
           return <TravelGuideManager />;
         case 'book-now':
           return <BookNowManager />;
+        case 'wild-tours':
+          return <WildToursManager />;
         case 'whale-booking':
           return <WhaleBookingManager />;
         case 'jungle-camping':
@@ -172,6 +180,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ initialSection }) => {
         // Services
         case 'hotels':
           return <HotelsManagement />;
+        case 'property-listings':
+          return <PropertyListingsManager />;
+        case 'fleet-vehicles':
+          return <FleetVehiclesManager />;
         case 'tours':
           return <ToursManagement />;
         case 'tours-old':
@@ -247,8 +259,33 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ initialSection }) => {
           return <div className="p-6"><h2 className="text-2xl font-bold">Driver Wallets - Coming Soon</h2><p className="text-gray-600 mt-2">View and manage driver wallet balances</p></div>;
         case 'driver-analytics':
           return <DriverAnalyticsDashboard />;
+        // B2B Portal
+        case 'b2b-dashboard':
+          return <B2BDashboard />;
+        case 'b2b-agencies':
+          return <div className="p-6"><h2 className="text-2xl font-bold">B2B Agency Management</h2><p className="text-gray-600 mt-2">Manage B2B partner agencies - Use Firebase Console or B2B API endpoints</p></div>;
+        case 'b2b-bookings':
+          return <div className="p-6"><h2 className="text-2xl font-bold">B2B Bookings</h2><p className="text-gray-600 mt-2">View B2B partner bookings - Use Firebase Console or B2B API endpoints</p></div>;
+        case 'b2b-tours':
+          return <div className="p-6"><h2 className="text-2xl font-bold">B2B Tours</h2><p className="text-gray-600 mt-2">Manage B2B tour packages - Use Firebase Console or B2B API endpoints</p></div>;
+        case 'b2b-analytics':
+          return <div className="p-6"><h2 className="text-2xl font-bold">B2B Analytics</h2><p className="text-gray-600 mt-2">B2B performance analytics coming soon</p></div>;
+        // AI Tools
+        case 'ai-hub':
+        case 'ai-image-generator':
+        case 'ai-seo-optimizer':
+        case 'ai-chatbot':
+          return <AIContentHub />;
+        case 'yalu-manager':
+          return <YaluManager />;
+        // Email Management
+        case 'email-queue':
+          return <EmailQueueManager />;
+        // Enhanced Dashboard
+        case 'enhanced-dashboard':
+          return <EnhancedDashboard />;
         default:
-          return <DashboardSection onNavigate={setActiveSection} />;
+          return <EnhancedDashboard />;
       }
     } catch (error) {
       console.error('🔴 Error rendering section:', error);
@@ -270,25 +307,16 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ initialSection }) => {
           <meta name="description" content="Complete admin panel for managing website content" />
         </Helmet>
 
-        <div className="flex min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-blue-50">
-          <AdminSidebar
-            activeSection={activeSection}
-            onSectionChange={handleSectionChange}
-            isMobileMenuOpen={isMobileMenuOpen}
-            onMobileMenuClose={() => setIsMobileMenuOpen(false)}
-          />
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100">
+          {/* Modern Top Navigation */}
+          <ModernNavigation />
 
-          <main className="flex-1 overflow-y-auto bg-gradient-to-br from-slate-50/50 via-purple-50/30 to-blue-50/50 lg:ml-0">
-            <AdminHeader
-              activeSection={activeSection}
-              onMobileMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            />
-            <div className="p-4 sm:p-6 lg:p-8">
-              <div className="max-w-7xl mx-auto">
-                <Suspense fallback={<LoadingSpinner />}>
-                  {renderActiveSection()}
-                </Suspense>
-              </div>
+          {/* Main Content Area - Full Width */}
+          <main className="min-h-[calc(100vh-64px)]">
+            <div className="max-w-[1600px] mx-auto">
+              <Suspense fallback={<LoadingSpinner />}>
+                {renderActiveSection()}
+              </Suspense>
             </div>
           </main>
         </div>

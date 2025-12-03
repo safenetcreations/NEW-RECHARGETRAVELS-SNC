@@ -51,12 +51,19 @@ import Footer from '@/components/Footer'
 import CircuitBuilder from '@/components/cultural/CircuitBuilder'
 import BookingEngine from '@/components/cultural/BookingEngine'
 import InteractiveMap from '@/components/cultural/InteractiveMap'
+import { Link } from 'react-router-dom'
 
 const CulturalTours = () => {
   const [selectedCurrency, setSelectedCurrency] = useState('USD')
   const [selectedLanguage, setSelectedLanguage] = useState('EN')
   const [selectedCircuit, setSelectedCircuit] = useState<string[]>([])
   const [selectedDuration, setSelectedDuration] = useState('7')
+
+  const relatedTours = [
+    { title: 'Wildlife & Parks', href: '/tours/wildtours' },
+    { title: 'Hill Country', href: '/tours/hill-country' },
+    { title: 'Beach & Coast', href: '/tours/beach-tours' }
+  ]
 
   // Classic 8-Site Circuit data
   const circuitSites = [
@@ -262,6 +269,28 @@ const CulturalTours = () => {
       />
 
       <Header />
+
+      {/* Breadcrumb and related links */}
+      <div className="bg-slate-50 border-b border-slate-200">
+        <div className="container mx-auto px-4 py-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <div className="text-sm text-slate-600 flex items-center gap-2">
+            <Link to="/tours" className="text-emerald-700 font-semibold hover:text-emerald-800">Tours</Link>
+            <span aria-hidden>›</span>
+            <span className="text-slate-900 font-semibold">Cultural & Heritage</span>
+          </div>
+          <div className="flex flex-wrap gap-3 text-xs">
+            {relatedTours.map(link => (
+              <Link
+                key={link.href}
+                to={link.href}
+                className="rounded-full border border-slate-200 bg-white px-3 py-1 font-semibold text-slate-700 hover:border-emerald-400 hover:text-emerald-700 transition"
+              >
+                Related: {link.title}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
 
       <style>{`
         @keyframes dust-mote {

@@ -41,6 +41,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import TransferBookingForm from '@/modules/transfers/components/TransferBookingForm';
 import { privateToursService } from '@/services/privateToursService';
+import { Link } from 'react-router-dom';
 import type {
   PrivateToursPageContent,
   PrivateTourPackage,
@@ -54,6 +55,12 @@ const iconMap: Record<string, React.ComponentType<any>> = {
   User, Route, Car, Camera, Heart, Shield, Clock, MapPin, Star, Award,
   Globe, Mountain, Waves, Bird, Landmark, Compass, Leaf, Phone
 };
+
+const relatedTransport = [
+  { title: 'Transport Hub', href: '/transport' },
+  { title: 'Airport Transfers', href: '/transport/airport-transfers' },
+  { title: 'Group Transport', href: '/transport/group-transport' }
+];
 
 const PrivateTours = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -274,6 +281,27 @@ const PrivateTours = () => {
       </Helmet>
 
       <Header />
+
+      <div className="bg-white border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <div className="text-sm text-slate-700 flex items-center gap-2">
+            <Link to="/transport" className="text-emerald-700 font-semibold hover:text-emerald-800">Transport</Link>
+            <span aria-hidden>›</span>
+            <span className="font-semibold text-slate-900">Private Tours & Chauffeurs</span>
+          </div>
+          <div className="flex flex-wrap gap-3 text-xs">
+            {relatedTransport.map(link => (
+              <Link
+                key={link.href}
+                to={link.href}
+                className="rounded-full border border-slate-200 bg-white px-3 py-1 font-semibold text-slate-700 hover:border-emerald-400 hover:text-emerald-700 transition"
+              >
+                {link.title}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
 
       <div className="min-h-screen bg-background">
         {/* ==================== HERO SECTION ==================== */}

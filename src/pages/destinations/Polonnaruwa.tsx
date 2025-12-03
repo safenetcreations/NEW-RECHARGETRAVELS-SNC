@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import DestinationMap from '@/components/destinations/DestinationMap';
+import WeatherWidget from '@/components/destinations/WeatherWidget';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Building,
@@ -53,8 +56,10 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import EnhancedBookingModal from '@/components/EnhancedBookingModal';
 import { getDestinationBySlug } from '@/services/destinationContentService';
+
+// Polonnaruwa coordinates
+const POLONNARUWA_CENTER = { lat: 7.9403, lng: 81.0188 };
 
 // Type Definitions
 interface HeroSlide {
@@ -152,24 +157,11 @@ interface CTASection {
 
 // Default Content
 const defaultHeroSlides: HeroSlide[] = [
-  {
-    id: '1',
-    image: 'https://images.unsplash.com/photo-1588598198321-9735fd4f2b45?auto=format&fit=crop&q=80',
-    title: 'Welcome to Polonnaruwa',
-    subtitle: 'Medieval Capital & UNESCO World Heritage Site'
-  },
-  {
-    id: '2',
-    image: 'https://images.unsplash.com/photo-1609920658906-8223bd289001?auto=format&fit=crop&q=80',
-    title: 'Ancient Kingdom',
-    subtitle: '11th-13th Century Royal City'
-  },
-  {
-    id: '3',
-    image: 'https://images.unsplash.com/photo-1624296398627-22e8db73fbdb?auto=format&fit=crop&q=80',
-    title: 'Archaeological Wonder',
-    subtitle: 'Where History Comes Alive'
-  }
+  { id: '1', image: "https://images.unsplash.com/photo-1588598198321-39f8c2be97ba?auto=format&fit=crop&q=80", title: "Discover Polonnaruwa", subtitle: "Medieval Capital of Ceylon" },
+  { id: '2', image: "https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&fit=crop&q=80", title: "Gal Vihara", subtitle: "Magnificent Rock Temple Sculptures" },
+  { id: '3', image: "https://images.unsplash.com/photo-1586613835341-78c143aef52c?auto=format&fit=crop&q=80", title: "Royal Palace", subtitle: "Ruins of Ancient Grandeur" },
+  { id: '4', image: "https://images.unsplash.com/photo-1571536802807-30451e3f3d43?auto=format&fit=crop&q=80", title: "Parakrama Samudra", subtitle: "Ancient Man-Made Reservoir" },
+  { id: '5', image: "https://images.unsplash.com/photo-1578128178243-721cd32ce739?auto=format&fit=crop&q=80", title: "Lankatilaka", subtitle: "Towering Buddha Image House" }
 ];
 
 const defaultAttractions: Attraction[] = [
@@ -542,6 +534,8 @@ const getIconComponent = (iconName: string) => {
 };
 
 const Polonnaruwa = () => {
+  const navigate = useNavigate();
+
   // State for content
   const [heroSlides, setHeroSlides] = useState<HeroSlide[]>(defaultHeroSlides);
   const [attractions, setAttractions] = useState<Attraction[]>(defaultAttractions);
@@ -557,8 +551,6 @@ const Polonnaruwa = () => {
   // UI State
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedTab, setSelectedTab] = useState('attractions');
-  const [showBookingModal, setShowBookingModal] = useState(false);
-  const [selectedService, setSelectedService] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
 
   // Load content from Firebase
@@ -609,12 +601,17 @@ const Polonnaruwa = () => {
     { id: 'dining', label: 'Dining', count: restaurants.length },
     { id: 'stay', label: 'Stay', count: hotels.length },
     { id: 'weather', label: 'Weather', count: null },
-    { id: 'tips', label: 'Travel Tips', count: travelTips.length }
+    { id: 'tips', label: 'Travel Tips', count: travelTips.length },
+    { id: 'map', label: 'Map', count: null }
   ];
 
-  const handleBooking = (service: string) => {
-    setSelectedService(service);
-    setShowBookingModal(true);
+  const handleBooking = () => {
+    navigate('/book-tour');
+  };
+
+  const handleWhatsAppClick = () => {
+    const message = encodeURIComponent('Hi! I would like to inquire about a Polonnaruwa tour.');
+    window.open(`https://wa.me/94703380057?text=${message}`, '_blank');
   };
 
   if (isLoading) {
@@ -637,15 +634,15 @@ const Polonnaruwa = () => {
         <meta property="og:title" content={seoSettings.title} />
         <meta property="og:description" content={seoSettings.description} />
         <meta property="og:image" content={heroSlides[0]?.image} />
-        <meta property="og:url" content="https://recharge-travels-73e76.web.app/destinations/polonnaruwa" />
-        <link rel="canonical" href="https://recharge-travels-73e76.web.app/destinations/polonnaruwa" />
+        <meta property="og:url" content="https://www.rechargetravels.com/destinations/polonnaruwa" />
+        <link rel="canonical" href="https://www.rechargetravels.com/destinations/polonnaruwa" />
       </Helmet>
 
       <Header />
 
       <main className="min-h-screen bg-background">
         {/* Hero Section */}
-        <section className="relative h-[85vh] overflow-hidden">
+        <section className="relative aspect-video max-h-[80vh] overflow-hidden">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentSlide}
@@ -702,7 +699,7 @@ const Polonnaruwa = () => {
                 <Button
                   size="lg"
                   className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-6 text-lg"
-                  onClick={() => handleBooking('Polonnaruwa Heritage Tour')}
+                  onClick={handleBooking}
                 >
                   Book Now
                 </Button>
@@ -899,7 +896,7 @@ const Polonnaruwa = () => {
                             </div>
                             <Button
                               className="w-full bg-orange-600 hover:bg-orange-700"
-                              onClick={() => handleBooking(attraction.name)}
+                              onClick={handleBooking}
                             >
                               Book Visit
                             </Button>
@@ -966,7 +963,7 @@ const Polonnaruwa = () => {
                             <Button
                               variant="outline"
                               className="w-full border-orange-600 text-orange-600 hover:bg-orange-600 hover:text-white"
-                              onClick={() => handleBooking(activity.name)}
+                              onClick={handleBooking}
                             >
                               Book Activity
                             </Button>
@@ -1111,7 +1108,7 @@ const Polonnaruwa = () => {
                           </div>
                           <Button
                             className="w-full bg-orange-600 hover:bg-orange-700"
-                            onClick={() => handleBooking(`${hotel.name} Booking`)}
+                            onClick={handleBooking}
                           >
                             Check Availability
                           </Button>
@@ -1254,6 +1251,52 @@ const Polonnaruwa = () => {
                 </div>
               </motion.section>
             )}
+
+            {/* Map Tab */}
+            {selectedTab === 'map' && (
+              <motion.section
+                key="map"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+              >
+                <div className="text-center mb-12">
+                  <h2 className="text-4xl font-bold mb-4">Explore Polonnaruwa</h2>
+                  <p className="text-muted-foreground max-w-2xl mx-auto">
+                    Interactive map showing key attractions and points of interest
+                  </p>
+                </div>
+
+                <div className="grid lg:grid-cols-3 gap-8">
+                  {/* Map Section */}
+                  <div className="lg:col-span-2">
+                    <Card className="overflow-hidden">
+                      <CardContent className="p-0">
+                        <DestinationMap
+                          center={POLONNARUWA_CENTER}
+                          attractions={[
+                            { name: 'Gal Vihara', position: { lat: 7.9558, lng: 81.0034 } },
+                            { name: 'Parakrama Samudra', position: { lat: 7.9171, lng: 81.0090 } },
+                            { name: 'Royal Palace', position: { lat: 7.9403, lng: 81.0188 } },
+                            { name: 'Vatadage', position: { lat: 7.9421, lng: 81.0175 } },
+                            { name: 'Lankathilaka', position: { lat: 7.9497, lng: 81.0127 } },
+                            { name: 'Shiva Devale', position: { lat: 7.9385, lng: 81.0210 } }
+                          ]}
+                        />
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Weather Widget */}
+                  <div className="lg:col-span-1">
+                    <WeatherWidget
+                      location="Polonnaruwa"
+                      weatherInfo={weatherInfo}
+                    />
+                  </div>
+                </div>
+              </motion.section>
+            )}
           </AnimatePresence>
         </div>
 
@@ -1272,19 +1315,18 @@ const Polonnaruwa = () => {
                 <Button
                   size="lg"
                   className="bg-white text-orange-600 hover:bg-gray-100"
-                  onClick={() => handleBooking('Polonnaruwa Complete Package')}
+                  onClick={handleBooking}
                 >
                   <Phone className="w-5 h-5 mr-2" />
                   {ctaSection.buttonText}
                 </Button>
                 <Button
                   size="lg"
-                  variant="outline"
-                  className="bg-transparent text-white border-white hover:bg-white/20"
-                  onClick={() => window.location.href = 'mailto:info@rechargetravels.com?subject=Polonnaruwa Inquiry'}
+                  className="bg-green-500 text-white hover:bg-green-600 border-0"
+                  onClick={handleWhatsAppClick}
                 >
-                  <Mail className="w-5 h-5 mr-2" />
-                  Contact Us
+                  <Phone className="w-5 h-5 mr-2" />
+                  WhatsApp Us
                 </Button>
               </div>
             </motion.div>
@@ -1293,13 +1335,6 @@ const Polonnaruwa = () => {
       </main>
 
       <Footer />
-
-      {/* Booking Modal */}
-      <EnhancedBookingModal
-        isOpen={showBookingModal}
-        onClose={() => setShowBookingModal(false)}
-        preSelectedService={selectedService}
-      />
     </>
   );
 };

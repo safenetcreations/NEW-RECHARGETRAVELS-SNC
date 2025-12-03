@@ -117,8 +117,46 @@ const LuxuryExperiences = () => {
   return (
     <>
       <Helmet>
-        <title>Curated Experiences Sri Lanka - Recharge Travels</title>
-        <meta name="description" content="Discover handcrafted luxury experiences in Sri Lanka. Safari, wellness, culinary, adventure, and cultural immersion tours." />
+        <title>Curated Experiences Sri Lanka | Safari, Wellness, Adventure Tours - Recharge Travels</title>
+        <meta name="description" content="Discover 50+ handcrafted luxury experiences in Sri Lanka. Safari, wellness retreats, culinary journeys, adventure expeditions, whale watching, hot air balloon rides, tea trails and cultural immersion tours. Book with 24/7 concierge support." />
+        <meta name="keywords" content="Sri Lanka experiences, luxury tours, safari Sri Lanka, wellness retreats, adventure tours, cultural tours, whale watching, hot air balloon Sigiriya, cooking class Sri Lanka, tea trails, train journeys" />
+        <link rel="canonical" href="https://www.rechargetravels.com/experiences" />
+        <meta property="og:title" content="Curated Luxury Experiences in Sri Lanka - Recharge Travels" />
+        <meta property="og:description" content="Discover 50+ handcrafted experiences: Safari, Wellness, Adventure, Cultural tours. 98% guest satisfaction. Book with confidence." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://www.rechargetravels.com/experiences" />
+        <meta property="og:image" content="https://images.unsplash.com/photo-1539367628448-4bc5c9d171c8?w=1200" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Sri Lanka Luxury Experiences - Recharge Travels" />
+        <meta name="twitter:description" content="50+ handcrafted experiences: Safari, Wellness, Adventure tours" />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            "name": "Sri Lanka Luxury Experiences",
+            "description": "Curated collection of 50+ luxury experiences in Sri Lanka including safaris, wellness retreats, adventure tours, and cultural immersions.",
+            "url": "https://www.rechargetravels.com/experiences",
+            "mainEntity": {
+              "@type": "ItemList",
+              "itemListElement": [
+                { "@type": "ListItem", "position": 1, "name": "Whale Watching Mirissa", "url": "https://www.rechargetravels.com/experiences/whale-watching" },
+                { "@type": "ListItem", "position": 2, "name": "Hot Air Balloon Sigiriya", "url": "https://www.rechargetravels.com/experiences/hot-air-balloon-sigiriya" },
+                { "@type": "ListItem", "position": 3, "name": "Tea Trails Ceylon", "url": "https://www.rechargetravels.com/experiences/tea-trails" },
+                { "@type": "ListItem", "position": 4, "name": "Ayurveda Wellness Retreats", "url": "https://www.rechargetravels.com/experiences/ayurveda-wellness" },
+                { "@type": "ListItem", "position": 5, "name": "Scenic Train Journeys", "url": "https://www.rechargetravels.com/experiences/train-journeys" },
+                { "@type": "ListItem", "position": 6, "name": "Sri Lankan Cooking Classes", "url": "https://www.rechargetravels.com/experiences/cooking-class-sri-lanka" },
+                { "@type": "ListItem", "position": 7, "name": "Hikkaduwa Water Sports", "url": "https://www.rechargetravels.com/experiences/hikkaduwa-water-sports" },
+                { "@type": "ListItem", "position": 8, "name": "Jungle Camping Sinharaja", "url": "https://www.rechargetravels.com/experiences/jungle-camping" }
+              ]
+            },
+            "provider": {
+              "@type": "TravelAgency",
+              "name": "Recharge Travels",
+              "url": "https://www.rechargetravels.com",
+              "telephone": "+94777721999"
+            }
+          })}
+        </script>
       </Helmet>
 
       <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
@@ -200,6 +238,41 @@ const LuxuryExperiences = () => {
                   <div className="text-sm opacity-90">Concierge Support</div>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Experience Pillars */}
+        <section className="bg-white py-12 border-b border-slate-200">
+          <div className="container mx-auto px-4">
+            <div className="flex flex-col gap-3 text-center mb-8">
+              <p className="text-xs font-bold uppercase tracking-[0.3em] text-slate-500">Experience Pillars</p>
+              <h2 className="text-3xl font-bold text-slate-900">Browse Experiences by Theme</h2>
+              <p className="text-slate-600 max-w-3xl mx-auto">
+                Jump into the most requested experiences, then dive deeper into their detailed pages.
+              </p>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {[
+                { title: 'Train Journeys', href: '/experiences/train-journeys', description: 'Kandy–Ella panoramas, observation decks, and door-to-door transfers.' },
+                { title: 'Island Getaways', href: '/experiences/island-getaways', description: 'Hidden beaches, boutique stays, and coastal slow travel.' },
+                { title: 'Whale Watching', href: '/experiences/whale-watching', description: 'Mirissa and Trincomalee marine safaris with biologist crews.' },
+                { title: 'Private Charters', href: '/experiences/private-charters', description: 'Yachts, helicopters, and jets on standby with concierge support.' },
+                { title: 'Wellness & Ayurveda', href: '/experiences/wellness', description: 'Retreats, spa programs, and Ayurveda-led healing journeys.' },
+                { title: 'Luxury Helicopter Charters', href: '/experiences/luxury/helicopter-charters', description: 'Point-to-point hops to tea country, national parks, and coastal resorts.' }
+              ].map(link => (
+                <Link
+                  key={link.href}
+                  to={link.href}
+                  className="group rounded-2xl border border-slate-200 bg-slate-50 hover:border-amber-300 hover:bg-amber-50 transition-all duration-300 p-5 text-left shadow-sm hover:-translate-y-1"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-bold text-slate-900 group-hover:text-amber-700">{link.title}</h3>
+                    <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-amber-600" />
+                  </div>
+                  <p className="text-sm text-slate-600">{link.description}</p>
+                </Link>
+              ))}
             </div>
           </div>
         </section>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { buildBrand, getBaseUrl } from '@/utils/seoSchemaHelpers';
 
 interface SEOProps {
   title: string;
@@ -30,9 +31,8 @@ const ComprehensiveSEO: React.FC<SEOProps> = ({
   noFollow = false
 }) => {
   const { language } = useLanguage();
-  const baseUrl = typeof window !== 'undefined'
-    ? window.location.origin
-    : 'https://recharge-travels-73e76.web.app';
+  const baseUrl = getBaseUrl();
+  const brand = buildBrand(baseUrl);
   const fullCanonicalUrl = canonicalUrl ? `${baseUrl}${canonicalUrl}` : baseUrl;
 
   // Default keywords for Sri Lanka travel
@@ -85,11 +85,7 @@ const ComprehensiveSEO: React.FC<SEOProps> = ({
       "contactType": "customer service",
       "availableLanguage": ["English", "Tamil", "Sinhala"]
     },
-    "sameAs": [
-      "https://www.facebook.com/rechargetravels",
-      "https://www.instagram.com/rechargetravels",
-      "https://www.youtube.com/rechargetravels"
-    ],
+    "sameAs": brand.sameAs,
     "areaServed": {
       "@type": "Country",
       "name": "Sri Lanka"
@@ -157,7 +153,7 @@ const ComprehensiveSEO: React.FC<SEOProps> = ({
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <meta name="theme-color" content="#1e40af" />
       <meta name="msapplication-TileColor" content="#1e40af" />
-      <meta name="apple-mobile-web-app-capable" content="yes" />
+      <meta name="mobile-web-app-capable" content="yes" />
       <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       <meta name="apple-mobile-web-app-title" content="Recharge Travels" />
 

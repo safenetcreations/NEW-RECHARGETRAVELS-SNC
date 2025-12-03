@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+import { getAnalytics, isSupported as isAnalyticsSupported } from "firebase/analytics";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
@@ -32,11 +32,20 @@ try {
   auth = getAuth(app);
   db = getFirestore(app);
   storage = getStorage(app);
-  functions = getFunctions(app);
+  functions = getFunctions(app, 'asia-south1');
   
   // Analytics only in browser environment
   if (typeof window !== 'undefined') {
-    // analytics = getAnalytics(app); // Commented out to prevent premature initialization
+    // Guarded analytics init to avoid SSR/build issues and unsupported environments
+    isAnalyticsSupported()
+      .then((supported) => {
+        if (supported) {
+          analytics = getAnalytics(app);
+        }
+      })
+      .catch(() => {
+        analytics = null;
+      });
   }
 } catch (error) {
   console.error('❌ Firebase initialization error:', error);

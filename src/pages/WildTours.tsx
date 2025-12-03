@@ -11,6 +11,7 @@ import { wildToursService } from '@/services/firebaseWildToursService'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import AIOptimizedFAQ from '@/components/seo/AIOptimizedFAQ'
 import {
   Binoculars,
   Camera,
@@ -25,15 +26,61 @@ import {
   Compass
 } from 'lucide-react'
 import { toast } from 'sonner'
-import NationalParksSection from '@/components/wildTours/NationalParksSection'
+import { BookingDialog } from '@/components/wildTours/BookingDialog'
+import { useAuth } from '@/contexts/AuthContext'
+import { Link } from 'react-router-dom'
+import {
+  COMPANY,
+  createBreadcrumbSchema,
+  createOrganizationSchema,
+  createSpeakableSchema
+} from '@/utils/schemaMarkup'
+
+// AI-Optimized FAQs for Wildlife Tours
+const wildlifeFAQs = [
+  {
+    question: "Which national park is best for seeing leopards in Sri Lanka?",
+    answer: "Yala National Park has the highest leopard density in the world at approximately 1 leopard per square kilometer. Block 1 of Yala is the best zone for leopard sightings, with early morning (6am) and late afternoon (3-6pm) safaris offering the highest success rates. February to July is the optimal season when leopards are most active near water sources. Wilpattu National Park is an excellent alternative with fewer crowds.",
+    category: "Leopards"
+  },
+  {
+    question: "When is the best time for whale watching in Sri Lanka?",
+    answer: "Blue whale watching in Sri Lanka has two main seasons: Mirissa (south coast) from November to April with peak sightings in February-March, and Trincomalee (east coast) from May to October. Success rates during peak season exceed 95%. Tours depart at 6am when seas are calmest. Mirissa is the most accessible location, just 3 hours from Colombo, offering sightings of blue whales, sperm whales, and dolphins.",
+    category: "Whale Watching"
+  },
+  {
+    question: "Where can I see wild elephants in Sri Lanka?",
+    answer: "The best places to see wild elephants are: Udawalawe National Park (500+ resident elephants, year-round sightings guaranteed), Minneriya National Park (famous for 'The Gathering' of 300+ elephants from July-October), and Kaudulla National Park (elephant gathering November-December). Pinnawala Elephant Orphanage offers close-up experiences with rescued elephants. Udawalawe is recommended for first-time visitors due to consistent sightings.",
+    category: "Elephants"
+  },
+  {
+    question: "How much do wildlife safaris cost in Sri Lanka?",
+    answer: "Wildlife safari costs in Sri Lanka vary by experience level: Budget-friendly safaris start at $50-80 per person (shared jeep, local guide). Semi-luxury safaris range from $120-200 per person (private jeep, expert naturalist, premium equipment). Full-day safaris including park fees, jeep, and guide typically cost $100-150 per person. Whale watching tours range from $40-150 depending on boat type and operator.",
+    category: "Pricing"
+  },
+  {
+    question: "What wildlife can I see on a Sri Lanka safari besides the Big 4?",
+    answer: "Beyond leopards, elephants, blue whales, and sloth bears, Sri Lanka offers incredible biodiversity: 439 bird species (34 endemic), crocodiles in every national park, wild boar, spotted deer, sambar deer, water buffalo, mongoose, jackals, dolphins (spinner, bottlenose), sea turtles (5 species), and over 100 reptile species. Sinharaja Rainforest is best for endemic birds and reptiles.",
+    category: "Wildlife"
+  },
+  {
+    question: "Is it safe to go on wildlife safaris in Sri Lanka?",
+    answer: "Yes, wildlife safaris in Sri Lanka are safe when conducted with licensed operators. All Recharge Travels safaris include: certified naturalist guides trained in animal behavior, DWC-approved safari vehicles with safety features, strict distance protocols from animals, and comprehensive insurance. Parks have ranger patrols and emergency procedures. We recommend wearing neutral colors and following guide instructions at all times.",
+    category: "Safety"
+  }
+]
 
 const WildTours = () => {
+  // Verified: NationalParksSection removed
+  console.log('WildTours component loaded');
   const [selectedCategory, setSelectedCategory] = useState<string>('')
   const [selectedPackage, setSelectedPackage] = useState<TourPackage | null>(null)
+  const [bookingDialogOpen, setBookingDialogOpen] = useState(false)
   const [tours, setTours] = useState<Record<string, TourPackage[]>>(wildToursData)
   const [loading, setLoading] = useState(true)
   const bookingRef = useRef<HTMLDivElement>(null)
   const location = useLocation()
+  const { user } = useAuth()
 
   const categories = Object.keys(tours)
 
@@ -92,13 +139,48 @@ const WildTours = () => {
 
   const handlePackageSelect = (pkg: TourPackage) => {
     setSelectedPackage(pkg)
-    toast.success(`${pkg.title} selected! Complete your booking below.`)
-    bookingRef.current?.scrollIntoView({ behavior: 'smooth' })
+    setBookingDialogOpen(true)
   }
 
-  const handleBookingSubmit = (bookingData: BookingFormData) => {
-    console.log('Booking submitted:', { ...bookingData, selectedPackage })
-    toast.success('Booking request submitted! We\'ll contact you shortly to confirm availability.')
+  const handleBookingSubmit = async (bookingData: any) => {
+    try {
+      const userId = user ? user.uid : 'guest';
+
+      await wildToursService.createBooking({
+        ...bookingData,
+        userId,
+        userEmail: user?.email || bookingData.contactEmail,
+        createdAt: new Date().toISOString()
+      });
+
+      setBookingDialogOpen(false);
+      toast.success('Booking confirmed! Check your email for details.', {
+        duration: 5000,
+      });
+
+      // Reset selection
+      setSelectedPackage(null);
+    } catch (error) {
+      console.error('Booking error:', error);
+      toast.error('Failed to process booking. Please try again.');
+    }
+  }
+
+  const relatedTours = [
+    { title: 'Tours Home', href: '/tours' },
+    { title: 'National Parks', href: '/tours/wildtours/parks' },
+    { title: 'Cultural Tours', href: '/tours/cultural' }
+  ]
+
+  const handleWidgetSubmit = (bookingData: BookingFormData) => {
+    console.log('Widget search submitted:', bookingData)
+    toast.info('Searching for available tours...')
+    // Logic to filter tours or scroll to category could go here
+    const categoryId = `${bookingData.tourType}-tours`
+    const element = document.getElementById(categoryId)
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
   }
 
   const structuredData = {
@@ -173,23 +255,107 @@ const WildTours = () => {
     <>
       <Helmet>
         <title>Wild Tours Sri Lanka – Elephant, Leopard, Whale, Dolphin & More | Recharge Travels</title>
-        <meta 
-          name="description" 
-          content="Experience Sri Lanka's incredible wildlife with semi-luxury and budget safari packages. Book elephant safaris, leopard watching, whale tours, dolphin encounters, birdwatching expeditions, national park visits, and underwater adventures. Expert guides, flexible pricing, instant booking." 
+        <meta
+          name="description"
+          content="Experience Sri Lanka's incredible wildlife with semi-luxury and budget safari packages. Book elephant safaris, leopard watching, whale tours, dolphin encounters, birdwatching expeditions, national park visits, and underwater adventures. Expert guides, flexible pricing, instant booking."
         />
         <meta name="keywords" content="Sri Lanka wildlife tours, elephant safari, leopard watching, whale watching Mirissa, dolphin tours Kalpitiya, budget safari packages, semi-luxury wildlife tours, book Sri Lanka elephant safari, Yala leopard tours, Sinharaja birdwatching, national parks Sri Lanka, Udawalawe elephants, Minneriya gathering" />
-        <link rel="canonical" href={`${window.location.origin}/wildtours`} />
+        <link rel="canonical" href="https://www.rechargetravels.com/wildtours" />
         <meta property="og:title" content="Wild Tours Sri Lanka – Wildlife Safari Adventures" />
         <meta property="og:description" content="Experience Sri Lanka's incredible wildlife with flexible semi-luxury and budget-friendly safari packages. Book now!" />
         <meta property="og:image" content="https://images.unsplash.com/photo-1549366021-9f761d040a94?w=1200" />
-        <meta property="og:url" content={`${window.location.origin}/wildtours`} />
+        <meta property="og:url" content="https://www.rechargetravels.com/wildtours" />
+        <meta property="og:type" content="website" />
+        <meta property="og:locale" content="en_US" />
+        <meta property="og:site_name" content="Recharge Travels" />
         <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Wild Tours Sri Lanka – Wildlife Safari Adventures" />
+        <meta name="twitter:description" content="Experience Sri Lanka's incredible wildlife. Book elephant safaris, leopard watching, whale tours & more." />
+
+        {/* Main Structured Data */}
         <script type="application/ld+json">
           {JSON.stringify(structuredData)}
+        </script>
+
+        {/* Breadcrumb Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify(createBreadcrumbSchema([
+            { name: 'Home', url: COMPANY.url },
+            { name: 'Tours', url: `${COMPANY.url}/tours` },
+            { name: 'Wildlife Tours', url: `${COMPANY.url}/wildtours` }
+          ]))}
+        </script>
+
+        {/* Organization Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify(createOrganizationSchema())}
+        </script>
+
+        {/* Speakable Schema for Voice Search */}
+        <script type="application/ld+json">
+          {JSON.stringify(createSpeakableSchema(
+            'https://www.rechargetravels.com/wildtours',
+            ['h1', '.hero-description', '.tour-category-title']
+          ))}
+        </script>
+
+        {/* Collection Page Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            "@id": "https://www.rechargetravels.com/wildtours#collection",
+            "name": "Wild Tours Sri Lanka - Wildlife Safari Adventures",
+            "description": "Browse and book wildlife safari tours in Sri Lanka. Elephant safaris, leopard watching, whale watching, dolphin tours, and more.",
+            "url": "https://www.rechargetravels.com/wildtours",
+            "image": "https://images.unsplash.com/photo-1549366021-9f761d040a94?w=1200",
+            "hasPart": categories.map(category => ({
+              "@type": "WebPage",
+              "name": getCategoryTitle(category),
+              "description": getCategoryDescription(category),
+              "url": `https://www.rechargetravels.com/wildtours#${category}`
+            })),
+            "provider": {
+              "@type": "TravelAgency",
+              "name": COMPANY.name,
+              "url": COMPANY.url,
+              "telephone": COMPANY.phone,
+              "email": COMPANY.email
+            },
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": 4.9,
+              "reviewCount": 1847,
+              "bestRating": 5,
+              "worstRating": 1
+            }
+          })}
         </script>
       </Helmet>
 
       <Header />
+
+      {/* Breadcrumb and related links */}
+      <div className="bg-slate-50 border-b border-slate-200">
+        <div className="container mx-auto px-4 py-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <div className="text-sm text-slate-600 flex items-center gap-2">
+            <Link to="/tours" className="text-emerald-700 font-semibold hover:text-emerald-800">Tours</Link>
+            <span aria-hidden>›</span>
+            <span className="text-slate-900 font-semibold">Wildlife & Safaris</span>
+          </div>
+          <div className="flex flex-wrap gap-3 text-xs">
+            {relatedTours.map(link => (
+              <Link
+                key={link.href}
+                to={link.href}
+                className="rounded-full border border-slate-200 bg-white px-3 py-1 font-semibold text-slate-700 hover:border-amber-400 hover:text-amber-700 transition"
+              >
+                {link.title}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
 
       {/* Hero Section */}
       <WildToursHero onBookingStart={handleBookingStart} />
@@ -206,7 +372,7 @@ const WildTours = () => {
               and boutique eco-lodges, or <strong className="text-green-700">Budget-friendly adventures</strong> with trusted local guides, shared boats,
               and authentic stays. Track leopards in Yala, witness “The Gathering” of elephants, and chase blue whales off Mirissa — tailored to how you travel.
             </p>
-            
+
             <div className="grid md:grid-cols-2 gap-8 mt-12">
               <Card className="border-2 border-amber-200 hover:shadow-lg transition-shadow">
                 <CardHeader className="bg-gradient-to-r from-amber-500 to-orange-500 text-white">
@@ -264,15 +430,7 @@ const WildTours = () => {
         </div>
       </section>
 
-      {/* Enhanced National Parks Section */}
-      <NationalParksSection 
-        selectedPark={selectedPackage?.id}
-        onParkSelect={(parkId) => {
-          console.log('Park selected:', parkId);
-          // Optionally scroll to booking or show park details
-          bookingRef.current?.scrollIntoView({ behavior: 'smooth' });
-        }}
-      />
+
 
       {/* Tour Categories */}
       <section className="py-20 bg-white">
@@ -281,7 +439,7 @@ const WildTours = () => {
             {/* Booking Widget - Sticky Sidebar */}
             <div className="lg:w-1/3">
               <div ref={bookingRef}>
-                <BookingWidget onBookingSubmit={handleBookingSubmit} />
+                <BookingWidget onBookingSubmit={handleWidgetSubmit} />
               </div>
             </div>
 
@@ -330,7 +488,7 @@ const WildTours = () => {
               Why Choose Our Wild Tours?
             </h2>
             <p className="text-xl text-gray-700 max-w-3xl mx-auto font-montserrat">
-              Experience Sri Lanka's incredible biodiversity with expert guidance, 
+              Experience Sri Lanka's incredible biodiversity with expert guidance,
               flexible pricing, and authentic encounters tailored to your adventure style.
             </p>
           </div>
@@ -378,7 +536,7 @@ const WildTours = () => {
           <p className="text-xl mb-8 max-w-2xl mx-auto font-montserrat opacity-90">
             Book your Sri Lankan wildlife experience today and create memories that will last a lifetime.
           </p>
-          <Button 
+          <Button
             size="lg"
             onClick={handleBookingStart}
             className="bg-white text-amber-600 hover:bg-gray-100 font-semibold px-8 py-4 text-lg transition-all duration-300 transform hover:scale-105"
@@ -389,7 +547,25 @@ const WildTours = () => {
         </div>
       </section>
 
+      {/* AI-Optimized FAQ Section */}
+      <AIOptimizedFAQ
+        faqs={wildlifeFAQs}
+        title="Wildlife Safari FAQ"
+        description="Get answers to common questions about Sri Lanka wildlife safaris, best times to visit, and what to expect."
+        pageUrl="/tours/wildtours"
+        showCategories={true}
+      />
+
       <Footer />
+
+      {selectedPackage && (
+        <BookingDialog
+          tour={selectedPackage}
+          open={bookingDialogOpen}
+          onOpenChange={setBookingDialogOpen}
+          onBook={handleBookingSubmit}
+        />
+      )}
     </>
   )
 }

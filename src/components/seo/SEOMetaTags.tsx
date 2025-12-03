@@ -83,7 +83,6 @@ export const SEOMetaTags: React.FC<SEOMetaTagsProps> = ({
             <meta name="format-detection" content="telephone=yes" />
             <meta name="theme-color" content="#0D9488" />
             <meta name="mobile-web-app-capable" content="yes" />
-            <meta name="apple-mobile-web-app-capable" content="yes" />
             <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         </Helmet>
     );

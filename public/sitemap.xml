@@ -2,445 +2,457 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://www.rechargetravels.com/</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/about</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/contact</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/connect-with-us</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/faq</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://www.rechargetravels.com/news</loc>
+    <lastmod>2025-12-01</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
     <loc>https://www.rechargetravels.com/travel-guide</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/destinations</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/destinations/colombo</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/destinations/kandy</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/destinations/galle</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/destinations/sigiriya</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/destinations/ella</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/destinations/nuwara-eliya</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/destinations/mirissa</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/destinations/arugam-bay</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/destinations/trincomalee</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/destinations/jaffna</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/destinations/negombo</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/destinations/bentota</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/destinations/hikkaduwa</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/destinations/weligama</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/destinations/anuradhapura</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/destinations/polonnaruwa</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/destinations/dambulla</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/destinations/adams-peak</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/destinations/kalpitiya</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/destinations/mannar</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/destinations/vavuniya</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/destinations/batticaloa</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/destinations/badulla</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/destinations/ratnapura</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/destinations/kurunegala</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/destinations/puttalam</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/destinations/hambantota</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/destinations/matara</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/destinations/tangalle</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/destinations/wadduwa</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/tours</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/tours/cultural</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/tours/cultural-heritage</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/tours/beach</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/tours/wildlife</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/tours/wild</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/tours/hill-country</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/tours/ramayana</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/tours/culinary</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/tours/photography</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/tours/ecotourism</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/tours/luxury</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/tours/pilgrimage</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/transport</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/transport/airport-transfers</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/transport/group-transport</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/transport/private-tours</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/transport/car-rentals</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/experiences</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/experiences/ayurveda-wellness</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/experiences/cooking-class</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/experiences/whale-watching</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/experiences/hot-air-balloon-sigiriya</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/experiences/kalpitiya-kite-surfing</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/experiences/hikkaduwa-water-sports</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/experiences/tea-trails</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.rechargetravels.com/experiences/waterfalls</loc>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/experiences/train-journeys</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/experiences/jungle-camping</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/experiences/island-getaways</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/experiences/lagoon-safari</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/experiences/sea-cucumber-farming</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/experiences/pilgrimage-tours</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/hotels</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/hotels/luxury</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/hotels/budget</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/hotels/boutique</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.rechargetravels.com/blog</loc>
-    <lastmod>2025-11-28</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>

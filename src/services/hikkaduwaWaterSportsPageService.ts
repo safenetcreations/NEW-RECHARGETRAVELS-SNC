@@ -114,7 +114,7 @@ export interface WaterSportsBookingContent {
 export const defaultWaterSportsContent: WaterSportsBookingContent = {
   hero: {
     title: 'Hikkaduwa Water Sports Concierge',
-    subtitle: "Surf, dive, and jet across Sri Lanka's most vibrant marine playground with pro hosts.",
+    subtitle: "Surf, dive, snorkel, and jet across Sri Lanka's most vibrant marine playground with concierge-level hosts.",
     badge: 'Marine & Adventure Certified',
     gallery: [
       {
@@ -136,15 +136,20 @@ export const defaultWaterSportsContent: WaterSportsBookingContent = {
         image: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&w=2000&q=80',
         caption: 'Adrenaline-fueled jet ski circuits',
         tag: 'Jet Ski'
+      },
+      {
+        image: 'https://images.unsplash.com/photo-1532910404212-2c2b4ad48229?auto=format&fit=crop&w=2000&q=80',
+        caption: 'Sunrise paddle into Hikkaduwa lagoon mangroves',
+        tag: 'Sunrise SUP'
       }
     ]
   },
   overview: {
     summary:
-      'We operate the only concierge-led water sports outfit in Hikkaduwa—pairing insured operators, boutique hospitality, and marine biologist briefings for every booking.',
+      'We operate the only concierge-led water sports outfit in Hikkaduwa—pairing insured operators, boutique hospitality, pro media, and marine biologist briefings for every booking.',
     badges: [
-      { label: 'Activities', value: '15+', iconName: 'Activity' },
-      { label: 'Pro Crew', value: 'ISA & PADI', iconName: 'Shield' },
+      { label: 'Activities', value: '18+', iconName: 'Activity' },
+      { label: 'Pro Crew', value: 'ISA / PADI / Rescue', iconName: 'Shield' },
       { label: 'Guest Rating', value: '4.97/5', iconName: 'Star' },
       { label: 'Same-day slots', value: 'Available', iconName: 'Calendar' }
     ],
@@ -155,11 +160,15 @@ export const defaultWaterSportsContent: WaterSportsBookingContent = {
       },
       {
         label: 'Premium equipment',
-        description: 'Surftech boards, Cressi dive gear, and GoPro footage included on select bundles.'
+        description: 'Surftech boards, Cressi dive gear, GoPro/DJI footage, and heated showers at base.'
       },
       {
         label: 'Safety & insurance',
         description: 'Full marine liability coverage plus on-site medics during peak hours.'
+      },
+      {
+        label: 'Season-aware planning',
+        description: 'We switch to lagoon/sheltered reefs on monsoon days so you never waste a slot.'
       }
     ]
   },
@@ -196,6 +205,39 @@ export const defaultWaterSportsContent: WaterSportsBookingContent = {
       includes: ['Yamaha VX jet ski', 'Safety marshal + comms', 'GoPro clips', 'Post-ride mocktail'],
       iconName: 'Zap',
       image: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&w=1400&q=80'
+    },
+    {
+      id: 'sup-mangroves',
+      name: 'Sunrise SUP & Mangrove Safari',
+      summary: 'LED-lit boards at dawn, birdlife spotting, and silent paddle coaching.',
+      duration: '90 mins',
+      priceLabel: 'USD 30 per guest',
+      level: 'Beginner',
+      includes: ['SUP board + paddle', 'Guide + safety boat', 'Hydration + fruit cooler', 'Photo highlights'],
+      iconName: 'Sun',
+      image: 'https://images.unsplash.com/photo-1532910404212-2c2b4ad48229?auto=format&fit=crop&w=1400&q=80'
+    },
+    {
+      id: 'banana-boat',
+      name: 'Banana Boat & Towables',
+      summary: 'Family-friendly towables with radio comms and safety skipper.',
+      duration: '20 mins',
+      priceLabel: 'USD 25 per ride (up to 5 pax)',
+      level: 'Beginner',
+      includes: ['Towable + vests', 'Safety briefing', 'Escort boat + skipper', 'Photos on request'],
+      iconName: 'Users',
+      image: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=1400&q=80'
+    },
+    {
+      id: 'padi-discover',
+      name: 'PADI Discover Scuba',
+      summary: 'Confined water intro + shallow reef dive with PADI instructors.',
+      duration: '3 hours',
+      priceLabel: 'USD 110 per diver',
+      level: 'Beginner',
+      includes: ['Full dive kit', 'Instructor 2:1', 'Pool/lagoon skills', 'Reef dive & photos'],
+      iconName: 'Anchor',
+      image: 'https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=1400&q=80'
     },
     {
       id: 'padi-dive',
@@ -239,6 +281,26 @@ export const defaultWaterSportsContent: WaterSportsBookingContent = {
       highlights: ['Lagoon SUP safari', 'Sunset mocktail raft', 'DJ + tapas board', 'Night-photography'],
       includes: ['LED-lit boards', 'Concierge crew', 'Tapas & beverages', 'Photography edits'],
       iconName: 'Sun'
+    },
+    {
+      id: 'cert-dive',
+      name: 'Open Water Fast-Track',
+      badge: 'Certification',
+      duration: '3 days',
+      priceLabel: 'From USD 420',
+      highlights: ['PADI eLearning pre-arrival', '4 open water dives', 'Gear + logbook', 'Certification processing'],
+      includes: ['Instructor 2:1', 'Nitrox upgrade option', 'Photo set', 'Snacks & hydration'],
+      iconName: 'Anchor'
+    },
+    {
+      id: 'vip-media',
+      name: 'VIP Media & Luxury Cabana',
+      badge: 'Premium',
+      duration: 'Full day',
+      priceLabel: 'USD 320 per couple',
+      highlights: ['Private cabana & butler', 'Surf + snorkel + sunset SUP', 'Pro photo/video crew', 'Sunset champagne'],
+      includes: ['All activities + gear', 'Transfers within 15km', 'Chef lunch + sundowner board', 'Edited media set'],
+      iconName: 'Sparkles'
     }
   ],
   logistics: {
@@ -246,8 +308,8 @@ export const defaultWaterSportsContent: WaterSportsBookingContent = {
     sessionTimes: ['Sunrise Tide • 6:30 AM', 'Midday Reef • 11:00 AM', 'Golden Hour • 4:30 PM'],
     baseLocation: 'Narigama Beachfront HQ with lockers, lounge, and showers',
     transferNote: 'Complimentary return transfers within 10 km. Private vans for longer distances at cost.',
-    gearProvided: ['Surftech boards & wetsuits', 'Cressi snorkel & dive rigs', 'Impact vests + helmets', 'Towels & amenities'],
-    bringList: ['Swimwear & change of clothes', 'Any medication / motion relief', 'Waterproof phone pouch', 'Gratuities for crew'],
+    gearProvided: ['Surftech boards & wetsuits', 'Cressi snorkel & dive rigs', 'Impact vests + helmets', 'Towels & amenities', 'GoPro/DJI media (select)'],
+    bringList: ['Swimwear & change of clothes', 'Any medication / motion relief', 'Waterproof phone pouch', 'Gratuities for crew', 'Reusable water bottle'],
     weatherPolicy: 'If seas exceed safe limits we reschedule or refund 100%. Forecasts shared 24h prior.',
     safetyNote: 'All sessions supervised by ISA/PADI crew, paramedic on-call, and live radio links to harbour control.'
   },
@@ -255,7 +317,8 @@ export const defaultWaterSportsContent: WaterSportsBookingContent = {
     'ISA / PADI certified lead instructors',
     'Daily equipment sanitization + maintenance logs',
     'Onsite medic & oxygen kit during peak hours',
-    'Full marine & personal accident insurance coverage'
+    'Full marine & personal accident insurance coverage',
+    'Live weather/radar monitoring and rapid evacuation SOPs'
   ],
   faqs: [
     {
@@ -281,6 +344,18 @@ export const defaultWaterSportsContent: WaterSportsBookingContent = {
       question: 'What happens if weather conditions change suddenly?',
       answer:
         'Safety first. We either shift to a calmer lagoon-based plan, move the booking, or process a full refund if we cancel.'
+    },
+    {
+      id: 'faq-5',
+      question: 'Do you provide photos and videos?',
+      answer:
+        'Select sessions include GoPro/DJI media. You can add a pro media pack with edited clips and drone footage on any booking.'
+    },
+    {
+      id: 'faq-6',
+      question: 'Is transport included?',
+      answer:
+        'Transfers within 10 km are complimentary. We arrange private vans beyond that at cost, timed to your tide/visibility windows.'
     }
   ],
   gallery: [

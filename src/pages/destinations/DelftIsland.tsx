@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -62,8 +63,12 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import EnhancedBookingModal from '@/components/EnhancedBookingModal';
+import DestinationMap from '@/components/destinations/DestinationMap';
+import WeatherWidget from '@/components/destinations/WeatherWidget';
 import { getDestinationBySlug } from '@/services/destinationContentService';
+
+// Delft Island center coordinates
+const DELFT_ISLAND_CENTER = { lat: 9.5133, lng: 79.6972 };
 
 // Type Definitions
 interface HeroSlide {
@@ -163,21 +168,33 @@ interface CTASection {
 const defaultHeroSlides: HeroSlide[] = [
   {
     id: '1',
-    image: 'https://images.unsplash.com/photo-1596895111956-bf1cf0599ce5?auto=format&fit=crop&q=80',
-    title: 'Welcome to Delft Island',
-    subtitle: 'The Untouched Gem of Jaffna Peninsula'
+    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80',
+    title: 'Discover Delft Island',
+    subtitle: 'Island of Wild Ponies'
   },
   {
     id: '2',
-    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&q=80',
-    title: 'Wild Ponies & Baobab Trees',
-    subtitle: 'Where Nature Reigns Supreme'
+    image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&q=80',
+    title: 'Wild Ponies',
+    subtitle: 'Descendants of Portuguese Horses'
   },
   {
     id: '3',
-    image: 'https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5?auto=format&fit=crop&q=80',
-    title: 'Dutch Colonial Heritage',
-    subtitle: 'Explore Ancient Ruins & History'
+    image: 'https://images.unsplash.com/photo-1559827291-72ee739d0d9a?auto=format&fit=crop&q=80',
+    title: 'Baobab Tree',
+    subtitle: 'Giant African Baobab'
+  },
+  {
+    id: '4',
+    image: 'https://images.unsplash.com/photo-1583212292454-1fe6229603b7?auto=format&fit=crop&q=80',
+    title: 'Dutch Fort Ruins',
+    subtitle: 'Colonial History'
+  },
+  {
+    id: '5',
+    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&q=80',
+    title: 'Coral Beaches',
+    subtitle: 'Untouched Coastal Beauty'
   }
 ];
 
@@ -518,6 +535,8 @@ const getIconComponent = (iconName: string) => {
 };
 
 const DelftIsland = () => {
+  const navigate = useNavigate();
+
   // State for content
   const [heroSlides, setHeroSlides] = useState<HeroSlide[]>(defaultHeroSlides);
   const [attractions, setAttractions] = useState<Attraction[]>(defaultAttractions);
@@ -533,8 +552,6 @@ const DelftIsland = () => {
   // UI State
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedTab, setSelectedTab] = useState('attractions');
-  const [showBookingModal, setShowBookingModal] = useState(false);
-  const [selectedService, setSelectedService] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
 
   // Load content from Firebase
@@ -584,13 +601,21 @@ const DelftIsland = () => {
     { id: 'activities', label: 'Activities', count: activities.length },
     { id: 'dining', label: 'Dining', count: restaurants.length },
     { id: 'stay', label: 'Stay', count: hotels.length },
+    { id: 'map', label: 'Map', count: null },
     { id: 'weather', label: 'Weather', count: null },
     { id: 'tips', label: 'Travel Tips', count: travelTips.length }
   ];
 
-  const handleBooking = (service: string) => {
-    setSelectedService(service);
-    setShowBookingModal(true);
+  const handleBooking = (service: string, tourData?: { id: string; name: string; description: string; duration: string; price: number; features: string[]; image?: string }) => {
+    const params = new URLSearchParams({
+      title: tourData?.name || service,
+      id: tourData?.id || service.toLowerCase().replace(/\s+/g, '-'),
+      duration: tourData?.duration || 'Full Day',
+      price: String(tourData?.price || 75),
+      image: tourData?.image || 'https://images.unsplash.com/photo-1596895111956-bf1cf0599ce5?w=800',
+      subtitle: `Delft Island - ${tourData?.name || service}`
+    });
+    navigate(`/book-tour?${params.toString()}`);
   };
 
   if (isLoading) {
@@ -627,7 +652,7 @@ const DelftIsland = () => {
 
       <main className="min-h-screen bg-background">
         {/* Hero Section */}
-        <section className="relative h-[85vh] overflow-hidden">
+        <section className="relative aspect-video max-h-[80vh] overflow-hidden">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentSlide}
@@ -741,40 +766,40 @@ const DelftIsland = () => {
         </section>
 
         {/* Quick Info Bar */}
-        <section className="relative -mt-16 z-10 px-4">
+        <section className="relative -mt-4 md:mt-0 lg:mt-8 z-10 px-4">
           <div className="container mx-auto">
             <Card className="bg-white/95 backdrop-blur-md shadow-2xl border-0">
               <CardContent className="py-6">
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 text-center">
                   <div className="flex flex-col items-center">
                     <Users className="w-6 h-6 text-teal-600 mb-2" />
-                    <span className="text-sm text-muted-foreground">Population</span>
-                    <span className="font-semibold">{destinationInfo.population}</span>
+                    <span className="text-sm text-gray-500">Population</span>
+                    <span className="font-semibold text-gray-900">{destinationInfo.population}</span>
                   </div>
                   <div className="flex flex-col items-center">
                     <MapPin className="w-6 h-6 text-teal-600 mb-2" />
-                    <span className="text-sm text-muted-foreground">Area</span>
-                    <span className="font-semibold">{destinationInfo.area}</span>
+                    <span className="text-sm text-gray-500">Area</span>
+                    <span className="font-semibold text-gray-900">{destinationInfo.area}</span>
                   </div>
                   <div className="flex flex-col items-center">
                     <Thermometer className="w-6 h-6 text-teal-600 mb-2" />
-                    <span className="text-sm text-muted-foreground">Temperature</span>
-                    <span className="font-semibold">{weatherInfo.temperature}</span>
+                    <span className="text-sm text-gray-500">Temperature</span>
+                    <span className="font-semibold text-gray-900">{weatherInfo.temperature}</span>
                   </div>
                   <div className="flex flex-col items-center">
                     <Calendar className="w-6 h-6 text-teal-600 mb-2" />
-                    <span className="text-sm text-muted-foreground">Best Time</span>
-                    <span className="font-semibold">{destinationInfo.bestTime}</span>
+                    <span className="text-sm text-gray-500">Best Time</span>
+                    <span className="font-semibold text-gray-900">{destinationInfo.bestTime}</span>
                   </div>
                   <div className="flex flex-col items-center">
                     <Languages className="w-6 h-6 text-teal-600 mb-2" />
-                    <span className="text-sm text-muted-foreground">Language</span>
-                    <span className="font-semibold">{destinationInfo.language}</span>
+                    <span className="text-sm text-gray-500">Language</span>
+                    <span className="font-semibold text-gray-900">{destinationInfo.language}</span>
                   </div>
                   <div className="flex flex-col items-center">
                     <Ship className="w-6 h-6 text-teal-600 mb-2" />
-                    <span className="text-sm text-muted-foreground">Access</span>
-                    <span className="font-semibold">Boat Only</span>
+                    <span className="text-sm text-gray-500">Access</span>
+                    <span className="font-semibold text-gray-900">Boat Only</span>
                   </div>
                 </div>
               </CardContent>
@@ -785,8 +810,8 @@ const DelftIsland = () => {
         {/* Island Introduction */}
         <section className="py-12 px-4 bg-gradient-to-b from-teal-50/50 to-white">
           <div className="container mx-auto max-w-4xl text-center">
-            <h2 className="text-3xl font-bold mb-6">Discover Delft Island (Neduntheevu)</h2>
-            <p className="text-lg text-muted-foreground leading-relaxed">
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">Discover Delft Island (Neduntheevu)</h2>
+            <p className="text-lg text-gray-600 leading-relaxed">
               Delft Island, locally known as Neduntheevu, is the largest island in the Jaffna Peninsula and one of Sri Lanka's most remote destinations. 
               Famous for its wild ponies, ancient baobab trees, and Dutch colonial ruins, this untouched paradise offers a unique glimpse into 
               colonial history and natural beauty. The island's flat terrain, limestone formations, and lack of modern development make it 
@@ -806,7 +831,7 @@ const DelftIsland = () => {
                   className={`px-6 py-4 font-medium transition-all whitespace-nowrap border-b-2 ${
                     selectedTab === tab.id
                       ? 'border-teal-600 text-teal-600'
-                      : 'border-transparent text-muted-foreground hover:text-foreground'
+                      : 'border-transparent text-gray-500 hover:text-gray-900'
                   }`}
                 >
                   {tab.label}
@@ -833,8 +858,8 @@ const DelftIsland = () => {
                 exit={{ opacity: 0, y: -20 }}
               >
                 <div className="text-center mb-12">
-                  <h2 className="text-4xl font-bold mb-4">Top Attractions in Delft Island</h2>
-                  <p className="text-muted-foreground max-w-2xl mx-auto">
+                  <h2 className="text-4xl font-bold text-gray-900 mb-4">Top Attractions in Delft Island</h2>
+                  <p className="text-gray-600 max-w-2xl mx-auto">
                     Wild ponies, ancient baobab trees, and Dutch colonial heritage await
                   </p>
                 </div>
@@ -874,7 +899,7 @@ const DelftIsland = () => {
                             </CardTitle>
                           </CardHeader>
                           <CardContent>
-                            <p className="text-muted-foreground mb-4 line-clamp-2">{attraction.description}</p>
+                            <p className="text-gray-600 mb-4 line-clamp-2">{attraction.description}</p>
                             <div className="flex flex-wrap gap-2 mb-4">
                               {attraction.highlights.slice(0, 3).map((highlight, idx) => (
                                 <Badge key={idx} variant="outline" className="text-xs border-teal-200 text-teal-700">
@@ -882,7 +907,7 @@ const DelftIsland = () => {
                                 </Badge>
                               ))}
                             </div>
-                            <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
+                            <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
                               <span className="flex items-center">
                                 <Clock className="w-4 h-4 mr-1" />
                                 {attraction.duration}
@@ -916,8 +941,8 @@ const DelftIsland = () => {
                 exit={{ opacity: 0, y: -20 }}
               >
                 <div className="text-center mb-12">
-                  <h2 className="text-4xl font-bold mb-4">Things to Do on Delft Island</h2>
-                  <p className="text-muted-foreground max-w-2xl mx-auto">
+                  <h2 className="text-4xl font-bold text-gray-900 mb-4">Things to Do on Delft Island</h2>
+                  <p className="text-gray-600 max-w-2xl mx-auto">
                     From wildlife safaris to historical exploration, discover unique island experiences
                   </p>
                 </div>
@@ -948,10 +973,10 @@ const DelftIsland = () => {
                             </div>
                           </CardHeader>
                           <CardContent>
-                            <p className="text-muted-foreground mb-4">{activity.description}</p>
+                            <p className="text-gray-600 mb-4">{activity.description}</p>
                             <div className="flex items-center justify-between text-sm mb-4">
                               <span className="text-teal-600 font-semibold">{activity.price}</span>
-                              <span className="text-muted-foreground">{activity.duration}</span>
+                              <span className="text-gray-500">{activity.duration}</span>
                             </div>
                             {activity.difficulty && (
                               <Badge variant="outline" className="mb-4 border-teal-200">
@@ -983,8 +1008,8 @@ const DelftIsland = () => {
                 exit={{ opacity: 0, y: -20 }}
               >
                 <div className="text-center mb-12">
-                  <h2 className="text-4xl font-bold mb-4">Dining on Delft Island</h2>
-                  <p className="text-muted-foreground max-w-2xl mx-auto">
+                  <h2 className="text-4xl font-bold text-gray-900 mb-4">Dining on Delft Island</h2>
+                  <p className="text-gray-600 max-w-2xl mx-auto">
                     Limited but authentic local dining options - bring snacks and water!
                   </p>
                 </div>
@@ -1039,9 +1064,9 @@ const DelftIsland = () => {
                                 {restaurant.priceRange}
                               </Badge>
                             </div>
-                            <p className="text-muted-foreground text-sm mb-4">{restaurant.description}</p>
+                            <p className="text-gray-600 text-sm mb-4">{restaurant.description}</p>
                             <div className="mb-4">
-                              <p className="text-xs text-muted-foreground mb-2">Specialties:</p>
+                              <p className="text-xs text-gray-500 mb-2">Specialties:</p>
                               <div className="flex flex-wrap gap-1">
                                 {restaurant.specialties.map((specialty, idx) => (
                                   <Badge key={idx} variant="secondary" className="text-xs">
@@ -1050,7 +1075,7 @@ const DelftIsland = () => {
                                 ))}
                               </div>
                             </div>
-                            <div className="flex items-center text-sm text-muted-foreground">
+                            <div className="flex items-center text-sm text-gray-500">
                               <Clock className="w-4 h-4 mr-1" />
                               {restaurant.openHours}
                             </div>
@@ -1072,8 +1097,8 @@ const DelftIsland = () => {
                 exit={{ opacity: 0, y: -20 }}
               >
                 <div className="text-center mb-12">
-                  <h2 className="text-4xl font-bold mb-4">Where to Stay</h2>
-                  <p className="text-muted-foreground max-w-2xl mx-auto">
+                  <h2 className="text-4xl font-bold text-gray-900 mb-4">Where to Stay</h2>
+                  <p className="text-gray-600 max-w-2xl mx-auto">
                     Very limited accommodation on the island - day trips from Jaffna recommended
                   </p>
                 </div>
@@ -1124,11 +1149,11 @@ const DelftIsland = () => {
                             <h3 className="text-xl font-bold">{hotel.name}</h3>
                             <span className="text-teal-600 font-semibold text-sm">{hotel.priceRange}</span>
                           </div>
-                          <div className="flex items-center text-sm text-muted-foreground mb-3">
+                          <div className="flex items-center text-sm text-gray-500 mb-3">
                             <MapPin className="w-4 h-4 mr-1" />
                             {hotel.location}
                           </div>
-                          <p className="text-muted-foreground text-sm mb-4">{hotel.description}</p>
+                          <p className="text-gray-600 text-sm mb-4">{hotel.description}</p>
                           <div className="flex flex-wrap gap-2 mb-4">
                             {hotel.amenities.slice(0, 4).map((amenity, idx) => (
                               <Badge key={idx} variant="outline" className="text-xs border-teal-200">
@@ -1150,6 +1175,54 @@ const DelftIsland = () => {
               </motion.section>
             )}
 
+            {/* Map Tab */}
+            {selectedTab === 'map' && (
+              <motion.section
+                key="map"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+              >
+                <div className="text-center mb-12">
+                  <h2 className="text-4xl font-bold text-gray-900 mb-4">Explore Delft Island Map</h2>
+                  <p className="text-gray-600 max-w-2xl mx-auto">
+                    Discover wild ponies, baobab trees, Dutch ruins and pristine beaches across the island
+                  </p>
+                </div>
+
+                <div className="grid lg:grid-cols-3 gap-8">
+                  {/* Map */}
+                  <div className="lg:col-span-2">
+                    <DestinationMap
+                      destinationName="Delft Island"
+                      center={DELFT_ISLAND_CENTER}
+                      attractions={attractions.map(a => ({
+                        name: a.name,
+                        description: a.description,
+                        image: a.image,
+                        category: a.category,
+                        rating: a.rating,
+                        duration: a.duration,
+                        price: a.price,
+                        highlights: a.highlights
+                      }))}
+                      height="600px"
+                      onAttractionClick={(attraction) => handleBooking(attraction.name)}
+                    />
+                  </div>
+
+                  {/* Weather Widget */}
+                  <div>
+                    <WeatherWidget
+                      latitude={DELFT_ISLAND_CENTER.lat}
+                      longitude={DELFT_ISLAND_CENTER.lng}
+                      locationName="Delft Island"
+                    />
+                  </div>
+                </div>
+              </motion.section>
+            )}
+
             {/* Weather Tab */}
             {selectedTab === 'weather' && (
               <motion.section
@@ -1159,8 +1232,8 @@ const DelftIsland = () => {
                 exit={{ opacity: 0, y: -20 }}
               >
                 <div className="text-center mb-12">
-                  <h2 className="text-4xl font-bold mb-4">Weather on Delft Island</h2>
-                  <p className="text-muted-foreground max-w-2xl mx-auto">
+                  <h2 className="text-4xl font-bold text-gray-900 mb-4">Weather on Delft Island</h2>
+                  <p className="text-gray-600 max-w-2xl mx-auto">
                     Plan your visit with our comprehensive weather guide
                   </p>
                 </div>
@@ -1203,7 +1276,7 @@ const DelftIsland = () => {
                           </Badge>
                         ))}
                       </div>
-                      <p className="text-muted-foreground mt-4 text-sm">
+                      <p className="text-gray-600 mt-4 text-sm">
                         The dry season offers calm seas for boat travel and ideal conditions for exploring the island on foot.
                       </p>
                     </CardContent>
@@ -1240,8 +1313,8 @@ const DelftIsland = () => {
                 exit={{ opacity: 0, y: -20 }}
               >
                 <div className="text-center mb-12">
-                  <h2 className="text-4xl font-bold mb-4">Essential Travel Tips for Delft Island</h2>
-                  <p className="text-muted-foreground max-w-2xl mx-auto">
+                  <h2 className="text-4xl font-bold text-gray-900 mb-4">Essential Travel Tips for Delft Island</h2>
+                  <p className="text-gray-600 max-w-2xl mx-auto">
                     Everything you need to know for a successful island adventure
                   </p>
                 </div>
@@ -1321,12 +1394,18 @@ const DelftIsland = () => {
 
       <Footer />
 
-      {/* Booking Modal */}
-      <EnhancedBookingModal
-        isOpen={showBookingModal}
-        onClose={() => setShowBookingModal(false)}
-        preSelectedService={selectedService}
-      />
+      {/* WhatsApp Float Button */}
+      <a
+        href="https://wa.me/94777721999?text=Hi! I'm interested in booking a Delft Island tour."
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 z-50 bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-lg transition-all hover:scale-110"
+        aria-label="Contact via WhatsApp"
+      >
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+      </a>
     </>
   );
 };

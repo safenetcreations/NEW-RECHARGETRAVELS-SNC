@@ -237,7 +237,7 @@ Respond with JSON:
       });
 
       const content = response.choices[0]?.message?.content || '{}';
-      let cleanContent = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      const cleanContent = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
       const parsed = JSON.parse(cleanContent);
 
       return parsed.topics || [];
@@ -283,7 +283,7 @@ Respond with JSON:
       });
 
       const responseContent = response.choices[0]?.message?.content || '{}';
-      let cleanContent = responseContent.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      const cleanContent = responseContent.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
 
       return JSON.parse(cleanContent);
     } catch (error: any) {

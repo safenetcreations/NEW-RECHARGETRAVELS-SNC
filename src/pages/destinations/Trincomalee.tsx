@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -32,12 +33,14 @@ import {
   Landmark,
   Ship,
   Sunrise,
-  Binoculars
+  Binoculars,
+  MessageCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import EnhancedBookingModal from '@/components/EnhancedBookingModal';
+import DestinationMap from '@/components/destinations/DestinationMap';
+import WeatherWidget from '@/components/destinations/WeatherWidget';
 import { getDestinationBySlug } from '@/services/destinationContentService';
 
 // Type definitions
@@ -120,6 +123,9 @@ interface CTASection {
   buttonText: string;
 }
 
+// Coordinates for Trincomalee
+const TRINCOMALEE_CENTER = { lat: 8.5874, lng: 81.2152 };
+
 // Icon mapping function
 const getIconComponent = (iconName: string) => {
   const iconMap: { [key: string]: any } = {
@@ -133,21 +139,11 @@ const getIconComponent = (iconName: string) => {
 
 // Default content for Trincomalee
 const defaultHeroSlides: HeroSlide[] = [
-  {
-    image: "https://images.unsplash.com/photo-1539367628448-4bc5c9d171c8?auto=format&fit=crop&q=80",
-    title: "Welcome to Trincomalee",
-    subtitle: "The Pearl of Sri Lanka's Eastern Coast"
-  },
-  {
-    image: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&q=80",
-    title: "Pristine Beaches & Sacred Sites",
-    subtitle: "Where Ancient History Meets Paradise"
-  },
-  {
-    image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&q=80",
-    title: "Marine Paradise",
-    subtitle: "World-Class Diving & Whale Watching"
-  }
+  { image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80", title: "Discover Trincomalee", subtitle: "Sri Lanka's Eastern Paradise" },
+  { image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&q=80", title: "Nilaveli Beach", subtitle: "Pristine White Sand Shores" },
+  { image: "https://images.unsplash.com/photo-1559827291-72ee739d0d9a?auto=format&fit=crop&q=80", title: "Koneswaram Temple", subtitle: "Sacred Hindu Shrine on the Cliff" },
+  { image: "https://images.unsplash.com/photo-1583212292454-1fe6229603b7?auto=format&fit=crop&q=80", title: "Pigeon Island", subtitle: "Marine Sanctuary & Coral Reefs" },
+  { image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&q=80", title: "Natural Harbor", subtitle: "One of the World's Finest" }
 ];
 
 const defaultAttractions: Attraction[] = [
@@ -380,9 +376,9 @@ const defaultCTA: CTASection = {
 };
 
 const Trincomalee = () => {
+  const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [activeTab, setActiveTab] = useState('attractions');
-  const [showBookingModal, setShowBookingModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
@@ -434,7 +430,7 @@ const Trincomalee = () => {
 
   const handleBooking = (itemName: string) => {
     setSelectedItem(itemName);
-    setShowBookingModal(true);
+    navigate('/book-tour', { state: { preSelectedService: itemName } });
   };
 
   // Dynamic tabs based on available content
@@ -444,7 +440,18 @@ const Trincomalee = () => {
     { id: 'restaurants', label: 'Dining', count: restaurants.length },
     { id: 'hotels', label: 'Stay', count: hotels.length },
     { id: 'weather', label: 'Weather', count: null },
+    { id: 'map', label: 'Map', count: null },
     { id: 'tips', label: 'Travel Tips', count: travelTips.length }
+  ];
+
+  // Map attractions for DestinationMap component
+  const mapAttractions = [
+    { name: 'Fort Frederick', lat: 8.5874, lng: 81.2152 },
+    { name: 'Koneswaram Temple', lat: 8.5874, lng: 81.2350 },
+    { name: 'Marble Beach', lat: 8.6000, lng: 81.2200 },
+    { name: 'Uppuveli Beach', lat: 8.6250, lng: 81.2150 },
+    { name: 'Nilaveli Beach', lat: 8.6800, lng: 81.2100 },
+    { name: 'Pigeon Island', lat: 8.7050, lng: 81.2180 }
   ];
 
   return (
@@ -462,7 +469,7 @@ const Trincomalee = () => {
 
       <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
         {/* Hero Section with Slideshow */}
-        <section className="relative h-[75vh] overflow-hidden">
+        <section className="relative aspect-video max-h-[80vh] overflow-hidden">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentSlide}
@@ -941,6 +948,39 @@ const Trincomalee = () => {
               </motion.div>
             )}
 
+            {/* Map Tab */}
+            {activeTab === 'map' && (
+              <motion.div
+                key="map"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="text-center mb-10">
+                  <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    Explore Trincomalee
+                  </h2>
+                  <p className="text-gray-600 max-w-2xl mx-auto">
+                    Discover key attractions and plan your route around Trincomalee
+                  </p>
+                </div>
+
+                <div className="grid lg:grid-cols-3 gap-6">
+                  <div className="lg:col-span-2">
+                    <DestinationMap
+                      center={TRINCOMALEE_CENTER}
+                      attractions={mapAttractions}
+                      zoom={12}
+                    />
+                  </div>
+                  <div>
+                    <WeatherWidget city="Trincomalee" />
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
             {/* Travel Tips Tab */}
             {activeTab === 'tips' && (
               <motion.div
@@ -993,26 +1033,29 @@ const Trincomalee = () => {
             >
               <h2 className="text-3xl md:text-4xl font-bold mb-4">{ctaSection.title}</h2>
               <p className="text-xl mb-8 max-w-2xl mx-auto opacity-90">{ctaSection.subtitle}</p>
-              <Button
-                size="lg"
-                className="bg-white text-cyan-700 hover:bg-gray-100 px-8 py-6 text-lg shadow-xl"
-                onClick={() => handleBooking('Trincomalee Complete Tour')}
-              >
-                {ctaSection.buttonText}
-              </Button>
+              <div className="flex flex-wrap justify-center gap-4">
+                <Button
+                  size="lg"
+                  className="bg-white text-cyan-700 hover:bg-gray-100 px-8 py-6 text-lg shadow-xl"
+                  onClick={() => handleBooking('Trincomalee Complete Tour')}
+                >
+                  {ctaSection.buttonText}
+                </Button>
+                <Button
+                  size="lg"
+                  className="bg-green-500 hover:bg-green-600 text-white px-8 py-6 text-lg shadow-xl flex items-center gap-2"
+                  onClick={() => window.open('https://wa.me/94777123456?text=Hi, I am interested in booking a Trincomalee tour', '_blank')}
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  WhatsApp Us
+                </Button>
+              </div>
             </motion.div>
           </div>
         </section>
       </main>
 
       <Footer />
-
-      {/* Booking Modal */}
-      <EnhancedBookingModal
-        isOpen={showBookingModal}
-        onClose={() => setShowBookingModal(false)}
-        preSelectedService={selectedItem}
-      />
     </>
   );
 };

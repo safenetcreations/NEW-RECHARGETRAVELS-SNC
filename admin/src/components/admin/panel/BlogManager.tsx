@@ -190,7 +190,7 @@ const BlogManager: React.FC<BlogManagerProps> = ({ onNavigate }) => {
     try {
       setLoading(true);
       const snapshot = await getDocs(collection(db, 'blogs'));
-      let data = snapshot.docs.map(docSnap => ({
+      const data = snapshot.docs.map(docSnap => ({
         id: docSnap.id,
         ...docSnap.data()
       })) as BlogPost[];

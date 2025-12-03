@@ -179,7 +179,7 @@ class LuxuryBookingService {
             customerPhone: data.phone,
             ...data,
             timestamp: new Date().toISOString(),
-            dashboardLink: `https://recharge-travels-73e76.web.app/admin/inquiries/${type}/${bookingId}`
+            dashboardLink: `https://www.rechargetravels.com/admin/inquiries/${type}/${bookingId}`
           }
         })
       });

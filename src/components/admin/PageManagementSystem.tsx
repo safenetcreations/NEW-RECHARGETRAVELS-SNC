@@ -440,7 +440,7 @@ const PageManagementSystem: React.FC = () => {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => window.open(`https://recharge-travels-73e76.web.app${page.slug}`, '_blank')}
+                          onClick={() => window.open(`https://www.rechargetravels.com${page.slug}`, '_blank')}
                           className="flex items-center gap-1"
                         >
                           <Eye className="w-3 h-3" />

@@ -4,7 +4,43 @@ import { Link } from 'react-router-dom'
 import { MapPin, Mountain, Waves, Sun, Compass, Building2, ArrowRight, Star, Clock, Users } from 'lucide-react'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
+import AISEOSchema from '@/components/seo/AISEOSchema'
+import AIOptimizedFAQ from '@/components/seo/AIOptimizedFAQ'
 import { destinationsByRegion } from '@/components/header/navigation/menuData'
+
+// AI-Optimized FAQs for Destinations page
+const destinationsFAQs = [
+  {
+    question: "What are the best destinations to visit in Sri Lanka?",
+    answer: "The top destinations in Sri Lanka include: Sigiriya (ancient rock fortress, UNESCO site), Kandy (Temple of the Tooth, cultural capital), Galle (Dutch Fort, colonial heritage), Ella (Nine Arch Bridge, hiking), Mirissa (whale watching, beaches), Nuwara Eliya (tea plantations, hill country), and Yala National Park (leopard safaris). For a complete Sri Lanka experience, plan 10-14 days covering the Cultural Triangle, hill country, and beaches.",
+    category: "Top Destinations"
+  },
+  {
+    question: "How many days do I need to explore Sri Lanka?",
+    answer: "We recommend 10-14 days to experience Sri Lanka's highlights comprehensively. A 7-day trip can cover either the Cultural Triangle and hill country OR the southern beaches and wildlife. For first-time visitors, our most popular 10-day itinerary includes Colombo (1 day), Sigiriya/Dambulla (2 days), Kandy (2 days), Nuwara Eliya/Ella (2 days), and Yala/beaches (3 days).",
+    category: "Planning"
+  },
+  {
+    question: "What is the best time to visit different regions of Sri Lanka?",
+    answer: "Sri Lanka has different seasons by region: West & South coasts (Galle, Mirissa, Bentota) are best December-April. East coast (Trincomalee, Arugam Bay) is best April-September. Hill country (Kandy, Ella, Nuwara Eliya) is pleasant January-April. Cultural Triangle (Sigiriya, Anuradhapura) is accessible year-round. This means Sri Lanka offers great weather somewhere in the country all year.",
+    category: "Weather"
+  },
+  {
+    question: "Which region of Sri Lanka is best for beaches?",
+    answer: "Sri Lanka has excellent beaches in multiple regions: South coast (Mirissa, Unawatuna, Weligama) offers whale watching, surfing, and nightlife - best December-April. West coast (Bentota, Negombo) has luxury resorts and water sports - best November-April. East coast (Arugam Bay, Trincomalee, Nilaveli) has world-class surfing and pristine beaches - best April-September.",
+    category: "Beaches"
+  },
+  {
+    question: "How do I get around between destinations in Sri Lanka?",
+    answer: "Transportation options between Sri Lanka destinations include: Private car with driver ($60-100/day, most convenient), scenic trains (Kandy-Ella route is world-famous, $2-10), public buses (cheapest, $1-5), and domestic flights (Colombo to Jaffna/Batticaloa). We recommend private transport for flexibility, combined with the scenic train journey for the hill country experience.",
+    category: "Transport"
+  },
+  {
+    question: "Is it safe to travel to Northern Sri Lanka (Jaffna)?",
+    answer: "Yes, Northern Sri Lanka including Jaffna is completely safe for tourists and has been welcoming visitors since 2010. The region offers unique Tamil culture, Hindu temples like Nallur Kandaswamy, pristine islands (Delft, Nagadeepa), and distinctive cuisine. Jaffna is accessible by domestic flight (1 hour from Colombo), train (6 hours), or car (7-8 hours). The region is less crowded than southern destinations.",
+    category: "Safety"
+  }
+]
 
 // Enhanced destination data with images
 const destinationImages: Record<string, { image: string; highlights: string[]; bestTime: string }> = {
@@ -267,6 +303,21 @@ const Destinations = () => {
         <link rel="canonical" href="https://www.rechargetravels.com/destinations" />
       </Helmet>
 
+      {/* AI-Optimized SEO Schema */}
+      <AISEOSchema
+        pageType="destination"
+        title="Sri Lanka Destinations Guide 2025 | 30+ Places to Visit"
+        description="Complete guide to Sri Lanka's top destinations across 5 regions. Explore 30+ handpicked locations including Sigiriya, Kandy, Galle, Ella, Mirissa, Jaffna, and more. Plan your perfect Sri Lanka itinerary."
+        url="/destinations"
+        rating={4.8}
+        reviewCount={350}
+        faqs={destinationsFAQs}
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Destinations", url: "/destinations" }
+        ]}
+      />
+
       <Header />
 
       <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50">
@@ -307,6 +358,41 @@ const Destinations = () => {
                   <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Destination Pillar Links */}
+        <section className="bg-white py-10 border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-6">
+              <p className="text-xs uppercase tracking-[0.3em] text-slate-500 font-bold">Destination Pillars</p>
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">Explore by Region & Theme</h2>
+              <p className="text-slate-600 max-w-3xl mx-auto mt-2">
+                Jump to key regional guides and themes, then explore their related towns and attractions.
+              </p>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {[
+                { title: 'Northern Heritage', href: '/destinations/jaffna', description: 'Jaffna, Delft Island, Mannar, and Tamil cultural highlights.' },
+                { title: 'Cultural Triangle', href: '/destinations/sigiriya', description: 'Sigiriya, Dambulla, Polonnaruwa, and Anuradhapura ancient cities.' },
+                { title: 'Hill Country', href: '/destinations/ella', description: 'Ella, Nuwara Eliya, Hatton, and tea country panoramas.' },
+                { title: 'South Coast', href: '/destinations/galle', description: 'Galle, Mirissa, Weligama, and Bentota beach escapes.' },
+                { title: 'East Coast', href: '/destinations/arugam-bay', description: 'Arugam Bay, Trincomalee, Batticaloa, and Pasikuda lagoons.' },
+                { title: 'Wildlife & Parks', href: '/tours/wildtours/parks', description: 'National parks and wildlife gateways across the island.' },
+              ].map(link => (
+                <Link
+                  key={link.href}
+                  to={link.href}
+                  className="group rounded-2xl border border-slate-200 bg-slate-50 hover:border-amber-300 hover:bg-amber-50 transition-all duration-300 p-4 shadow-sm hover:-translate-y-1"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-bold text-slate-900 group-hover:text-amber-700">{link.title}</h3>
+                    <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-amber-600" />
+                  </div>
+                  <p className="text-sm text-slate-600">{link.description}</p>
+                </Link>
+              ))}
             </div>
           </div>
         </section>
@@ -518,6 +604,15 @@ const Destinations = () => {
             </div>
           </div>
         </section>
+
+        {/* AI-Optimized FAQ Section */}
+        <AIOptimizedFAQ
+          faqs={destinationsFAQs}
+          title="Frequently Asked Questions About Sri Lanka Destinations"
+          description="Get answers to common questions about the best places to visit, when to go, and how to plan your Sri Lanka trip."
+          pageUrl="/destinations"
+          showCategories={true}
+        />
 
         {/* CTA Section */}
         <section className="py-16 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900">

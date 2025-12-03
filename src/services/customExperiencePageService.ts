@@ -10,36 +10,79 @@ import {
   orderBy,
   getDocs,
   deleteDoc,
-  Timestamp
+  Timestamp,
+  arrayUnion
 } from 'firebase/firestore';
+
+// ============================================
+// HERO & CONTENT INTERFACES
+// ============================================
+
+export interface CustomHeroSlide {
+  image: string;
+  caption: string;
+  tag?: string;
+}
+
+export interface CustomBadge {
+  label: string;
+  value: string;
+  iconName: string;
+}
+
+export interface CustomHighlight {
+  label: string;
+  description: string;
+}
+
+export interface CustomExperienceType {
+  id: string;
+  icon: string;
+  title: string;
+  description: string;
+}
+
+export interface CustomBenefit {
+  id: string;
+  title: string;
+  description: string;
+  image: string;
+  icon?: string;
+}
+
+export interface CustomTestimonial {
+  id: string;
+  name: string;
+  location: string;
+  text: string;
+  rating: number;
+  avatar: string;
+  tripType?: string;
+}
+
+export interface CustomBookingInfo {
+  contactPhone: string;
+  whatsapp: string;
+  email: string;
+  responseTime: string;
+  conciergeNote: string;
+}
 
 export interface CustomExperiencePageContent {
   hero: {
     title: string;
     subtitle: string;
-    backgroundImage: string;
-    ctaText: string;
+    badge: string;
+    gallery: CustomHeroSlide[];
   };
-  features: Array<{
-    id: string;
-    icon: string;
-    title: string;
-    description: string;
-  }>;
-  benefits: Array<{
-    id: string;
-    title: string;
-    description: string;
-    image: string;
-  }>;
-  testimonials: Array<{
-    id: string;
-    name: string;
-    location: string;
-    text: string;
-    rating: number;
-    avatar: string;
-  }>;
+  overview: {
+    summary: string;
+    badges: CustomBadge[];
+    highlights: CustomHighlight[];
+  };
+  experienceTypes: CustomExperienceType[];
+  benefits: CustomBenefit[];
+  testimonials: CustomTestimonial[];
   formConfig: {
     enabledFields: string[];
     customQuestions: Array<{
@@ -50,18 +93,18 @@ export interface CustomExperiencePageContent {
       required: boolean;
     }>;
   };
-  contact: {
-    phone: string;
-    email: string;
-    whatsapp: string;
-    availability: string;
-  };
+  booking: CustomBookingInfo;
   seo: {
     title: string;
     description: string;
     keywords: string[];
+    ogImage: string;
   };
 }
+
+// ============================================
+// SUBMISSION INTERFACE
+// ============================================
 
 export interface CustomExperienceSubmission {
   id?: string;
@@ -87,10 +130,172 @@ export interface CustomExperienceSubmission {
   previousVisits: boolean;
   mobilityRequirements: string;
   medicalConditions: string;
+  travelStyle?: string;
+  travelPace?: 'relaxed' | 'balanced' | 'fast';
+  celebration?: string;
+  preferredDestinations?: string[];
+  communicationPreference?: 'email' | 'whatsapp' | 'phone';
+  channel?: 'web' | 'whatsapp' | 'phone';
+  assignedConcierge?: string;
+  internalNotes?: string;
   status: 'new' | 'contacted' | 'quoted' | 'confirmed' | 'completed';
+  statusHistory?: Array<{
+    status: CustomExperienceSubmission['status'];
+    note?: string;
+    agent?: string;
+    timestamp: Date;
+  }>;
   createdAt: Date;
   updatedAt: Date;
 }
+
+// ============================================
+// DEFAULT CONTENT
+// ============================================
+
+const defaultContent: CustomExperiencePageContent = {
+  hero: {
+    title: 'Design Your Dream Sri Lanka',
+    subtitle: 'Concierge-crafted itineraries blending wildlife, culture, tea trails, and oceanside bliss. Every trip hand-built around your style.',
+    badge: 'Bespoke Travel Concierge',
+    gallery: [
+      {
+        image: 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=2000&q=80',
+        caption: 'Your journey awaits',
+        tag: 'Personalized'
+      },
+      {
+        image: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=2000&q=80',
+        caption: 'Pristine landscapes',
+        tag: 'Adventure'
+      },
+      {
+        image: 'https://images.unsplash.com/photo-1501117716987-c8e1ecb210cc?auto=format&fit=crop&w=2000&q=80',
+        caption: 'Luxury retreats',
+        tag: 'Relaxation'
+      },
+      {
+        image: 'https://images.unsplash.com/photo-1483683804023-6ccdb62f86ef?auto=format&fit=crop&w=2000&q=80',
+        caption: 'Cultural immersion',
+        tag: 'Discovery'
+      }
+    ]
+  },
+  overview: {
+    summary:
+      "Share your travel dreams, and our Sri Lanka-based concierge team will design every day of your journey—handpicking guides, stays, transfers, and hidden experiences. We remain on WhatsApp throughout your trip for anything you need.",
+    badges: [
+      { label: 'Trips Designed', value: '500+', iconName: 'Compass' },
+      { label: 'Guest Rating', value: '4.97/5', iconName: 'Star' },
+      { label: 'Response Time', value: '<12h', iconName: 'Clock' },
+      { label: 'Destinations', value: '50+', iconName: 'MapPin' }
+    ],
+    highlights: [
+      {
+        label: 'Dedicated travel designer',
+        description: 'One expert planner handles your entire trip—from first message to farewell dinner.'
+      },
+      {
+        label: 'Handpicked experiences',
+        description: "Private safaris, chef's tables, helicopter transfers, and off-the-map spots only locals know."
+      },
+      {
+        label: '24/7 WhatsApp support',
+        description: 'Your concierge stays on call throughout your journey for real-time adjustments.'
+      }
+    ]
+  },
+  experienceTypes: [
+    { id: '1', icon: '🦁', title: 'Wildlife Safaris', description: 'Private jeeps in Yala, Wilpattu & Minneriya' },
+    { id: '2', icon: '🏛️', title: 'Culture & Heritage', description: 'UNESCO cities, local artisans & rituals' },
+    { id: '3', icon: '🏖️', title: 'Beach Escapades', description: 'Whale watching, surfing & sunsets' },
+    { id: '4', icon: '🍵', title: 'Tea Country', description: 'Tea tastings, scenic train rides & hikes' },
+    { id: '5', icon: '🧘', title: 'Wellness', description: 'Ayurveda retreats & sunrise yoga' },
+    { id: '6', icon: '🚁', title: 'Luxury Touches', description: 'Heli transfers, villa buyouts & butlers' },
+    { id: '7', icon: '🍽️', title: 'Culinary', description: 'Cooking classes, market tours & private chefs' },
+    { id: '8', icon: '🏔️', title: 'Adventure', description: 'Hiking, cycling, rafting & rock climbing' }
+  ],
+  benefits: [
+    {
+      id: '1',
+      title: 'Dedicated concierge',
+      description: 'Sri Lanka based experts craft every day and stay on WhatsApp 24/7.',
+      image: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=800&q=80',
+      icon: '✨'
+    },
+    {
+      id: '2',
+      title: 'Handpicked stays',
+      description: 'Tea bungalows, boutique villas and luxe beach properties matched to your vibe.',
+      image: 'https://images.unsplash.com/photo-1501117716987-c8e1ecb210cc?auto=format&fit=crop&w=800&q=80',
+      icon: '🏨'
+    },
+    {
+      id: '3',
+      title: 'Signature experiences',
+      description: 'Sunrise hikes, leopard trackers, private chefs and helicopter transfers.',
+      image: 'https://images.unsplash.com/photo-1483683804023-6ccdb62f86ef?auto=format&fit=crop&w=800&q=80',
+      icon: '💎'
+    }
+  ],
+  testimonials: [
+    {
+      id: '1',
+      name: 'Nisha & Devin',
+      location: 'Toronto, Canada',
+      text: 'Recharge built a 12-day honeymoon across tea country and the south coast—concierge stayed on WhatsApp every day. Absolutely perfect.',
+      rating: 5,
+      avatar: 'https://i.pravatar.cc/120?img=45',
+      tripType: 'Honeymoon'
+    },
+    {
+      id: '2',
+      name: 'Lena G.',
+      location: 'Berlin, Germany',
+      text: 'Every transfer, guide and restaurant felt curated. The surprise leopard safari upgrade was unforgettable.',
+      rating: 5,
+      avatar: 'https://i.pravatar.cc/120?img=15',
+      tripType: 'Solo Adventure'
+    },
+    {
+      id: '3',
+      name: 'The Martinez Family',
+      location: 'Miami, USA',
+      text: 'Traveling with kids can be stressful, but Recharge handled everything. The driver knew exactly what our kids needed.',
+      rating: 5,
+      avatar: 'https://i.pravatar.cc/120?img=33',
+      tripType: 'Family Trip'
+    }
+  ],
+  formConfig: {
+    enabledFields: ['all'],
+    customQuestions: []
+  },
+  booking: {
+    contactPhone: '+94 777 721 999',
+    whatsapp: 'https://wa.me/94777721999',
+    email: 'concierge@rechargetravels.com',
+    responseTime: 'Replies within 12 hours (usually much faster)',
+    conciergeNote: "Share your travel dates, group size, budget, and dream experiences. We'll design a trip you'll never forget."
+  },
+  seo: {
+    title: 'Custom Sri Lanka Travel | Bespoke Itineraries | Recharge Travels',
+    description:
+      'Design your perfect Sri Lanka trip with our dedicated travel concierge. Personalized itineraries, handpicked stays, and 24/7 WhatsApp support.',
+    keywords: [
+      'custom Sri Lanka tour',
+      'bespoke travel Sri Lanka',
+      'personalized Sri Lanka itinerary',
+      'luxury Sri Lanka trip planner',
+      'Recharge Travels'
+    ],
+    ogImage: 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1200&h=630&q=80'
+  }
+};
+
+// ============================================
+// SERVICE CLASS
+// ============================================
 
 class CustomExperiencePageService {
   private contentCollection = 'customExperiencePage';
@@ -103,36 +308,88 @@ class CustomExperiencePageService {
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
-        return docSnap.data() as CustomExperiencePageContent;
+        const data = docSnap.data() as Partial<CustomExperiencePageContent>;
+
+        return {
+          ...defaultContent,
+          ...data,
+          hero: {
+            ...defaultContent.hero,
+            ...(data.hero || {}),
+            gallery:
+              data.hero?.gallery && data.hero.gallery.length > 0
+                ? data.hero.gallery
+                : defaultContent.hero.gallery
+          },
+          overview: {
+            ...defaultContent.overview,
+            ...(data.overview || {}),
+            badges:
+              data.overview?.badges && data.overview.badges.length > 0
+                ? data.overview.badges
+                : defaultContent.overview.badges,
+            highlights:
+              data.overview?.highlights && data.overview.highlights.length > 0
+                ? data.overview.highlights
+                : defaultContent.overview.highlights
+          },
+          experienceTypes:
+            data.experienceTypes && data.experienceTypes.length > 0
+              ? data.experienceTypes
+              : defaultContent.experienceTypes,
+          benefits:
+            data.benefits && data.benefits.length > 0
+              ? data.benefits
+              : defaultContent.benefits,
+          testimonials:
+            data.testimonials && data.testimonials.length > 0
+              ? data.testimonials
+              : defaultContent.testimonials,
+          formConfig: { ...defaultContent.formConfig, ...(data.formConfig || {}) },
+          booking: { ...defaultContent.booking, ...(data.booking || {}) },
+          seo: { ...defaultContent.seo, ...(data.seo || {}) }
+        };
       }
 
-      // Return default content if not found
-      return this.getDefaultContent();
+      // Initialize with default content
+      await setDoc(docRef, defaultContent);
+      return defaultContent;
     } catch (error) {
       console.error('Error fetching custom experience page content:', error);
-      return this.getDefaultContent();
+      return defaultContent;
     }
   }
 
-  // Update page content
-  async updatePageContent(content: Partial<CustomExperiencePageContent>): Promise<void> {
+  // Save page content
+  async saveContent(content: Partial<CustomExperiencePageContent>): Promise<boolean> {
     try {
       const docRef = doc(db, this.contentCollection, 'content');
       await setDoc(docRef, content, { merge: true });
+      return true;
     } catch (error) {
-      console.error('Error updating custom experience page content:', error);
-      throw error;
+      console.error('Error saving custom experience page content:', error);
+      return false;
     }
   }
 
   // Submit custom experience request
-  async submitRequest(data: Omit<CustomExperienceSubmission, 'id' | 'status' | 'createdAt' | 'updatedAt'>): Promise<string> {
+  async submitRequest(
+    data: Omit<CustomExperienceSubmission, 'id' | 'status' | 'createdAt' | 'updatedAt' | 'statusHistory'>
+  ): Promise<string> {
     try {
+      const timestamp = Timestamp.now();
       const submissionData = {
         ...data,
         status: 'new',
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now()
+        createdAt: timestamp,
+        updatedAt: timestamp,
+        statusHistory: [
+          {
+            status: 'new',
+            note: data.channel === 'web' ? 'Submitted via custom experience form' : 'Submission created',
+            timestamp
+          }
+        ]
       };
 
       const docRef = await addDoc(collection(db, this.submissionsCollection), submissionData);
@@ -152,12 +409,19 @@ class CustomExperiencePageService {
       );
 
       const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate(),
-        updatedAt: doc.data().updatedAt?.toDate()
-      })) as CustomExperienceSubmission[];
+      return querySnapshot.docs.map((docSnap) => {
+        const data = docSnap.data();
+        return {
+          id: docSnap.id,
+          ...data,
+          statusHistory: data.statusHistory?.map((entry: any) => ({
+            ...entry,
+            timestamp: entry?.timestamp?.toDate ? entry.timestamp.toDate() : entry?.timestamp
+          })),
+          createdAt: data.createdAt?.toDate(),
+          updatedAt: data.updatedAt?.toDate()
+        };
+      }) as CustomExperienceSubmission[];
     } catch (error) {
       console.error('Error fetching submissions:', error);
       throw error;
@@ -165,12 +429,22 @@ class CustomExperiencePageService {
   }
 
   // Update submission status
-  async updateSubmissionStatus(id: string, status: CustomExperienceSubmission['status']): Promise<void> {
+  async updateSubmissionStatus(
+    id: string,
+    status: CustomExperienceSubmission['status'],
+    options?: { note?: string; agent?: string }
+  ): Promise<void> {
     try {
       const docRef = doc(db, this.submissionsCollection, id);
       await updateDoc(docRef, {
         status,
-        updatedAt: Timestamp.now()
+        updatedAt: Timestamp.now(),
+        statusHistory: arrayUnion({
+          status,
+          note: options?.note,
+          agent: options?.agent,
+          timestamp: Timestamp.now()
+        })
       });
     } catch (error) {
       console.error('Error updating submission status:', error);
@@ -188,96 +462,24 @@ class CustomExperiencePageService {
     }
   }
 
+  async updateSubmissionDetails(id: string, updates: Partial<CustomExperienceSubmission>): Promise<void> {
+    try {
+      const docRef = doc(db, this.submissionsCollection, id);
+      await updateDoc(docRef, {
+        ...updates,
+        updatedAt: Timestamp.now()
+      });
+    } catch (error) {
+      console.error('Error updating submission details:', error);
+      throw error;
+    }
+  }
+
   // Get default content
-  private getDefaultContent(): CustomExperiencePageContent {
-    return {
-      hero: {
-        title: 'Design Your Dream Sri Lankan Adventure',
-        subtitle: 'Let our expert travel designers create a bespoke journey tailored exclusively to your desires, interests, and dreams.',
-        backgroundImage: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1920',
-        ctaText: 'Start Planning'
-      },
-      features: [
-        {
-          id: '1',
-          icon: '✨',
-          title: '100% Personalized',
-          description: 'Every detail crafted around your preferences and interests'
-        },
-        {
-          id: '2',
-          icon: '🎯',
-          title: 'Expert Guidance',
-          description: 'Work directly with our experienced travel designers'
-        },
-        {
-          id: '3',
-          icon: '💎',
-          title: 'Luxury Experiences',
-          description: 'Access to exclusive locations and premium services'
-        },
-        {
-          id: '4',
-          icon: '🌟',
-          title: 'Flexible Planning',
-          description: 'Adjust your itinerary anytime before your trip'
-        }
-      ],
-      benefits: [
-        {
-          id: '1',
-          title: 'Private Wildlife Safaris',
-          description: 'Exclusive access to national parks with expert naturalists',
-          image: 'https://images.unsplash.com/photo-1549366021-9f761d450615?w=800'
-        },
-        {
-          id: '2',
-          title: 'Cultural Immersions',
-          description: 'Authentic experiences with local communities and traditions',
-          image: 'https://images.unsplash.com/photo-1570789210967-2cac24afeb00?w=800'
-        },
-        {
-          id: '3',
-          title: 'Luxury Accommodations',
-          description: 'Handpicked boutique hotels and private villas',
-          image: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800'
-        }
-      ],
-      testimonials: [
-        {
-          id: '1',
-          name: 'Sarah & Michael',
-          location: 'New York, USA',
-          text: 'Recharge Travels created the perfect honeymoon for us. Every detail was thoughtfully planned and exceeded our expectations.',
-          rating: 5,
-          avatar: 'https://i.pravatar.cc/150?img=1'
-        },
-        {
-          id: '2',
-          name: 'The Johnson Family',
-          location: 'London, UK',
-          text: 'Our custom family tour was absolutely magical. The kids loved every moment, and we discovered places we never knew existed.',
-          rating: 5,
-          avatar: 'https://i.pravatar.cc/150?img=2'
-        }
-      ],
-      formConfig: {
-        enabledFields: ['all'],
-        customQuestions: []
-      },
-      contact: {
-        phone: '+94 7777 21 999',
-        email: 'custom@rechargetravels.com',
-        whatsapp: '+94777721999',
-        availability: 'Available 24/7'
-      },
-      seo: {
-        title: 'Custom Sri Lanka Travel Experiences | Recharge Travels',
-        description: 'Design your perfect Sri Lankan adventure with our bespoke travel planning service. Expert guidance, luxury experiences, and complete customization.',
-        keywords: ['custom sri lanka tours', 'bespoke travel sri lanka', 'personalized sri lanka vacation', 'luxury sri lanka travel']
-      }
-    };
+  getDefaultContent(): CustomExperiencePageContent {
+    return defaultContent;
   }
 }
 
 export const customExperiencePageService = new CustomExperiencePageService();
+export default customExperiencePageService;

@@ -581,14 +581,14 @@ const PilgrimageBooking: React.FC = () => {
                         <div className="form-section card-details">
                           <div className="form-group full-width">
                             <label>Card Number *</label>
-                            <input type="text" value={formData.cardNumber} onChange={(e) => { let v = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, ''); let f = v.match(/.{1,4}/g)?.join(' ') || v; setFormData({ ...formData, cardNumber: f }); }} className={errors.cardNumber ? 'error' : ''} placeholder="1234 5678 9012 3456" maxLength={19} />
+                            <input type="text" value={formData.cardNumber} onChange={(e) => { const raw = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, ''); const formatted = raw.match(/.{1,4}/g)?.join(' ') || raw; setFormData({ ...formData, cardNumber: formatted }); }} className={errors.cardNumber ? 'error' : ''} placeholder="1234 5678 9012 3456" maxLength={19} />
                             {errors.cardNumber && <span className="error-text">Card number is required</span>}
                           </div>
 
                           <div className="form-row">
                             <div className="form-group">
                               <label>Expiry Date *</label>
-                              <input type="text" value={formData.cardExpiry} onChange={(e) => { let v = e.target.value.replace(/\D/g, ''); if (v.length >= 2) v = v.substring(0, 2) + '/' + v.substring(2, 4); setFormData({ ...formData, cardExpiry: v }); }} className={errors.cardExpiry ? 'error' : ''} placeholder="MM/YY" maxLength={5} />
+                              <input type="text" value={formData.cardExpiry} onChange={(e) => { const numeric = e.target.value.replace(/\D/g, ''); const formatted = numeric.length >= 2 ? `${numeric.substring(0, 2)}/${numeric.substring(2, 4)}` : numeric; setFormData({ ...formData, cardExpiry: formatted }); }} className={errors.cardExpiry ? 'error' : ''} placeholder="MM/YY" maxLength={5} />
                               {errors.cardExpiry && <span className="error-text">Expiry date is required</span>}
                             </div>
 

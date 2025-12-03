@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { useNavigate, Link } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import DestinationMap from '@/components/destinations/DestinationMap';
+import WeatherWidget from '@/components/destinations/WeatherWidget';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Building,
@@ -58,8 +61,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import EnhancedBookingModal from '@/components/EnhancedBookingModal';
 import { getDestinationBySlug } from '@/services/destinationContentService';
+
+const HATTON_CENTER = { lat: 6.8919, lng: 80.5953 };
 
 // Type Definitions
 interface HeroSlide {
@@ -159,21 +163,33 @@ interface CTASection {
 const defaultHeroSlides: HeroSlide[] = [
   {
     id: '1',
-    image: 'https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&fit=crop&q=80',
-    title: 'Welcome to Hatton',
-    subtitle: 'Gateway to Sri Pada & Ceylon Tea Country'
+    image: 'https://images.unsplash.com/photo-1571536802807-30451e3f3d43?auto=format&fit=crop&q=80',
+    title: 'Discover Hatton',
+    subtitle: 'Heart of Ceylon Tea Country'
   },
   {
     id: '2',
-    image: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&q=80',
-    title: 'Adam\'s Peak Pilgrimage',
-    subtitle: 'Sacred Mountain with Breathtaking Sunrise Views'
+    image: 'https://images.unsplash.com/photo-1546587348-d12660c30c50?auto=format&fit=crop&q=80',
+    title: 'Tea Plantations',
+    subtitle: 'Rolling Emerald Hills'
   },
   {
     id: '3',
-    image: 'https://images.unsplash.com/photo-1582650625119-3a3dbd4a76b1?auto=format&fit=crop&q=80',
-    title: 'Rolling Tea Plantations',
-    subtitle: 'Experience the Legacy of Ceylon Tea'
+    image: 'https://images.unsplash.com/photo-1580835845419-bb7c9c878f57?auto=format&fit=crop&q=80',
+    title: 'Adam\'s Peak Base',
+    subtitle: 'Gateway to Sri Pada'
+  },
+  {
+    id: '4',
+    image: 'https://images.unsplash.com/photo-1627894483216-2138af692e32?auto=format&fit=crop&q=80',
+    title: 'Castlereagh Reservoir',
+    subtitle: 'Scenic Mountain Lake'
+  },
+  {
+    id: '5',
+    image: 'https://images.unsplash.com/photo-1588598198321-39f8c2be97ba?auto=format&fit=crop&q=80',
+    title: 'Tea Factory Tours',
+    subtitle: 'Discover Ceylon Tea Heritage'
   }
 ];
 
@@ -599,6 +615,8 @@ const getIconComponent = (iconName: string) => {
 };
 
 const Hatton: React.FC = () => {
+  const navigate = useNavigate();
+
   // State
   const [heroSlides, setHeroSlides] = useState<HeroSlide[]>(defaultHeroSlides);
   const [attractions, setAttractions] = useState<Attraction[]>(defaultAttractions);
@@ -612,8 +630,7 @@ const Hatton: React.FC = () => {
   const [ctaSection, setCtaSection] = useState<CTASection>(defaultCTASection);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
-  const [selectedExperience, setSelectedExperience] = useState<string>('');
+  const [selectedTab, setSelectedTab] = useState('overview');
 
   // Load content from Firebase
   useEffect(() => {
@@ -649,9 +666,16 @@ const Hatton: React.FC = () => {
     return () => clearInterval(timer);
   }, [heroSlides.length]);
 
-  const handleBookNow = (experience: string) => {
-    setSelectedExperience(experience);
-    setIsBookingModalOpen(true);
+  const handleBooking = (service: string = 'Hatton Tour', tourData?: { id: string; name: string; description: string; duration: string; price: number; features: string[]; image?: string }) => {
+    const params = new URLSearchParams({
+      title: tourData?.name || service,
+      id: tourData?.id || service.toLowerCase().replace(/\s+/g, '-'),
+      duration: tourData?.duration || 'Full Day',
+      price: String(tourData?.price || 55),
+      image: tourData?.image || 'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=800',
+      subtitle: `Hatton - ${tourData?.name || service}`
+    });
+    navigate(`/book-tour?${params.toString()}`);
   };
 
   const nextSlide = () => {
@@ -696,7 +720,7 @@ const Hatton: React.FC = () => {
 
       <main className="min-h-screen bg-background">
         {/* Hero Section */}
-        <section className="relative h-[85vh] overflow-hidden">
+        <section className="relative aspect-video max-h-[85vh] overflow-hidden">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentSlide}
@@ -753,7 +777,7 @@ const Hatton: React.FC = () => {
                 <Button
                   size="lg"
                   className="bg-emerald-600 hover:bg-emerald-700 text-white px-8"
-                  onClick={() => handleBookNow('Hatton Tour')}
+                  onClick={() => handleBooking('Hatton Tour')}
                 >
                   <Mountain className="mr-2 h-5 w-5" />
                   Explore Hatton
@@ -762,7 +786,7 @@ const Hatton: React.FC = () => {
                   size="lg"
                   variant="outline"
                   className="border-white text-white hover:bg-white/20 px-8"
-                  onClick={() => handleBookNow("Adam's Peak Trek")}
+                  onClick={() => handleBooking("Adam's Peak Trek")}
                 >
                   <Sunrise className="mr-2 h-5 w-5" />
                   Book Adam's Peak
@@ -850,12 +874,12 @@ const Hatton: React.FC = () => {
                   Discover Hatton
                 </h2>
                 <p className="text-lg text-gray-600 leading-relaxed mb-8">
-                  Nestled in the heart of Sri Lanka's central highlands, Hatton is the gateway to one 
-                  of the world's most sacred pilgrimages—Adam's Peak (Sri Pada)—and the legendary 
-                  Ceylon tea country. At an elevation of over 1,200 meters, this misty hill town is 
-                  surrounded by endless rolling tea plantations, spectacular waterfalls, and colonial-era 
-                  tea estate bungalows. Whether you're seeking spiritual enlightenment at sunrise on 
-                  the sacred peak, exploring the art of tea making, or simply escaping into the cool, 
+                  Nestled in the heart of Sri Lanka's central highlands, Hatton is the gateway to one
+                  of the world's most sacred pilgrimages—Adam's Peak (Sri Pada)—and the legendary
+                  Ceylon tea country. At an elevation of over 1,200 meters, this misty hill town is
+                  surrounded by endless rolling tea plantations, spectacular waterfalls, and colonial-era
+                  tea estate bungalows. Whether you're seeking spiritual enlightenment at sunrise on
+                  the sacred peak, exploring the art of tea making, or simply escaping into the cool,
                   green embrace of the highlands, Hatton offers an unforgettable experience.
                 </p>
                 <div className="flex flex-wrap justify-center gap-3">
@@ -877,7 +901,42 @@ const Hatton: React.FC = () => {
           </div>
         </section>
 
+        {/* Tabs Navigation */}
+        <section className="bg-gray-100 sticky top-0 z-40 border-b border-gray-200">
+          <div className="container mx-auto px-4">
+            <div className="flex overflow-x-auto gap-2 py-4">
+              {['overview', 'attractions', 'activities', 'dining', 'accommodation', 'map', 'tips'].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setSelectedTab(tab)}
+                  className={`px-6 py-2 rounded-full whitespace-nowrap transition-all ${
+                    selectedTab === tab
+                      ? 'bg-emerald-600 text-white'
+                      : 'bg-white text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Tab Content Sections */}
+        {selectedTab === 'overview' && (
+          <section className="py-16 bg-gray-50">
+            <div className="container mx-auto px-4">
+              <h2 className="text-3xl font-bold mb-8">Overview</h2>
+              <p className="text-gray-600 mb-4">
+                Explore all that Hatton has to offer - from sacred peaks to tea plantations.
+                Use the tabs above to navigate to specific sections.
+              </p>
+            </div>
+          </section>
+        )}
+
         {/* Attractions Section */}
+        {selectedTab === 'attractions' && (
         <section className="py-16 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
@@ -940,7 +999,7 @@ const Hatton: React.FC = () => {
                         </div>
                         <Button
                           className="w-full bg-emerald-600 hover:bg-emerald-700"
-                          onClick={() => handleBookNow(attraction.name)}
+                          onClick={() => handleBooking(attraction.name)}
                         >
                           Explore This
                         </Button>
@@ -952,8 +1011,10 @@ const Hatton: React.FC = () => {
             </div>
           </div>
         </section>
+        )}
 
         {/* Activities Section */}
+        {selectedTab === 'activities' && (
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
@@ -1003,7 +1064,7 @@ const Hatton: React.FC = () => {
                         <Button
                           variant="outline"
                           className="w-full border-emerald-600 text-emerald-600 hover:bg-emerald-50"
-                          onClick={() => handleBookNow(activity.name)}
+                          onClick={() => handleBooking(activity.name)}
                         >
                           Book Activity
                         </Button>
@@ -1015,8 +1076,10 @@ const Hatton: React.FC = () => {
             </div>
           </div>
         </section>
+        )}
 
         {/* Restaurants Section */}
+        {selectedTab === 'dining' && (
         <section className="py-16 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
@@ -1072,8 +1135,10 @@ const Hatton: React.FC = () => {
             </div>
           </div>
         </section>
+        )}
 
         {/* Hotels Section */}
+        {selectedTab === 'accommodation' && (
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
@@ -1126,7 +1191,7 @@ const Hatton: React.FC = () => {
                         <Button
                           size="sm"
                           className="bg-emerald-600 hover:bg-emerald-700"
-                          onClick={() => handleBookNow(hotel.name)}
+                          onClick={() => handleBooking(hotel.name)}
                         >
                           Book Now
                         </Button>
@@ -1138,8 +1203,45 @@ const Hatton: React.FC = () => {
             </div>
           </div>
         </section>
+        )}
+
+        {/* Map Tab Section */}
+        {selectedTab === 'map' && (
+          <section className="py-16 bg-white">
+            <div className="container mx-auto px-4">
+              <h2 className="text-3xl font-bold mb-8">Explore Hatton Map</h2>
+              <div className="grid lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-2">
+                  <Card className="overflow-hidden h-[500px]">
+                    <DestinationMap
+                      destinationName="Hatton"
+                      center={HATTON_CENTER}
+                      attractions={[
+                        { name: 'Ceylon Tea Plantations', description: 'Famous tea estates', coordinates: { lat: 6.8919, lng: 80.5953 } },
+                        { name: 'Castlereagh Reservoir', description: 'Scenic reservoir views', coordinates: { lat: 6.8600, lng: 80.5700 } },
+                        { name: 'Laxapana Falls', description: 'Majestic waterfall', coordinates: { lat: 6.9000, lng: 80.5100 } },
+                        { name: "St. Clair's Falls", description: 'Widest waterfall in Sri Lanka', coordinates: { lat: 6.9600, lng: 80.6000 } },
+                        { name: 'Nallathanniya (Adams Peak base)', description: 'Gateway to Sri Pada', coordinates: { lat: 6.8300, lng: 80.5100 } }
+                      ]}
+                      height="500px"
+                    />
+                  </Card>
+                </div>
+                <div className="lg:col-span-1">
+                  <WeatherWidget
+                    locationName="Hatton"
+                    latitude={HATTON_CENTER.lat}
+                    longitude={HATTON_CENTER.lng}
+                  />
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Weather & Packing Section */}
+        {selectedTab === 'tips' && (
+        <>
         <section className="py-16 bg-gradient-to-br from-emerald-50 to-green-50">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
@@ -1254,6 +1356,8 @@ const Hatton: React.FC = () => {
             </div>
           </div>
         </section>
+        </>
+        )}
 
         {/* CTA Section */}
         <section className="py-20 bg-gradient-to-r from-emerald-600 via-green-600 to-emerald-700">
@@ -1275,7 +1379,7 @@ const Hatton: React.FC = () => {
                   <Button
                     size="lg"
                     className="bg-white text-emerald-600 hover:bg-gray-100 px-8"
-                    onClick={() => handleBookNow('Hatton Complete Tour')}
+                    onClick={() => handleBooking('Hatton Complete Tour')}
                   >
                     <Compass className="mr-2 h-5 w-5" />
                     {ctaSection.buttonText}
@@ -1298,13 +1402,18 @@ const Hatton: React.FC = () => {
 
       <Footer />
 
-      {/* Booking Modal */}
-      <EnhancedBookingModal
-        isOpen={isBookingModalOpen}
-        onClose={() => setIsBookingModalOpen(false)}
-        selectedExperience={selectedExperience}
-        destination="Hatton"
-      />
+      {/* WhatsApp Floating Button */}
+      <a
+        href="https://wa.me/94777721999?text=Hi! I'm interested in booking a Hatton tea country tour."
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 z-50 bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-lg transition-all hover:scale-110"
+        aria-label="Contact via WhatsApp"
+      >
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+      </a>
     </>
   );
 };

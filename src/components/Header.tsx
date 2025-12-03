@@ -18,10 +18,17 @@ import {
   Star,
   MessageCircle,
   ChevronRight,
+  ChevronDown,
   Info,
   Key,
   Calendar,
-  Waves
+  Waves,
+  Plane,
+  Mountain,
+  Palmtree,
+  Camera,
+  Heart,
+  Utensils
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { useAuth } from "@/hooks/useAuth"
@@ -259,11 +266,75 @@ const getColomboTime = (): string => {
   }
 }
 
+// Mobile navigation menu structure with expandable sections
+const mobileNavSections = [
+  {
+    id: 'tours',
+    title: 'Tours & Packages',
+    icon: Compass,
+    links: [
+      { label: 'Luxury Tours', href: '/tours/luxury' },
+      { label: 'Cultural Tours', href: '/tours/cultural' },
+      { label: 'Wildlife Safaris', href: '/tours/wildtours' },
+      { label: 'Hill Country', href: '/tours/hill-country' },
+      { label: 'Beach Tours', href: '/tours/beach' },
+    ]
+  },
+  {
+    id: 'transport',
+    title: 'Transport',
+    icon: Car,
+    links: [
+      { label: 'Airport Transfers', href: '/transport/airport-transfers' },
+      { label: 'Private Tours', href: '/transport/private-tours' },
+      { label: 'Group Transport', href: '/transport/group-transport' },
+      { label: 'Vehicle Rental', href: '/vehicle-rental' },
+    ]
+  },
+  {
+    id: 'experiences',
+    title: 'Experiences',
+    icon: Sparkles,
+    links: [
+      { label: 'Train Journeys', href: '/experiences/train-journeys' },
+      { label: 'Whale Watching', href: '/experiences/whale-watching' },
+      { label: 'Wellness & Ayurveda', href: '/experiences/wellness' },
+      { label: 'Cooking Classes', href: '/experiences/cooking-class' },
+      { label: 'Private Charters', href: '/experiences/private-charters' },
+    ]
+  },
+  {
+    id: 'destinations',
+    title: 'Destinations',
+    icon: MapPin,
+    links: [
+      { label: 'Colombo', href: '/destinations/colombo' },
+      { label: 'Kandy', href: '/destinations/kandy' },
+      { label: 'Galle', href: '/destinations/galle' },
+      { label: 'Sigiriya', href: '/destinations/sigiriya' },
+      { label: 'Ella', href: '/destinations/ella' },
+      { label: 'All Destinations', href: '/destinations' },
+    ]
+  },
+  {
+    id: 'about',
+    title: 'About Us',
+    icon: Info,
+    links: [
+      { label: 'Our Story', href: '/about' },
+      { label: 'Contact Us', href: '/contact' },
+      { label: 'FAQ', href: '/faq' },
+      { label: 'Travel Guide', href: '/travel-guide' },
+    ]
+  },
+]
+
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false)
   const [animatingItem, setAnimatingItem] = useState<string | null>(null)
   const [isLogoAnimating, setIsLogoAnimating] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [expandedSection, setExpandedSection] = useState<string | null>(null)
   const [localTime, setLocalTime] = useState<string>(getColomboTime)
   const location = useLocation()
   const { user, signOut } = useAuth()
@@ -288,6 +359,18 @@ const Header = () => {
     }, 60_000)
     return () => window.clearInterval(intervalId)
   }, [])
+
+  // Lock body scroll when mobile menu is open (native app behavior)
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isMobileMenuOpen])
 
   const handleMenuClick = (menuItem: string) => {
     setAnimatingItem(menuItem)
@@ -317,10 +400,11 @@ const Header = () => {
 
   const mobileTriggerClass = `md:hidden inline-flex h-11 w-11 items-center justify-center rounded-full border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${isScrolled
     ? "border-slate-200 bg-white text-slate-900 hover:bg-slate-100 focus:ring-slate-400"
-    : "border-white/30 bg-white/10 text-white hover:bg-white/20 focus:ring-white/70"
+    : "border-slate-600 bg-slate-800/80 text-white hover:bg-slate-700 focus:ring-slate-500 shadow-lg"
     }`
 
   return (
+    <>
     <header
       className={`fixed inset-x-0 top-0 z-[120] transition-all duration-500 ${isScrolled
         ? "bg-white/95 backdrop-blur-2xl border-b border-white/70 shadow-[0_18px_46px_rgba(15,23,42,0.12)]"
@@ -387,221 +471,176 @@ const Header = () => {
           </div>
         </div>
       </div>
-
-      {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-[200] bg-slate-900/75 backdrop-blur-md md:hidden">
-          <div className="fixed inset-y-0 right-0 flex w-full max-w-[360px] flex-col overflow-hidden bg-white shadow-2xl">
-            <div className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-teal-700 p-6 text-white">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.4em] text-white/50">
-                    Recharge Travels
-                  </p>
-                  <h2 className="mt-2 text-2xl font-semibold">Ultra Luxury Concierge</h2>
-                  <div className="mt-3 flex items-center gap-2 text-sm text-white/70">
-                    <Clock className="h-4 w-4" />
-                    <span>Colombo • {localTime} GMT+5:30</span>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="rounded-full bg-white/10 p-2 transition hover:bg-white/20"
-                  aria-label="Close menu"
-                >
-                  <X className="h-5 w-5 text-white" />
-                </button>
-              </div>
-              <div className="mt-6 grid grid-cols-3 gap-3 text-center">
-                {statHighlights.map(({ label, value, icon: Icon }) => (
-                  <div key={label} className="rounded-2xl bg-white/10 px-2 py-3 backdrop-blur-md">
-                    <Icon className="mx-auto h-5 w-5 text-white/80" />
-                    <p className="mt-1 text-sm font-semibold">{value}</p>
-                    <p className="text-[0.6rem] uppercase tracking-[0.3em] text-white/60">
-                      {label.split(" ")[0]}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex-1 space-y-8 overflow-y-auto px-6 py-6">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
-                  Explore
-                </p>
-                <div className="mt-4 space-y-4">
-                  {navigationItems.map((item) => {
-                    const Icon = item.icon
-                    return (
-                      <Link
-                        key={item.name}
-                        to={item.href}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className={`relative block overflow-hidden rounded-2xl border border-slate-200/70 bg-white shadow-[0_18px_36px_rgba(15,23,42,0.08)] transition-transform hover:-translate-y-1 ${isActiveRoute(item.href) ? "ring-2 ring-slate-900/20" : ""
-                          }`}
-                      >
-                        <div
-                          className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${item.gradient}`}
-                        />
-                        <div className="relative flex items-start gap-4 p-4">
-                          <div
-                            className={`flex h-12 w-12 items-center justify-center rounded-2xl ${item.iconBg} text-white shadow-lg`}
-                          >
-                            <Icon className="h-5 w-5" />
-                          </div>
-                          <div>
-                            <p className="text-base font-semibold text-slate-900">{item.name}</p>
-                            <p className="mt-1 text-sm text-slate-600">{item.description}</p>
-                          </div>
-                        </div>
-                      </Link>
-                    )
-                  })}
-                </div>
-              </div>
-
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
-                  Book Now
-                </p>
-                <div className="mt-4 space-y-4">
-                  {bookNowItems.map((item) => {
-                    const Icon = item.icon
-                    return (
-                      <Link
-                        key={item.name}
-                        to={item.href}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className={`relative block overflow-hidden rounded-2xl border border-slate-200/70 bg-white shadow-[0_18px_36px_rgba(15,23,42,0.08)] transition-transform hover:-translate-y-1 ${isActiveRoute(item.href) ? "ring-2 ring-slate-900/20" : ""
-                          }`}
-                      >
-                        <div
-                          className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${item.gradient}`}
-                        />
-                        <div className="relative flex items-start gap-4 p-4">
-                          <div
-                            className={`flex h-12 w-12 items-center justify-center rounded-2xl ${item.iconBg} text-white shadow-lg`}
-                          >
-                            <Icon className="h-5 w-5" />
-                          </div>
-                          <div>
-                            <p className="text-base font-semibold text-slate-900">{item.name}</p>
-                            <p className="mt-1 text-sm text-slate-600">{item.description}</p>
-                          </div>
-                        </div>
-                      </Link>
-                    )
-                  })}
-                </div>
-              </div>
-
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
-                  Signature Journeys
-                </p>
-                <div className="mt-3 space-y-3">
-                  {signatureJourneys.map((journey) => (
-                    <Link
-                      key={journey.label}
-                      to={journey.href}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-start justify-between rounded-xl border border-slate-200 px-4 py-3 text-left transition hover:bg-slate-50"
-                    >
-                      <div>
-                        <p className="text-sm font-semibold text-slate-800">{journey.label}</p>
-                        <p className="text-xs text-slate-500">{journey.description}</p>
-                      </div>
-                      <ChevronRight className="h-4 w-4 text-slate-400" />
-                    </Link>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
-                  Travel Services
-                </p>
-                <div className="mt-3 space-y-3">
-                  {travelServices.map((service) => (
-                    <Link
-                      key={service.label}
-                      to={service.href}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-start justify-between rounded-xl border border-slate-200 px-4 py-3 text-left transition hover:bg-slate-50"
-                    >
-                      <div>
-                        <p className="text-sm font-semibold text-slate-800">{service.label}</p>
-                        <p className="text-xs text-slate-500">{service.description}</p>
-                      </div>
-                      <ChevronRight className="h-4 w-4 text-slate-400" />
-                    </Link>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
-                  Immersive Moments
-                </p>
-                <div className="mt-3 space-y-3">
-                  {experienceHighlights.map((experience) => (
-                    <Link
-                      key={experience.label}
-                      to={experience.href}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-start justify-between rounded-xl border border-slate-200 px-4 py-3 text-left transition hover:bg-slate-50"
-                    >
-                      <div>
-                        <p className="text-sm font-semibold text-slate-800">{experience.label}</p>
-                        <p className="text-xs text-slate-500">{experience.description}</p>
-                      </div>
-                      <ChevronRight className="h-4 w-4 text-slate-400" />
-                    </Link>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
-                  Concierge Desk
-                </p>
-                <div className="mt-3 space-y-3">
-                  {conciergeContacts.map((contact) => {
-                    const Icon = contact.icon
-                    const isWhatsApp = contact.label.includes("WhatsApp")
-                    const sharedProps =
-                      contact.href.startsWith("http") ? { target: "_blank", rel: "noreferrer" as const } : {}
-                    return (
-                      <a
-                        key={contact.label}
-                        href={contact.href}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className={`flex items-center gap-3 rounded-xl border border-slate-200 px-4 py-3 transition ${isWhatsApp ? "bg-emerald-50 hover:bg-emerald-100" : "hover:bg-slate-50"
-                          }`}
-                        {...sharedProps}
-                      >
-                        <div
-                          className={`flex h-10 w-10 items-center justify-center rounded-xl ${isWhatsApp ? "bg-emerald-500 text-white" : "bg-slate-900 text-white"
-                            }`}
-                        >
-                          <Icon className="h-4 w-4" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-slate-800">{contact.label}</p>
-                          <p className="text-xs text-slate-500">{contact.value}</p>
-                        </div>
-                      </a>
-                    )
-                  })}
-                </div>
-              </div>
-
-
-            </div>
-          </div>
-        </div>
-      )}
     </header>
+
+    {/* Mobile Side Drawer - Native App Style (outside header for proper z-index) */}
+    <div
+      className={`fixed inset-0 z-[200] md:hidden transition-opacity duration-300 ease-in-out ${
+        isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+      }`}
+    >
+        {/* Backdrop - Click to close */}
+        <div
+          className={`absolute inset-0 bg-slate-900/75 backdrop-blur-md transition-opacity duration-300 ${
+            isMobileMenuOpen ? 'opacity-100' : 'opacity-0'
+          }`}
+          onClick={() => setIsMobileMenuOpen(false)}
+          aria-hidden="true"
+        />
+
+        {/* Side Drawer - Slides from right */}
+        <div
+          className={`fixed inset-y-0 right-0 flex w-full max-w-[360px] flex-col overflow-hidden bg-white shadow-2xl transition-transform duration-300 ease-out ${
+            isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
+          }`}
+        >
+            {/* Simple Header with Close Button */}
+            <div className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-600">
+                  <span className="text-lg font-bold text-white">R</span>
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-slate-900">Recharge Travels</p>
+                  <p className="text-xs text-slate-500">Sri Lanka Tours</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 transition hover:bg-slate-200"
+                aria-label="Close menu"
+              >
+                <X className="h-5 w-5 text-slate-600" />
+              </button>
+            </div>
+
+            {/* Accordion Navigation */}
+            <div className="flex-1 overflow-y-auto">
+              {/* Quick Actions */}
+              <div className="border-b border-slate-100 px-4 py-3">
+                <div className="flex gap-2">
+                  <Link
+                    to="/book-now"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex-1 rounded-lg bg-emerald-600 px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-emerald-700"
+                  >
+                    Book Now
+                  </Link>
+                  <a
+                    href="https://wa.me/94777721999"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center rounded-lg bg-green-500 px-4 py-2.5 text-white transition hover:bg-green-600"
+                  >
+                    <MessageCircle className="h-5 w-5" />
+                  </a>
+                </div>
+              </div>
+
+              {/* Home Link */}
+              <Link
+                to="/"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-3 border-b border-slate-100 px-4 py-3.5 transition hover:bg-slate-50"
+              >
+                <Home className="h-5 w-5 text-slate-600" />
+                <span className="font-medium text-slate-800">Home</span>
+              </Link>
+
+              {/* Accordion Sections */}
+              {mobileNavSections.map((section) => {
+                const Icon = section.icon
+                const isExpanded = expandedSection === section.id
+                return (
+                  <div key={section.id} className="border-b border-slate-100">
+                    {/* Section Header - Click to expand */}
+                    <button
+                      onClick={() => setExpandedSection(isExpanded ? null : section.id)}
+                      className="flex w-full items-center justify-between px-4 py-3.5 text-left transition hover:bg-slate-50"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Icon className="h-5 w-5 text-slate-600" />
+                        <span className="font-medium text-slate-800">{section.title}</span>
+                      </div>
+                      <ChevronDown
+                        className={`h-5 w-5 text-slate-400 transition-transform duration-200 ${
+                          isExpanded ? 'rotate-180' : ''
+                        }`}
+                      />
+                    </button>
+
+                    {/* Expandable Links */}
+                    <div
+                      className={`overflow-hidden transition-all duration-200 ease-in-out ${
+                        isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                      }`}
+                    >
+                      <div className="bg-slate-50 py-2">
+                        {section.links.map((link) => (
+                          <Link
+                            key={link.href}
+                            to={link.href}
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className={`block px-12 py-2.5 text-sm transition hover:bg-slate-100 ${
+                              isActiveRoute(link.href)
+                                ? 'font-semibold text-emerald-600'
+                                : 'text-slate-600'
+                            }`}
+                          >
+                            {link.label}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+
+              {/* Direct Links */}
+              <Link
+                to="/hotels"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-3 border-b border-slate-100 px-4 py-3.5 transition hover:bg-slate-50"
+              >
+                <Crown className="h-5 w-5 text-slate-600" />
+                <span className="font-medium text-slate-800">Hotels</span>
+              </Link>
+
+              <Link
+                to="/drivers"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-3 border-b border-slate-100 px-4 py-3.5 transition hover:bg-slate-50"
+              >
+                <Users className="h-5 w-5 text-slate-600" />
+                <span className="font-medium text-slate-800">Find Drivers</span>
+              </Link>
+
+              {/* Contact Section */}
+              <div className="mt-4 px-4 pb-6">
+                <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  Contact Us
+                </p>
+                <div className="space-y-2">
+                  <a
+                    href="tel:+94777721999"
+                    className="flex items-center gap-3 rounded-lg bg-slate-100 px-4 py-3 transition hover:bg-slate-200"
+                  >
+                    <Phone className="h-4 w-4 text-slate-600" />
+                    <span className="text-sm font-medium text-slate-700">+94 7777 21 999</span>
+                  </a>
+                  <a
+                    href="mailto:info@rechargetravels.com"
+                    className="flex items-center gap-3 rounded-lg bg-slate-100 px-4 py-3 transition hover:bg-slate-200"
+                  >
+                    <Mail className="h-4 w-4 text-slate-600" />
+                    <span className="text-sm font-medium text-slate-700">info@rechargetravels.com</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+        </div>
+      </div>
+    </>
   )
 }
 

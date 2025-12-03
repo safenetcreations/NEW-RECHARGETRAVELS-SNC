@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -35,8 +36,11 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import EnhancedBookingModal from '@/components/EnhancedBookingModal';
+import DestinationMap from '@/components/destinations/DestinationMap';
+import WeatherWidget from '@/components/destinations/WeatherWidget';
 import { getDestinationBySlug } from '@/services/destinationContentService';
+
+const KURUNEGALA_CENTER = { lat: 7.4863, lng: 80.3647 };
 
 // Type definitions
 interface HeroSlide {
@@ -131,21 +135,11 @@ const getIconComponent = (iconName: string) => {
 
 // Default content for Kurunegala
 const defaultHeroSlides: HeroSlide[] = [
-  {
-    image: "https://images.unsplash.com/photo-1580541832626-2a7131ee809f?auto=format&fit=crop&q=80",
-    title: "Welcome to Kurunegala",
-    subtitle: "Gateway to the Cultural Triangle"
-  },
-  {
-    image: "https://images.unsplash.com/photo-1588982832579-86f4a0ce272e?auto=format&fit=crop&q=80",
-    title: "Majestic Elephant Rock",
-    subtitle: "Climb the Iconic Ethagala"
-  },
-  {
-    image: "https://images.unsplash.com/photo-1606142113105-58b79af5de72?auto=format&fit=crop&q=80",
-    title: "Ancient Rock Fortresses",
-    subtitle: "Where History Meets Adventure"
-  }
+  { image: "https://images.unsplash.com/photo-1588598198321-39f8c2be97ba?auto=format&fit=crop&q=80", title: "Discover Kurunegala", subtitle: "City of the Elephant Rock" },
+  { image: "https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&fit=crop&q=80", title: "Ethagala", subtitle: "Iconic Elephant-Shaped Rock" },
+  { image: "https://images.unsplash.com/photo-1586613835341-78c143aef52c?auto=format&fit=crop&q=80", title: "Kurunegala Lake", subtitle: "Scenic Urban Reservoir" },
+  { image: "https://images.unsplash.com/photo-1571536802807-30451e3f3d43?auto=format&fit=crop&q=80", title: "Ancient Temples", subtitle: "Buddhist Heritage Sites" },
+  { image: "https://images.unsplash.com/photo-1578128178243-721cd32ce739?auto=format&fit=crop&q=80", title: "Ridi Viharaya", subtitle: "Silver Temple Caves" }
 ];
 
 const defaultAttractions: Attraction[] = [
@@ -378,10 +372,9 @@ const defaultCTA: CTASection = {
 };
 
 const Kurunegala = () => {
+  const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [activeTab, setActiveTab] = useState('attractions');
-  const [showBookingModal, setShowBookingModal] = useState(false);
-  const [selectedItem, setSelectedItem] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
   // Content state
@@ -430,9 +423,16 @@ const Kurunegala = () => {
     return () => clearInterval(timer);
   }, [heroSlides.length]);
 
-  const handleBooking = (itemName: string) => {
-    setSelectedItem(itemName);
-    setShowBookingModal(true);
+  const handleBooking = (service: string = 'Kurunegala Tour', tourData?: { id: string; name: string; description: string; duration: string; price: number; features: string[]; image?: string }) => {
+    const params = new URLSearchParams({
+      title: tourData?.name || service,
+      id: tourData?.id || service.toLowerCase().replace(/\s+/g, '-'),
+      duration: tourData?.duration || 'Full Day',
+      price: String(tourData?.price || 45),
+      image: tourData?.image || 'https://images.unsplash.com/photo-1588598198321-9735fd509ed5?w=800',
+      subtitle: `Kurunegala - ${tourData?.name || service}`
+    });
+    navigate(`/book-tour?${params.toString()}`);
   };
 
   // Dynamic tabs based on available content
@@ -442,6 +442,7 @@ const Kurunegala = () => {
     { id: 'restaurants', label: 'Dining', count: restaurants.length },
     { id: 'hotels', label: 'Stay', count: hotels.length },
     { id: 'weather', label: 'Weather', count: null },
+    { id: 'map', label: 'Map', count: null },
     { id: 'tips', label: 'Travel Tips', count: travelTips.length }
   ];
 
@@ -460,7 +461,7 @@ const Kurunegala = () => {
 
       <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
         {/* Hero Section with Slideshow */}
-        <section className="relative h-[75vh] overflow-hidden">
+        <section className="relative aspect-video max-h-[75vh] overflow-hidden">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentSlide}
@@ -939,6 +940,51 @@ const Kurunegala = () => {
               </motion.div>
             )}
 
+            {/* Map Tab */}
+            {activeTab === 'map' && (
+              <motion.div
+                key="map"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="text-center mb-10">
+                  <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    Explore Kurunegala Map
+                  </h2>
+                  <p className="text-gray-600 max-w-2xl mx-auto">
+                    Navigate through Kurunegala's iconic landmarks and attractions
+                  </p>
+                </div>
+                <div className="grid lg:grid-cols-3 gap-8">
+                  <div className="lg:col-span-2">
+                    <Card className="overflow-hidden h-[500px]">
+                      <DestinationMap
+                        destinationName="Kurunegala"
+                        center={KURUNEGALA_CENTER}
+                        attractions={[
+                          { name: 'Ethagala Rock', description: 'Elephant Rock viewpoint', coordinates: { lat: 7.4900, lng: 80.3700 } },
+                          { name: 'Kurunegala Lake', description: 'Scenic city lake', coordinates: { lat: 7.4850, lng: 80.3650 } },
+                          { name: 'Athugala Temple', description: 'Rock temple with Buddha statue', coordinates: { lat: 7.4920, lng: 80.3680 } },
+                          { name: 'Ridi Viharaya', description: 'Ancient silver temple', coordinates: { lat: 7.4200, lng: 80.3100 } },
+                          { name: 'Yapahuwa Rock Fortress', description: 'Medieval rock fortress', coordinates: { lat: 7.7900, lng: 80.3100 } }
+                        ]}
+                        height="500px"
+                      />
+                    </Card>
+                  </div>
+                  <div className="lg:col-span-1">
+                    <WeatherWidget
+                      locationName="Kurunegala"
+                      latitude={KURUNEGALA_CENTER.lat}
+                      longitude={KURUNEGALA_CENTER.lng}
+                    />
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
             {/* Travel Tips Tab */}
             {activeTab === 'tips' && (
               <motion.div
@@ -1005,12 +1051,18 @@ const Kurunegala = () => {
 
       <Footer />
 
-      {/* Booking Modal */}
-      <EnhancedBookingModal
-        isOpen={showBookingModal}
-        onClose={() => setShowBookingModal(false)}
-        preSelectedService={selectedItem}
-      />
+      {/* WhatsApp Floating Button */}
+      <a
+        href="https://wa.me/94777721999?text=Hi! I'm interested in booking a Kurunegala tour."
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 z-50 bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-lg transition-all hover:scale-110"
+        aria-label="Contact via WhatsApp"
+      >
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+      </a>
     </>
   );
 };

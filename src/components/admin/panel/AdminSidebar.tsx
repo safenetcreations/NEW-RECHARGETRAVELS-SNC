@@ -23,7 +23,9 @@ import {
   Sparkles,
   Train,
   Bot,
-  TreePine
+  TreePine,
+  Share2,
+  Newspaper
 } from 'lucide-react';
 
 interface AdminSidebarProps {
@@ -42,6 +44,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeSection, onSectionCha
     { id: 'custom-experience', label: 'Custom Experience', icon: Sparkles },
     { id: 'custom-experience-submissions', label: 'Experience Requests', icon: FileText },
     { id: 'train-journeys', label: 'Train Journeys', icon: Train },
+    { id: 'destinations', label: 'Destinations', icon: Map },
     { id: 'posts', label: 'Blog Posts', icon: Edit },
     { id: 'media', label: 'Media Library', icon: Camera },
     { id: 'hotels', label: 'Hotels & Lodges', icon: Hotel },
@@ -52,6 +55,8 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeSection, onSectionCha
     { id: 'reviews', label: 'Reviews', icon: Star },
     { id: 'users', label: 'User Management', icon: Users },
     { id: 'email-templates', label: 'Email Templates', icon: Mail },
+    { id: 'social-feed', label: 'Social Media Feed', icon: Share2 },
+    { id: 'news-aggregator', label: 'Tourism News', icon: Newspaper },
     { id: 'ai-tools', label: 'AI Content Tools', icon: Bot },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];

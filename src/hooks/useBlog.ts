@@ -228,7 +228,7 @@ export const useFeaturedPosts = () => {
             where('status', '==', 'published')
           );
           const snapshot = await getDocs(fallbackQuery);
-          let data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as BlogPost[];
+          const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as BlogPost[];
 
           // Sort client-side
           data.sort((a, b) => {

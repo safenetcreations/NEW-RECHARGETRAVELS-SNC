@@ -195,6 +195,13 @@ export interface TravelPackageFormData {
 // Featured Destinations Types
 // ==========================================
 
+// Hero image with title and subtitle overlay
+export interface HeroImage {
+  url: string;
+  title: string;
+  subtitle: string;
+}
+
 export interface FeaturedDestination {
   id: string;
   name: string;
@@ -202,6 +209,7 @@ export interface FeaturedDestination {
   category: string;
   description: string;
   image: string;
+  images: HeroImage[]; // Support for multiple hero images with titles (up to 5)
   price: number;
   currency: string;
   duration: string;
@@ -223,6 +231,7 @@ export interface FeaturedDestinationFormData {
   category: string;
   description: string;
   image: string;
+  images: HeroImage[]; // Support for multiple hero images with titles (up to 5)
   price: number;
   currency: string;
   duration: string;

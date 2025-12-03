@@ -1,9 +1,12 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore, doc, setDoc, collection, addDoc } from 'firebase/firestore';
-import cookingClassData from '../src/data/seed-cooking-class-sri-lanka.json' assert { type: 'json' };
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
+
+const cookingClassData = JSON.parse(
+    fs.readFileSync(new URL('../src/data/seed-cooking-class-sri-lanka.json', import.meta.url), 'utf-8')
+);
 // Get __dirname equivalent in ES module
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

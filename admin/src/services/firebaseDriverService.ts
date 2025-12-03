@@ -46,6 +46,7 @@ export interface Driver {
   biography?: string;
   specialty_languages?: string[];
   profile_photo?: string;
+  profile_photos?: string[]; // Multiple profile photos (up to 5)
   cover_image?: string;
 
   // Vehicle Info
@@ -57,6 +58,7 @@ export interface Driver {
   vehicle_ac?: boolean;
   vehicle_wifi?: boolean;
   vehicle_photo?: string;
+  vehicle_photos?: string[]; // Multiple vehicle photos
   vehicle_preference?: 'own_vehicle' | 'company_vehicle';
 
   // Rates
@@ -254,9 +256,10 @@ export const firebaseDriverService = {
     }
   },
 
-  async uploadDriverPhoto(file: File, driverId: string, type: 'profile' | 'cover' | 'vehicle'): Promise<string> {
+  async uploadDriverPhoto(file: File, driverId: string, type: 'profile' | 'cover' | 'vehicle' | 'sltda_license' | 'driver_license' | 'national_id'): Promise<string> {
     try {
-      const storageRef = ref(storage, `drivers/${driverId}/${type}_${Date.now()}`)
+      const extension = file.name.split('.').pop() || 'jpg';
+      const storageRef = ref(storage, `drivers/${driverId}/${type}_${Date.now()}.${extension}`)
       await uploadBytes(storageRef, file)
       const url = await getDownloadURL(storageRef)
       return url

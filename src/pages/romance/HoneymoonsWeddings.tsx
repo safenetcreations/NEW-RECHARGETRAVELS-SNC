@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { getAllRomanceData, WeddingPackage, HoneymoonPackage, RomanceFAQ, RomanceTestimonial, RomancePageSettings } from '@/services/romanceService';
+import { buildAggregateRating, buildBrand, buildOffersFromItems, getBaseUrl } from '@/utils/seoSchemaHelpers';
 
 const weddingThemes: Record<string, { gradient: string; bg: string; text: string }> = {
   beach: { gradient: 'from-cyan-400 to-teal-400', bg: 'bg-gradient-to-br from-cyan-50 to-teal-50', text: 'text-teal-800' },
@@ -189,9 +190,60 @@ const HoneymoonsWeddings: React.FC = () => {
 
   if (loading) return <div className="min-h-screen bg-gradient-to-br from-rose-50 to-pink-50 flex items-center justify-center"><Loader2 className="w-12 h-12 animate-spin text-rose-500" /></div>;
 
+  const baseUrl = getBaseUrl();
+  const canonicalUrl = `${baseUrl}/romance/honeymoons-weddings`;
+  const brand = buildBrand(baseUrl);
+  const offers = buildOffersFromItems([
+    ...weddingPackages.map((pkg) => ({ name: pkg.name, price: pkg.priceFrom })),
+    ...honeymoonPackages.map((pkg) => ({ name: pkg.name, price: pkg.priceFrom }))
+  ], canonicalUrl);
+  const aggregateRating = buildAggregateRating(settings?.ratingValue || 4.9, settings?.reviewCount || 124);
+  const romanceSchema = {
+    "@context": "https://schema.org",
+    "@type": ["Product", "Service"],
+    "name": "Sri Lanka Weddings & Honeymoons | Recharge Travels",
+    "description": settings?.heroSubtitle || "Plan luxury Sri Lanka destination weddings and bespoke honeymoons with trusted local planners, venues, and private concierge.",
+    "url": canonicalUrl,
+    "image": settings?.heroImage || `${baseUrl}/logo-v2.png`,
+    "brand": brand,
+    "provider": brand,
+    "areaServed": { "@type": "Country", "name": "Sri Lanka" },
+    "offers": offers,
+    "aggregateRating": aggregateRating
+  };
+
+  const faqSchema = faqs.length ? {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map((faq) => ({
+      "@type": "Question",
+      "name": faq.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": faq.answer
+      }
+    }))
+  } : null;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50">
-      <Helmet><title>Weddings & Honeymoons in Sri Lanka | Recharge Travels</title></Helmet>
+      <Helmet>
+        <title>Weddings & Honeymoons in Sri Lanka | Recharge Travels</title>
+        <meta name="description" content="Design your dream Sri Lanka wedding or honeymoon with Recharge Travels. Luxury venues, beach ceremonies, cultural celebrations, and bespoke itineraries with private concierge support." />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:title" content="Weddings & Honeymoons in Sri Lanka | Recharge Travels" />
+        <meta property="og:description" content="Bespoke weddings and honeymoons across Sri Lanka’s beaches, tea country, and heritage venues with trusted local planners." />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:image" content={settings?.heroImage || `${baseUrl}/logo-v2.png`} />
+        <script type="application/ld+json">
+          {JSON.stringify(romanceSchema)}
+        </script>
+        {faqSchema && (
+          <script type="application/ld+json">
+            {JSON.stringify(faqSchema)}
+          </script>
+        )}
+      </Helmet>
       <Header />
 
       {/* HERO - 16:9 aspect ratio with buttons overlay */}

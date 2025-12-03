@@ -10,6 +10,7 @@ import HotelsSection from '@/components/admin/panel/HotelsSection';
 import ToursSection from '@/components/admin/panel/ToursSection';
 import DriversSection from '@/components/admin/panel/DriversSection';
 import VehiclesSection from '@/components/admin/panel/VehiclesSection';
+import VehicleCategoriesSection from '@/components/admin/panel/VehicleCategoriesSection';
 import BookingsSection from '@/components/admin/panel/BookingsSection';
 import ExperiencesSection from '@/components/admin/panel/ExperiencesSection';
 import ScenicSection from '@/components/admin/panel/ScenicSection';
@@ -373,7 +374,10 @@ const AdminPanel: React.FC = () => {
           </TabsContent>
           
           <TabsContent value="vehicles">
-            <VehiclesSection />
+            <div className="space-y-8">
+              <VehiclesSection />
+              <VehicleCategoriesSection />
+            </div>
           </TabsContent>
           
           <TabsContent value="drivers">

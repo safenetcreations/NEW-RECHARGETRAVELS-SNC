@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { 
-  MapPin, Clock, DollarSign, Star, Calendar, Phone, Share2, Heart, 
+import {
+  MapPin, Clock, DollarSign, Star, Calendar, Phone, Share2, Heart,
   Play, Camera, Navigation, Globe, Sun, Cloud, Users, Award,
   Mountain, Sunset, TreePine, Car, UtensilsCrossed, Bed, Compass,
   Info, BookOpen, Video, Map, Activity, Ticket
@@ -10,6 +10,16 @@ import {
 import { GoogleMap, LoadScript, Marker, InfoWindow } from '@react-google-maps/api';
 import BookingModal from '../../components/BookingModal';
 import { DestinationData, getDestinationBySlug } from '../../data/destinationDetails';
+import {
+  COMPANY,
+  createTouristAttractionSchema,
+  createBreadcrumbSchema,
+  createOrganizationSchema,
+  createImageGallerySchema,
+  createVideoSchema,
+  createSpeakableSchema,
+  createHowToSchema
+} from '@/utils/schemaMarkup';
 
 
 const DestinationDetail: React.FC = () => {
@@ -45,6 +55,8 @@ const DestinationDetail: React.FC = () => {
       </div>
     );
   }
+
+  const canonicalUrl = `https://www.rechargetravels.com/destinations/${destination.slug || destinationId || ''}`;
 
   const HeroSection = () => (
     <div className="relative h-screen">
@@ -143,39 +155,149 @@ const DestinationDetail: React.FC = () => {
       <Helmet>
         <title>{destination.name} - {destination.subtitle} | Recharge Travels</title>
         <meta name="description" content={destination.description} />
-        <meta name="keywords" content={`${destination.name}, Sri Lanka, tourism, UNESCO, heritage, travel`} />
-        
+        <meta name="keywords" content={`${destination.name}, Sri Lanka, tourism, UNESCO, heritage, travel, ${destination.location.province}, things to do`} />
+
         {/* Open Graph */}
         <meta property="og:title" content={`${destination.name} - ${destination.subtitle}`} />
         <meta property="og:description" content={destination.description} />
         <meta property="og:image" content={destination.heroImage} />
-        <meta property="og:type" content="website" />
-        
-        {/* Schema.org structured data */}
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:type" content="place" />
+        <meta property="og:locale" content="en_US" />
+        <meta property="og:site_name" content="Recharge Travels" />
+
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${destination.name} - ${destination.subtitle}`} />
+        <meta name="twitter:description" content={destination.description} />
+        <meta name="twitter:image" content={destination.heroImage} />
+
+        <link rel="canonical" href={canonicalUrl} />
+
+        {/* TouristAttraction Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify(createTouristAttractionSchema({
+            name: destination.name,
+            description: destination.description,
+            image: [destination.heroImage, ...(destination.gallery || [])],
+            latitude: destination.location.lat,
+            longitude: destination.location.lng,
+            address: `${destination.location.address}, ${destination.location.province}, Sri Lanka`,
+            openingHours: `${destination.hours.days} ${destination.hours.open}-${destination.hours.close}`,
+            priceRange: `LKR ${destination.pricing.foreignAdult}`,
+            rating: { value: Number(destination.rating), count: Number(destination.reviews) },
+            url: canonicalUrl
+          }))}
+        </script>
+
+        {/* Breadcrumb Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify(createBreadcrumbSchema([
+            { name: 'Home', url: COMPANY.url },
+            { name: 'Destinations', url: `${COMPANY.url}/about/sri-lanka` },
+            { name: destination.name, url: canonicalUrl }
+          ]))}
+        </script>
+
+        {/* Organization Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify(createOrganizationSchema())}
+        </script>
+
+        {/* Image Gallery Schema */}
+        {destination.gallery && destination.gallery.length > 0 && (
+          <script type="application/ld+json">
+            {JSON.stringify(createImageGallerySchema(
+              destination.gallery.map((img: string, idx: number) => ({
+                url: img,
+                caption: `${destination.name} - Image ${idx + 1}`,
+                description: `Beautiful view of ${destination.name} in Sri Lanka`
+              }))
+            ))}
+          </script>
+        )}
+
+        {/* Video Schema */}
+        {destination.heroVideo && (
+          <script type="application/ld+json">
+            {JSON.stringify(createVideoSchema({
+              name: `${destination.name} - Virtual Tour`,
+              description: `Explore ${destination.name}, ${destination.subtitle}. A visual journey through one of Sri Lanka's most iconic destinations.`,
+              thumbnailUrl: destination.heroImage,
+              uploadDate: '2024-01-15',
+              contentUrl: destination.heroVideo,
+              embedUrl: destination.heroVideo.replace('watch?v=', 'embed/')
+            }))}
+          </script>
+        )}
+
+        {/* Speakable Schema for Voice Search */}
+        <script type="application/ld+json">
+          {JSON.stringify(createSpeakableSchema(
+            canonicalUrl,
+            ['h1', '.hero-description', '.overview-content']
+          ))}
+        </script>
+
+        {/* Place Schema for Google Maps integration */}
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
-            "@type": "TouristAttraction",
+            "@type": "Place",
+            "@id": `${canonicalUrl}#place`,
             "name": destination.name,
-            "description": destination.description,
+            "description": destination.longDescription || destination.description,
+            "image": destination.heroImage,
+            "url": canonicalUrl,
+            "telephone": COMPANY.phone,
             "address": {
               "@type": "PostalAddress",
               "addressLocality": destination.location.address,
-              "addressCountry": "Sri Lanka"
+              "addressRegion": destination.location.province,
+              "addressCountry": "LK"
             },
             "geo": {
               "@type": "GeoCoordinates",
               "latitude": destination.location.lat,
               "longitude": destination.location.lng
             },
-            "openingHours": `${destination.hours.days} ${destination.hours.open}-${destination.hours.close}`,
-            "priceRange": `LKR ${destination.pricing.foreignAdult}`,
+            "openingHoursSpecification": {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": destination.hours.days?.split('-').map((d: string) => d.trim()) || ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+              "opens": destination.hours.open,
+              "closes": destination.hours.close
+            },
+            "publicAccess": true,
+            "isAccessibleForFree": false,
             "aggregateRating": {
               "@type": "AggregateRating",
-              "ratingValue": destination.rating,
-              "reviewCount": destination.reviews
-            }
+              "ratingValue": Number(destination.rating),
+              "reviewCount": Number(destination.reviews),
+              "bestRating": 5,
+              "worstRating": 1
+            },
+            "containedInPlace": {
+              "@type": "Country",
+              "name": "Sri Lanka"
+            },
+            "touristType": ["Cultural Tourism", "Heritage Tourism", "Adventure Tourism"]
           })}
+        </script>
+
+        {/* HowTo Schema - Visit Guide */}
+        <script type="application/ld+json">
+          {JSON.stringify(createHowToSchema(
+            `How to Visit ${destination.name}`,
+            `Complete guide to planning your visit to ${destination.name}, ${destination.subtitle} in Sri Lanka`,
+            [
+              { name: 'Plan Your Visit Date', text: `Check the best time to visit ${destination.name}. Opening hours: ${destination.hours.open} - ${destination.hours.close}, ${destination.hours.days}.`, image: destination.heroImage },
+              { name: 'Book Transportation', text: `Arrange transport to ${destination.location.address}. Contact Recharge Travels at ${COMPANY.phone} for private transfers or guided tours.` },
+              { name: 'Purchase Entry Tickets', text: `Entry fees: Foreign Adults LKR ${destination.pricing.foreignAdult}, Foreign Children LKR ${destination.pricing.foreignChild || 'Half price'}.` },
+              { name: 'Explore the Site', text: `Spend ${destination.visitDuration || '2-3 hours'} exploring the highlights: ${destination.highlights?.slice(0, 3).join(', ') || destination.name}.` },
+              { name: 'Capture Memories', text: 'Photography is usually permitted. Hire a local guide for deeper insights into the history and significance.' }
+            ],
+            { totalTime: destination.visitDuration || 'PT3H', estimatedCost: `LKR ${destination.pricing.foreignAdult}`, currency: 'LKR' }
+          ))}
         </script>
       </Helmet>
 

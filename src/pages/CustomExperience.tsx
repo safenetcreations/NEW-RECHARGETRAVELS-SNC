@@ -1,171 +1,457 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Sparkles, Calendar, Users, MapPin, Heart, CheckCircle, ArrowRight, ArrowLeft, Phone, Star, Compass, Camera, Mountain, Car, Clock, Shield, Award, MessageCircle, Send, Loader2, Plane, Hotel, Utensils, Map, Binoculars, Palmtree } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import {
+  ArrowLeft,
+  ArrowRight,
+  Calendar,
+  CheckCircle,
+  Clock,
+  Compass,
+  Loader2,
+  Mail,
+  MapPin,
+  MessageCircle,
+  Phone,
+  Shield,
+  Sparkles,
+  Star,
+  Users
+} from 'lucide-react';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-import { customExperiencePageService } from '@/services/customExperiencePageService';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import {
+  customExperiencePageService,
+  type CustomExperiencePageContent
+} from '@/services/customExperiencePageService';
+import { emailService } from '@/services/emailService';
+import { cachedFetch } from '@/lib/cache';
 
-const SAMPLE_ITINERARIES = [
-  { title: '7-Day Cultural Discovery', destinations: 'Colombo → Sigiriya → Kandy → Nuwara Eliya → Galle', highlights: ['Sigiriya Rock Fortress', 'Temple of Tooth', 'Tea Plantations', 'Dutch Fort'], price: '$1,200', image: 'https://images.unsplash.com/photo-1588598198321-9735fd52271e?w=600' },
-  { title: '10-Day Wildlife & Beach', destinations: 'Colombo → Yala → Mirissa → Bentota → Colombo', highlights: ['Leopard Safari', 'Whale Watching', 'Beach Relaxation', 'Water Sports'], price: '$1,800', image: 'https://images.unsplash.com/photo-1549366021-9f761d450615?w=600' },
-  { title: '14-Day Complete Sri Lanka', destinations: 'Colombo → Anuradhapura → Sigiriya → Kandy → Ella → Yala → Galle', highlights: ['Ancient Cities', 'Hill Country', 'Wildlife', 'Beaches'], price: '$2,500', image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600' }
-];
+const iconMap: Record<string, React.ComponentType<any>> = {
+  Compass,
+  Star,
+  Clock,
+  MapPin,
+  Users,
+  Calendar,
+  Sparkles,
+  Shield
+};
 
-const EXPERIENCES = [
-  { icon: '🦁', title: 'Wildlife Safari', desc: 'Leopards, elephants & exotic birds in national parks' },
-  { icon: '🏛️', title: 'Ancient Temples', desc: 'UNESCO World Heritage sites & sacred places' },
-  { icon: '🏖️', title: 'Beach Paradise', desc: 'Pristine beaches, surfing & water sports' },
-  { icon: '🍵', title: 'Tea Trails', desc: 'Scenic plantations & tea factory tours' },
-  { icon: '🐋', title: 'Whale Watching', desc: 'Blue whales & dolphins in Mirissa' },
-  { icon: '🧘', title: 'Ayurveda & Yoga', desc: 'Traditional wellness retreats' }
-];
+const MEAL_OPTIONS = ['Street food crawls', 'Fine dining', 'Vegan friendly', 'Halal friendly', 'Gluten free'];
+const ACCOMMODATION_OPTIONS = ['Boutique Luxury', 'Tea Bungalows', 'Beach Villas', 'Family Suites', 'City Hotels'];
 
-const WHATS_INCLUDED = [
-  { icon: Hotel, title: 'Handpicked Hotels', desc: 'From boutique to luxury resorts' },
-  { icon: Car, title: 'Private Transport', desc: 'AC vehicle with English-speaking driver' },
-  { icon: Utensils, title: 'Authentic Cuisine', desc: 'Local restaurants & cooking classes' },
-  { icon: Map, title: 'Expert Guides', desc: 'Knowledgeable local guides at each site' },
-  { icon: Plane, title: 'Airport Transfers', desc: 'Seamless pickup & drop-off' },
-  { icon: Phone, title: '24/7 Support', desc: 'We\'re always just a call away' }
-];
+const DEFAULT_FORM = {
+  firstName: '',
+  lastName: '',
+  email: '',
+  phone: '',
+  country: '',
+  startDate: '',
+  flexibleDates: true,
+  groupSize: 2,
+  groupType: 'couple',
+  accommodation: 'Boutique Luxury',
+  budgetAmount: '3500',
+  budgetType: 'total',
+  currency: 'USD',
+  travelStyle: 'luxury',
+  travelPace: 'balanced',
+  celebration: '',
+  preferredDestinations: '',
+  interests: [] as string[],
+  mealPreferences: [] as string[],
+  communication: 'email',
+  specialRequests: '',
+  previousVisits: false,
+  mobility: '',
+  medical: ''
+};
 
-const INTERESTS = [
-  { id: 'wildlife', label: 'Wildlife Safari', icon: '🦁' },
-  { id: 'culture', label: 'Culture & Heritage', icon: '🏛️' },
-  { id: 'beach', label: 'Beach & Coastal', icon: '🏖️' },
-  { id: 'adventure', label: 'Adventure', icon: '🧗' },
-  { id: 'wellness', label: 'Wellness & Spa', icon: '🧘' },
-  { id: 'food', label: 'Food & Culinary', icon: '🍜' },
-  { id: 'photography', label: 'Photography', icon: '📷' },
-  { id: 'nature', label: 'Mountains', icon: '🏔️' },
-  { id: 'family', label: 'Family', icon: '👨‍👩‍��‍👦' },
-  { id: 'romantic', label: 'Honeymoon', icon: '💕' },
-  { id: 'offbeat', label: 'Off-beat', icon: '🗺️' },
-  { id: 'luxury', label: 'Luxury', icon: '👑' }
-];
-
-const BUDGETS = ['$1,000 - $2,000', '$2,000 - $3,500', '$3,500 - $5,000', '$5,000 - $7,500', '$7,500+'];
+const paceBadges: Record<string, string> = {
+  relaxed: 'Spa days + long stays',
+  balanced: 'Blend of slow + active',
+  fast: 'Cover more ground'
+};
 
 const CustomExperience = () => {
-  const [showForm, setShowForm] = useState(false);
+  const { toast } = useToast();
+  const [pageContent, setPageContent] = useState<CustomExperiencePageContent | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [step, setStep] = useState(1);
+  const [form, setForm] = useState(DEFAULT_FORM);
+  const [customAnswers, setCustomAnswers] = useState<Record<string, string | string[]>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [bookingRef, setBookingRef] = useState('');
-  const [form, setForm] = useState({
-    firstName: '', lastName: '', email: '', phone: '', country: '',
-    startDate: '', duration: '7', groupSize: 2, groupType: 'couple',
-    budget: '', accommodation: 'luxury', interests: [] as string[],
-    mustSee: '', specialRequests: ''
-  });
+  const [error, setError] = useState<string | null>(null);
 
-  const updateForm = (field: string, value: any) => setForm(prev => ({ ...prev, [field]: value }));
-  const toggleInterest = (id: string) => setForm(prev => ({
-    ...prev, interests: prev.interests.includes(id) ? prev.interests.filter(i => i !== id) : [...prev.interests, id]
-  }));
+  const heroSlides = useMemo(
+    () => pageContent?.hero.gallery || [],
+    [pageContent?.hero.gallery]
+  );
+  const [slideIndex, setSlideIndex] = useState(0);
+  const formSectionRef = useRef<HTMLElement | null>(null);
 
-  const handleSubmit = async () => {
-    setSubmitting(true);
-    try {
-      await customExperiencePageService.submitRequest({
-        name: `${form.firstName} ${form.lastName}`, email: form.email, phone: form.phone, country: form.country,
-        startDate: form.startDate, endDate: '', flexibleDates: true, groupSize: form.groupSize,
-        budget: { amount: parseInt(form.budget.replace(/[^0-9]/g, '')) || 0, currency: 'USD', perPerson: false },
-        interests: form.interests, experienceTypes: form.interests, accommodationPreference: form.accommodation,
-        mealPreferences: [], specialRequests: `Duration: ${form.duration} days | Group: ${form.groupType} | Must See: ${form.mustSee}\n${form.specialRequests}`,
-        previousVisits: false, mobilityRequirements: '', medicalConditions: ''
-      });
-      setBookingRef(`CUS-${Date.now().toString(36).toUpperCase()}`);
-      setSubmitted(true);
-    } catch (e) { console.error(e); }
-    setSubmitting(false);
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const content = await cachedFetch<CustomExperiencePageContent>(
+          'custom-experience-page',
+          () => customExperiencePageService.getPageContent(),
+          5 * 60 * 1000
+        );
+        setPageContent(content);
+      } catch (err) {
+        console.error('Failed to load custom experience content', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  useEffect(() => {
+    if (heroSlides.length > 0) {
+      const ticker = setInterval(() => {
+        setSlideIndex((prev) => (prev + 1) % heroSlides.length);
+      }, 6000);
+      return () => clearInterval(ticker);
+    }
+  }, [heroSlides.length]);
+
+  const experienceTypes = useMemo(
+    () => pageContent?.experienceTypes || [],
+    [pageContent?.experienceTypes]
+  );
+
+  const benefits = useMemo(
+    () => pageContent?.benefits || [],
+    [pageContent?.benefits]
+  );
+
+  const testimonials = useMemo(
+    () => pageContent?.testimonials || [],
+    [pageContent?.testimonials]
+  );
+
+  const booking = pageContent?.booking || {
+    contactPhone: '+94 777 721 999',
+    whatsapp: 'https://wa.me/94777721999',
+    email: 'concierge@rechargetravels.com',
+    responseTime: 'Replies within 12 hours',
+    conciergeNote: ''
   };
 
-  if (submitted) {
+  const updateForm = (field: keyof typeof form, value: any) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const toggleInterest = (value: string) => {
+    setForm((prev) => ({
+      ...prev,
+      interests: prev.interests.includes(value)
+        ? prev.interests.filter((item) => item !== value)
+        : [...prev.interests, value]
+    }));
+  };
+
+  const toggleMeal = (value: string) => {
+    setForm((prev) => ({
+      ...prev,
+      mealPreferences: prev.mealPreferences.includes(value)
+        ? prev.mealPreferences.filter((item) => item !== value)
+        : [...prev.mealPreferences, value]
+    }));
+  };
+
+  const handleCustomQuestionChange = (id: string, value: string | string[]) => {
+    setCustomAnswers((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const validateStep = (targetStep: number): boolean => {
+    setError(null);
+    if (targetStep === 2) {
+      if (!form.firstName || !form.lastName || !form.email || !form.phone || !form.country) {
+        setError('Please complete your personal details.');
+        return false;
+      }
+    }
+    if (targetStep === 3) {
+      if (!form.budgetAmount) {
+        setError('Please include a budget estimate so we can tailor experiences.');
+        return false;
+      }
+      if (!form.startDate && !form.flexibleDates) {
+        setError('Select a start date or mark the dates as flexible.');
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const goToStep = (targetStep: number) => {
+    if (targetStep > step && !validateStep(targetStep)) return;
+    setStep(targetStep);
+  };
+
+  const scrollToForm = () => {
+    formSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const summary = useMemo(
+    () => ({
+      traveler: `${form.firstName || 'Traveler'} ${form.lastName}`,
+      group: `${form.groupSize} ${form.groupSize > 1 ? 'guests' : 'guest'} (${form.groupType})`,
+      pace: form.travelPace,
+      style: form.travelStyle,
+      interests: form.interests,
+      meals: form.mealPreferences,
+      celebration: form.celebration || 'None listed',
+      budget: `${form.currency} ${Number(form.budgetAmount || 0).toLocaleString()} ${form.budgetType === 'perPerson' ? 'per guest' : 'total'}`,
+    destinations: form.preferredDestinations || "We'll recommend combinations"
+    }),
+    [form]
+  );
+
+  const sendConfirmationEmails = async (submissionId: string) => {
+    const adminEmail = booking.email;
+    const conciergeName = booking.contactPhone ? `Concierge • ${booking.contactPhone}` : 'Recharge Concierge';
+    const introList = `
+      <ul>
+        <li>Travelers: ${summary.group}</li>
+        <li>Preferred Style: ${form.travelStyle} / ${form.travelPace}</li>
+        <li>Budget: ${summary.budget}</li>
+        <li>Interests: ${summary.interests.join(', ') || 'Not specified'}</li>
+      </ul>
+    `;
+
+    await emailService.sendEmail({
+      to: form.email,
+      subject: `We're designing your Sri Lanka journey (ref ${submissionId})`,
+      html: `
+        <p>Hi ${form.firstName},</p>
+        <p>Our travel designers just received your request and are reserving the best guides, transfers, and villas that match your preferences.</p>
+        ${introList}
+        <p>Your concierge will reach out within 12 hours from <strong>${conciergeName}</strong>. Need anything sooner? WhatsApp ${booking.whatsapp}.</p>
+        <p>— Recharge Travels</p>
+      `,
+      text: `Hi ${form.firstName}, our team has started building your itinerary. Concierge: ${conciergeName}.`
+    });
+
+    const adminDetails = `
+      <p><strong>New custom experience request</strong></p>
+      <p>Reference: ${submissionId}</p>
+      <p>Name: ${form.firstName} ${form.lastName} • ${form.email} • ${form.phone}</p>
+      <p>Country: ${form.country}</p>
+      ${introList}
+      <p>Special requests: ${form.specialRequests || 'N/A'}</p>
+    `;
+
+    await emailService.sendEmail({
+      to: adminEmail,
+      subject: `New custom experience lead • ${form.firstName} (${submissionId})`,
+      html: adminDetails,
+      text: `New lead ${form.firstName} ${form.lastName} (${form.email}). Ref ${submissionId}`
+    });
+  };
+
+  const handleSubmit = async () => {
+    if (!validateStep(3)) return;
+    setSubmitting(true);
+    setError(null);
+
+    try {
+      const payload = {
+        name: `${form.firstName} ${form.lastName}`.trim(),
+        email: form.email,
+        phone: form.phone,
+        country: form.country,
+        startDate: form.startDate,
+        endDate: '',
+        flexibleDates: form.flexibleDates,
+        groupSize: Number(form.groupSize),
+        budget: {
+          amount: Number(form.budgetAmount) || 0,
+          currency: form.currency,
+          perPerson: form.budgetType === 'perPerson'
+        },
+        interests: form.interests,
+        experienceTypes: form.interests,
+        accommodationPreference: form.accommodation,
+        mealPreferences: form.mealPreferences,
+        specialRequests: form.specialRequests,
+        customAnswers,
+        previousVisits: form.previousVisits,
+        mobilityRequirements: form.mobility,
+        medicalConditions: form.medical,
+        travelStyle: form.travelStyle,
+        travelPace: form.travelPace as 'relaxed' | 'balanced' | 'fast',
+        celebration: form.celebration,
+        preferredDestinations: form.preferredDestinations
+          ? form.preferredDestinations
+              .split(',')
+              .map((dest) => dest.trim())
+              .filter(Boolean)
+          : [],
+        communicationPreference: form.communication as 'email' | 'whatsapp' | 'phone',
+        channel: 'web'
+      };
+
+      const submissionId = await customExperiencePageService.submitRequest(payload);
+      setBookingRef(submissionId);
+      setSubmitted(true);
+      await sendConfirmationEmails(submissionId);
+
+      toast({
+        title: '✨ Request Submitted!',
+        description: `Reference: ${submissionId}. Your concierge will reach out soon.`
+      });
+    } catch (err) {
+      console.error('Custom experience submission error', err);
+      setError('We could not submit your request. Please try again or WhatsApp our concierge.');
+      toast({
+        title: 'Submission Failed',
+        description: 'Please try again or contact us via WhatsApp.',
+        variant: 'destructive'
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const getIcon = (iconName: string) => iconMap[iconName] || Compass;
+
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-orange-50">
-        <Header />
-        <div className="min-h-[70vh] flex items-center justify-center px-4 py-20">
-          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="max-w-xl text-center">
-            <div className="w-20 h-20 bg-gradient-to-r from-emerald-500 to-green-500 rounded-full flex items-center justify-center mx-auto mb-6"><CheckCircle className="w-10 h-10 text-white" /></div>
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-3">Request Received!</h1>
-            <p className="text-lg text-amber-600 font-mono mb-2">{bookingRef}</p>
-            <p className="text-gray-600 mb-8">Our travel designers will contact you within 24 hours.</p>
-            <div className="flex gap-4 justify-center">
-              <Button variant="outline" onClick={() => window.location.href = '/'}>Home</Button>
-              <Button className="bg-amber-500 hover:bg-amber-600" onClick={() => window.open('https://wa.me/94777721999', '_blank')}><MessageCircle className="w-4 h-4 mr-2" />WhatsApp</Button>
-            </div>
-          </motion.div>
-        </div>
-        <Footer />
+      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+        <Loader2 className="h-12 w-12 animate-spin text-amber-600" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-orange-50">
-      <Helmet><title>Custom Sri Lanka Tours | Design Your Perfect Trip</title></Helmet>
+    <>
+      <Helmet>
+        <title>{pageContent?.seo.title || 'Custom Sri Lanka Travel | Recharge Travels'}</title>
+        <meta name="description" content={pageContent?.seo.description || ''} />
+        <meta name="keywords" content={pageContent?.seo.keywords?.join(', ') || ''} />
+        <meta property="og:title" content={pageContent?.seo.title} />
+        <meta property="og:description" content={pageContent?.seo.description} />
+        <meta property="og:image" content={pageContent?.seo.ogImage} />
+        <link rel="canonical" href="https://www.rechargetravels.com/custom-experience" />
+      </Helmet>
+
       <Header />
 
-      {/* HERO */}
-      <section className="relative py-20 px-4 bg-gradient-to-r from-amber-100 via-orange-50 to-amber-100">
-        <div className="container mx-auto max-w-6xl">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <Badge className="bg-amber-500 text-white mb-4"><Sparkles className="w-4 h-4 mr-1" />100% Personalized</Badge>
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">Design Your Perfect <span className="text-amber-600">Sri Lanka</span> Adventure</h1>
-              <p className="text-lg text-gray-600 mb-6">Tell us your dream, and our expert travel designers will craft a unique itinerary just for you. From ancient temples to pristine beaches, wildlife safaris to tea plantations.</p>
-              <div className="flex flex-wrap gap-3 mb-8">
-                {['Fully Customizable', 'Expert Local Guides', 'Best Price Guarantee'].map((item, i) => (
-                  <span key={i} className="flex items-center gap-1 text-sm text-gray-700"><CheckCircle className="w-4 h-4 text-green-500" />{item}</span>
-                ))}
-              </div>
-              <div className="flex gap-4">
-                <Button size="lg" className="bg-amber-500 hover:bg-amber-600" onClick={() => { setShowForm(true); document.getElementById('form')?.scrollIntoView({ behavior: 'smooth' }); }}>
-                  <Compass className="w-5 h-5 mr-2" />Start Planning
-                </Button>
-                <Button size="lg" variant="outline" onClick={() => window.open('https://wa.me/94777721999', '_blank')}>
-                  <MessageCircle className="w-5 h-5 mr-2" />Chat Now
-                </Button>
-              </div>
-            </div>
-            <div className="relative">
-              <img src="https://images.unsplash.com/photo-1588598198321-9735fd52271e?w=800" alt="Sri Lanka" className="rounded-2xl shadow-2xl" />
-              <div className="absolute -bottom-4 -left-4 bg-white rounded-xl p-4 shadow-lg">
-                <div className="flex items-center gap-2"><Star className="w-5 h-5 text-amber-500 fill-amber-500" /><span className="font-bold">4.9</span><span className="text-gray-500 text-sm">(500+ trips)</span></div>
-              </div>
-            </div>
+      {/* Hero */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={heroSlides[slideIndex]?.image}
+            className="absolute inset-0"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.1 }}
+          >
+            <img
+              src={heroSlides[slideIndex]?.image}
+              alt={heroSlides[slideIndex]?.caption}
+              className="h-full w-full object-cover object-center"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-slate-950/90 via-slate-950/70 to-slate-950/90" />
+          </motion.div>
+        </AnimatePresence>
+
+        <div className="relative mx-auto flex min-h-[520px] max-w-6xl flex-col items-center gap-6 px-4 py-24 text-center">
+          <Badge className="bg-white/10 text-white backdrop-blur">{pageContent?.hero.badge}</Badge>
+          <h1 className="text-4xl font-semibold leading-tight sm:text-5xl lg:text-6xl">
+            {pageContent?.hero.title}
+          </h1>
+          <p className="max-w-3xl text-lg text-white/80">{pageContent?.hero.subtitle}</p>
+          <div className="flex flex-wrap items-center justify-center gap-3 text-xs uppercase tracking-[0.4em] text-amber-200/80">
+            <span>{heroSlides[slideIndex]?.tag}</span>
+          </div>
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+            {pageContent?.overview.badges.map((badge) => {
+              const Icon = getIcon(badge.iconName);
+              return (
+                <span
+                  key={badge.label}
+                  className="inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 text-sm text-white/90 backdrop-blur"
+                >
+                  <Icon className="h-4 w-4 text-amber-200" />
+                  {badge.label}: <strong className="font-semibold">{badge.value}</strong>
+                </span>
+              );
+            })}
+          </div>
+          <div className="mt-8 flex flex-wrap justify-center gap-4">
+            <Button
+              size="lg"
+              className="bg-amber-500 hover:bg-amber-600 px-8 py-6 text-base"
+              onClick={scrollToForm}
+            >
+              Start planning
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              className="border-white/40 bg-white/10 px-8 py-6 text-base text-white hover:bg-white/20"
+              onClick={() => window.open(booking.whatsapp, '_blank')}
+            >
+              <MessageCircle className="mr-2 h-4 w-4" />
+              WhatsApp concierge
+            </Button>
           </div>
         </div>
       </section>
 
-      {/* SAMPLE ITINERARIES */}
-      <section className="py-16 px-4 bg-white">
-        <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-800 mb-2">Popular <span className="text-amber-500">Itineraries</span></h2>
-            <p className="text-gray-600">Starting points for your custom adventure - we'll tailor any of these to your preferences</p>
+      {/* Overview */}
+      <section className="bg-white py-16">
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 md:grid-cols-[1.2fr_0.8fr]">
+          <div>
+            <h2 className="text-3xl font-semibold text-slate-900">How we design your trip</h2>
+            <p className="mt-4 text-lg text-slate-600">{pageContent?.overview.summary}</p>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {SAMPLE_ITINERARIES.map((item, i) => (
-              <Card key={i} className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all">
-                <img src={item.image} alt={item.title} className="w-full h-48 object-cover" />
+          <div className="grid gap-4">
+            {pageContent?.overview.highlights.map((highlight) => (
+              <div key={highlight.label} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <p className="text-xs uppercase tracking-[0.3em] text-slate-500">{highlight.label}</p>
+                <p className="mt-2 text-sm text-slate-700">{highlight.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Benefits */}
+      <section className="bg-slate-50 py-16">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="mb-10 text-center">
+            <p className="text-xs uppercase tracking-[0.4em] text-slate-500">Why Recharge</p>
+            <h3 className="text-3xl font-semibold text-slate-900">The concierge difference</h3>
+          </div>
+          <div className="grid gap-6 md:grid-cols-3">
+            {benefits.map((benefit) => (
+              <Card key={benefit.id} className="overflow-hidden border-0 shadow-sm">
+                <div className="relative h-48">
+                  <img src={benefit.image} alt={benefit.title} className="h-full w-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent" />
+                  <div className="absolute bottom-4 left-4 text-3xl">{benefit.icon}</div>
+                </div>
                 <CardContent className="p-5">
-                  <h3 className="font-bold text-lg mb-1">{item.title}</h3>
-                  <p className="text-sm text-gray-500 mb-3">{item.destinations}</p>
-                  <div className="flex flex-wrap gap-1 mb-3">
-                    {item.highlights.map((h, j) => <Badge key={j} variant="outline" className="text-xs">{h}</Badge>)}
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-amber-600 font-bold text-lg">From {item.price}</span>
-                    <Button size="sm" variant="outline" onClick={() => { setShowForm(true); document.getElementById('form')?.scrollIntoView({ behavior: 'smooth' }); }}>Customize</Button>
-                  </div>
+                  <h4 className="text-lg font-semibold text-slate-900">{benefit.title}</h4>
+                  <p className="mt-2 text-sm text-slate-600">{benefit.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -173,146 +459,429 @@ const CustomExperience = () => {
         </div>
       </section>
 
-      {/* EXPERIENCES */}
-      <section className="py-16 px-4 bg-gradient-to-br from-amber-50 to-orange-50">
-        <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-800 mb-2">Experiences You Can <span className="text-amber-500">Include</span></h2>
-            <p className="text-gray-600">Mix and match to create your perfect trip</p>
+      {/* Experience Types (Interactive) */}
+      <section className="bg-white py-16">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="mb-10 text-center">
+            <p className="text-xs uppercase tracking-[0.4em] text-slate-500">Curate Your Trip</p>
+            <h3 className="text-3xl font-semibold text-slate-900">Tap interests to add to your wishlist</h3>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {EXPERIENCES.map((exp, i) => (
-              <div key={i} className="bg-white rounded-xl p-4 text-center shadow hover:shadow-lg transition-all cursor-pointer" onClick={() => { setShowForm(true); document.getElementById('form')?.scrollIntoView({ behavior: 'smooth' }); }}>
-                <span className="text-4xl mb-2 block">{exp.icon}</span>
-                <h3 className="font-semibold text-sm mb-1">{exp.title}</h3>
-                <p className="text-xs text-gray-500">{exp.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* WHATS INCLUDED */}
-      <section className="py-16 px-4 bg-white">
-        <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-800 mb-2">What's <span className="text-amber-500">Included</span></h2>
-            <p className="text-gray-600">Everything you need for a worry-free adventure</p>
-          </div>
-          <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-6">
-            {WHATS_INCLUDED.map((item, i) => (
-              <div key={i} className="text-center">
-                <div className="w-14 h-14 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <item.icon className="w-7 h-7 text-amber-600" />
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {experienceTypes.map((exp) => (
+              <button
+                key={exp.id}
+                type="button"
+                onClick={() => toggleInterest(exp.title)}
+                className={`text-left rounded-2xl border p-5 transition hover:shadow ${
+                  form.interests.includes(exp.title)
+                    ? 'border-amber-500 bg-amber-50'
+                    : 'border-slate-200 bg-white'
+                }`}
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-2xl">{exp.icon}</span>
+                  <h4 className="font-semibold text-slate-900">{exp.title}</h4>
                 </div>
-                <h3 className="font-semibold text-sm mb-1">{item.title}</h3>
-                <p className="text-xs text-gray-500">{item.desc}</p>
-              </div>
+                <p className="text-sm text-slate-600">{exp.description}</p>
+                {form.interests.includes(exp.title) && (
+                  <div className="mt-3 flex items-center text-xs text-amber-600">
+                    <CheckCircle className="mr-1 h-3.5 w-3.5" /> Added to wishlist
+                  </div>
+                )}
+              </button>
             ))}
           </div>
         </div>
       </section>
 
-      {/* BOOKING FORM */}
-      <section id="form" className="py-16 px-4 bg-gradient-to-br from-amber-50 to-orange-50">
-        <div className="container mx-auto max-w-3xl">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold text-gray-800 mb-2">Plan Your <span className="text-amber-500">Custom Trip</span></h2>
-            <p className="text-gray-600">Fill in your details and we'll design the perfect itinerary</p>
+      {/* Multi-Step Form */}
+      <section
+        ref={formSectionRef}
+        className="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 py-20 text-white"
+      >
+        <div className="mx-auto max-w-4xl px-4">
+          <div className="mb-10 text-center">
+            <Badge className="bg-white/10 text-white backdrop-blur">Concierge Intake</Badge>
+            <h3 className="mt-4 text-3xl font-semibold">Tell us about your dream trip</h3>
+            <p className="mt-2 text-slate-300">{booking.conciergeNote}</p>
           </div>
 
-          <Card className="border-0 shadow-xl bg-white">
-            <CardContent className="p-6 md:p-8 bg-white">
-              {/* Step Indicator */}
-              <div className="flex justify-center gap-2 mb-8">
-                {[1, 2, 3].map(s => (
-                  <div key={s} className={`h-2 rounded-full transition-all ${step >= s ? 'bg-amber-500 w-12' : 'bg-gray-200 w-8'}`} />
+          <Card className="border-0 shadow-2xl bg-white text-slate-900">
+            <CardContent className="p-6 md:p-10">
+              {/* Step indicators */}
+              <div className="flex justify-center gap-3 mb-10">
+                {[1, 2, 3].map((s) => (
+                  <div key={s} className="flex flex-col items-center">
+                    <div
+                      className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
+                        step >= s ? 'bg-amber-500 text-white' : 'bg-slate-200 text-slate-500'
+                      }`}
+                    >
+                      {s}
+                    </div>
+                    <span className="text-xs mt-2 text-slate-500">{['You', 'Trip', 'Review'][s - 1]}</span>
+                  </div>
                 ))}
               </div>
 
+              {error && (
+                <div className="mb-6 rounded-xl bg-red-50 border border-red-200 text-red-600 p-3 text-sm">
+                  {error}
+                </div>
+              )}
+
               <AnimatePresence mode="wait">
                 {step === 1 && (
-                  <motion.div key="s1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                    <h3 className="text-xl font-bold mb-4 text-gray-800">Your Details</h3>
-                    <div className="grid md:grid-cols-2 gap-4 mb-6">
-                      <div><label className="text-sm font-medium block mb-1 text-gray-700">First Name *</label><Input value={form.firstName} onChange={e => updateForm('firstName', e.target.value)} className="h-11 bg-white" /></div>
-                      <div><label className="text-sm font-medium block mb-1 text-gray-700">Last Name *</label><Input value={form.lastName} onChange={e => updateForm('lastName', e.target.value)} className="h-11 bg-white" /></div>
-                      <div><label className="text-sm font-medium block mb-1 text-gray-700">Email *</label><Input type="email" value={form.email} onChange={e => updateForm('email', e.target.value)} className="h-11 bg-white" /></div>
-                      <div><label className="text-sm font-medium block mb-1 text-gray-700">Phone *</label><Input value={form.phone} onChange={e => updateForm('phone', e.target.value)} className="h-11 bg-white" /></div>
-                      <div className="md:col-span-2"><label className="text-sm font-medium block mb-1 text-gray-700">Country *</label><Input value={form.country} onChange={e => updateForm('country', e.target.value)} className="h-11 bg-white" /></div>
+                  <motion.div
+                    key="step1"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                  >
+                    <h4 className="text-xl font-semibold mb-6 text-slate-800">Who's traveling?</h4>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-slate-600 mb-1 block">First name *</label>
+                        <Input value={form.firstName} onChange={(e) => updateForm('firstName', e.target.value)} className="rounded-xl" />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-slate-600 mb-1 block">Last name *</label>
+                        <Input value={form.lastName} onChange={(e) => updateForm('lastName', e.target.value)} className="rounded-xl" />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-slate-600 mb-1 block">Email *</label>
+                        <Input type="email" value={form.email} onChange={(e) => updateForm('email', e.target.value)} className="rounded-xl" />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-slate-600 mb-1 block">Phone / WhatsApp *</label>
+                        <Input value={form.phone} onChange={(e) => updateForm('phone', e.target.value)} placeholder="+1 555 123 4567" className="rounded-xl" />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-slate-600 mb-1 block">Country of residence *</label>
+                        <Input value={form.country} onChange={(e) => updateForm('country', e.target.value)} className="rounded-xl" />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-slate-600 mb-1 block">Preferred contact</label>
+                        <Select value={form.communication} onValueChange={(value) => updateForm('communication', value)}>
+                          <SelectTrigger className="rounded-xl"><SelectValue placeholder="Choose channel" /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="email">Email</SelectItem>
+                            <SelectItem value="whatsapp">WhatsApp</SelectItem>
+                            <SelectItem value="phone">Phone call</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
-                    <div className="flex justify-end"><Button className="bg-amber-500 hover:bg-amber-600 text-white" onClick={() => setStep(2)} disabled={!form.firstName || !form.email}>Next <ArrowRight className="w-4 h-4 ml-2" /></Button></div>
+                    <div className="flex justify-end mt-8">
+                      <Button onClick={() => goToStep(2)} className="bg-amber-500 hover:bg-amber-600">
+                        Continue <ArrowRight className="w-4 h-4 ml-2" />
+                      </Button>
+                    </div>
                   </motion.div>
                 )}
 
                 {step === 2 && (
-                  <motion.div key="s2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                    <h3 className="text-xl font-bold mb-4 text-gray-800">Trip Details</h3>
-                    <div className="grid md:grid-cols-2 gap-4 mb-4">
-                      <div><label className="text-sm font-medium block mb-1 text-gray-700">Start Date</label><Input type="date" value={form.startDate} onChange={e => updateForm('startDate', e.target.value)} className="h-11 bg-white" /></div>
-                      <div><label className="text-sm font-medium block mb-1 text-gray-700">Duration</label>
-                        <select value={form.duration} onChange={e => updateForm('duration', e.target.value)} className="w-full h-11 border rounded-md px-3 bg-white text-gray-800">
-                          {[5,7,10,14,21].map(d => <option key={d} value={d}>{d} days</option>)}
-                        </select>
+                  <motion.div
+                    key="step2"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                  >
+                    <h4 className="text-xl font-semibold mb-6 text-slate-800">Trip preferences</h4>
+                    <div className="grid md:grid-cols-2 gap-4 mb-6">
+                      <div>
+                        <label className="text-sm font-medium text-slate-600 mb-1 block">Start date</label>
+                        <Input type="date" value={form.startDate} onChange={(e) => updateForm('startDate', e.target.value)} disabled={form.flexibleDates} className="rounded-xl" />
+                        <label className="flex items-center gap-2 text-sm text-slate-500 mt-2">
+                          <Checkbox checked={form.flexibleDates} onCheckedChange={(checked) => updateForm('flexibleDates', Boolean(checked))} />
+                          My dates are flexible
+                        </label>
                       </div>
-                      <div><label className="text-sm font-medium block mb-1 text-gray-700">Travelers</label>
-                        <div className="flex items-center gap-3 h-11">
-                          <button className="w-9 h-9 border rounded bg-white text-gray-800 hover:bg-gray-50" onClick={() => updateForm('groupSize', Math.max(1, form.groupSize - 1))}>-</button>
-                          <span className="font-semibold text-gray-800">{form.groupSize}</span>
-                          <button className="w-9 h-9 border rounded bg-white text-gray-800 hover:bg-gray-50" onClick={() => updateForm('groupSize', form.groupSize + 1)}>+</button>
+                      <div>
+                        <label className="text-sm font-medium text-slate-600 mb-1 block">Group size</label>
+                        <Input type="number" min={1} value={form.groupSize} onChange={(e) => updateForm('groupSize', Number(e.target.value))} className="rounded-xl" />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-slate-600 mb-1 block">Accommodation</label>
+                        <Select value={form.accommodation} onValueChange={(value) => updateForm('accommodation', value)}>
+                          <SelectTrigger className="rounded-xl"><SelectValue placeholder="Select preference" /></SelectTrigger>
+                          <SelectContent>
+                            {ACCOMMODATION_OPTIONS.map((option) => (
+                              <SelectItem key={option} value={option}>{option}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-slate-600 mb-1 block">Budget estimate</label>
+                        <div className="flex gap-2">
+                          <Input value={form.budgetAmount} onChange={(e) => updateForm('budgetAmount', e.target.value.replace(/\D/g, ''))} placeholder="3500" className="rounded-xl" />
+                          <Select value={form.budgetType} onValueChange={(value) => updateForm('budgetType', value)}>
+                            <SelectTrigger className="w-36 rounded-xl"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="total">Total trip</SelectItem>
+                              <SelectItem value="perPerson">Per guest</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
                       </div>
-                      <div><label className="text-sm font-medium block mb-1 text-gray-700">Group Type</label>
-                        <select value={form.groupType} onChange={e => updateForm('groupType', e.target.value)} className="w-full h-11 border rounded-md px-3 bg-white text-gray-800">
-                          <option value="solo">Solo</option><option value="couple">Couple</option><option value="family">Family</option><option value="friends">Friends</option>
-                        </select>
+                    </div>
+
+                    <div className="mb-6">
+                      <label className="text-sm font-medium text-slate-600 mb-2 block">Travel pace</label>
+                      <div className="flex flex-wrap gap-3">
+                        {([
+                          { value: 'relaxed', label: 'Slow & soulful', icon: '🕯️' },
+                          { value: 'balanced', label: 'Balanced', icon: '⚖️' },
+                          { value: 'fast', label: 'See it all', icon: '⚡' }
+                        ] as const).map((pace) => (
+                          <button
+                            key={pace.value}
+                            type="button"
+                            onClick={() => updateForm('travelPace', pace.value)}
+                            className={`px-4 py-3 rounded-2xl border text-left transition ${
+                              form.travelPace === pace.value
+                                ? 'border-amber-500 bg-amber-50 text-amber-600'
+                                : 'border-slate-200'
+                            }`}
+                          >
+                            <div className="text-xl">{pace.icon}</div>
+                            <div className="text-sm font-semibold">{pace.label}</div>
+                            <div className="text-xs text-slate-500">{paceBadges[pace.value]}</div>
+                          </button>
+                        ))}
                       </div>
                     </div>
-                    <div className="mb-4"><label className="text-sm font-medium block mb-2 text-gray-700">Budget Range</label>
-                      <div className="flex flex-wrap gap-2">{BUDGETS.map(b => <button key={b} onClick={() => updateForm('budget', b)} className={`px-4 py-2 rounded-full text-sm border-2 bg-white text-gray-800 ${form.budget === b ? 'border-amber-500 bg-amber-50' : 'border-gray-200 hover:border-amber-300'}`}>{b}</button>)}</div>
+
+                    <div className="mb-6">
+                      <label className="text-sm font-medium text-slate-600 mb-2 block">Preferred destinations</label>
+                      <Textarea
+                        value={form.preferredDestinations}
+                        onChange={(e) => updateForm('preferredDestinations', e.target.value)}
+                        placeholder="Ex: Tea Country, Yala, Galle Fort..."
+                        className="rounded-xl"
+                      />
                     </div>
-                    <div className="flex justify-between"><Button variant="outline" className="bg-white" onClick={() => setStep(1)}><ArrowLeft className="w-4 h-4 mr-2" />Back</Button><Button className="bg-amber-500 hover:bg-amber-600 text-white" onClick={() => setStep(3)}>Next <ArrowRight className="w-4 h-4 ml-2" /></Button></div>
+
+                    <div className="mb-6">
+                      <label className="text-sm font-medium text-slate-600 mb-2 block">Meal preferences</label>
+                      <div className="flex flex-wrap gap-3">
+                        {MEAL_OPTIONS.map((option) => (
+                          <label
+                            key={option}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm cursor-pointer ${
+                              form.mealPreferences.includes(option)
+                                ? 'border-amber-500 bg-amber-50 text-amber-600'
+                                : 'border-slate-200 text-slate-600'
+                            }`}
+                          >
+                            <Checkbox checked={form.mealPreferences.includes(option)} onCheckedChange={() => toggleMeal(option)} />
+                            {option}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    {pageContent?.formConfig?.customQuestions?.length > 0 && (
+                      <div className="space-y-4 mb-6">
+                        {pageContent.formConfig.customQuestions.map((question) => (
+                          <div key={question.id}>
+                            <label className="text-sm font-medium text-slate-600 mb-1 block">
+                              {question.question}
+                              {question.required && <span className="text-amber-500 ml-1">*</span>}
+                            </label>
+                            {question.type === 'textarea' && (
+                              <Textarea value={(customAnswers[question.id] as string) || ''} onChange={(e) => handleCustomQuestionChange(question.id, e.target.value)} className="rounded-xl" />
+                            )}
+                            {question.type === 'text' && (
+                              <Input value={(customAnswers[question.id] as string) || ''} onChange={(e) => handleCustomQuestionChange(question.id, e.target.value)} className="rounded-xl" />
+                            )}
+                            {question.type === 'select' && (
+                              <Select value={(customAnswers[question.id] as string) || ''} onValueChange={(value) => handleCustomQuestionChange(question.id, value)}>
+                                <SelectTrigger className="rounded-xl"><SelectValue placeholder="Choose" /></SelectTrigger>
+                                <SelectContent>
+                                  {question.options?.map((option) => (
+                                    <SelectItem key={option} value={option}>{option}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="flex justify-between mt-8">
+                      <Button variant="outline" onClick={() => goToStep(1)}>
+                        <ArrowLeft className="w-4 h-4 mr-2" /> Back
+                      </Button>
+                      <Button onClick={() => goToStep(3)} className="bg-amber-500 hover:bg-amber-600">
+                        Continue <ArrowRight className="w-4 h-4 ml-2" />
+                      </Button>
+                    </div>
                   </motion.div>
                 )}
 
                 {step === 3 && (
-                  <motion.div key="s3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                    <h3 className="text-xl font-bold mb-4 text-gray-800">Interests & Requests</h3>
-                    <div className="mb-4"><label className="text-sm font-medium block mb-2 text-gray-700">What interests you? (select all)</label>
-                      <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
-                        {INTERESTS.map(i => <button key={i.id} onClick={() => toggleInterest(i.id)} className={`p-2 rounded-lg text-sm border-2 bg-white text-gray-800 ${form.interests.includes(i.id) ? 'border-amber-500 bg-amber-50' : 'border-gray-200 hover:border-amber-300'}`}><span className="text-lg">{i.icon}</span><div className="text-xs mt-1">{i.label}</div></button>)}
+                  <motion.div
+                    key="step3"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                  >
+                    <h4 className="text-xl font-semibold mb-6 text-slate-800">Review & share details</h4>
+                    <div className="grid md:grid-cols-[2fr_1fr] gap-6">
+                      <div className="space-y-4">
+                        <div>
+                          <label className="text-sm font-medium text-slate-600 mb-1 block">Is this trip celebrating something?</label>
+                          <Input value={form.celebration} onChange={(e) => updateForm('celebration', e.target.value)} placeholder="Anniversary, honeymoon, milestone..." className="rounded-xl" />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-slate-600 mb-1 block">Special requests</label>
+                          <Textarea value={form.specialRequests} onChange={(e) => updateForm('specialRequests', e.target.value)} rows={4} placeholder="Tell us about dream experiences, must-eat dishes, or things to avoid." className="rounded-xl" />
+                        </div>
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-sm font-medium text-slate-600 mb-1 block">Been to Sri Lanka before?</label>
+                            <Select value={form.previousVisits ? 'yes' : 'no'} onValueChange={(value) => updateForm('previousVisits', value === 'yes')}>
+                              <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="no">Not yet</SelectItem>
+                                <SelectItem value="yes">Yes, returning</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium text-slate-600 mb-1 block">Mobility or medical notes</label>
+                            <Input value={form.mobility} onChange={(e) => updateForm('mobility', e.target.value)} placeholder="Wheelchair access, allergies..." className="rounded-xl" />
+                          </div>
+                        </div>
                       </div>
+
+                      <Card className="border border-amber-100 bg-amber-50/80">
+                        <CardContent className="p-4 space-y-3">
+                          <div className="flex items-center gap-2 text-amber-700 font-semibold">
+                            <Sparkles className="w-4 h-4" />
+                            Trip snapshot
+                          </div>
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between"><span className="text-slate-500">Group</span><span className="font-medium">{summary.group}</span></div>
+                            <div className="flex justify-between"><span className="text-slate-500">Budget</span><span className="font-medium">{summary.budget}</span></div>
+                            <div className="flex justify-between"><span className="text-slate-500">Pace</span><span className="font-medium capitalize">{summary.pace}</span></div>
+                            <div className="flex justify-between"><span className="text-slate-500">Style</span><span className="font-medium capitalize">{summary.style}</span></div>
+                            <div>
+                              <div className="text-slate-500 mb-1">Interests</div>
+                              <div className="flex flex-wrap gap-1">
+                                {summary.interests.length > 0 ? summary.interests.map((interest) => <Badge key={interest} variant="outline" className="text-xs">{interest}</Badge>) : <span className="text-slate-400">We'll suggest ideas</span>}
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
                     </div>
-                    <div className="mb-4"><label className="text-sm font-medium block mb-1 text-gray-700">Must-see places?</label><Input value={form.mustSee} onChange={e => updateForm('mustSee', e.target.value)} placeholder="Sigiriya, Yala, Galle..." className="h-11 bg-white" /></div>
-                    <div className="mb-6"><label className="text-sm font-medium block mb-1 text-gray-700">Special Requests</label><Textarea value={form.specialRequests} onChange={e => updateForm('specialRequests', e.target.value)} placeholder="Celebrations, dietary needs, accessibility..." rows={3} className="bg-white" /></div>
-                    <div className="flex justify-between">
-                      <Button variant="outline" className="bg-white" onClick={() => setStep(2)}><ArrowLeft className="w-4 h-4 mr-2" />Back</Button>
-                      <Button className="bg-amber-500 hover:bg-amber-600 text-white" onClick={handleSubmit} disabled={submitting}>
-                        {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Sending...</> : <><Send className="w-4 h-4 mr-2" />Submit Request</>}
+
+                    <div className="flex justify-between mt-8">
+                      <Button variant="outline" onClick={() => goToStep(2)}>
+                        <ArrowLeft className="w-4 h-4 mr-2" /> Back
+                      </Button>
+                      <Button onClick={handleSubmit} disabled={submitting} className="bg-amber-500 hover:bg-amber-600 px-8">
+                        {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Submit request <ArrowRight className="w-4 h-4 ml-2" /></>}
                       </Button>
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
+
+              {submitted && (
+                <div className="mt-8 rounded-2xl border border-green-200 bg-green-50 p-6 space-y-3">
+                  <div className="flex items-center gap-3 text-green-700">
+                    <CheckCircle className="w-5 h-5" />
+                    <div>
+                      <p className="font-semibold">We're on it!</p>
+                      <p className="text-sm text-green-600">Reference ID <strong>{bookingRef}</strong>. Your concierge will WhatsApp or email soon.</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-3">
+                    <Button variant="outline" onClick={() => window.open(booking.whatsapp, '_blank')}>
+                      <MessageCircle className="w-4 h-4 mr-2" />WhatsApp Concierge
+                    </Button>
+                    <Button variant="outline" onClick={() => window.open(`mailto:${booking.email}`)}>
+                      <Mail className="w-4 h-4 mr-2" />Email Concierge
+                    </Button>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
       </section>
 
-      {/* CONTACT CTA */}
-      <section className="py-12 px-4 bg-amber-500">
-        <div className="container mx-auto max-w-4xl text-center text-white">
-          <h2 className="text-2xl font-bold mb-2">Prefer to Talk?</h2>
-          <p className="mb-6 text-amber-100">Our experts are available 24/7</p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Button size="lg" className="bg-white text-amber-600 hover:bg-amber-50" onClick={() => window.open('https://wa.me/94777721999', '_blank')}><MessageCircle className="w-5 h-5 mr-2" />WhatsApp</Button>
-            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10 bg-transparent"><Phone className="w-5 h-5 mr-2" />+94 777 721 999</Button>
+      {/* Testimonials */}
+      <section className="bg-white py-16">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="mb-10 text-center">
+            <p className="text-xs uppercase tracking-[0.4em] text-slate-500">Guest Stories</p>
+            <h3 className="text-3xl font-semibold text-slate-900">Recently designed journeys</h3>
+          </div>
+          <div className="grid gap-6 md:grid-cols-3">
+            {testimonials.map((testimonial) => (
+              <Card key={testimonial.id} className="border-0 shadow">
+                <CardContent className="p-6 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <img src={testimonial.avatar} alt={testimonial.name} className="w-12 h-12 rounded-full object-cover" />
+                    <div>
+                      <div className="font-semibold">{testimonial.name}</div>
+                      <div className="text-sm text-slate-500">{testimonial.location}</div>
+                    </div>
+                    <div className="ml-auto flex text-amber-500">
+                      {Array.from({ length: testimonial.rating }).map((_, idx) => (
+                        <Star key={idx} className="w-4 h-4 fill-current" />
+                      ))}
+                    </div>
+                  </div>
+                  {testimonial.tripType && <Badge variant="outline" className="text-xs">{testimonial.tripType}</Badge>}
+                  <p className="text-slate-600">{testimonial.text}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Concierge contact */}
+      <section className="bg-slate-950 px-4 py-12 text-white">
+        <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-3">
+          <a
+            href={booking.whatsapp}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex flex-col items-center rounded-3xl border border-white/10 bg-white/5 p-6 text-center transition hover:border-amber-300/60 hover:bg-white/10"
+          >
+            <svg className="h-9 w-9 text-amber-400" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347" />
+              <path d="M11.999 2c-5.511 0-10 4.489-10 10 0 1.77.465 3.494 1.347 5.009L2 22l5.154-1.349A10 10 0 1 0 12 2Zm0 18c-1.64 0-3.228-.438-4.626-1.267l-.33-.195-3.053.8.82-2.991-.199-.316A7.98 7.98 0 0 1 4 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8Z" />
+            </svg>
+            <p className="mt-4 text-sm uppercase tracking-[0.3em] text-amber-200/80">WhatsApp</p>
+            <p className="mt-2 text-lg font-semibold">{booking.contactPhone}</p>
+            <p className="text-sm text-slate-300">Tap to open concierge chat</p>
+          </a>
+          <div className="flex flex-col items-center rounded-3xl border border-white/10 bg-white/5 p-6 text-center">
+            <Mail className="h-9 w-9 text-amber-300" />
+            <p className="mt-4 text-sm uppercase tracking-[0.3em] text-amber-200/80">Email</p>
+            <p className="mt-2 text-lg font-semibold">{booking.email}</p>
+            <p className="text-sm text-slate-300">{booking.responseTime}</p>
+          </div>
+          <div className="flex flex-col items-center rounded-3xl border border-white/10 bg-white/5 p-6 text-center">
+            <Phone className="h-9 w-9 text-orange-300" />
+            <p className="mt-4 text-sm uppercase tracking-[0.3em] text-orange-200/80">Hotline</p>
+            <p className="mt-2 text-lg font-semibold">{booking.contactPhone}</p>
+            <p className="text-sm text-slate-300">Global support 6 AM – 10 PM (GMT+5:30)</p>
           </div>
         </div>
       </section>
 
       <Footer />
-    </div>
+    </>
   );
 };
 

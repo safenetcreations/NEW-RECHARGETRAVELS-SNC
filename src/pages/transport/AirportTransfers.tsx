@@ -62,6 +62,7 @@ import {
   notifyAdminWhatsApp,
   sendBookingConfirmation,
 } from '@/services/bookingConfirmationService';
+import { Link } from 'react-router-dom';
 
 // Icon mapping for extras
 const extraIconMap: { [key: string]: React.ElementType } = {
@@ -83,6 +84,12 @@ const BOOKING_STEPS = [
   { id: 4, key: 'extras', label: 'Extras', icon: Sparkles },
   { id: 5, key: 'details', label: 'Details', icon: User },
   { id: 6, key: 'payment', label: 'Payment', icon: CreditCard },
+];
+
+const relatedTransport = [
+  { title: 'Transport Hub', href: '/transport' },
+  { title: 'Private Tours', href: '/transport/private-tours' },
+  { title: 'Group Transport', href: '/transport/group-transport' }
 ];
 
 const AirportTransfers = () => {
@@ -484,7 +491,9 @@ const AirportTransfers = () => {
             try {
               const time = new Date(arrivalTime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
               setPickupTime(time);
-            } catch (e) {}
+            } catch (e) {
+              console.error('Unable to parse arrival time', e);
+            }
           }
         }
         setFlightSearchLoading(false);
@@ -670,6 +679,27 @@ const AirportTransfers = () => {
       </Helmet>
 
       <Header />
+
+      <div className="bg-white border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <div className="text-sm text-slate-700 flex items-center gap-2">
+            <Link to="/transport" className="text-emerald-700 font-semibold hover:text-emerald-800">Transport</Link>
+            <span aria-hidden>›</span>
+            <span className="font-semibold text-slate-900">Airport Transfers</span>
+          </div>
+          <div className="flex flex-wrap gap-3 text-xs">
+            {relatedTransport.map(link => (
+              <Link
+                key={link.href}
+                to={link.href}
+                className="rounded-full border border-slate-200 bg-white px-3 py-1 font-semibold text-slate-700 hover:border-emerald-400 hover:text-emerald-700 transition"
+              >
+                {link.title}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
 
       {/* Main Container with Green Gradient Background */}
       <div

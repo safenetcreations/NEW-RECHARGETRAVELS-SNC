@@ -119,6 +119,31 @@ export default function Blog() {
         {/* Hero Section - Latest Blog Post */}
         <BlogHero />
 
+        {/* Pillar shortcuts for context */}
+        <section className="bg-muted/40 py-6 border-b border-border/60">
+          <div className="container mx-auto px-4">
+            <p className="text-xs uppercase tracking-[0.25em] font-semibold text-muted-foreground mb-3">Explore Pillars</p>
+            <div className="flex flex-wrap gap-3 text-sm">
+              {[
+                { title: 'Tours', href: '/tours' },
+                { title: 'Destinations', href: '/destinations' },
+                { title: 'Experiences', href: '/experiences' },
+                { title: 'Transport', href: '/transport' },
+                { title: 'Family Activities', href: '/family-activities' },
+                { title: 'Scenic Sri Lanka', href: '/scenic' }
+              ].map(link => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 font-semibold text-foreground hover:border-primary hover:text-primary transition"
+                >
+                  {link.title}
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* Categories Filter */}
         {categories && categories.length > 0 && (
           <BlogCategories

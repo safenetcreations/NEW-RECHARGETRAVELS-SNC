@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import DestinationMap from '@/components/destinations/DestinationMap';
+import WeatherWidget from '@/components/destinations/WeatherWidget';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Waves, 
@@ -41,10 +44,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import EnhancedBookingModal from '@/components/EnhancedBookingModal';
 import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { toast } from 'sonner';
+import { MessageCircle } from 'lucide-react';
 
 interface HeroSlide {
   id: string;
@@ -133,24 +136,11 @@ interface MirissaContent {
 const defaultContent: MirissaContent = {
   hero: {
     slides: [
-      {
-        id: '1',
-        image: "https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?auto=format&fit=crop&q=80",
-        title: "Welcome to Mirissa",
-        subtitle: "Sri Lanka's Whale Watching Paradise"
-      },
-      {
-        id: '2',
-        image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&q=80",
-        title: "Pristine Beaches",
-        subtitle: "Golden Sands and Turquoise Waters"
-      },
-      {
-        id: '3',
-        image: "https://images.unsplash.com/photo-1562113775-74db0a3219e5?auto=format&fit=crop&q=80",
-        title: "Tropical Paradise",
-        subtitle: "Where Ocean Meets Serenity"
-      }
+      { id: '1', image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80", title: "Discover Mirissa", subtitle: "Tropical Beach Paradise" },
+      { id: '2', image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&q=80", title: "Mirissa Beach", subtitle: "Perfect Crescent Bay" },
+      { id: '3', image: "https://images.unsplash.com/photo-1559827291-72ee739d0d9a?auto=format&fit=crop&q=80", title: "Whale Watching", subtitle: "Blue Whale Capital of the World" },
+      { id: '4', image: "https://images.unsplash.com/photo-1583212292454-1fe6229603b7?auto=format&fit=crop&q=80", title: "Coconut Tree Hill", subtitle: "Instagram-Famous Viewpoint" },
+      { id: '5', image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&q=80", title: "Secret Beach", subtitle: "Hidden Cove Paradise" }
     ],
     title: "Mirissa",
     subtitle: "Discover Sri Lanka's Coastal Gem"
@@ -420,11 +410,13 @@ const defaultContent: MirissaContent = {
   ]
 };
 
+const MIRISSA_CENTER = { lat: 5.9485, lng: 80.4718 };
+
 const Mirissa = () => {
+  const navigate = useNavigate();
   const [content, setContent] = useState<MirissaContent>(defaultContent);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedTab, setSelectedTab] = useState('attractions');
-  const [showBookingModal, setShowBookingModal] = useState(false);
   const [selectedService, setSelectedService] = useState<string>('');
   const [galleryIndex, setGalleryIndex] = useState(0);
 
@@ -486,21 +478,61 @@ const Mirissa = () => {
     { id: 'activities', label: 'Activities', count: content.activities.length },
     { id: 'itineraries', label: 'Tours', count: content.itineraries.length },
     { id: 'travel-tips', label: 'Travel Tips', count: content.travelTips.length },
-    { id: 'faqs', label: 'FAQs', count: content.faqs.length }
+    { id: 'faqs', label: 'FAQs', count: content.faqs.length },
+    { id: 'map', label: 'Map' }
   ];
 
-  const handleBooking = (service: string) => {
-    setSelectedService(service);
-    setShowBookingModal(true);
+  const handleBooking = (service?: string) => {
+    navigate('/book-tour', { state: { preSelectedService: service } });
   };
 
+  const mirissaAttractions = [
+    { name: 'Mirissa Beach', lat: 5.9485, lng: 80.4718 },
+    { name: 'Parrot Rock', lat: 5.9475, lng: 80.4725 },
+    { name: 'Coconut Tree Hill', lat: 5.9500, lng: 80.4730 },
+    { name: 'Secret Beach', lat: 5.9465, lng: 80.4710 },
+    { name: 'Whale Watching Point', lat: 5.9400, lng: 80.4650 },
+    { name: 'Weligama Bay', lat: 5.9730, lng: 80.4290 }
+  ];
+
   // JSON-LD Structured Data for SEO
+  const canonicalUrl = "https://www.rechargetravels.com/destinations/mirissa";
+
+  const parsePrice = (price: string) => {
+    const match = price.match(/[\d.]+/);
+    if (!match) return null;
+    const value = parseFloat(match[0]);
+    return Number.isFinite(value) ? value : null;
+  };
+
+  const offerEntries = [...content.activities, ...content.itineraries]
+    .map(({ name, price }) => {
+      const parsedPrice = parsePrice(price);
+      if (parsedPrice === null) return null;
+      return {
+        "@type": "Offer",
+        "name": name,
+        "price": parsedPrice,
+        "priceCurrency": "USD",
+        "availability": "https://schema.org/InStock",
+        "url": canonicalUrl
+      };
+    })
+    .filter((offer): offer is { "@type": string; name: string; price: number; priceCurrency: string; availability: string; url: string } => Boolean(offer));
+
   const structuredData = {
     "@context": "https://schema.org",
-    "@type": "TouristDestination",
+    "@type": ["Product", "TouristDestination"],
     "name": "Mirissa, Sri Lanka",
     "description": content.overview.description,
+    "url": canonicalUrl,
     "image": content.hero.slides.map(slide => slide.image),
+    "brand": {
+      "@type": "Organization",
+      "name": "Recharge Travels",
+      "url": "https://www.rechargetravels.com",
+      "logo": "https://www.rechargetravels.com/logo-v2.png"
+    },
     "touristType": ["Beach Tourism", "Whale Watching", "Marine Life"],
     "geo": {
       "@type": "GeoCoordinates",
@@ -509,15 +541,12 @@ const Mirissa = () => {
     },
     "aggregateRating": {
       "@type": "AggregateRating",
-      "ratingValue": "4.8",
-      "reviewCount": "2451"
+      "ratingValue": 4.8,
+      "reviewCount": 2451,
+      "bestRating": 5,
+      "worstRating": 1
     },
-    "offers": content.activities.map(activity => ({
-      "@type": "Offer",
-      "name": activity.name,
-      "price": activity.price,
-      "priceCurrency": "USD"
-    }))
+    "offers": offerEntries.length ? offerEntries : undefined
   };
 
   return (
@@ -531,7 +560,7 @@ const Mirissa = () => {
         <meta property="og:title" content={content.seo.title} />
         <meta property="og:description" content={content.seo.description} />
         <meta property="og:image" content={content.hero.slides[0].image} />
-        <meta property="og:url" content="https://recharge-travels-73e76.web.app/destinations/mirissa" />
+        <meta property="og:url" content={canonicalUrl} />
         <meta property="og:type" content="website" />
         
         {/* Twitter Card Tags */}
@@ -541,7 +570,7 @@ const Mirissa = () => {
         <meta name="twitter:image" content={content.hero.slides[0].image} />
         
         {/* Canonical URL */}
-        <link rel="canonical" href="https://recharge-travels-73e76.web.app/destinations/mirissa" />
+        <link rel="canonical" href={canonicalUrl} />
         
         {/* JSON-LD Structured Data */}
         <script type="application/ld+json">
@@ -553,7 +582,7 @@ const Mirissa = () => {
       
       <main className="min-h-screen bg-background">
         {/* Hero Section with Video/Image Slideshow */}
-        <section className="relative h-[80vh] overflow-hidden" aria-label="Hero">
+        <section className="relative aspect-video max-h-[80vh] overflow-hidden" aria-label="Hero">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentSlide}
@@ -951,6 +980,41 @@ const Mirissa = () => {
                 </div>
               </motion.section>
             )}
+
+            {/* Map Tab */}
+            {selectedTab === 'map' && (
+              <motion.section
+                key="map"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                aria-label="Map and Weather"
+              >
+                <h3 className="text-3xl font-bold mb-8 text-center">Explore Mirissa</h3>
+                <div className="grid lg:grid-cols-3 gap-8">
+                  <div className="lg:col-span-2">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <MapPin className="w-5 h-5 text-blue-600" />
+                          Interactive Map
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <DestinationMap
+                          center={MIRISSA_CENTER}
+                          attractions={mirissaAttractions}
+                          zoom={13}
+                        />
+                      </CardContent>
+                    </Card>
+                  </div>
+                  <div>
+                    <WeatherWidget destination="Mirissa" />
+                  </div>
+                </div>
+              </motion.section>
+            )}
           </AnimatePresence>
         </div>
 
@@ -1085,22 +1149,22 @@ const Mirissa = () => {
               From whale watching adventures to pristine beaches, let us help you create unforgettable memories in Mirissa
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 className="bg-white text-blue-600 hover:bg-gray-100"
                 onClick={() => handleBooking('Mirissa Complete Package')}
               >
                 <Phone className="w-5 h-5 mr-2" />
                 Book Your Trip
               </Button>
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 variant="outline"
                 className="bg-transparent text-white border-white hover:bg-white/20"
-                onClick={() => window.location.href = 'mailto:info@rechargetravels.com?subject=Mirissa Inquiry'}
+                onClick={() => window.open(`https://wa.me/94701139996?text=${encodeURIComponent('Hi, I am interested in a Mirissa tour. Can you provide more details?')}`, '_blank')}
               >
-                <Mail className="w-5 h-5 mr-2" />
-                Contact Us
+                <MessageCircle className="w-5 h-5 mr-2" />
+                WhatsApp Us
               </Button>
             </div>
           </div>
@@ -1109,13 +1173,6 @@ const Mirissa = () => {
       </main>
 
       <Footer />
-
-      {/* Enhanced Booking Modal */}
-      <EnhancedBookingModal
-        isOpen={showBookingModal}
-        onClose={() => setShowBookingModal(false)}
-        preSelectedService={selectedService}
-      />
     </>
   );
 };

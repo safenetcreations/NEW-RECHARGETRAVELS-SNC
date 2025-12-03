@@ -1,6 +1,7 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import type { BlogPost } from '@/hooks/useBlog';
+import { buildBrand, getBaseUrl } from '@/utils/seoSchemaHelpers';
 
 interface BlogSEOProps {
   post?: BlogPost | null;
@@ -19,9 +20,8 @@ const BlogSEO: React.FC<BlogSEOProps> = ({
   url = 'https://www.rechargetravels.com/blog',
   type = 'website'
 }) => {
-  const baseUrl = typeof window !== 'undefined'
-    ? window.location.origin
-    : 'https://recharge-travels-73e76.web.app';
+  const baseUrl = getBaseUrl();
+  const brand = buildBrand(baseUrl);
   const getAuthorName = (author: BlogPost['author'] | undefined) => {
     if (!author) return 'Recharge Travels';
     if (typeof author === 'string') return author;
@@ -49,14 +49,7 @@ const BlogSEO: React.FC<BlogSEOProps> = ({
       '@type': 'Person',
       name: getAuthorName(post.author)
     },
-    publisher: {
-      '@type': 'Organization',
-      name: 'Recharge Travels',
-      logo: {
-        '@type': 'ImageObject',
-        url: `${baseUrl}/logo-v2.png`
-      }
-    },
+    publisher: brand,
     datePublished: post.published_at || post.created_at,
     dateModified: post.updated_at || post.created_at,
     mainEntityOfPage: {
@@ -72,14 +65,7 @@ const BlogSEO: React.FC<BlogSEOProps> = ({
     name: 'Recharge Travels Blog',
     description: description,
     url: url,
-    publisher: {
-      '@type': 'Organization',
-      name: 'Recharge Travels',
-      logo: {
-        '@type': 'ImageObject',
-        url: `${baseUrl}/logo-v2.png`
-      }
-    }
+    publisher: brand
   } : null;
 
   // Breadcrumb schema

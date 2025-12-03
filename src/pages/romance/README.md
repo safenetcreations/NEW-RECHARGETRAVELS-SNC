@@ -3,7 +3,7 @@
 ## Overview
 A comprehensive, conversion-focused landing page that combines both honeymoon packages and destination wedding services for Recharge Travels Sri Lanka.
 
-**Live URL**: https://recharge-travels-73e76.web.app/romance/honeymoons-weddings
+**Live URL**: https://www.rechargetravels.com/romance/honeymoons-weddings
 
 ## Features
 
@@ -131,7 +131,7 @@ All content is stored in `seed-honeymoons-weddings.json`. Edit this file to upda
    ```
 
 3. **Verify**
-   Visit: https://recharge-travels-73e76.web.app/romance/honeymoons-weddings
+   Visit: https://www.rechargetravels.com/romance/honeymoons-weddings
 
 ## Performance Tips
 

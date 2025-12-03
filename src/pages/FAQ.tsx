@@ -4,6 +4,12 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { HelpCircle, ChevronDown, ChevronUp, Search, Car, Plane, Train, Shield, DollarSign, Sun, Phone, FileText, Globe, Heart } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import {
+  COMPANY,
+  createBreadcrumbSchema,
+  createSpeakableSchema,
+  createHowToSchema
+} from '@/utils/schemaMarkup';
 
 interface FAQItem {
     question: string;
@@ -1173,8 +1179,145 @@ const FAQ: React.FC = () => {
                                     "@type": "Answer",
                                     "text": "Police: 119 | Ambulance/Fire: 110 | Tourist Police: 011-242-1052 | IGP WhatsApp: +94 77 222 3456 | General Emergency: 1990"
                                 }
+                            },
+                            {
+                                "@type": "Question",
+                                "name": "How much does a Sri Lanka tour cost?",
+                                "acceptedAnswer": {
+                                    "@type": "Answer",
+                                    "text": "Sri Lanka tours range from $50-200 per day. Budget tours start around $50-80/day, mid-range $100-150/day, luxury $200-500/day. A typical 7-day tour costs $500-2000 including accommodation, transport, and activities."
+                                }
+                            },
+                            {
+                                "@type": "Question",
+                                "name": "What vaccinations do I need for Sri Lanka?",
+                                "acceptedAnswer": {
+                                    "@type": "Answer",
+                                    "text": "No mandatory vaccinations for most travelers. Recommended: Hepatitis A, Typhoid, Tetanus-Diphtheria. Consider Hepatitis B, Japanese Encephalitis, Rabies for extended stays. Malaria prophylaxis isn't usually needed for tourist areas."
+                                }
+                            },
+                            {
+                                "@type": "Question",
+                                "name": "Can I see leopards in Sri Lanka?",
+                                "acceptedAnswer": {
+                                    "@type": "Answer",
+                                    "text": "Yes! Yala National Park has the highest leopard density in the world. Best time: February-July during dry season. Morning and late afternoon safaris offer best sighting chances. Book with experienced guides for 90%+ sighting success."
+                                }
+                            },
+                            {
+                                "@type": "Question",
+                                "name": "Is tap water safe to drink in Sri Lanka?",
+                                "acceptedAnswer": {
+                                    "@type": "Answer",
+                                    "text": "No, don't drink tap water. Buy bottled water (available everywhere, LKR 50-100). Most hotels provide free drinking water. Use bottled water for brushing teeth. Ice in tourist establishments is usually safe."
+                                }
+                            },
+                            {
+                                "@type": "Question",
+                                "name": "What should I wear to visit temples in Sri Lanka?",
+                                "acceptedAnswer": {
+                                    "@type": "Answer",
+                                    "text": "Cover shoulders and knees, remove shoes and hats. White clothing is traditional for temples. Avoid shorts, sleeveless tops, and revealing clothing. Sarongs/coverups available for rent at major temples. Photography restrictions apply at some sites."
+                                }
+                            },
+                            {
+                                "@type": "Question",
+                                "name": "How do I get from Colombo Airport to Kandy?",
+                                "acceptedAnswer": {
+                                    "@type": "Answer",
+                                    "text": "Options: 1) Private transfer (3-4 hours, $65-80) - most comfortable. 2) Express train from Colombo Fort (3.5 hours, $5-15). 3) Bus from Colombo central (4 hours, $3). Pre-book transfer for hassle-free arrival."
+                                }
+                            },
+                            {
+                                "@type": "Question",
+                                "name": "What is the Ella train journey?",
+                                "acceptedAnswer": {
+                                    "@type": "Answer",
+                                    "text": "The Kandy to Ella train is rated one of the world's most scenic rail journeys. 7-hour ride through tea plantations, waterfalls, and mountains. Book observation deck seats 30 days ahead. Second class offers best views at reasonable price."
+                                }
+                            },
+                            {
+                                "@type": "Question",
+                                "name": "Can I use credit cards in Sri Lanka?",
+                                "acceptedAnswer": {
+                                    "@type": "Answer",
+                                    "text": "Major cards (Visa, Mastercard) accepted at hotels, restaurants, and large shops in tourist areas. Always carry cash for smaller vendors, local markets, and rural areas. ATMs widely available (limit ~LKR 40,000/transaction)."
+                                }
+                            },
+                            {
+                                "@type": "Question",
+                                "name": "What plug type does Sri Lanka use?",
+                                "acceptedAnswer": {
+                                    "@type": "Answer",
+                                    "text": "Sri Lanka uses Type D (India) and Type G (UK) plugs. Voltage is 230V/50Hz. Bring a universal adapter. Most hotels provide multiple socket types. USB charging ports increasingly common in newer hotels."
+                                }
                             }
                         ]
+                    })}
+                </script>
+
+                {/* Breadcrumb Schema */}
+                <script type="application/ld+json">
+                    {JSON.stringify(createBreadcrumbSchema([
+                        { name: 'Home', url: COMPANY.url },
+                        { name: 'FAQ', url: `${COMPANY.url}/faq` }
+                    ]))}
+                </script>
+
+                {/* HowTo Schema: Getting a Visa */}
+                <script type="application/ld+json">
+                    {JSON.stringify(createHowToSchema(
+                        'How to Get a Sri Lanka Visa (ETA)',
+                        'Step-by-step guide to applying for the Sri Lanka Electronic Travel Authorization',
+                        [
+                            { name: 'Visit Official ETA Website', text: 'Go to www.eta.gov.lk or download the official Sri Lanka ETA app. Ensure you use the official government site to avoid scams.' },
+                            { name: 'Fill Application Form', text: 'Enter your passport details, travel dates, Sri Lanka address (hotel name is fine), and contact information. Double-check all spellings match your passport exactly.' },
+                            { name: 'Pay ETA Fee', text: 'Pay the $50 USD fee (most nationalities) using credit/debit card. Processing fee may apply. Keep payment confirmation.' },
+                            { name: 'Receive ETA Approval', text: 'Approval typically comes via email within 24-48 hours. Download and print your ETA approval letter.' },
+                            { name: 'Present at Immigration', text: 'Show your printed ETA approval, passport, and return ticket at Sri Lanka immigration. Visa is stamped for 30 days, extendable to 6 months.' }
+                        ],
+                        { totalTime: 'PT15M', estimatedCost: { value: 50, currency: 'USD' } }
+                    ))}
+                </script>
+
+                {/* HowTo Schema: Booking a Safari */}
+                <script type="application/ld+json">
+                    {JSON.stringify(createHowToSchema(
+                        'How to Book a Wildlife Safari in Sri Lanka',
+                        'Complete guide to planning and booking your Sri Lanka safari experience',
+                        [
+                            { name: 'Choose Your Park', text: 'Yala for leopards, Udawalawe for elephants, Wilpattu for variety, Minneriya for elephant gatherings (Aug-Oct). Each park offers unique wildlife experiences.' },
+                            { name: 'Select Safari Time', text: 'Morning safaris (5:30-11:00 AM) offer best wildlife activity and cooler temperatures. Afternoon safaris (2:30-6:30 PM) good for predator sightings.' },
+                            { name: 'Book with Licensed Operator', text: 'Choose SLTDA-licensed operators like Recharge Travels. Verify their license, read reviews, and confirm pricing includes park fees, jeep, and guide.' },
+                            { name: 'Prepare for Safari', text: 'Bring binoculars, camera with zoom lens, sunscreen, hat, and neutral-colored clothing. Wake early and have breakfast after morning safari.' },
+                            { name: 'Enjoy Responsibly', text: 'Follow guide instructions, maintain silence near animals, never feed wildlife, and stay in the vehicle. Respect the environment for future visitors.' }
+                        ],
+                        { totalTime: 'PT10M', estimatedCost: { value: 85, currency: 'USD' } }
+                    ))}
+                </script>
+
+                {/* Speakable Schema for Voice Search */}
+                <script type="application/ld+json">
+                    {JSON.stringify(createSpeakableSchema(
+                        `${COMPANY.url}/faq`,
+                        ['h1', '.faq-question', '.faq-answer', '.category-description']
+                    ))}
+                </script>
+
+                {/* Organization Schema */}
+                <script type="application/ld+json">
+                    {JSON.stringify({
+                        "@context": "https://schema.org",
+                        "@type": "TravelAgency",
+                        "name": COMPANY.name,
+                        "url": COMPANY.url,
+                        "telephone": COMPANY.phone,
+                        "email": COMPANY.email,
+                        "aggregateRating": {
+                            "@type": "AggregateRating",
+                            "ratingValue": COMPANY.rating.value,
+                            "reviewCount": COMPANY.rating.count
+                        }
                     })}
                 </script>
             </Helmet>

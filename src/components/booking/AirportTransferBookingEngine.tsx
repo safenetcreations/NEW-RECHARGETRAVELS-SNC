@@ -364,7 +364,9 @@ const AirportTransferBookingEngine: React.FC<AirportTransferBookingEngineProps> 
             try {
               const time = new Date(arrivalTime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
               setPickupTime(time);
-            } catch (e) {}
+            } catch (e) {
+              console.error('Unable to parse arrival time', e);
+            }
           }
         }
         setFlightSearchLoading(false);
@@ -802,28 +804,32 @@ const AirportTransferBookingEngine: React.FC<AirportTransferBookingEngineProps> 
                 {/* Date & Time */}
                 <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div>
-                    <Label className="text-sm font-semibold text-slate-600 mb-2 block">Pickup Date</Label>
+                    <Label htmlFor="pickup-date" className="text-sm font-semibold text-slate-600 mb-2 block">Pickup Date</Label>
                     <div className="relative">
-                      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-sky-600" />
+                      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-sky-600 pointer-events-none" />
                       <Input
+                        id="pickup-date"
                         type="date"
                         value={pickupDate}
                         onChange={(e) => setPickupDate(e.target.value)}
                         min={getMinDate()}
+                        aria-label="Select pickup date"
                         className="pl-10 py-3 h-14 bg-white border-2 border-sky-200 focus:border-sky-600 focus:ring-2 focus:ring-sky-100 rounded-xl text-slate-800 font-medium"
                       />
                     </div>
                   </div>
                   <div>
-                    <Label className="text-sm font-semibold text-slate-600 mb-2 block">
+                    <Label htmlFor="pickup-time" className="text-sm font-semibold text-slate-600 mb-2 block">
                       {transferType === 'arrival' ? 'Flight Arrival Time' : 'Pickup Time'}
                     </Label>
                     <div className="relative">
-                      <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-sky-600" />
+                      <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-sky-600 pointer-events-none" />
                       <Input
+                        id="pickup-time"
                         type="time"
                         value={pickupTime}
                         onChange={(e) => setPickupTime(e.target.value)}
+                        aria-label="Select pickup time"
                         className="pl-10 py-3 h-14 bg-white border-2 border-sky-200 focus:border-sky-600 focus:ring-2 focus:ring-sky-100 rounded-xl text-slate-800 font-medium"
                       />
                     </div>
@@ -831,12 +837,12 @@ const AirportTransferBookingEngine: React.FC<AirportTransferBookingEngineProps> 
                   {transferType === 'round-trip' && (
                     <>
                       <div>
-                        <Label className="text-sm font-semibold text-slate-600 mb-2 block">Return Date</Label>
-                        <Input type="date" value={returnDate} onChange={(e) => setReturnDate(e.target.value)} min={pickupDate || getMinDate()} className="py-3 h-14 bg-white border-2 border-sky-200 focus:border-sky-600 focus:ring-2 focus:ring-sky-100 rounded-xl text-slate-800 font-medium" />
+                        <Label htmlFor="return-date" className="text-sm font-semibold text-slate-600 mb-2 block">Return Date</Label>
+                        <Input id="return-date" type="date" value={returnDate} onChange={(e) => setReturnDate(e.target.value)} min={pickupDate || getMinDate()} aria-label="Select return date" className="py-3 h-14 bg-white border-2 border-sky-200 focus:border-sky-600 focus:ring-2 focus:ring-sky-100 rounded-xl text-slate-800 font-medium" />
                       </div>
                       <div>
-                        <Label className="text-sm font-semibold text-slate-600 mb-2 block">Return Time</Label>
-                        <Input type="time" value={returnTime} onChange={(e) => setReturnTime(e.target.value)} className="py-3 h-14 bg-white border-2 border-sky-200 focus:border-sky-600 focus:ring-2 focus:ring-sky-100 rounded-xl text-slate-800 font-medium" />
+                        <Label htmlFor="return-time" className="text-sm font-semibold text-slate-600 mb-2 block">Return Time</Label>
+                        <Input id="return-time" type="time" value={returnTime} onChange={(e) => setReturnTime(e.target.value)} aria-label="Select return time" className="py-3 h-14 bg-white border-2 border-sky-200 focus:border-sky-600 focus:ring-2 focus:ring-sky-100 rounded-xl text-slate-800 font-medium" />
                       </div>
                     </>
                   )}
@@ -855,9 +861,9 @@ const AirportTransferBookingEngine: React.FC<AirportTransferBookingEngineProps> 
                         <Icon className="w-4 h-4 text-sky-600" /> {label}
                       </Label>
                       <div className="flex items-center justify-between">
-                        <button type="button" onClick={() => setValue((prev: number) => Math.max(min, prev - 1))} className="w-9 h-9 rounded-full bg-white border-2 border-sky-600 text-sky-700 font-bold hover:bg-sky-100 transition-colors">-</button>
-                        <span className="text-lg font-bold text-slate-800">{value}</span>
-                        <button type="button" onClick={() => setValue((prev: number) => prev + 1)} className="w-9 h-9 rounded-full bg-white border-2 border-sky-600 text-sky-700 font-bold hover:bg-sky-100 transition-colors">+</button>
+                        <button type="button" onClick={() => setValue((prev: number) => Math.max(min, prev - 1))} aria-label={`Decrease ${label.toLowerCase()}`} className="w-9 h-9 rounded-full bg-white border-2 border-sky-600 text-sky-700 font-bold hover:bg-sky-100 transition-colors">-</button>
+                        <span className="text-lg font-bold text-slate-800" aria-live="polite">{value}</span>
+                        <button type="button" onClick={() => setValue((prev: number) => prev + 1)} aria-label={`Increase ${label.toLowerCase()}`} className="w-9 h-9 rounded-full bg-white border-2 border-sky-600 text-sky-700 font-bold hover:bg-sky-100 transition-colors">+</button>
                       </div>
                     </div>
                   ))}

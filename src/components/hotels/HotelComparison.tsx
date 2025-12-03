@@ -124,7 +124,7 @@ const HotelComparison: React.FC<HotelComparisonProps> = ({
 
   if (hotels.length === 0) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm flex items-center justify-center z-50">
         <Card className="w-full max-w-md mx-4">
           <CardContent className="p-6 text-center">
             <h3 className="text-lg font-semibold mb-2">No Hotels to Compare</h3>
@@ -143,7 +143,7 @@ const HotelComparison: React.FC<HotelComparisonProps> = ({
         <meta name="description" content="Compare hotels side by side to find the perfect accommodation for your Sri Lankan journey." />
       </Helmet>
 
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-lg w-full max-w-7xl max-h-[90vh] overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b">

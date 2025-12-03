@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { motion, AnimatePresence } from 'framer-motion';
+import DestinationMap from '@/components/destinations/DestinationMap';
+import WeatherWidget from '@/components/destinations/WeatherWidget';
 import { 
   Waves, 
   Sun, 
@@ -29,8 +32,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import EnhancedBookingModal from '@/components/EnhancedBookingModal';
 import { getDestinationBySlug } from '@/services/destinationContentService';
+
+const ARUGAM_BAY_CENTER = { lat: 6.8389, lng: 81.8300 };
 
 interface HeroSlide {
   image: string;
@@ -101,27 +105,17 @@ interface CTASection {
 }
 
 const ArugamBay = () => {
+  const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedTab, setSelectedTab] = useState('attractions');
-  const [showBookingModal, setShowBookingModal] = useState(false);
   const [selectedAttraction, setSelectedAttraction] = useState<string>('');
 
   const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([
-    {
-      image: "https://images.unsplash.com/photo-1502680390469-be75c86b636f?auto=format&fit=crop&q=80",
-      title: "Welcome to Arugam Bay",
-      subtitle: "Sri Lanka's Premier Surfing Paradise"
-    },
-    {
-      image: "https://images.unsplash.com/photo-1502933691298-84fc14542831?auto=format&fit=crop&q=80",
-      title: "World-Class Waves",
-      subtitle: "International Surfing Destination"
-    },
-    {
-      image: "https://images.unsplash.com/photo-1527004760551-13e8a5e0e6c4?auto=format&fit=crop&q=80",
-      title: "Tropical Beach Paradise",
-      subtitle: "Endless Summer Vibes"
-    }
+    { image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80", title: "Discover Arugam Bay", subtitle: "Surfing Capital of Sri Lanka" },
+    { image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&q=80", title: "Perfect Waves", subtitle: "World-Class Surf Breaks" },
+    { image: "https://images.unsplash.com/photo-1559827291-72ee739d0d9a?auto=format&fit=crop&q=80", title: "Main Point", subtitle: "Legendary Right-Hand Break" },
+    { image: "https://images.unsplash.com/photo-1583212292454-1fe6229603b7?auto=format&fit=crop&q=80", title: "Beach Life", subtitle: "Laid-Back Coastal Vibes" },
+    { image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&q=80", title: "Kumana National Park", subtitle: "Wildlife Near the Waves" }
   ]);
 
   const [attractions, setAttractions] = useState<Attraction[]>([
@@ -433,6 +427,18 @@ const ArugamBay = () => {
     loadContent();
   }, []);
 
+  const handleBooking = (service: string = 'Arugam Bay Tour', tourData?: { id: string; name: string; description: string; duration: string; price: number; features: string[]; image?: string }) => {
+    const params = new URLSearchParams({
+      title: tourData?.name || service,
+      id: tourData?.id || service.toLowerCase().replace(/\s+/g, '-'),
+      duration: tourData?.duration || 'Full Day',
+      price: String(tourData?.price || 55),
+      image: tourData?.image || 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800',
+      subtitle: `Arugam Bay - ${tourData?.name || service}`
+    });
+    navigate(`/book-tour?${params.toString()}`);
+  };
+
   const getIconComponent = (iconName: string) => {
     const iconMap: { [key: string]: any } = {
       Waves,
@@ -455,6 +461,7 @@ const ArugamBay = () => {
     { id: 'surfing', label: 'Surf Spots', count: surfSpots.length },
     { id: 'accommodation', label: 'Stay', count: accommodations.length },
     { id: 'dining', label: 'Dining', count: restaurants.length },
+    { id: 'map', label: 'Map', count: null },
     { id: 'info', label: 'Travel Info', count: null }
   ];
 
@@ -470,7 +477,7 @@ const ArugamBay = () => {
       
       <div className="min-h-screen bg-background">
         {/* Hero Section with Slideshow */}
-        <div className="relative h-[70vh] overflow-hidden">
+        <div className="relative aspect-video max-h-[80vh] overflow-hidden">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentSlide}
@@ -513,10 +520,10 @@ const ArugamBay = () => {
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.7 }}
               >
-                <Button 
-                  size="lg" 
+                <Button
+                  size="lg"
                   className="bg-cyan-600 hover:bg-cyan-700 text-white px-8 py-6 text-lg"
-                  onClick={() => setShowBookingModal(true)}
+                  onClick={() => handleBooking('Arugam Bay Surf Adventure')}
                 >
                   Plan Your Surf Adventure
                 </Button>
@@ -633,12 +640,9 @@ const ArugamBay = () => {
                           <span>{attraction.price}</span>
                         </div>
                       </div>
-                      <Button 
+                      <Button
                         className="w-full bg-cyan-600 hover:bg-cyan-700"
-                        onClick={() => {
-                          setSelectedAttraction(attraction.name);
-                          setShowBookingModal(true);
-                        }}
+                        onClick={() => handleBooking(attraction.name)}
                       >
                         Book Now
                       </Button>
@@ -682,13 +686,10 @@ const ArugamBay = () => {
                         <span className="text-lg font-semibold text-cyan-600">{activity.price}</span>
                         <span className="text-sm text-muted-foreground">{activity.duration}</span>
                       </div>
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         className="w-full hover:bg-cyan-600 hover:text-white"
-                        onClick={() => {
-                          setSelectedAttraction(activity.name);
-                          setShowBookingModal(true);
-                        }}
+                        onClick={() => handleBooking(activity.name)}
                       >
                         Book Activity
                       </Button>
@@ -764,12 +765,9 @@ const ArugamBay = () => {
                               </Badge>
                             </div>
                           </div>
-                          <Button 
+                          <Button
                             className="mt-4 bg-cyan-600 hover:bg-cyan-700"
-                            onClick={() => {
-                              setSelectedAttraction(`Surfing at ${spot.name}`);
-                              setShowBookingModal(true);
-                            }}
+                            onClick={() => handleBooking(`Surfing at ${spot.name}`)}
                           >
                             Book Surf Session
                           </Button>
@@ -813,12 +811,9 @@ const ArugamBay = () => {
                         <div className="mt-4 md:mt-0 md:ml-8 text-right">
                           <p className="text-2xl font-bold text-cyan-600">{hotel.price}</p>
                           <p className="text-sm text-muted-foreground">per night</p>
-                          <Button 
+                          <Button
                             className="mt-4 bg-cyan-600 hover:bg-cyan-700"
-                            onClick={() => {
-                              setSelectedAttraction(hotel.name);
-                              setShowBookingModal(true);
-                            }}
+                            onClick={() => handleBooking(hotel.name)}
                           >
                             Check Availability
                           </Button>
@@ -856,6 +851,43 @@ const ArugamBay = () => {
                     </CardContent>
                   </Card>
                 ))}
+              </motion.div>
+            )}
+
+            {/* Map Tab */}
+            {selectedTab === 'map' && (
+              <motion.div
+                key="map"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+              >
+                <h2 className="text-3xl font-bold mb-8">Explore Arugam Bay Map</h2>
+                <div className="grid lg:grid-cols-3 gap-8">
+                  <div className="lg:col-span-2">
+                    <Card className="overflow-hidden h-[500px]">
+                      <DestinationMap
+                        destinationName="Arugam Bay"
+                        center={ARUGAM_BAY_CENTER}
+                        attractions={[
+                          { name: 'Main Point Surf Break', description: 'World-famous surfing spot', coordinates: { lat: 6.8389, lng: 81.8350 } },
+                          { name: 'Whiskey Point', description: 'Popular beginner surf spot', coordinates: { lat: 6.8600, lng: 81.8450 } },
+                          { name: 'Pottuvil Lagoon', description: 'Scenic lagoon for kayaking', coordinates: { lat: 6.8700, lng: 81.8200 } },
+                          { name: 'Elephant Rock', description: 'Rock formation and beach', coordinates: { lat: 6.8200, lng: 81.8400 } },
+                          { name: 'Kudumbigala Monastery', description: 'Ancient forest monastery', coordinates: { lat: 6.7500, lng: 81.7800 } }
+                        ]}
+                        height="500px"
+                      />
+                    </Card>
+                  </div>
+                  <div className="lg:col-span-1">
+                    <WeatherWidget
+                      locationName="Arugam Bay"
+                      latitude={ARUGAM_BAY_CENTER.lat}
+                      longitude={ARUGAM_BAY_CENTER.lng}
+                    />
+                  </div>
+                </div>
               </motion.div>
             )}
 
@@ -978,10 +1010,10 @@ const ArugamBay = () => {
             <p className="text-xl mb-8 max-w-2xl mx-auto">
               {ctaSection.subtitle}
             </p>
-            <Button 
-              size="lg" 
+            <Button
+              size="lg"
               className="bg-white text-cyan-600 hover:bg-gray-100"
-              onClick={() => setShowBookingModal(true)}
+              onClick={() => handleBooking('Arugam Bay Surf Trip')}
             >
               {ctaSection.buttonText}
             </Button>
@@ -991,12 +1023,18 @@ const ArugamBay = () => {
 
       <Footer />
 
-      {/* Enhanced Booking Modal */}
-      <EnhancedBookingModal
-        isOpen={showBookingModal}
-        onClose={() => setShowBookingModal(false)}
-        preSelectedService={selectedAttraction}
-      />
+      {/* WhatsApp Floating Button */}
+      <a
+        href="https://wa.me/94777721999?text=Hi! I'm interested in booking an Arugam Bay tour."
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 z-50 bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-lg transition-all hover:scale-110"
+        aria-label="Contact via WhatsApp"
+      >
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+      </a>
     </>
   );
 };

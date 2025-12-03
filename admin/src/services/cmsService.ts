@@ -59,8 +59,14 @@ const DEFAULT_FEATURED_DESTINATIONS: FeaturedDestinationFormData[] = [
     category: 'UNESCO Heritage',
     description:
       'Ancient rock fortress rising 200m above jungle. UNESCO World Heritage site.',
-    image:
-      'https://images.unsplash.com/photo-1586523969943-2d62a1a7d4d3?w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1586523969943-2d62a1a7d4d3?w=1920&q=80',
+    images: [
+      { url: 'https://images.unsplash.com/photo-1586523969943-2d62a1a7d4d3?w=1920&q=80', title: 'Discover Sigiriya', subtitle: 'Ancient Rock Fortress' },
+      { url: 'https://images.unsplash.com/photo-1588598198321-9735fd52045b?w=1920&q=80', title: 'Lion Gate Entrance', subtitle: 'Gateway to History' },
+      { url: 'https://images.unsplash.com/photo-1624461682949-18e7f54a0c74?w=1920&q=80', title: 'Ancient Frescoes', subtitle: 'Cloud Maidens Art' },
+      { url: 'https://images.unsplash.com/photo-1546587348-d12660c30c50?w=1920&q=80', title: 'Mirror Wall', subtitle: 'Ancient Graffiti Gallery' },
+      { url: 'https://images.unsplash.com/photo-1580181046391-e7e83f206c62?w=1920&q=80', title: 'Summit Views', subtitle: 'Panoramic Jungle Vistas' },
+    ],
     price: 150,
     currency: 'USD',
     duration: 'Full Day Trip',
@@ -78,8 +84,14 @@ const DEFAULT_FEATURED_DESTINATIONS: FeaturedDestinationFormData[] = [
     title: 'Hill Country Paradise',
     category: 'Hill Country',
     description: 'Misty mountain town famous for Nine Arch Bridge and hiking trails.',
-    image:
-      'https://images.unsplash.com/photo-1566296314736-6eaac1ca0cb9?w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1566296314736-6eaac1ca0cb9?w=1920&q=80',
+    images: [
+      { url: 'https://images.unsplash.com/photo-1566296314736-6eaac1ca0cb9?w=1920&q=80', title: 'Welcome to Ella', subtitle: 'Hill Country Paradise' },
+      { url: 'https://images.unsplash.com/photo-1590123853629-82e97e3d5291?w=1920&q=80', title: 'Nine Arch Bridge', subtitle: 'Iconic Railway Wonder' },
+      { url: 'https://images.unsplash.com/photo-1571536802807-30451e3f3d43?w=1920&q=80', title: 'Tea Plantations', subtitle: 'Emerald Green Hills' },
+      { url: 'https://images.unsplash.com/photo-1546587348-d12660c30c50?w=1920&q=80', title: 'Ella Rock Summit', subtitle: 'Breathtaking Views' },
+      { url: 'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=1920&q=80', title: 'Scenic Train Journey', subtitle: 'Most Beautiful Ride' },
+    ],
     price: 180,
     currency: 'USD',
     duration: '2 Days / 1 Night',
@@ -87,7 +99,7 @@ const DEFAULT_FEATURED_DESTINATIONS: FeaturedDestinationFormData[] = [
     features: ['Nine Arch Bridge', 'Ella Rock', 'Tea Trails'],
     link: '/destinations/ella',
     bestTimeToVisit: 'February to April',
-    popularActivities: ['Scenic train ride', 'Ella Rock hike', 'Little Adam’s Peak'],
+    popularActivities: ['Scenic train ride', 'Ella Rock hike', 'Little Adam\'s Peak'],
     isActive: true,
     isFeatured: true,
     order: 2,
@@ -97,8 +109,14 @@ const DEFAULT_FEATURED_DESTINATIONS: FeaturedDestinationFormData[] = [
     title: 'Temple of Sacred Tooth',
     category: 'Cultural Heritage',
     description: "Cultural capital housing Buddha's sacred tooth relic.",
-    image:
-      'https://images.unsplash.com/photo-1580181046391-e7e83f206c62?w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1580181046391-e7e83f206c62?w=1920&q=80',
+    images: [
+      { url: 'https://images.unsplash.com/photo-1580181046391-e7e83f206c62?w=1920&q=80', title: 'Discover Kandy', subtitle: 'Cultural Capital of Sri Lanka' },
+      { url: 'https://images.unsplash.com/photo-1588598198321-9735fd52045b?w=1920&q=80', title: 'Temple of Tooth', subtitle: 'Sacred Buddhist Relic' },
+      { url: 'https://images.unsplash.com/photo-1546587348-d12660c30c50?w=1920&q=80', title: 'Kandy Lake', subtitle: 'Serene Waters' },
+      { url: 'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=1920&q=80', title: 'Traditional Dance', subtitle: 'Cultural Performance' },
+      { url: 'https://images.unsplash.com/photo-1571536802807-30451e3f3d43?w=1920&q=80', title: 'Royal Palace', subtitle: 'Historic Architecture' },
+    ],
     price: 130,
     currency: 'USD',
     duration: 'Full Day Trip',
@@ -116,8 +134,14 @@ const DEFAULT_FEATURED_DESTINATIONS: FeaturedDestinationFormData[] = [
     title: 'Dutch Colonial Fort',
     category: 'Colonial Heritage',
     description: 'Historic fort city with colonial architecture and ocean views.',
-    image:
-      'https://images.unsplash.com/photo-1588598198321-9735fd52045b?w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1588598198321-9735fd52045b?w=1920&q=80',
+    images: [
+      { url: 'https://images.unsplash.com/photo-1588598198321-9735fd52045b?w=1920&q=80', title: 'Galle Fort', subtitle: 'UNESCO World Heritage Site' },
+      { url: 'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=1920&q=80', title: 'Historic Lighthouse', subtitle: 'Iconic Landmark' },
+      { url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=80', title: 'Ocean Views', subtitle: 'Stunning Coastline' },
+      { url: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=1920&q=80', title: 'Colonial Streets', subtitle: 'Dutch Architecture' },
+      { url: 'https://images.unsplash.com/photo-1580181046391-e7e83f206c62?w=1920&q=80', title: 'Sunset Magic', subtitle: 'Golden Hour Views' },
+    ],
     price: 140,
     currency: 'USD',
     duration: 'Full Day Trip',
@@ -136,8 +160,14 @@ const DEFAULT_FEATURED_DESTINATIONS: FeaturedDestinationFormData[] = [
     category: 'Beach & Wildlife',
     description:
       "Pristine beach paradise and world's best blue whale destination.",
-    image:
-      'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=80',
+    images: [
+      { url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=80', title: 'Mirissa Beach', subtitle: 'Tropical Paradise' },
+      { url: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=1920&q=80', title: 'Blue Whale Watching', subtitle: 'Marine Giants' },
+      { url: 'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=1920&q=80', title: 'Coconut Tree Hill', subtitle: 'Instagram Famous' },
+      { url: 'https://images.unsplash.com/photo-1588598198321-9735fd52045b?w=1920&q=80', title: 'Surfing Paradise', subtitle: 'Ride the Waves' },
+      { url: 'https://images.unsplash.com/photo-1580181046391-e7e83f206c62?w=1920&q=80', title: 'Beach Sunset', subtitle: 'Golden Evenings' },
+    ],
     price: 160,
     currency: 'USD',
     duration: 'Full Day Trip',
@@ -155,8 +185,14 @@ const DEFAULT_FEATURED_DESTINATIONS: FeaturedDestinationFormData[] = [
     title: 'Leopard Kingdom',
     category: 'Wildlife Safari',
     description: "World's highest leopard density. Iconic safari destination.",
-    image:
-      'https://images.unsplash.com/photo-1549366021-9f761d450615?w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1549366021-9f761d450615?w=1920&q=80',
+    images: [
+      { url: 'https://images.unsplash.com/photo-1549366021-9f761d450615?w=1920&q=80', title: 'Yala National Park', subtitle: 'Wildlife Sanctuary' },
+      { url: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=1920&q=80', title: 'Sri Lankan Leopard', subtitle: 'Highest Density in World' },
+      { url: 'https://images.unsplash.com/photo-1516426122078-c23e76319801?w=1920&q=80', title: 'Wild Elephants', subtitle: 'Gentle Giants' },
+      { url: 'https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=1920&q=80', title: 'Safari Adventure', subtitle: 'Jeep Expedition' },
+      { url: 'https://images.unsplash.com/photo-1546587348-d12660c30c50?w=1920&q=80', title: 'Bird Watching', subtitle: 'Over 200 Species' },
+    ],
     price: 220,
     currency: 'USD',
     duration: 'Full Day Safari',
@@ -787,13 +823,11 @@ export const homepageStatsService = {
 export const featuredDestinationsService = {
   async getAll(): Promise<FeaturedDestination[]> {
     try {
-      const q = query(
-        collection(db, 'featuredDestinations'),
-        where('isActive', '==', true),
-        orderBy('order', 'asc')
-      );
-      const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FeaturedDestination));
+      // For admin panel, get all destinations (including inactive) and sort client-side
+      const snapshot = await getDocs(collection(db, 'featuredDestinations'));
+      const destinations = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FeaturedDestination));
+      // Sort by order field
+      return destinations.sort((a, b) => (a.order || 0) - (b.order || 0));
     } catch (error) {
       console.error('Error fetching featured destinations:', error);
       throw error;
@@ -887,6 +921,46 @@ export const featuredDestinationsService = {
       return { success: true, data: created };
     } catch (error) {
       console.error('Error importing default featured destinations:', error);
+      return { success: false, error: (error as Error).message };
+    }
+  },
+
+  async clearAll(): Promise<CMSResponse<void>> {
+    try {
+      const snapshot = await getDocs(collection(db, 'featuredDestinations'));
+      const deletePromises = snapshot.docs.map(docSnap => deleteDoc(docSnap.ref));
+      await Promise.all(deletePromises);
+      return { success: true };
+    } catch (error) {
+      console.error('Error clearing featured destinations:', error);
+      return { success: false, error: (error as Error).message };
+    }
+  },
+
+  async clearAndImport(): Promise<CMSResponse<FeaturedDestination[]>> {
+    try {
+      // First clear all existing destinations
+      const snapshot = await getDocs(collection(db, 'featuredDestinations'));
+      const deletePromises = snapshot.docs.map(docSnap => deleteDoc(docSnap.ref));
+      await Promise.all(deletePromises);
+
+      // Now import defaults
+      const created: FeaturedDestination[] = [];
+      const timestamp = Timestamp.now();
+
+      for (const dest of DEFAULT_FEATURED_DESTINATIONS) {
+        const data = {
+          ...dest,
+          createdAt: timestamp,
+          updatedAt: timestamp,
+        };
+        const docRef = await addDoc(collection(db, 'featuredDestinations'), data);
+        created.push({ id: docRef.id, ...data } as FeaturedDestination);
+      }
+
+      return { success: true, data: created };
+    } catch (error) {
+      console.error('Error clearing and importing featured destinations:', error);
       return { success: false, error: (error as Error).message };
     }
   },

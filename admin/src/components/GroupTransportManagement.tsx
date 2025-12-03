@@ -98,23 +98,27 @@ const GroupTransportManagement = () => {
         setLoading(true);
         try {
             switch (activeTab) {
-                case 'hero':
+                case 'hero': {
                     const heroData = await groupTransportHeroService.getAll();
                     setHeroSlides(heroData);
                     break;
-                case 'vehicles':
+                }
+                case 'vehicles': {
                     const vehiclesData = await groupTransportVehiclesService.getAll();
                     setVehicles(vehiclesData);
                     break;
-                case 'features':
+                }
+                case 'features': {
                     const featuresData = await groupTransportFeaturesService.getAll();
                     setFeatures(featuresData);
                     break;
-                case 'benefits':
+                }
+                case 'benefits': {
                     const benefitsData = await groupTransportBenefitsService.getAll();
                     setBenefits(benefitsData);
                     break;
-                case 'settings':
+                }
+                case 'settings': {
                     const settingsData = await groupTransportSettingsService.getActive();
                     if (settingsData) {
                         setSettings(settingsData);
@@ -125,6 +129,7 @@ const GroupTransportManagement = () => {
                         });
                     }
                     break;
+                }
             }
         } catch (error) {
             console.error('Error loading data:', error);

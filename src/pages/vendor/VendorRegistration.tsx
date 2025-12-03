@@ -1372,186 +1372,172 @@ Book with confidence - we're committed to providing unforgettable experiences in
     const progress = (currentStep / steps.length) * 100;
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-orange-50/30 to-gray-50">
+        <div className="min-h-screen bg-white">
             <Helmet>
                 <title>Become a Partner - Recharge Travels Vendor Registration</title>
                 <meta name="description" content="Join Recharge Travels as a vendor partner. Register your hotel, tour service, or activity and reach thousands of international tourists. Easy registration, fast payments!" />
                 <meta name="keywords" content="sri lanka tourism partner, travel vendor registration, tour operator sign up, hotel registration sri lanka, become a vendor" />
             </Helmet>
 
-            {/* Header */}
-            <header className="bg-white border-b sticky top-0 z-50 shadow-sm">
-                <div className="container mx-auto px-4 py-3">
+            {/* Clean Header */}
+            <header className="bg-white border-b border-slate-100 sticky top-0 z-50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <div className="flex items-center justify-between">
-                        <a href="/" className="flex items-center gap-2">
-                            <img src="/logo-v2.png" alt="Recharge Travels" className="h-8 w-auto" />
-                            <div className="hidden sm:flex flex-col">
-                                <span className="text-sm font-semibold text-gray-900 leading-tight">Vendor Partner</span>
-                                <span className="text-xs text-orange-600 leading-tight">Registration</span>
+                        <a href="/" className="flex items-center gap-3">
+                            <img src="/logo-v2.png" alt="Recharge Travels" className="h-10 w-auto" />
+                            <div className="hidden sm:block">
+                                <span className="text-lg font-semibold text-slate-900">Vendor Registration</span>
                             </div>
                         </a>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-6">
                             <a
                                 href="https://wa.me/94777721999"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex items-center gap-2 text-sm text-green-600 hover:text-green-700"
+                                className="flex items-center gap-2 text-sm text-emerald-600 hover:text-emerald-700 font-medium"
                             >
                                 <MessageCircle className="w-4 h-4" />
                                 <span className="hidden sm:inline">Need help?</span>
                             </a>
                             <a
                                 href="/login"
-                                className="text-sm text-gray-600 hover:text-orange-600"
+                                className="text-sm text-slate-600 hover:text-amber-600 font-medium"
                             >
-                                Already registered? Login
+                                Already registered? <span className="text-amber-600">Login</span>
                             </a>
                         </div>
                     </div>
                 </div>
             </header>
 
-            <div className="container mx-auto px-4 py-8 max-w-6xl">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                    {/* Sidebar - Steps */}
-                    <div className="lg:col-span-3">
-                        <Card className="sticky top-24">
-                            <CardContent className="p-4">
-                                <div className="mb-4">
-                                    <div className="flex justify-between text-sm mb-1">
-                                        <span className="text-gray-600">Progress</span>
-                                        <span className="font-medium text-orange-600">{Math.round(progress)}%</span>
-                                    </div>
-                                    <Progress value={progress} className="h-2" />
-                                </div>
-                                <nav className="space-y-1">
-                                    {steps.map((step) => {
-                                        const Icon = step.icon;
-                                        const isActive = step.id === currentStep;
-                                        const isCompleted = step.id < currentStep;
-                                        const isClickable = step.id <= currentStep;
-
-                                        return (
-                                            <button
-                                                key={step.id}
-                                                onClick={() => isClickable && goToStep(step.id)}
-                                                disabled={!isClickable}
-                                                className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all ${
-                                                    isActive
-                                                        ? 'bg-orange-50 text-orange-700'
-                                                        : isCompleted
-                                                            ? 'text-gray-900 hover:bg-gray-50'
-                                                            : 'text-gray-400 cursor-not-allowed'
-                                                }`}
-                                            >
-                                                <div className={`flex-shrink-0 mr-3 w-8 h-8 flex items-center justify-center rounded-lg ${
-                                                    isActive
-                                                        ? 'bg-orange-500 text-white'
-                                                        : isCompleted
-                                                            ? 'bg-green-100 text-green-600'
-                                                            : 'bg-gray-100 text-gray-400'
-                                                }`}>
-                                                    {isCompleted ? (
-                                                        <CheckCircle className="w-4 h-4" />
-                                                    ) : (
-                                                        <Icon className="w-4 h-4" />
-                                                    )}
-                                                </div>
-                                                <span className="truncate">{step.title}</span>
-                                            </button>
-                                        );
-                                    })}
-                                </nav>
-                            </CardContent>
-                        </Card>
+            {/* Progress Bar - Full Width */}
+            <div className="bg-slate-50 border-b border-slate-100">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                    <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-slate-700">Step {currentStep} of {steps.length}</span>
+                        <span className="text-sm font-semibold text-amber-600">{Math.round(progress)}% Complete</span>
                     </div>
-
-                    {/* Main Form Area */}
-                    <div className="lg:col-span-9">
-                        <Card className="shadow-xl border-0 overflow-hidden">
-                            <div className="h-2 bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400" />
-                            <CardHeader className="pb-2">
-                                <div className="flex items-center gap-3">
-                                    {(() => {
-                                        const StepIcon = steps[currentStep - 1].icon;
-                                        return (
-                                            <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
-                                                <StepIcon className="w-6 h-6 text-orange-600" />
-                                            </div>
-                                        );
-                                    })()}
-                                    <div>
-                                        <CardTitle className="text-xl">{steps[currentStep - 1].title}</CardTitle>
-                                        <CardDescription>{steps[currentStep - 1].description}</CardDescription>
+                    <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                        <motion.div 
+                            className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${progress}%` }}
+                            transition={{ duration: 0.3 }}
+                        />
+                    </div>
+                    {/* Step indicators */}
+                    <div className="hidden md:flex items-center justify-between mt-3">
+                        {steps.map((step) => {
+                            const Icon = step.icon;
+                            const isActive = step.id === currentStep;
+                            const isCompleted = step.id < currentStep;
+                            return (
+                                <button
+                                    key={step.id}
+                                    onClick={() => step.id <= currentStep && goToStep(step.id)}
+                                    disabled={step.id > currentStep}
+                                    className={`flex items-center gap-1.5 text-xs font-medium transition-colors ${
+                                        isActive ? 'text-amber-600' : isCompleted ? 'text-emerald-600' : 'text-slate-400'
+                                    } ${step.id <= currentStep ? 'cursor-pointer hover:text-amber-600' : 'cursor-not-allowed'}`}
+                                >
+                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                                        isActive ? 'bg-amber-100 text-amber-600' : isCompleted ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400'
+                                    }`}>
+                                        {isCompleted ? <CheckCircle className="w-3.5 h-3.5" /> : <Icon className="w-3.5 h-3.5" />}
                                     </div>
+                                    <span className="hidden lg:inline">{step.title}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            </div>
+
+            {/* Main Content - Clean Full Width */}
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {/* Step Header */}
+                <div className="mb-8">
+                    <div className="flex items-center gap-4 mb-2">
+                        {(() => {
+                            const StepIcon = steps[currentStep - 1].icon;
+                            return (
+                                <div className="w-14 h-14 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl flex items-center justify-center">
+                                    <StepIcon className="w-7 h-7 text-amber-600" />
                                 </div>
-                            </CardHeader>
-
-                            <CardContent className="pt-6 min-h-[450px]">
-                                <AnimatePresence mode="wait">
-                                    <motion.div
-                                        key={currentStep}
-                                        initial={{ opacity: 0, x: 20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        exit={{ opacity: 0, x: -20 }}
-                                        transition={{ duration: 0.2 }}
-                                    >
-                                        {renderStepContent()}
-                                    </motion.div>
-                                </AnimatePresence>
-                            </CardContent>
-
-                            <CardFooter className="bg-gray-50 px-6 py-4 flex justify-between">
-                                <Button
-                                    variant="outline"
-                                    onClick={prevStep}
-                                    disabled={currentStep === 1}
-                                    className="gap-2"
-                                >
-                                    <ChevronLeft className="w-4 h-4" />
-                                    Previous
-                                </Button>
-
-                                <Button
-                                    onClick={nextStep}
-                                    disabled={isSubmitting || (currentStep === steps.length && !agreedToTerms)}
-                                    className="gap-2 bg-orange-500 hover:bg-orange-600"
-                                >
-                                    {isSubmitting ? (
-                                        <>
-                                            <Loader2 className="w-4 h-4 animate-spin" />
-                                            Submitting...
-                                        </>
-                                    ) : currentStep === steps.length ? (
-                                        <>
-                                            <Send className="w-4 h-4" />
-                                            Submit Application
-                                        </>
-                                    ) : (
-                                        <>
-                                            Continue
-                                            <ChevronRight className="w-4 h-4" />
-                                        </>
-                                    )}
-                                </Button>
-                            </CardFooter>
-                        </Card>
-
-                        {/* Help Section */}
-                        <div className="mt-6 text-center">
-                            <p className="text-gray-600 text-sm">
-                                Need help? Contact us at{' '}
-                                <a href="mailto:info@rechargetravels.com" className="text-orange-600 hover:underline">
-                                    info@rechargetravels.com
-                                </a>
-                                {' '}or{' '}
-                                <a href="https://wa.me/94777721999" className="text-green-600 hover:underline inline-flex items-center gap-1">
-                                    <MessageCircle className="w-4 h-4" />
-                                    WhatsApp +94 77 772 1999
-                                </a>
-                            </p>
+                            );
+                        })()}
+                        <div>
+                            <h1 className="text-2xl font-bold text-slate-900">{steps[currentStep - 1].title}</h1>
+                            <p className="text-slate-500">{steps[currentStep - 1].description}</p>
                         </div>
                     </div>
+                </div>
+
+                {/* Form Content */}
+                <div className="bg-white">
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={currentStep}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.2 }}
+                            className="min-h-[400px]"
+                        >
+                            {renderStepContent()}
+                        </motion.div>
+                    </AnimatePresence>
+                </div>
+
+                {/* Navigation Buttons */}
+                <div className="flex justify-between items-center mt-10 pt-6 border-t border-slate-100">
+                    <Button
+                        variant="outline"
+                        onClick={prevStep}
+                        disabled={currentStep === 1}
+                        className="gap-2 h-12 px-6 border-slate-200 hover:bg-slate-50"
+                    >
+                        <ChevronLeft className="w-4 h-4" />
+                        Previous
+                    </Button>
+
+                    <Button
+                        onClick={nextStep}
+                        disabled={isSubmitting || (currentStep === steps.length && !agreedToTerms)}
+                        className="gap-2 h-12 px-8 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-orange-500/25"
+                    >
+                        {isSubmitting ? (
+                            <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                Submitting...
+                            </>
+                        ) : currentStep === steps.length ? (
+                            <>
+                                <Send className="w-4 h-4" />
+                                Submit Application
+                            </>
+                        ) : (
+                            <>
+                                Continue
+                                <ChevronRight className="w-4 h-4" />
+                            </>
+                        )}
+                    </Button>
+                </div>
+
+                {/* Help Section */}
+                <div className="mt-12 text-center pb-8">
+                    <p className="text-slate-500 text-sm">
+                        Need help? Contact us at{' '}
+                        <a href="mailto:info@rechargetravels.com" className="text-amber-600 hover:underline font-medium">
+                            info@rechargetravels.com
+                        </a>
+                        {' '}or{' '}
+                        <a href="https://wa.me/94777721999" className="text-emerald-600 hover:underline inline-flex items-center gap-1 font-medium">
+                            <MessageCircle className="w-4 h-4" />
+                            WhatsApp
+                        </a>
+                    </p>
                 </div>
             </div>
         </div>

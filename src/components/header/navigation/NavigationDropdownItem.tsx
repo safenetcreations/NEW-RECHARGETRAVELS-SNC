@@ -24,6 +24,8 @@ interface NavigationDropdownItemProps {
   hoverColorClass?: string
   gradientClass?: string
   isScrolled?: boolean;
+  primaryHref?: string
+  primaryLabel?: string
 }
 
 const NavigationDropdownItem = ({
@@ -34,7 +36,9 @@ const NavigationDropdownItem = ({
   onMenuClick,
   hoverColorClass = "group-hover:text-[#1abc9c]",
   gradientClass = "hover:from-emerald-50 hover:to-emerald-100 hover:border-emerald-200",
-  isScrolled = true
+  isScrolled = true,
+  primaryHref,
+  primaryLabel
 }: NavigationDropdownItemProps) => {
   const isAnimating = itemKey && animatingItem === itemKey
   const animationClass = isAnimating ? getAnimationClass(itemKey) : ''
@@ -127,6 +131,30 @@ const NavigationDropdownItem = ({
               </NavigationMenuLink>
             ))}
           </div>
+          
+          {primaryHref && primaryLabel && (
+            <div className={cn(
+              "px-5 pb-4",
+              isScrolled ? "bg-white/60 backdrop-blur-sm" : "bg-white/5"
+            )}>
+              <Link
+                to={primaryHref}
+                onClick={(e) => {
+                  e.preventDefault()
+                  handleItemClick(primaryHref)
+                }}
+                className={cn(
+                  "flex items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-300",
+                  isScrolled
+                    ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg hover:from-amber-400 hover:to-orange-400"
+                    : "bg-gradient-to-r from-amber-500/90 to-orange-500/90 text-white shadow-lg hover:from-amber-400/90 hover:to-orange-400/90"
+                )}
+              >
+                <span>{primaryLabel}</span>
+                <span aria-hidden className="opacity-80">→</span>
+              </Link>
+            </div>
+          )}
           
           {/* Wild Theme Footer Accent */}
           <div className="h-1 bg-gradient-to-r from-emerald-500 via-orange-500 to-amber-500"></div>

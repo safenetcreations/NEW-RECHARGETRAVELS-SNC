@@ -43,9 +43,14 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import EnhancedBookingModal from '@/components/EnhancedBookingModal';
+import { useNavigate } from 'react-router-dom';
+import DestinationMap from '@/components/destinations/DestinationMap';
+import WeatherWidget from '@/components/destinations/WeatherWidget';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+
+// Colombo coordinates
+const COLOMBO_CENTER = { lat: 6.9271, lng: 79.8612 };
 
 interface HeroSlide {
   id?: string;
@@ -179,19 +184,29 @@ const tipCategoryIcons: { [key: string]: any } = {
 // Default content
 const DEFAULT_HERO_SLIDES: HeroSlide[] = [
   {
-    image: "https://images.unsplash.com/photo-1577718335397-f6f60e23de14?auto=format&fit=crop&q=80",
+    image: "https://images.unsplash.com/photo-1578005343615-68e6c7efcab7?auto=format&fit=crop&q=80",
     title: "Welcome to Colombo",
-    subtitle: "Sri Lanka's Vibrant Capital City"
+    subtitle: "Sri Lanka's Vibrant Commercial Capital"
   },
   {
-    image: "https://images.unsplash.com/photo-1566296314736-6eaac1ca0cb9?auto=format&fit=crop&q=80",
-    title: "Modern Skyline Meets Heritage",
-    subtitle: "Where Past and Present Converge"
+    image: "https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&fit=crop&q=80",
+    title: "Galle Face Green",
+    subtitle: "The Heart of Coastal Colombo"
   },
   {
-    image: "https://images.unsplash.com/photo-1590165482129-1b8b27698780?auto=format&fit=crop&q=80",
-    title: "Gateway to Sri Lanka",
-    subtitle: "Your Journey Begins Here"
+    image: "https://images.unsplash.com/photo-1590123597862-1d4e0b6e9a0b?auto=format&fit=crop&q=80",
+    title: "Gangaramaya Temple",
+    subtitle: "Buddhist Heritage in the City"
+  },
+  {
+    image: "https://images.unsplash.com/photo-1606567595334-d39972c85dfd?auto=format&fit=crop&q=80",
+    title: "Modern Skyline",
+    subtitle: "Where Tradition Meets Progress"
+  },
+  {
+    image: "https://images.unsplash.com/photo-1575999502951-4ab25fb1e5b9?auto=format&fit=crop&q=80",
+    title: "Independence Square",
+    subtitle: "Historic Heart of the Nation"
   }
 ];
 
@@ -327,10 +342,9 @@ const DEFAULT_SEO: SEOInfo = {
 };
 
 const Colombo = () => {
+  const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedTab, setSelectedTab] = useState('attractions');
-  const [showBookingModal, setShowBookingModal] = useState(false);
-  const [selectedAttraction, setSelectedAttraction] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
   // Content state
@@ -414,9 +428,16 @@ const Colombo = () => {
     return () => clearInterval(timer);
   }, [heroSlides.length]);
 
-  const handleBookNow = (attractionName: string = '') => {
-    setSelectedAttraction(attractionName);
-    setShowBookingModal(true);
+  const handleBooking = (service: string = 'Colombo Tour') => {
+    const params = new URLSearchParams({
+      title: service,
+      id: service.toLowerCase().replace(/\s+/g, '-'),
+      duration: 'Full Day',
+      price: '55',
+      image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800',
+      subtitle: `Colombo - ${service}`
+    });
+    navigate(`/book-tour?${params.toString()}`);
   };
 
   // Get available tabs based on content
@@ -424,6 +445,7 @@ const Colombo = () => {
     const tabs = ['attractions', 'activities'];
     if (restaurants.length > 0) tabs.push('restaurants');
     if (hotels.length > 0) tabs.push('hotels');
+    tabs.push('map');
     tabs.push('weather');
     if (travelTips.length > 0) tabs.push('tips');
     return tabs;
@@ -446,7 +468,7 @@ const Colombo = () => {
 
       <div className="min-h-screen bg-background">
         {/* Hero Section */}
-        <section className="relative h-[80vh] overflow-hidden">
+        <section className="relative aspect-video max-h-[80vh] overflow-hidden">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentSlide}
@@ -491,7 +513,7 @@ const Colombo = () => {
                 transition={{ duration: 0.8, delay: 0.4 }}
                 className="flex gap-4 justify-center"
               >
-                <Button size="lg" onClick={() => handleBookNow()} className="bg-blue-600 hover:bg-blue-700">
+                <Button size="lg" onClick={() => handleBooking()} className="bg-blue-600 hover:bg-blue-700">
                   Book Your Experience
                 </Button>
                 <Button size="lg" variant="outline" className="bg-white/10 backdrop-blur-sm border-white text-white hover:bg-white/20">
@@ -622,7 +644,7 @@ const Colombo = () => {
 
                       <Button
                         className="w-full bg-blue-600 hover:bg-blue-700"
-                        onClick={() => handleBookNow(attraction.name)}
+                        onClick={() => handleBooking(attraction.name)}
                       >
                         Book Now
                       </Button>
@@ -658,7 +680,7 @@ const Colombo = () => {
                         <p className="text-gray-600 mb-4">{activity.description}</p>
                         <div className="flex items-center justify-between">
                           <span className="text-2xl font-bold text-blue-600">{activity.price}</span>
-                          <Button onClick={() => handleBookNow(activity.name)} className="bg-blue-600 hover:bg-blue-700">
+                          <Button onClick={() => handleBooking(activity.name)} className="bg-blue-600 hover:bg-blue-700">
                             Book Now
                           </Button>
                         </div>
@@ -794,7 +816,7 @@ const Colombo = () => {
                           </div>
                         )}
 
-                        <Button className="w-full bg-blue-600 hover:bg-blue-700" onClick={() => handleBookNow(hotel.name)}>
+                        <Button className="w-full bg-blue-600 hover:bg-blue-700" onClick={() => handleBooking(hotel.name)}>
                           Check Availability
                         </Button>
                       </CardContent>
@@ -808,6 +830,31 @@ const Colombo = () => {
                   <p className="text-gray-600">We're working on bringing you the best hotel recommendations in Colombo</p>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Map Tab */}
+          {selectedTab === 'map' && (
+            <div>
+              <h2 className="text-3xl font-bold mb-8">Explore Colombo</h2>
+              <div className="space-y-6">
+                <DestinationMap
+                  center={COLOMBO_CENTER}
+                  destinationName="Colombo"
+                  attractions={[
+                    { name: 'Galle Face Green', lat: 6.9271, lng: 79.8434 },
+                    { name: 'Gangaramaya Temple', lat: 6.9165, lng: 79.8554 },
+                    { name: 'National Museum', lat: 6.9096, lng: 79.8607 },
+                    { name: 'Viharamahadevi Park', lat: 6.9147, lng: 79.8610 },
+                    { name: 'Colombo Fort', lat: 6.9355, lng: 79.8501 },
+                    { name: 'Pettah Market', lat: 6.9387, lng: 79.8553 }
+                  ]}
+                />
+                <WeatherWidget
+                  coordinates={COLOMBO_CENTER}
+                  locationName="Colombo"
+                />
+              </div>
             </div>
           )}
 
@@ -902,7 +949,7 @@ const Colombo = () => {
               {ctaSection.subtitle}
             </p>
             <div className="flex gap-4 justify-center">
-              <Button size="lg" variant="secondary" onClick={() => handleBookNow()} className="bg-white text-blue-600 hover:bg-gray-100">
+              <Button size="lg" variant="secondary" onClick={() => handleBooking()} className="bg-white text-blue-600 hover:bg-gray-100">
                 {ctaSection.buttonText}
               </Button>
               <Button size="lg" variant="outline" className="bg-white/10 backdrop-blur-sm text-white border-white hover:bg-white/20">
@@ -913,12 +960,16 @@ const Colombo = () => {
         </section>
       </div>
 
-      {/* Booking Modal */}
-      <EnhancedBookingModal
-        isOpen={showBookingModal}
-        onClose={() => setShowBookingModal(false)}
-        preSelectedService={selectedAttraction}
-      />
+      {/* WhatsApp Float Button */}
+      <a
+        href="https://wa.me/94773724030?text=Hi!%20I'm%20interested%20in%20booking%20a%20Colombo%20tour."
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-lg transition-all hover:scale-110 z-50"
+        aria-label="Contact us on WhatsApp"
+      >
+        <MessageCircle className="w-6 h-6" />
+      </a>
 
       <Footer />
     </>

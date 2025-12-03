@@ -30,7 +30,7 @@ export const googlePlacesApiHandler = functions.https.onCall(async (data, contex
     console.log(`🔍 Google Places API ${action} request:`, params)
 
     let apiUrl = ''
-    let requestBody = {}
+    const requestBody = {}
 
     switch (action) {
       case 'autocomplete':

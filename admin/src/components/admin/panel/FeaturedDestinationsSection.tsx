@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Plus, Edit, Trash2, Search, Star, Clock, Tag, Download } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Star, Clock, Tag, Download, RefreshCw } from 'lucide-react';
 import { cmsService } from '@/services/cmsService';
 import { FeaturedDestination, FeaturedDestinationFormData } from '@/types/cms';
 import FeaturedDestinationForm from './FeaturedDestinationForm';
@@ -105,6 +105,24 @@ const FeaturedDestinationsSection: React.FC = () => {
     }
   };
 
+  const handleClearAndImport = async () => {
+    if (!confirm('This will delete ALL existing destinations and import fresh demo data. Are you sure?')) return;
+
+    try {
+      const response = await cmsService.featuredDestinations.clearAndImport();
+      if (response.success) {
+        const count = response.data?.length ?? 0;
+        toast.success(`Cleared existing data and imported ${count} demo destinations`);
+        fetchDestinations();
+      } else {
+        toast.error(response.error || 'Failed to clear and import destinations');
+      }
+    } catch (error) {
+      console.error('Error clearing and importing destinations:', error);
+      toast.error('Failed to clear and import destinations');
+    }
+  };
+
   const filteredDestinations = destinations.filter(destination => {
     const matchesSearch = (destination.name || destination.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       destination.description?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -144,14 +162,22 @@ const FeaturedDestinationsSection: React.FC = () => {
                 onClick={handleImportDefaults}
               >
                 <Download className="w-4 h-4 mr-2" />
-                Import Demo Destinations
+                Import Demo
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleClearAndImport}
+                className="border-red-300 text-red-600 hover:bg-red-50"
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Clear & Re-import
               </Button>
               <Button
                 onClick={() => setShowCreateForm(true)}
                 className="bg-orange-600 hover:bg-orange-700"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Add New Destination
+                Add New
               </Button>
             </div>
           </div>

@@ -19,7 +19,7 @@ const HotelImageGallery: React.FC<HotelImageGalleryProps> = ({
   const hasMultipleImages = images.length > 1
 
   return (
-    <div className="relative h-96 bg-gray-900">
+    <div className="relative h-96 bg-gray-100">
       <img
                         src={images[currentImageIndex] || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&h=600&fit=crop'}
         alt={hotelName}
@@ -34,7 +34,7 @@ const HotelImageGallery: React.FC<HotelImageGalleryProps> = ({
             )}
             variant="ghost"
             size="icon"
-            className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white hover:bg-opacity-70"
+            className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/90 text-gray-800 hover:bg-white shadow-md"
           >
             <ChevronLeft className="w-6 h-6" />
           </Button>
@@ -44,7 +44,7 @@ const HotelImageGallery: React.FC<HotelImageGalleryProps> = ({
             )}
             variant="ghost"
             size="icon"
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white hover:bg-opacity-70"
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/90 text-gray-800 hover:bg-white shadow-md"
           >
             <ChevronRight className="w-6 h-6" />
           </Button>
@@ -52,13 +52,13 @@ const HotelImageGallery: React.FC<HotelImageGalleryProps> = ({
       )}
       
       {hasMultipleImages && (
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 bg-white/80 px-3 py-2 rounded-full">
           {images.map((_, index) => (
             <button
               key={index}
               onClick={() => onImageIndexChange(index)}
-              className={`w-3 h-3 rounded-full ${
-                index === currentImageIndex ? 'bg-white' : 'bg-white bg-opacity-50'
+              className={`w-3 h-3 rounded-full transition-colors ${
+                index === currentImageIndex ? 'bg-blue-600' : 'bg-gray-300 hover:bg-gray-400'
               }`}
             />
           ))}

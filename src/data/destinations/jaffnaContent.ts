@@ -9,29 +9,29 @@ export const jaffnaDestinationContent: DestinationContent = {
     'Recharge Travels curates immersive journeys across Sri Lanka\'s northern peninsula—from crimson temple festivals and lagoon harvests to Delft Island\'s wild ponies. Base yourself in Jaffna City and weave through palmyrah groves, Dutch-era bastions, and coral-ringed beaches with our bilingual concierge team.',
   heroSlides: [
     {
-      image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2000&q=80',
-      title: 'Jaffna Fort Lagoon Glow',
-      subtitle: 'Golden ramparts, coral walls, and a sapphire moat at sunset'
+      image: 'https://images.unsplash.com/photo-1588598198321-39f8c2be97ba?auto=format&fit=crop&q=80',
+      title: 'Discover Jaffna',
+      subtitle: 'Cultural Capital of the North'
     },
     {
-      image: 'https://images.unsplash.com/photo-1470770903676-69b98201ea1c?auto=format&fit=crop&w=2000&q=80',
-      title: 'Nallur Festival Processions',
-      subtitle: 'Crimson-clad devotees, drummers, and a 600-year-old kovil'
+      image: 'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&fit=crop&q=80',
+      title: 'Nallur Kovil',
+      subtitle: 'Sacred Hindu Temple'
     },
     {
-      image: 'https://images.unsplash.com/photo-1526481280695-3c469d1d53b1?auto=format&fit=crop&w=2000&q=80',
-      title: 'Casuarina Beach Pastels',
-      subtitle: 'Shallow turquoise water wrapped by whispering casuarina trees'
+      image: 'https://images.unsplash.com/photo-1586613835341-78c143aef52c?auto=format&fit=crop&q=80',
+      title: 'Jaffna Fort',
+      subtitle: 'Dutch Colonial Heritage'
     },
     {
-      image: 'https://images.unsplash.com/photo-1470246973918-0296173bc064?auto=format&fit=crop&w=2000&q=80',
-      title: 'Delft Island Wild Ponies',
-      subtitle: 'Sail the Palk Strait to baobab groves and Portuguese ruins'
+      image: 'https://images.unsplash.com/photo-1571536802807-30451e3f3d43?auto=format&fit=crop&q=80',
+      title: 'Jaffna Library',
+      subtitle: 'Rebuilt Cultural Monument'
     },
     {
-      image: 'https://images.unsplash.com/photo-1483683804023-6ccdb62f86ef?auto=format&fit=crop&w=2000&q=80',
-      title: 'Lagoon Nights & Palmyrah Skies',
-      subtitle: 'Fisher lanterns, toddy taps, and velvet northern skies'
+      image: 'https://images.unsplash.com/photo-1578128178243-721cd32ce739?auto=format&fit=crop&q=80',
+      title: 'Casuarina Beach',
+      subtitle: 'Northern Coastal Paradise'
     }
   ],
   attractions: [

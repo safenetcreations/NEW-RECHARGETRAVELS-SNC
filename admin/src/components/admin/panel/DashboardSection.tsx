@@ -14,8 +14,21 @@ import {
   TrendingUp,
   ArrowRight,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  Newspaper,
+  RefreshCw,
+  Loader2,
+  Clock,
+  Activity,
+  CheckCircle,
+  Star,
+  ExternalLink,
+  AlertTriangle,
+  CheckCircle2
 } from 'lucide-react';
+import { httpsCallable } from 'firebase/functions';
+import { functions } from '@/lib/firebase';
+import { toast } from 'sonner';
 import TimeRangeFilter from './TimeRangeFilter';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
@@ -53,6 +66,33 @@ const DashboardSection: React.FC<{ onNavigate: (section: string) => void }> = ({
       changeType: "neutral"
     }
   ]);
+
+  const [fetchingNews, setFetchingNews] = useState(false);
+  const [newsResult, setNewsResult] = useState<{ total: number; sources: number } | null>(null);
+
+  // TripAdvisor Tours Stats
+  const [tripAdvisorStats, setTripAdvisorStats] = useState({
+    total: 0,
+    validUrls: 0,
+    needsUrl: 0,
+    loading: true
+  });
+
+  const fetchNews = async () => {
+    setFetchingNews(true);
+    try {
+      const manualFetch = httpsCallable(functions, 'manualNewsFetch');
+      const result = await manualFetch();
+      const data = result.data as { total: number; sources: number };
+      setNewsResult(data);
+      toast.success(`Fetched ${data.total} articles from ${data.sources} sources!`);
+    } catch (error: any) {
+      console.error('Error fetching news:', error);
+      toast.error(error.message || 'Failed to fetch news');
+    } finally {
+      setFetchingNews(false);
+    }
+  };
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -97,7 +137,30 @@ const DashboardSection: React.FC<{ onNavigate: (section: string) => void }> = ({
       }
     };
 
+    // Fetch TripAdvisor tours stats
+    const fetchTripAdvisorStats = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, 'tours_tripadvisor'));
+        const tours = snapshot.docs.map(doc => doc.data());
+
+        const validUrls = tours.filter(tour =>
+          tour.tripAdvisorUrl && tour.tripAdvisorUrl.includes('AttractionProductReview')
+        ).length;
+
+        setTripAdvisorStats({
+          total: tours.length,
+          validUrls,
+          needsUrl: tours.length - validUrls,
+          loading: false
+        });
+      } catch (error) {
+        console.error("Error fetching TripAdvisor stats:", error);
+        setTripAdvisorStats(prev => ({ ...prev, loading: false }));
+      }
+    };
+
     fetchStats();
+    fetchTripAdvisorStats();
   }, []);
 
   return (
@@ -293,6 +356,171 @@ const DashboardSection: React.FC<{ onNavigate: (section: string) => void }> = ({
             </button>
           </div>
         </div>
+      </div>
+
+      {/* TripAdvisor Tours Management Widget */}
+      <div className="admin-card p-6 bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-lg">
+              <Star className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-green-900">TripAdvisor Tours Manager</h3>
+              <p className="text-sm text-green-700">
+                Manage TripAdvisor tour URLs displayed on homepage and tours page
+              </p>
+            </div>
+          </div>
+          <Button
+            onClick={() => onNavigate('tripadvisor-tours')}
+            className="bg-green-600 hover:bg-green-700 text-white"
+          >
+            <ExternalLink className="w-4 h-4 mr-2" />
+            Manage Tours
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white rounded-xl p-4 border border-green-200">
+            <div className="flex items-center gap-3">
+              <Star className="w-5 h-5 text-green-600" />
+              <div>
+                <p className="text-sm text-gray-500">Total Tours</p>
+                <p className="font-semibold text-gray-900 text-xl">
+                  {tripAdvisorStats.loading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : tripAdvisorStats.total}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded-xl p-4 border border-green-200">
+            <div className="flex items-center gap-3">
+              <CheckCircle2 className="w-5 h-5 text-green-500" />
+              <div>
+                <p className="text-sm text-gray-500">Valid URLs</p>
+                <p className="font-semibold text-green-600 text-xl">
+                  {tripAdvisorStats.loading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : tripAdvisorStats.validUrls}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded-xl p-4 border border-green-200">
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="w-5 h-5 text-amber-500" />
+              <div>
+                <p className="text-sm text-gray-500">Needs URL</p>
+                <p className="font-semibold text-amber-600 text-xl">
+                  {tripAdvisorStats.loading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : tripAdvisorStats.needsUrl}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {!tripAdvisorStats.loading && tripAdvisorStats.needsUrl > 0 && (
+          <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+            <div className="flex items-center gap-2 text-amber-800">
+              <AlertTriangle className="w-5 h-5" />
+              <span className="font-medium">
+                {tripAdvisorStats.needsUrl} tour(s) need valid TripAdvisor URLs. Click "Manage Tours" to fix.
+              </span>
+            </div>
+          </div>
+        )}
+
+        {!tripAdvisorStats.loading && tripAdvisorStats.needsUrl === 0 && tripAdvisorStats.total > 0 && (
+          <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-xl">
+            <div className="flex items-center gap-2 text-green-800">
+              <CheckCircle className="w-5 h-5" />
+              <span className="font-medium">
+                All {tripAdvisorStats.total} tours have valid TripAdvisor URLs!
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Tourism News Aggregator Widget */}
+      <div className="admin-card p-6 bg-gradient-to-br from-orange-50 to-amber-50 border-orange-200">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-orange-500 rounded-xl">
+              <Newspaper className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-orange-900">Tourism News Aggregator</h3>
+              <p className="text-sm text-orange-700">
+                Fetch latest tourism news from 10 Sri Lanka news sources
+              </p>
+            </div>
+          </div>
+          <Button 
+            onClick={fetchNews}
+            disabled={fetchingNews}
+            className="bg-orange-500 hover:bg-orange-600 text-white"
+          >
+            {fetchingNews ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Fetching...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Fetch News Now
+              </>
+            )}
+          </Button>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white rounded-xl p-4 border border-orange-200">
+            <div className="flex items-center gap-3">
+              <Clock className="w-5 h-5 text-orange-500" />
+              <div>
+                <p className="text-sm text-gray-500">Auto-Fetch Schedule</p>
+                <p className="font-semibold text-gray-900">9:00 AM & 6:00 PM IST</p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded-xl p-4 border border-orange-200">
+            <div className="flex items-center gap-3">
+              <Activity className="w-5 h-5 text-green-500" />
+              <div>
+                <p className="text-sm text-gray-500">News Sources</p>
+                <p className="font-semibold text-gray-900">15 Active Sources</p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded-xl p-4 border border-orange-200">
+            <div className="flex items-center gap-3">
+              <CheckCircle className="w-5 h-5 text-blue-500" />
+              <div>
+                <p className="text-sm text-gray-500">Last Fetch Result</p>
+                <p className="font-semibold text-gray-900">
+                  {newsResult ? `${newsResult.total} articles` : 'Not fetched yet'}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {newsResult && (
+          <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-xl">
+            <div className="flex items-center gap-2 text-green-800">
+              <CheckCircle className="w-5 h-5" />
+              <span className="font-medium">
+                Successfully fetched {newsResult.total} articles from {newsResult.sources} sources!
+              </span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

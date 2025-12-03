@@ -1,5 +1,6 @@
 
 import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -17,7 +18,9 @@ import {
   XCircle,
   Info,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  ArrowRight,
+  Eye
 } from 'lucide-react'
 import {
   Dialog,
@@ -217,14 +220,26 @@ const TourPackageCard = ({ package: pkg, onSelect }: TourPackageCardProps) => {
 
         {/* Action Buttons */}
         <div className="flex gap-2">
+          {/* View Full Details - Link to detail page */}
+          <Link to={`/tours/wildtours/${pkg.id}`} className="flex-1">
+            <Button
+              variant="outline"
+              className="w-full font-montserrat text-sm"
+            >
+              <Eye className="w-4 h-4 mr-1" />
+              View Details
+            </Button>
+          </Link>
+
+          {/* Quick Details Dialog */}
           <Dialog>
             <DialogTrigger asChild>
               <Button
-                variant="outline"
-                className="flex-1 font-montserrat text-sm"
+                variant="ghost"
+                size="icon"
+                className="font-montserrat text-sm"
               >
-                <Info className="w-4 h-4 mr-1" />
-                Full Details
+                <Info className="w-4 h-4" />
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -389,16 +404,29 @@ const TourPackageCard = ({ package: pkg, onSelect }: TourPackageCardProps) => {
                   </div>
                 )}
 
-                {/* Book Button */}
-                <Button
-                  onClick={() => {
-                    onSelect(pkg)
-                  }}
-                  size="lg"
-                  className={`w-full ${tierColors[pkg.tier]} hover:opacity-90 text-white font-semibold text-lg py-6`}
-                >
-                  Book This Tour Now
-                </Button>
+                {/* Action Buttons in Dialog */}
+                <div className="flex gap-3">
+                  <Link to={`/tours/wildtours/${pkg.id}`} className="flex-1">
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className="w-full font-semibold text-lg py-6"
+                    >
+                      <Eye className="w-5 h-5 mr-2" />
+                      Full Tour Page
+                    </Button>
+                  </Link>
+                  <Button
+                    onClick={() => {
+                      onSelect(pkg)
+                    }}
+                    size="lg"
+                    className={`flex-[2] ${tierColors[pkg.tier]} hover:opacity-90 text-white font-semibold text-lg py-6`}
+                  >
+                    Book Now
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </Button>
+                </div>
               </div>
             </DialogContent>
           </Dialog>
@@ -407,7 +435,8 @@ const TourPackageCard = ({ package: pkg, onSelect }: TourPackageCardProps) => {
             onClick={() => onSelect(pkg)}
             className={`flex-1 ${tierColors[pkg.tier]} hover:opacity-90 text-white font-semibold transition-all duration-300 transform hover:scale-105`}
           >
-            Select & Book
+            Book Now
+            <ArrowRight className="w-4 h-4 ml-1" />
           </Button>
         </div>
       </CardContent>

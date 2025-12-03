@@ -10,9 +10,46 @@ import LoadingSpinner from '@/components/LoadingSpinner'
 import BookingModal from '@/components/BookingModal'
 import { SEOMetaTags } from '@/components/seo/SEOMetaTags'
 import { SEOSchema } from '@/components/seo/SEOSchema'
+import AISEOSchema from '@/components/seo/AISEOSchema'
+import AIOptimizedFAQ from '@/components/seo/AIOptimizedFAQ'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { toursByCategory } from '@/components/header/navigation/menuData'
+import { cn } from '@/lib/utils'
+
+// AI-Optimized FAQs for Tours page
+const toursFAQs = [
+  {
+    question: "What types of tours does Recharge Travels offer in Sri Lanka?",
+    answer: "Recharge Travels offers 8 main tour categories in Sri Lanka: Cultural & Heritage tours (Sigiriya, Kandy, ancient cities), Wildlife Safaris (Yala, Udawalawe, Wilpattu), Hill Country tours (tea estates, Ella, Nuwara Eliya), Beach & Coastal tours, Honeymoon & Romance packages, Ayurveda & Wellness retreats, Culinary & Tea tours, and Photography & Specialty tours. All tours include SLTDA-certified guides, transport, and 24/7 support.",
+    category: "Tours"
+  },
+  {
+    question: "How much do Sri Lanka tour packages cost?",
+    answer: "Sri Lanka tour packages from Recharge Travels range from $50-200 per person per day depending on the experience level. Budget-friendly day tours start at $50, mid-range multi-day tours average $100-150/day, and luxury private tours range from $200-400/day. Prices include accommodation, transport, guide services, and most entrance fees. Group tours offer additional savings of 15-20%.",
+    category: "Pricing"
+  },
+  {
+    question: "What is included in Recharge Travels tour packages?",
+    answer: "All Recharge Travels tour packages include: private or semi-private transport with English-speaking driver, SLTDA-certified tour guides, accommodation (3-5 star depending on package), daily breakfast, national park and site entrance fees, airport pickup/dropoff, 24/7 local support, and complimentary bottled water. Lunch and dinner are available as add-ons.",
+    category: "Inclusions"
+  },
+  {
+    question: "How do I book a tour with Recharge Travels?",
+    answer: "Book your Sri Lanka tour in 3 easy steps: 1) Browse our tours and select your preferred package, 2) Fill out the booking form with your dates and group size, 3) Receive instant confirmation via email. We accept credit cards, PayPal, and bank transfers. A 20% deposit secures your booking, with the balance due 14 days before your tour.",
+    category: "Booking"
+  },
+  {
+    question: "What is the best time to visit Sri Lanka for tours?",
+    answer: "Sri Lanka offers year-round touring opportunities. The best time depends on your destination: West and South coasts are ideal December-April, East coast is best April-September, and Hill Country is pleasant January-April. Cultural Triangle sites are accessible year-round. Wildlife safaris peak February-July during dry season when animals gather at water holes.",
+    category: "Planning"
+  },
+  {
+    question: "Can I customize my Sri Lanka tour itinerary?",
+    answer: "Yes, all Recharge Travels tours are fully customizable. Our travel designers will work with you to adjust destinations, duration, accommodation level, activities, and pace. Simply select 'Customize This Tour' on any package or contact us with your preferences. Custom itineraries are typically finalized within 24-48 hours.",
+    category: "Customization"
+  }
+]
 
 const Tours = () => {
   const navigate = useNavigate()
@@ -57,6 +94,49 @@ const Tours = () => {
     setIsBookingModalOpen(true)
   }
 
+  const tourPillars = [
+    {
+      title: 'Cultural & Heritage',
+      href: '/tours/cultural',
+      description: 'Sigiriya, Kandy, Anuradhapura, and UNESCO temples with expert guides.'
+    },
+    {
+      title: 'Wildlife & Parks',
+      href: '/tours/wildtours',
+      description: 'Yala, Wilpattu, and national parks with safari jeeps and rangers.'
+    },
+    {
+      title: 'Hill Country',
+      href: '/tours/hill-country',
+      description: 'Tea country train rides, waterfalls, and misty viewpoints in Ella and Nuwara Eliya.'
+    },
+    {
+      title: 'Beach & Coast',
+      href: '/tours/beach-tours',
+      description: 'South and east coast beaches, sunsets, whale watching, and surfing escapes.'
+    },
+    {
+      title: 'Honeymoon & Romance',
+      href: '/tours/honeymoon',
+      description: 'Private drivers, boutique stays, and curated experiences for couples.'
+    },
+    {
+      title: 'Ayurveda & Wellness',
+      href: '/tours/ayurveda-wellness',
+      description: 'Retreats, spas, and mindful journeys with licensed Ayurveda doctors.'
+    },
+    {
+      title: 'Culinary & Tea',
+      href: '/tours/culinary',
+      description: 'Market walks, cooking classes, and tea tasting across the island.'
+    },
+    {
+      title: 'Photography & Speciality',
+      href: '/tours/photography',
+      description: 'Guided shoots, birding hides, and golden-hour itineraries.'
+    }
+  ]
+
   if (isLoading) {
     return <LoadingSpinner fullScreen message="Loading tours..." />
   }
@@ -82,6 +162,22 @@ const Tours = () => {
           description: "Premium tour operator in Sri Lanka offering cultural tours, wildlife safaris, beach holidays and personalized travel experiences since 2014.",
           image: "https://www.rechargetravels.com/images/tours-hero.jpg",
         }}
+      />
+
+      {/* AI-Optimized SEO Schema */}
+      <AISEOSchema
+        pageType="tour"
+        title="Sri Lanka Tours & Travel Packages 2025 | Recharge Travels"
+        description="Book Sri Lanka tour packages from $50/day. 8 tour categories including cultural heritage, wildlife safaris, beach holidays, and luxury experiences. SLTDA certified, 10+ years experience, 4.9★ rating."
+        url="/tours"
+        rating={4.9}
+        reviewCount={500}
+        price="50"
+        faqs={toursFAQs}
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Tours", url: "/tours" }
+        ]}
       />
 
       {/* Enhanced Hero Section */}
@@ -148,6 +244,36 @@ const Tours = () => {
               <div className="text-2xl font-bold mb-1">SLTDA</div>
               <div className="text-green-100 text-sm">Certified</div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Tour Pillar Links */}
+      <section className="bg-white py-12 border-b border-slate-200">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col gap-3 text-center mb-8">
+            <p className="text-xs font-bold uppercase tracking-[0.3em] text-slate-500">Tour Pillars</p>
+            <h2 className="text-3xl font-bold text-slate-900">Explore Tours by Theme</h2>
+            <p className="text-slate-600 max-w-3xl mx-auto">
+              Jump straight to the tour themes most relevant to your trip and discover their child pages.
+            </p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {tourPillars.map(pillar => (
+              <Link
+                key={pillar.href}
+                to={pillar.href}
+                className={cn(
+                  "group rounded-2xl border border-slate-200 bg-slate-50 hover:border-orange-300 hover:bg-orange-50 transition-all duration-300 p-5 text-left shadow-sm hover:-translate-y-1"
+                )}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-lg font-bold text-slate-900 group-hover:text-orange-600">{pillar.title}</h3>
+                  <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-orange-500" />
+                </div>
+                <p className="text-sm text-slate-600">{pillar.description}</p>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
@@ -549,6 +675,15 @@ const Tours = () => {
           </div>
         </div>
       </section>
+
+      {/* AI-Optimized FAQ Section */}
+      <AIOptimizedFAQ
+        faqs={toursFAQs}
+        title="Frequently Asked Questions About Sri Lanka Tours"
+        description="Get answers to common questions about booking tours, pricing, and what to expect on your Sri Lanka adventure."
+        pageUrl="/tours"
+        showCategories={true}
+      />
 
       {/* Booking Modal */}
       <BookingModal

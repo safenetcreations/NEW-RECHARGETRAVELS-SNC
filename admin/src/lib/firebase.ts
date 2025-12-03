@@ -30,7 +30,7 @@ try {
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
-export const functions = getFunctions(app);
+export const functions = getFunctions(app, 'asia-south1');
 
 // Analytics might fail in some environments, so wrap it in try-catch
 export let analytics;

@@ -186,7 +186,7 @@ export const customerCrmService = {
     const email = bookingData.email.toLowerCase();
 
     // Check if customer exists
-    let existingCustomer = await this.findByEmail(email);
+    const existingCustomer = await this.findByEmail(email);
 
     if (existingCustomer) {
       // Update existing customer

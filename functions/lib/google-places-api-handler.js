@@ -50,7 +50,7 @@ exports.googlePlacesApiHandler = functions.https.onCall(async (data, context) =>
         }
         console.log(`🔍 Google Places API ${action} request:`, params);
         let apiUrl = '';
-        let requestBody = {};
+        const requestBody = {};
         switch (action) {
             case 'autocomplete':
                 apiUrl = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(params.input)}&key=${apiKey}&components=country:lk`;

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -61,8 +62,12 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import EnhancedBookingModal from '@/components/EnhancedBookingModal';
+import DestinationMap from '@/components/destinations/DestinationMap';
+import WeatherWidget from '@/components/destinations/WeatherWidget';
 import { getDestinationBySlug } from '@/services/destinationContentService';
+
+// Mullaitivu coordinates
+const MULLAITIVU_CENTER = { lat: 9.2671, lng: 80.5879 };
 
 // Type Definitions
 interface HeroSlide {
@@ -162,21 +167,33 @@ interface CTASection {
 const defaultHeroSlides: HeroSlide[] = [
   {
     id: '1',
-    image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80',
-    title: 'Welcome to Mullaitivu',
-    subtitle: 'Pristine Beaches of Northern Sri Lanka'
+    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80',
+    title: 'Discover Mullaitivu',
+    subtitle: 'Emerging Northern Destination'
   },
   {
     id: '2',
-    image: 'https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&q=80',
-    title: 'Untouched Coastal Paradise',
-    subtitle: 'Where Golden Sands Meet Azure Waters'
+    image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&q=80',
+    title: 'Mullaitivu Beach',
+    subtitle: 'Untouched Coastal Beauty'
   },
   {
     id: '3',
-    image: 'https://images.unsplash.com/photo-1476673160081-cf065c1a6c12?auto=format&fit=crop&q=80',
-    title: 'Rich Heritage & War Memorials',
-    subtitle: 'A Land of Resilience and Recovery'
+    image: 'https://images.unsplash.com/photo-1559827291-72ee739d0d9a?auto=format&fit=crop&q=80',
+    title: 'Nanthikadal Lagoon',
+    subtitle: 'Scenic Lagoon Waters'
+  },
+  {
+    id: '4',
+    image: 'https://images.unsplash.com/photo-1583212292454-1fe6229603b7?auto=format&fit=crop&q=80',
+    title: 'War Memorial',
+    subtitle: 'Remembering History'
+  },
+  {
+    id: '5',
+    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&q=80',
+    title: 'Rural Villages',
+    subtitle: 'Authentic Northern Life'
   }
 ];
 
@@ -607,6 +624,8 @@ const getIconComponent = (iconName: string) => {
 };
 
 const Mullaitivu: React.FC = () => {
+  const navigate = useNavigate();
+
   // State
   const [heroSlides, setHeroSlides] = useState<HeroSlide[]>(defaultHeroSlides);
   const [attractions, setAttractions] = useState<Attraction[]>(defaultAttractions);
@@ -620,8 +639,6 @@ const Mullaitivu: React.FC = () => {
   const [ctaSection, setCtaSection] = useState<CTASection>(defaultCTASection);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
-  const [selectedExperience, setSelectedExperience] = useState<string>('');
   const [expandedSection, setExpandedSection] = useState<string | null>('attractions');
 
   // Load content from Firebase
@@ -658,9 +675,16 @@ const Mullaitivu: React.FC = () => {
     return () => clearInterval(timer);
   }, [heroSlides.length]);
 
-  const handleBookNow = (experience: string) => {
-    setSelectedExperience(experience);
-    setIsBookingModalOpen(true);
+  const handleBooking = (service: string, tourData?: { id: string; name: string; description: string; duration: string; price: number; features: string[]; image?: string }) => {
+    const params = new URLSearchParams({
+      title: tourData?.name || service,
+      id: tourData?.id || service.toLowerCase().replace(/\s+/g, '-'),
+      duration: tourData?.duration || 'Full Day',
+      price: String(tourData?.price || 75),
+      image: tourData?.image || 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800',
+      subtitle: `Mullaitivu - ${tourData?.name || service}`
+    });
+    navigate(`/book-tour?${params.toString()}`);
   };
 
   const nextSlide = () => {
@@ -709,7 +733,7 @@ const Mullaitivu: React.FC = () => {
 
       <main className="min-h-screen bg-background">
         {/* Hero Section */}
-        <section className="relative h-[85vh] overflow-hidden">
+        <section className="relative aspect-video max-h-[80vh] overflow-hidden">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentSlide}
@@ -766,7 +790,7 @@ const Mullaitivu: React.FC = () => {
                 <Button
                   size="lg"
                   className="bg-cyan-600 hover:bg-cyan-700 text-white px-8"
-                  onClick={() => handleBookNow('Mullaitivu Tour')}
+                  onClick={() => handleBooking('Mullaitivu Tour')}
                 >
                   <Compass className="mr-2 h-5 w-5" />
                   Explore Mullaitivu
@@ -952,7 +976,7 @@ const Mullaitivu: React.FC = () => {
                         </div>
                         <Button
                           className="w-full bg-cyan-600 hover:bg-cyan-700"
-                          onClick={() => handleBookNow(attraction.name)}
+                          onClick={() => handleBooking(attraction.name)}
                         >
                           Explore This
                         </Button>
@@ -1015,7 +1039,7 @@ const Mullaitivu: React.FC = () => {
                         <Button
                           variant="outline"
                           className="w-full border-cyan-600 text-cyan-600 hover:bg-cyan-50"
-                          onClick={() => handleBookNow(activity.name)}
+                          onClick={() => handleBooking(activity.name)}
                         >
                           Book Activity
                         </Button>
@@ -1138,7 +1162,7 @@ const Mullaitivu: React.FC = () => {
                         <Button
                           size="sm"
                           className="bg-cyan-600 hover:bg-cyan-700"
-                          onClick={() => handleBookNow(hotel.name)}
+                          onClick={() => handleBooking(hotel.name)}
                         >
                           Book Now
                         </Button>
@@ -1151,8 +1175,47 @@ const Mullaitivu: React.FC = () => {
           </div>
         </section>
 
-        {/* Weather & Packing Section */}
+        {/* Interactive Map Section */}
         <section className="py-16 bg-gradient-to-br from-cyan-50 to-blue-50">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl font-bold text-gray-900 mb-4">Explore the Map</h2>
+              <p className="text-gray-600">Discover key locations and check live weather</p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Interactive Map */}
+              <div className="lg:col-span-2">
+                <Card className="overflow-hidden h-[500px]">
+                  <DestinationMap
+                    destinationName="Mullaitivu"
+                    center={MULLAITIVU_CENTER}
+                    attractions={[
+                      { name: 'Mullaitivu Town', description: 'District capital', coordinates: MULLAITIVU_CENTER },
+                      { name: 'Mullaitivu Beach', description: 'Pristine golden sand beach', coordinates: { lat: 9.2833, lng: 80.5833 } },
+                      { name: 'Nandikadal Lagoon', description: 'Serene lagoon for kayaking', coordinates: { lat: 9.3167, lng: 80.4833 } },
+                      { name: 'Kokkuthoduvai Beach', description: 'Hidden gem beach', coordinates: { lat: 9.2000, lng: 80.6167 } },
+                      { name: 'Fishing Harbour', description: 'Traditional fishing port', coordinates: { lat: 9.2500, lng: 80.5500 } },
+                    ]}
+                    height="500px"
+                  />
+                </Card>
+              </div>
+
+              {/* Weather Widget */}
+              <div className="lg:col-span-1">
+                <WeatherWidget
+                  locationName="Mullaitivu"
+                  latitude={MULLAITIVU_CENTER.lat}
+                  longitude={MULLAITIVU_CENTER.lng}
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Weather & Packing Section */}
+        <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <h2 className="text-4xl font-bold text-gray-900 mb-4">Weather & Packing</h2>
@@ -1287,7 +1350,7 @@ const Mullaitivu: React.FC = () => {
                   <Button
                     size="lg"
                     className="bg-white text-cyan-600 hover:bg-gray-100 px-8"
-                    onClick={() => handleBookNow('Mullaitivu Complete Tour')}
+                    onClick={() => handleBooking('Mullaitivu Complete Tour')}
                   >
                     <Compass className="mr-2 h-5 w-5" />
                     {ctaSection.buttonText}
@@ -1310,13 +1373,18 @@ const Mullaitivu: React.FC = () => {
 
       <Footer />
 
-      {/* Booking Modal */}
-      <EnhancedBookingModal
-        isOpen={isBookingModalOpen}
-        onClose={() => setIsBookingModalOpen(false)}
-        selectedExperience={selectedExperience}
-        destination="Mullaitivu"
-      />
+      {/* WhatsApp Float Button */}
+      <a
+        href="https://wa.me/94777721999?text=Hi! I'm interested in booking a Mullaitivu tour."
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 z-50 bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-lg transition-all hover:scale-110"
+        aria-label="Contact via WhatsApp"
+      >
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+      </a>
     </>
   );
 };

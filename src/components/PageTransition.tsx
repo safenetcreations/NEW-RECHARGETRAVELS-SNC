@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
 
@@ -7,48 +7,50 @@ interface PageTransitionProps {
   className?: string;
 }
 
-const PageTransition: React.FC<PageTransitionProps> = ({ children, className = '' }) => {
+// Optimized page transition - faster animations for better UX
+const PageTransition: React.FC<PageTransitionProps> = memo(({ children, className = '' }) => {
   const location = useLocation();
 
-  const pageVariants = {
+  // Memoize variants to prevent recreation
+  const pageVariants = useMemo(() => ({
     initial: {
       opacity: 0,
-      y: 20,
-      scale: 0.98
+      y: 8, // Reduced from 20 for subtler effect
     },
     in: {
       opacity: 1,
       y: 0,
-      scale: 1
     },
     out: {
       opacity: 0,
-      y: -20,
-      scale: 0.98
+      y: -8, // Reduced from -20
     }
-  };
+  }), []);
 
-  const pageTransition = {
+  // Ultra-fast transition for snappy feel
+  const pageTransition = useMemo(() => ({
     type: 'tween' as const,
-    ease: 'anticipate' as const,
-    duration: 0.4
-  };
+    ease: 'easeOut' as const, // Fast easing
+    duration: 0.15 // Reduced from 0.4 to 0.15
+  }), []);
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence mode="wait" initial={false}>
       <motion.div
         key={location.pathname}
         initial="initial"
         animate="in"
         exit="out"
         variants={pageVariants}
-        transition={{ duration: 0.4, ease: "easeInOut" }}
+        transition={pageTransition}
         className={className}
       >
         {children}
       </motion.div>
     </AnimatePresence>
   );
-};
+});
+
+PageTransition.displayName = 'PageTransition';
 
 export default PageTransition; 

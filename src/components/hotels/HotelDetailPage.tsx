@@ -167,7 +167,7 @@ const HotelDetailPage: React.FC<HotelDetailPageProps> = ({ hotel, onBookNow }) =
         </div>
 
         {/* Hero Image Gallery */}
-        <div className="relative bg-black">
+        <div className="relative bg-gray-100">
           <div className="relative h-96 md:h-[500px] overflow-hidden">
             <img
               src={mockImages[selectedImageIndex]}
@@ -178,13 +178,13 @@ const HotelDetailPage: React.FC<HotelDetailPageProps> = ({ hotel, onBookNow }) =
             {/* Navigation Arrows */}
             <button
               onClick={prevImage}
-              className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
+              className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 p-2 rounded-full shadow-md transition-colors"
             >
               <ChevronLeft className="h-6 w-6" />
             </button>
             <button
               onClick={nextImage}
-              className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
+              className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 p-2 rounded-full shadow-md transition-colors"
             >
               <ChevronRight className="h-6 w-6" />
             </button>
@@ -612,13 +612,13 @@ const HotelDetailPage: React.FC<HotelDetailPageProps> = ({ hotel, onBookNow }) =
             />
             <button
               onClick={prevImage}
-              className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full"
+              className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 p-2 rounded-full shadow-md"
             >
               <ChevronLeft className="h-6 w-6" />
             </button>
             <button
               onClick={nextImage}
-              className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full"
+              className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 p-2 rounded-full shadow-md"
             >
               <ChevronRight className="h-6 w-6" />
             </button>

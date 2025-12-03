@@ -117,7 +117,7 @@ const AIContentGenerator: React.FC<AIContentGeneratorProps> = ({ onNavigate }) =
     try {
       // Simple query without orderBy to avoid index requirements
       const snapshot = await getDocs(collection(db, 'blog_categories'));
-      let data = snapshot.docs.map(docSnap => ({
+      const data = snapshot.docs.map(docSnap => ({
         id: docSnap.id,
         ...docSnap.data()
       })) as BlogCategory[];

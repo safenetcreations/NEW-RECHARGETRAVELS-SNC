@@ -156,6 +156,11 @@ export const aboutItems = [
     title: "List Your Property",
     href: "/list-property",
     description: "Register your hotel, villa, or apartment to receive bookings"
+  },
+  {
+    title: "B2B Agency Portal",
+    href: "/about/partners/b2b",
+    description: "Travel agency partners: Login to book tours with exclusive 10% discounts"
   }
 ]
 
@@ -304,11 +309,6 @@ export const toursByCategory = {
         description: "Protected wilderness and biodiversity hotspots"
       },
       {
-        title: "Whale Watching",
-        href: "/experiences/whale-watching",
-        description: "Blue whales and dolphins off Mirissa coast"
-      },
-      {
         title: "Water Sports",
         href: "/experiences/hikkaduwa-water-sports",
         description: "Diving, surfing, and snorkeling adventures"
@@ -349,6 +349,11 @@ export const toursByCategory = {
         description: "Tea plantations and cool highlands"
       },
       {
+        title: "Waterfalls",
+        href: "/experiences/waterfalls",
+        description: "Discover Sri Lanka's stunning cascades"
+      },
+      {
         title: "Beach Tours",
         href: "/tours/beach-tours",
         description: "Pristine beaches and coastal wonders"
@@ -368,6 +373,11 @@ export const toursByCategory = {
   specialty: {
     title: "Special Interest",
     tours: [
+      {
+        title: "Waterfalls",
+        href: "/experiences/waterfalls",
+        description: "Explore 40+ stunning cascades across Sri Lanka"
+      },
       {
         title: "Photography Tours",
         href: "/tours/photography",
@@ -407,11 +417,6 @@ export const toursByCategory = {
         title: "Private Charters",
         href: "/experiences/private-charters",
         description: "Superyachts, jets, and helicopters curated by our concierge desk"
-      },
-      {
-        title: "Ayurveda Wellness",
-        href: "/experiences/ayurveda",
-        description: "Traditional healing and spa retreats"
       },
       {
         title: "Honeymoon Tours",
@@ -491,6 +496,11 @@ export const destinationsByRegion = {
         title: "Vavuniya",
         href: "/destinations/vavuniya",
         description: "Northern gateway rich in Tamil culture"
+      },
+      {
+        title: "Kilinochchi",
+        href: "/destinations/kilinochchi",
+        description: "War memorials, Elephant Pass, and northern heritage"
       }
     ]
   },

@@ -27,6 +27,9 @@ import CustomExperienceSubmissions from '@/components/admin/panel/CustomExperien
 import TrainJourneysSection from '@/components/admin/panel/TrainJourneysSection';
 import AIContentTools from '@/components/admin/AIContentTools';
 import { ExperienceContentManager } from '@/components/cms/ExperienceContentManager';
+import DestinationsSection from '@/components/admin/panel/DestinationsSection';
+import { LiveSocialFeedAdmin } from '@/components/social/LiveSocialFeedAdmin';
+import NewsAggregatorSection from '@/components/admin/panel/NewsAggregatorSection';
 
 const AdminPanel: React.FC = () => {
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -63,6 +66,8 @@ const AdminPanel: React.FC = () => {
         return <CustomExperienceSubmissions />;
       case 'train-journeys':
         return <TrainJourneysSection />;
+      case 'destinations':
+        return <DestinationsSection />;
       case 'page-management':
         return <PageManagementSystem />;
       case 'images':
@@ -79,6 +84,10 @@ const AdminPanel: React.FC = () => {
         return <EmailTemplatesSection />;
       case 'ai-tools':
         return <AIContentTools />;
+      case 'social-feed':
+        return <LiveSocialFeedAdmin />;
+      case 'news-aggregator':
+        return <NewsAggregatorSection />;
       case 'settings':
         return <SettingsSection />;
       default:

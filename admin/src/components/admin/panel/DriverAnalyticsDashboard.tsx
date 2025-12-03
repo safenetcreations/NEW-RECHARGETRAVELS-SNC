@@ -87,11 +87,12 @@ const DriverAnalyticsDashboard: React.FC = () => {
         endDate = new Date(now.getFullYear(), now.getMonth(), 0);
         label = 'Last Month';
         break;
-      case 'this_quarter':
+      case 'this_quarter': {
         const quarter = Math.floor(now.getMonth() / 3);
         startDate = new Date(now.getFullYear(), quarter * 3, 1);
         label = 'This Quarter';
         break;
+      }
       case 'this_year':
         startDate = new Date(now.getFullYear(), 0, 1);
         label = 'This Year';

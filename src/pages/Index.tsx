@@ -1,71 +1,77 @@
-
-import { useState } from 'react';
+import { useState, useEffect, memo, lazy, Suspense } from 'react';
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-// import HeroSection from "@/components/HeroSection";
 import LuxuryHeroSection from "@/components/homepage/LuxuryHeroSection";
-// import ModernHeroSection from "@/components/homepage/ModernHeroSection";
-import FeaturedDestinations from "@/components/homepage/FeaturedDestinations";
-import LuxuryExperiences from "@/components/homepage/LuxuryExperiences";
-import TripAdvisorHighlights from "@/components/homepage/TripAdvisorHighlights";
-// import EnhancedLuxuryExperiences from "@/components/homepage/EnhancedLuxuryExperiences";
-// import TravelPackages from "@/components/homepage/TravelPackages"; // Removed - Best Value Deals section
-import EcotourismPromo from "@/components/homepage/EcotourismPromo";
-import FeaturedExperiencesStrip from "@/components/homepage/FeaturedExperiencesStrip";
-import WellnessPackagesSection from "@/components/homepage/WellnessPackagesSection";
-import AboutSriLanka from "@/pages/AboutSriLanka";
-import TravelGuide from "@/components/homepage/TravelGuide";
-// import WhyChooseUs from "@/components/homepage/WhyChooseUs"; // Removed - redundant with footer
-import LuxuryBlogSection from "@/components/homepage/LuxuryBlogSection";
-// import NewsletterSection from "@/components/homepage/NewsletterSection"; // Removed - using Best Value Deals in footer
-import ReviewsSection from "@/components/homepage/ReviewsSection";
-import ComprehensiveSEO from "@/components/seo/ComprehensiveSEO";
-import InteractiveTripBuilder from "@/components/trip-builder/InteractiveTripBuilder";
-// import QuoteCalculator from "@/components/quote-calculator/QuoteCalculator";
 import AirportTransferSection from "@/components/homepage/AirportTransferSection";
-import { useLanguage } from "@/contexts/LanguageContext";
+import ComprehensiveSEO from "@/components/seo/ComprehensiveSEO";
 import HomepageSchema from "@/components/seo/HomepageSchema";
+import { prefetchCommonRoutes } from "@/utils/routePrefetch";
+import { getBaseUrl } from "@/utils/seoSchemaHelpers";
+import { useIsMobile } from "@/hooks/use-mobile";
 
-const Index = () => {
-  const [hoveredRegion, setHoveredRegion] = useState<{ name: string, description: string } | null>(null);
-  const { t, language } = useLanguage();
+// Lazy load heavy components
+const InteractiveTripBuilder = lazy(() => import("@/components/trip-builder/InteractiveTripBuilder"));
+const FeaturedDestinations = lazy(() => import("@/components/homepage/FeaturedDestinations"));
+const LuxuryExperiences = lazy(() => import("@/components/homepage/LuxuryExperiences"));
 
-  const handleLocationsChange = (locations: { pickup: string; dropoff: string }) => {
-    console.log('Locations changed:', locations);
-  };
+// Lazy load below-the-fold components for faster initial paint
+const TripAdvisorHighlights = lazy(() => import("@/components/homepage/TripAdvisorHighlights"));
+const EcotourismPromo = lazy(() => import("@/components/homepage/EcotourismPromo"));
+const FeaturedExperiencesStrip = lazy(() => import("@/components/homepage/FeaturedExperiencesStrip"));
+const WellnessPackagesSection = lazy(() => import("@/components/homepage/WellnessPackagesSection"));
+const AboutSriLanka = lazy(() => import("@/pages/AboutSriLanka"));
+const TravelGuide = lazy(() => import("@/components/homepage/TravelGuide"));
+const LuxuryBlogSection = lazy(() => import("@/components/homepage/LuxuryBlogSection"));
+const ReviewsSection = lazy(() => import("@/components/homepage/ReviewsSection"));
 
-  const baseUrl = typeof window !== 'undefined'
-    ? window.location.origin
-    : 'https://recharge-travels-73e76.web.app';
+// Minimal fallback for lazy components
+const LazyFallback = memo(() => (
+  <div className="min-h-[200px] bg-slate-50 animate-pulse" />
+));
+LazyFallback.displayName = 'LazyFallback';
+
+const Index = memo(() => {
+  // Detect mobile screen - hero section will NOT render on mobile
+  const isMobile = useIsMobile();
+
+  // Prefetch common routes after homepage loads
+  useEffect(() => {
+    // Wait for homepage to fully render, then prefetch
+    const timer = setTimeout(() => {
+      prefetchCommonRoutes();
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const baseUrl = getBaseUrl();
 
   return (
     <>
       <ComprehensiveSEO
-        title={t('home.hero.title') + " - Recharge Travels & Tours Ltd"}
-        description="Discover the beauty of Sri Lanka with Recharge Travels. We offer luxury tours, wildlife safaris, cultural experiences, and personalized travel packages. Book your dream vacation today."
+        title="Travel Agency Colombo | Sri Lanka Tours & Safaris | Recharge Travels"
+        description="Recharge Travels is Colombo's #1 rated travel agency (4.9★ from 2,847+ reviews). Book luxury Sri Lanka tours, Yala safaris, Colombo airport transfers, whale watching, and cultural experiences. 24/7 support. Best price guaranteed!"
         keywords={[
-          'Sri Lanka travel',
+          'travel agency Colombo',
+          'Sri Lanka travel agency',
+          'Colombo airport transfer',
           'Sri Lanka tours',
-          'Sri Lanka destinations',
+          'Yala safari booking',
           'Sri Lanka safari',
-          'Sri Lanka culture',
+          'whale watching Mirissa',
           'Sri Lanka beaches',
-          'Sri Lanka temples',
+          'Sigiriya tours',
+          'Kandy tours',
           'Sri Lanka wildlife',
           'Sri Lanka tea plantations',
-          'Sri Lanka itinerary',
           'visit Sri Lanka',
-          'Sri Lanka guide',
           'Sri Lanka vacation',
           'Sri Lanka holidays',
-          'Sri Lanka travel agency',
           'Ceylon travel',
-          'Jaffna tours',
-          'Indian Tamil tourism',
-          'Palaly airport taxi',
           'luxury travel sri lanka',
           'private driver sri lanka',
-          'best time to visit sri lanka'
+          'best time to visit sri lanka',
+          'Sri Lanka tour packages',
+          'Colombo city tours'
         ]}
         canonicalUrl="/"
         ogImage="https://i.imgur.com/AEnBWJf.jpeg"
@@ -78,7 +84,8 @@ const Index = () => {
 
       <HomepageSchema />
 
-      <h1 className="sr-only">Recharge Travels - Luxury Sri Lanka Tours & Travel Agency</h1>
+      {/* H1 with Local SEO: Primary GBP Category + City */}
+      <h1 className="sr-only">Travel Agency Colombo | Sri Lanka Tours & Safaris | Recharge Travels - Book Luxury Tours, Yala Safaris, Airport Transfers</h1>
 
       {/* Breadcrumb Structured Data for Homepage */}
       <script type="application/ld+json">
@@ -99,58 +106,56 @@ const Index = () => {
       <Header />
 
       <div className="w-full overflow-x-hidden">
-        {/* Hero Section with 4 Booking Tabs */}
-        <LuxuryHeroSection />
+        {/* Hero Section with 4 Booking Tabs - Desktop Only (heavy images) */}
+        {!isMobile && <LuxuryHeroSection />}
 
-        {/* Airport Transfer Booking Section */}
+        {/* Airport Transfer Booking Section - First on mobile, after hero on desktop */}
         <AirportTransferSection />
 
-        {/* Interactive Trip Builder */}
-        <InteractiveTripBuilder />
+        <Suspense fallback={<LazyFallback />}>
+          {/* Interactive Trip Builder */}
+          <InteractiveTripBuilder />
 
-        {/* Quote Calculator - temporarily disabled */}
-        {/* <QuoteCalculator /> */}
+          {/* Featured Destinations */}
+          <FeaturedDestinations />
 
-        {/* Featured Destinations */}
-        <FeaturedDestinations />
+          {/* Luxury Experiences */}
+          <LuxuryExperiences />
+        </Suspense>
 
+        {/* Below-the-fold lazy loaded sections */}
+        <Suspense fallback={<LazyFallback />}>
+          {/* Wellness Packages Section */}
+          <WellnessPackagesSection />
 
+          {/* Ecotourism Promotion Section */}
+          <EcotourismPromo />
 
-        {/* Luxury Experiences */}
-        <LuxuryExperiences />
+          {/* Featured Experiences Strip */}
+          <FeaturedExperiencesStrip />
 
-        {/* Wellness Packages Section */}
-        <WellnessPackagesSection />
+          {/* About Sri Lanka - Enhanced Section */}
+          <AboutSriLanka />
 
-        {/* Ecotourism Promotion Section */}
-        <EcotourismPromo />
+          {/* TripAdvisor tours showcase */}
+          <TripAdvisorHighlights />
 
-        {/* Featured Experiences Strip */}
-        <FeaturedExperiencesStrip />
+          {/* Travel Guide */}
+          <TravelGuide />
 
-        {/* About Sri Lanka - Enhanced Section */}
-        <AboutSriLanka />
+          {/* Reviews Section - Above Footer */}
+          <ReviewsSection />
 
-        {/* TripAdvisor tours showcase */}
-        <TripAdvisorHighlights />
-
-        {/* Travel Guide */}
-        <TravelGuide />
-
-
-
-        {/* Reviews Section - Above Footer */}
-        <ReviewsSection />
-
-        {/* Luxury Blog Section - Auto-updates from Admin Panel */}
-        <LuxuryBlogSection />
-
-        {/* Newsletter removed - Best Value Deals section is in footer */}
+          {/* Luxury Blog Section - Auto-updates from Admin Panel */}
+          <LuxuryBlogSection />
+        </Suspense>
       </div>
 
       <Footer />
     </>
   );
-};
+});
+
+Index.displayName = 'Index';
 
 export default Index;

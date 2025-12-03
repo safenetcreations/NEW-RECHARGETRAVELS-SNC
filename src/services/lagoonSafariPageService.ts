@@ -4,91 +4,106 @@ import { db } from '@/lib/firebase';
 const COLLECTION_NAME = 'pageContent';
 const DOC_ID = 'lagoon-safari';
 
-// Interfaces
-export interface HeroImage {
-  id: string;
-  url: string;
+export interface LagoonHeroSlide {
+  image: string;
   caption: string;
+  tag?: string;
 }
 
-export interface Stat {
-  id: string;
-  iconName: string;
+export interface LagoonBadge {
   label: string;
   value: string;
-}
-
-export interface SafariPackage {
-  id: string;
-  name: string;
-  duration: string;
-  price: string;
-  highlights: string[];
-  included: string[];
   iconName: string;
-  bestTime: string;
-  level?: string;
 }
 
-export interface WildlifeSpotting {
-  id: string;
-  species: string;
-  type: string;
-  frequency: 'Very Common' | 'Common' | 'Regular' | 'Occasional' | 'Rare sighting';
-  bestSpot: string;
+export interface LagoonHighlight {
+  label: string;
   description: string;
 }
 
-export interface LagoonZone {
+export interface LagoonExperience {
   id: string;
-  zone: string;
-  features: string[];
-  wildlife: string[];
+  name: string;
+  summary: string;
+  duration: string;
+  priceLabel: string;
+  level: 'Beginner' | 'Intermediate' | 'Advanced' | 'All Levels';
+  includes: string[];
+  image?: string;
+  iconName: string;
 }
 
-export interface FAQ {
+export interface LagoonComboPackage {
+  id: string;
+  name: string;
+  badge: string;
+  duration: string;
+  priceLabel: string;
+  highlights: string[];
+  includes: string[];
+  iconName: string;
+}
+
+export interface LagoonLogistics {
+  meetingPoint: string;
+  sessionTimes: string[];
+  launchPoints: string[];
+  transferOptions: string;
+  gearProvided: string[];
+  bringList: string[];
+  weatherPolicy: string;
+  sustainabilityNote: string;
+}
+
+export interface LagoonFaq {
   id: string;
   question: string;
   answer: string;
 }
 
-export interface GalleryImage {
+export interface LagoonGalleryImage {
   id: string;
-  url: string;
-  alt: string;
+  image: string;
+  caption: string;
+}
+
+export interface LagoonBookingInfo {
+  contactPhone: string;
+  whatsapp: string;
+  email: string;
+  responseTime: string;
+  conciergeNote: string;
+  deskHours: string;
+}
+
+export interface LagoonPricing {
+  currency: string;
+  startingPrice: number;
+  depositNote: string;
+  refundPolicy: string;
+  privateUpgrade: string;
 }
 
 export interface LagoonSafariPageContent {
   hero: {
     title: string;
     subtitle: string;
-    ctaText: string;
-    images: HeroImage[];
+    badge: string;
+    gallery: LagoonHeroSlide[];
   };
   overview: {
-    title: string;
-    description: string;
+    summary: string;
+    badges: LagoonBadge[];
+    highlights: LagoonHighlight[];
   };
-  stats: Stat[];
-  safariPackages: SafariPackage[];
-  wildlifeSpottings: WildlifeSpotting[];
-  lagoonZones: LagoonZone[];
-  faqs: FAQ[];
-  gallery: GalleryImage[];
-  cta: {
-    title: string;
-    description: string;
-    primaryButtonText: string;
-    secondaryButtonText: string;
-  };
-  contact: {
-    phone: string;
-    phoneNote: string;
-    email: string;
-    emailNote: string;
-    website: string;
-    websiteNote: string;
-  };
+  experiences: LagoonExperience[];
+  combos: LagoonComboPackage[];
+  logistics: LagoonLogistics;
+  safety: string[];
+  faqs: LagoonFaq[];
+  gallery: LagoonGalleryImage[];
+  booking: LagoonBookingInfo;
+  pricing: LagoonPricing;
   seo: {
     title: string;
     description: string;
@@ -98,129 +113,292 @@ export interface LagoonSafariPageContent {
   updatedAt?: any;
 }
 
-// Default content
 const defaultContent: LagoonSafariPageContent = {
   hero: {
-    title: 'Lagoon Canoe Safari',
-    subtitle: "Navigate Bentota's Enchanting Mangrove Waterways",
-    ctaText: 'Book Safari Tour',
-    images: [
-      { id: '1', url: 'https://images.unsplash.com/photo-1569163139394-de4b5c4c4e3f?w=1920&h=1080&fit=crop', caption: 'Bentota Lagoon Safari' },
-      { id: '2', url: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=1920&h=1080&fit=crop', caption: 'Mangrove Exploration' },
-      { id: '3', url: 'https://images.unsplash.com/photo-1596706487638-7c924bf5883a?w=1920&h=1080&fit=crop', caption: 'River Wildlife' },
-      { id: '4', url: 'https://images.unsplash.com/photo-1585016495481-91613a3ab1bc?w=1920&h=1080&fit=crop', caption: 'Peaceful Waters' }
+    title: 'Bentota Lagoon Concierge',
+    subtitle: 'Slow cruises through cinnamon islands, mangrove tunnels, and crocodile territory with naturalist skippers.',
+    badge: 'Mangrove Naturalist Led',
+    gallery: [
+      {
+        image: 'https://images.unsplash.com/photo-1544551763-77932436c73d?auto=format&fit=crop&w=2000&q=80',
+        caption: 'Sunrise mist around Dedduwa lagoon',
+        tag: 'Sunrise Drift'
+      },
+      {
+        image: 'https://images.unsplash.com/photo-1596178065887-1198b6148b2b?auto=format&fit=crop&w=2000&q=80',
+        caption: 'Mangrove cathedral channels',
+        tag: 'Mangrove Labyrinth'
+      },
+      {
+        image: 'https://images.unsplash.com/photo-1596706487638-7c924bf5883a?auto=format&fit=crop&w=2000&q=80',
+        caption: 'Water monitors and birdlife',
+        tag: 'Wildlife Watch'
+      },
+      {
+        image: 'https://images.unsplash.com/photo-1585016495481-91613a3ab1bc?auto=format&fit=crop&w=2000&q=80',
+        caption: 'Golden hour over Bentota river mouth',
+        tag: 'Sunset Cruise'
+      }
     ]
   },
   overview: {
-    title: "Discover Bentota's Hidden Ecosystem",
-    description: "Embark on a tranquil journey through the Bentota Lagoon, where the river meets the sea. Glide silently through mysterious mangrove tunnels, spot exotic wildlife, and experience the rich biodiversity of this unique wetland ecosystem. Our expert naturalists guide you through this watery wonderland, sharing insights about the delicate balance of life here."
+    summary:
+      'The Recharge lagoon desk choreographs every circuit from cinnamon islands to hidden fish spas. We brief guests with our naturalist team, hold sunrise & sunset slots, and coordinate transfers plus gourmet add-ons so your only job is to drift.',
+    badges: [
+      { label: 'Private zones', value: '4 circuits', iconName: 'MapPin' },
+      { label: 'Wildlife sightings', value: '18+ avg', iconName: 'Binoculars' },
+      { label: 'Mangrove species', value: '15 identified', iconName: 'TreePine' },
+      { label: 'Guest rating', value: '4.93/5', iconName: 'Star' }
+    ],
+    highlights: [
+      {
+        label: 'Concierge planning',
+        description: 'Single WhatsApp thread for scheduling, transfers, and weather calls across Bentota, Madu, and Negombo.'
+      },
+      {
+        label: 'Pro naturalists',
+        description: 'Field biologists and lagoon skippers trained on wildlife etiquette, photography cues, and safety.'
+      },
+      {
+        label: 'Flexible craft',
+        description: 'Stilted canoes, canopy boats, or luxury pontoons based on party size with full insurance and life jackets.'
+      }
+    ]
   },
-  stats: [
-    { id: '1', iconName: 'Droplets', label: 'Lagoon Area', value: '64 hectares' },
-    { id: '2', iconName: 'Bird', label: 'Bird Species', value: '70+' },
-    { id: '3', iconName: 'TreePine', label: 'Mangrove Types', value: '15' },
-    { id: '4', iconName: 'Fish', label: 'Wildlife Species', value: '100+' }
-  ],
-  safariPackages: [
+  experiences: [
     {
-      id: '1',
-      name: 'Morning Lagoon Explorer',
-      duration: '2 hours',
-      price: '$30 per person',
-      highlights: ['Early bird watching', 'Mangrove navigation', 'Crocodile spotting', 'Traditional fishing villages'],
-      included: ['Canoe with guide', 'Life jackets', 'Binoculars', 'Light refreshments', 'Hotel transfers'],
+      id: 'sunrise-mangrove',
+      name: 'Sunrise Mangrove Drift',
+      summary: 'Launch before dawn for misty tunnels, kingfisher activity, and cinnamon island breakfast stops.',
+      duration: '120 mins',
+      priceLabel: 'USD 35 per guest',
+      level: 'All Levels',
+      includes: ['Private naturalist skipper', 'Cinnamon island tea stop', 'Binoculars & field guide', 'Hotel pickup (Bentota)'],
       iconName: 'Sunrise',
-      bestTime: '6:00 AM - 8:00 AM',
-      level: 'Easy'
+      image: 'https://images.unsplash.com/photo-1574263867128-a00c8b5e62f4?auto=format&fit=crop&w=1400&q=80'
     },
     {
-      id: '2',
-      name: 'Sunset Wildlife Safari',
-      duration: '2.5 hours',
-      price: '$35 per person',
-      highlights: ['Golden hour photography', 'Evening bird activity', 'Monitor lizard viewing', 'Sunset over lagoon'],
-      included: ['Traditional boat', 'Expert naturalist', 'Photography tips', 'Evening snacks', 'Return transfers'],
-      iconName: 'Bird',
-      bestTime: '4:00 PM - 6:30 PM',
-      level: 'Easy'
-    },
-    {
-      id: '3',
-      name: 'Full Day Lagoon Adventure',
-      duration: '6 hours',
-      price: '$75 per person',
-      highlights: ['Complete lagoon circuit', 'Island temple visit', 'Fishing demonstration', 'Mangrove walk'],
-      included: ['Private boat', 'Lunch on island', 'All activities', 'Professional guide', 'Water & refreshments'],
-      iconName: 'Anchor',
-      bestTime: '8:00 AM - 2:00 PM',
-      level: 'Moderate'
-    },
-    {
-      id: '4',
-      name: 'Photography Special',
-      duration: '3 hours',
-      price: '$55 per person',
-      highlights: ['Best photo locations', 'Wildlife close-ups', 'Dawn or dusk timing', 'Small group (max 4)'],
-      included: ['Stable photo boat', 'Expert photo guide', 'Multiple stops', 'Tripod mounts', 'Digital tips guide'],
+      id: 'golden-hour',
+      name: 'Golden Hour Wildlife Safari',
+      summary: 'Birding-focused afternoon run covering crocodile spots, bat colonies, and photo-led pauses.',
+      duration: '150 mins',
+      priceLabel: 'USD 45 per guest',
+      level: 'All Levels',
+      includes: ['Stabilized canopy boat', 'Photography host', 'Refreshments on island', 'Return transfers'],
       iconName: 'Camera',
-      bestTime: 'Flexible timing',
-      level: 'Easy'
+      image: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&w=1400&q=80'
+    },
+    {
+      id: 'full-lagoon',
+      name: 'Full Lagoon Immersion',
+      summary: 'Half-day circuit with island temple, cinnamon peeling, and natural fish spa with curated lunch.',
+      duration: '5 hours',
+      priceLabel: 'USD 85 per guest',
+      level: 'All Levels',
+      includes: ['Private craft + skipper', 'Island lunch & tastings', 'Temple donation & guide', 'Fish spa experience'],
+      iconName: 'Anchor',
+      image: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1400&q=80'
+    },
+    {
+      id: 'canoe-kayak',
+      name: 'Canoe & Kayak Explorer',
+      summary: 'Active paddling session along narrow tributaries with GoPro footage and support boat.',
+      duration: '150 mins',
+      priceLabel: 'USD 55 per guest',
+      level: 'All Levels',
+      includes: ['Stable double canoes', 'Safety escort boat', 'Dry bags + GoPro clips', 'Cold pressed juices'],
+      iconName: 'Waves',
+      image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1400&q=80'
     }
   ],
-  wildlifeSpottings: [
-    { id: '1', species: 'Water Monitor', type: 'Reptile', frequency: 'Very Common', bestSpot: 'Mangrove edges', description: 'Large lizards often seen basking on riverbanks or swimming' },
-    { id: '2', species: 'Mugger Crocodile', type: 'Reptile', frequency: 'Occasional', bestSpot: 'Deep water areas', description: 'Small population inhabits the lagoon, mostly shy of boats' },
-    { id: '3', species: 'Purple Heron', type: 'Bird', frequency: 'Common', bestSpot: 'Shallow waters', description: 'Beautiful wading bird often hunting in the shallows' },
-    { id: '4', species: 'White-bellied Sea Eagle', type: 'Bird', frequency: 'Regular', bestSpot: 'Open water', description: 'Magnificent raptor fishing over the lagoon' },
-    { id: '5', species: 'Kingfishers (various)', type: 'Bird', frequency: 'Very Common', bestSpot: 'Throughout lagoon', description: 'Multiple species including Pied, Common, and White-throated' },
-    { id: '6', species: 'Fruit Bats', type: 'Mammal', frequency: 'Common', bestSpot: 'Island colonies', description: 'Large colonies roost on lagoon islands' },
-    { id: '7', species: 'Asian Water Snake', type: 'Reptile', frequency: 'Rare sighting', bestSpot: 'Mangrove roots', description: 'Non-venomous snake occasionally seen swimming' },
-    { id: '8', species: 'Brahminy Kite', type: 'Bird', frequency: 'Common', bestSpot: 'Above water', description: 'Beautiful chestnut and white raptor' }
+  combos: [
+    {
+      id: 'temple-combo',
+      name: 'Mangrove & Temple Circuit',
+      badge: 'Cultural Combo',
+      duration: '4.5 hours',
+      priceLabel: 'USD 75 for 2 guests',
+      highlights: ['Island monastery blessing', 'Cinnamon peeling workshop', 'Hidden mangrove tunnels', 'Local lunch'],
+      includes: ['Private canopy boat', 'Temple caretaker donation', 'Cinnamon family host', 'Transfers Bentota/Sri Villa'],
+      iconName: 'Globe'
+    },
+    {
+      id: 'island-brunch',
+      name: 'Island Brunch & Fish Spa',
+      badge: 'Family Favorite',
+      duration: '3.5 hours',
+      priceLabel: 'USD 65 for 2 adults + child',
+      highlights: ['Floating brunch platter', 'Natural fish spa stop', 'Village visit & toddy tasting', 'Birding deck'],
+      includes: ['Dedicated crew + chef', 'Fresh juices & king coconut', 'Child life jackets', 'Complimentary drone clip'],
+      iconName: 'Users'
+    },
+    {
+      id: 'sunset-private',
+      name: 'Private Sunset Charter',
+      badge: 'Luxury',
+      duration: '2.5 hours',
+      priceLabel: 'USD 140 up to 6 guests',
+      highlights: ['Champagne sundowners', 'Live sax or ambient playlist', 'Croc & bat colony viewing', 'Concierge transfers'],
+      includes: ['Luxury pontoon boat', 'Premium beverage program', 'On-board host & captain', 'Priority weather hold'],
+      iconName: 'Star'
+    }
   ],
-  lagoonZones: [
-    { id: '1', zone: 'Main Lagoon', features: ['Open water', 'Island visits', 'Fishing boats', 'Best for sunset'], wildlife: ['Sea eagles', 'Herons', 'Cormorants'] },
-    { id: '2', zone: 'Mangrove Tunnels', features: ['Natural canopy', 'Cool shade', 'Narrow passages', 'Unique ecosystem'], wildlife: ['Monitor lizards', 'Snakes', 'Mudskippers'] },
-    { id: '3', zone: 'River Mouth', features: ['Tidal changes', 'Sand bars', 'Ocean connection', 'Dynamic environment'], wildlife: ['Crocodiles', 'Fish eagles', 'Terns'] },
-    { id: '4', zone: 'Village Areas', features: ['Traditional life', 'Fishing methods', 'Local interaction', 'Cultural insights'], wildlife: ['Domestic birds', 'Village wildlife'] }
+  logistics: {
+    meetingPoint: 'Bentota Lagoon Jetty (Old Bentota Bridge side) or hotel pier pick-up on request',
+    sessionTimes: ['05:45 – Sunrise drift', '08:30 – Cinnamon & temples', '16:00 – Golden hour wildlife'],
+    launchPoints: ['Bentota / Dedduwa lagoon', 'Madu river (Balapitiya)', 'Negombo lagoon (by request)'],
+    transferOptions: 'Private car/van transfers from Colombo, Galle, or Kalutara zones with chilled towels and cool boxes.',
+    gearProvided: ['Life jackets all sizes', 'Binocular sets', 'Insect repellent & ponchos', 'GoPro / DSLR mount'],
+    bringList: ['Light layers + hat', 'Eco sunscreen', 'Camera / telephoto lens', 'Slip-on footwear'],
+    weatherPolicy: 'We monitor tide + storm cells hourly. If heavy rain or lightning is forecast we reschedule or fully refund.',
+    sustainabilityNote: 'Portions of every booking fund mangrove restoration and temple caretaker stipends through Recharge Foundation.'
+  },
+  safety: [
+    'All craft carry GPS, VHF, and certified skippers with first-aid credentials.',
+    'Insurance coverage for guests + equipment plus floating child vests in all sizes.',
+    'Wildlife interaction briefings before launch and no single-use plastics onboard.',
+    'Real-time concierge channel for weather advisories or schedule adjustments.'
   ],
   faqs: [
-    { id: '1', question: 'Is the lagoon safari safe for children?', answer: 'Yes, the lagoon safari is very safe for children. All boats are stable and equipped with life jackets in children\'s sizes. The water is calm, and our guides are experienced with family groups. Children usually love spotting wildlife and the boat ride itself.' },
-    { id: '2', question: 'What\'s the best time of day for wildlife viewing?', answer: 'Early morning (6-8 AM) and late afternoon (4-6 PM) offer the best wildlife viewing. Birds are most active during these cooler hours, and you\'re more likely to see monitors and other reptiles. The lighting is also perfect for photography during these golden hours.' },
-    { id: '3', question: 'Do I need to know how to swim?', answer: 'No swimming skills are required as you remain in the boat throughout the safari. Life jackets are provided and must be worn. The boats are very stable, and the lagoon waters are generally calm. Our guides are trained in water safety.' },
-    { id: '4', question: 'What should I bring on the safari?', answer: 'Essentials include sunscreen, hat, sunglasses, camera, and binoculars (though we provide these too). Wear light, comfortable clothing and bring insect repellent. A light rain jacket during monsoon season is advisable. We provide water and snacks.' },
-    { id: '5', question: 'How close do we get to wildlife?', answer: 'We maintain respectful distances from all wildlife for their safety and yours. However, many animals are habituated to boats and allow relatively close approach. With binoculars and zoom lenses, you\'ll get excellent views and photos. Kingfishers often perch very close to boats.' },
-    { id: '6', question: 'What happens if it rains?', answer: 'Light rain doesn\'t affect the safari and can actually enhance the experience with more active wildlife. We provide rain ponchos if needed. For heavy storms, we may delay departure or offer rescheduling. The mangrove areas provide natural shelter from rain.' }
+    {
+      id: 'children',
+      question: 'Is the lagoon safari safe for children or grandparents?',
+      answer:
+        'Yes. Boats are wide and low to the water, fitted with life jackets for infants to XXL adults. Boarding steps and handrails are provided at every jetty and our skippers move at comfortable speeds.'
+    },
+    {
+      id: 'wildlife',
+      question: 'What wildlife do we usually encounter?',
+      answer:
+        'Expect water monitors, crocodiles (from a distance), purple herons, brahminy kites, kingfishers, fruit bats, and mangrove crabs. Dawn/late-afternoon sessions offer the most activity.'
+    },
+    {
+      id: 'swimming',
+      question: 'Can we swim during the safari?',
+      answer:
+        'Swimming is generally not recommended due to currents and wildlife. However, our fish-spa stop lets guests dip feet into netted shallows under guide supervision.'
+    },
+    {
+      id: 'bring',
+      question: 'What should we bring?',
+      answer:
+        'Wear breathable clothing, bring eco sunscreen, sunglasses, and insect repellent. Cameras with zoom lenses are ideal though we provide binoculars + shared DSLR for photos.'
+    },
+    {
+      id: 'rain',
+      question: 'What happens if it rains?',
+      answer:
+        'Light rain creates beautiful misty conditions and we continue with ponchos provided. For heavy storms we hold departures, shift to another slot the same day, or fully refund.'
+    }
   ],
   gallery: [
-    { id: '1', url: 'https://images.unsplash.com/photo-1569163139394-de4b5c4c4e3f?w=400&h=300&fit=crop', alt: 'Bentota Lagoon' },
-    { id: '2', url: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&h=300&fit=crop', alt: 'Mangrove exploration' },
-    { id: '3', url: 'https://images.unsplash.com/photo-1596706487638-7c924bf5883a?w=400&h=300&fit=crop', alt: 'River wildlife' },
-    { id: '4', url: 'https://images.unsplash.com/photo-1585016495481-91613a3ab1bc?w=400&h=300&fit=crop', alt: 'Peaceful waters' },
-    { id: '5', url: 'https://images.unsplash.com/photo-1574263867128-a00c8b5e62f4?w=400&h=300&fit=crop', alt: 'Canoe safari' },
-    { id: '6', url: 'https://images.unsplash.com/photo-1605713288610-00c1c630f6c6?w=400&h=300&fit=crop', alt: 'Bird watching' },
-    { id: '7', url: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&h=300&fit=crop', alt: 'Mangrove tunnel' },
-    { id: '8', url: 'https://images.unsplash.com/photo-1547036967-23d11aacaee0?w=400&h=300&fit=crop', alt: 'Sunset safari' }
+    {
+      id: 'gallery-1',
+      image: 'https://images.unsplash.com/photo-1569163139394-de4b5c4c4e3f?auto=format&fit=crop&w=900&q=80',
+      caption: 'Cinnamon island walk-through'
+    },
+    {
+      id: 'gallery-2',
+      image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=900&q=80',
+      caption: 'Mangrove cathedral tunnels'
+    },
+    {
+      id: 'gallery-3',
+      image: 'https://images.unsplash.com/photo-1596706487638-7c924bf5883a?auto=format&fit=crop&w=900&q=80',
+      caption: 'Water monitors basking near Dedduwa'
+    },
+    {
+      id: 'gallery-4',
+      image: 'https://images.unsplash.com/photo-1585016495481-91613a3ab1bc?auto=format&fit=crop&w=900&q=80',
+      caption: 'Golden hour from the pontoon bow'
+    },
+    {
+      id: 'gallery-5',
+      image: 'https://images.unsplash.com/photo-1574263867128-a00c8b5e62f4?auto=format&fit=crop&w=900&q=80',
+      caption: 'Island brunch set-up under palms'
+    },
+    {
+      id: 'gallery-6',
+      image: 'https://images.unsplash.com/photo-1605713288610-00c1c630f6c6?auto=format&fit=crop&w=900&q=80',
+      caption: 'Kingfishers along quiet tributaries'
+    }
   ],
-  cta: {
-    title: 'Ready to Explore the Lagoon?',
-    description: "Embark on a peaceful journey through Bentota's magical waterways. Book your lagoon safari today and discover nature's hidden treasures.",
-    primaryButtonText: 'Book Safari Tour',
-    secondaryButtonText: 'Call for Info'
+  booking: {
+    contactPhone: '+94 77 772 1999',
+    whatsapp: 'https://wa.me/94777721999',
+    email: 'concierge@rechargetravels.com',
+    responseTime: 'Replies within 15 minutes, 6 AM – 10 PM (GMT+5:30)',
+    conciergeNote: 'Share preferred slots, pickup hotel, and party mix. Our lagoon concierge holds the craft, confirms transfers, and dispatches a detailed brief.',
+    deskHours: 'Daily lagoon desk online 05:00 – 22:00'
   },
-  contact: {
-    phone: '+94 76 505 9595',
-    phoneNote: 'Available 24/7',
-    email: 'info@rechargetravels.com',
-    emailNote: 'Quick response',
-    website: 'www.rechargetravels.com',
-    websiteNote: 'More experiences'
+  pricing: {
+    currency: 'USD',
+    startingPrice: 35,
+    depositNote: 'Lock your craft with a USD 20 deposit. Balance settled via link or cash on arrival.',
+    refundPolicy: '100% refundable up to 12 hours before departure or if weather cancels launches.',
+    privateUpgrade: 'Private pontoon upgrades start at USD 120 for up to six guests including beverages.'
   },
   seo: {
     title: 'Bentota Lagoon Safari | Mangrove Boat Tours Sri Lanka | Recharge Travels',
-    description: "Explore Bentota's rich lagoon ecosystem by traditional canoe. Spot crocodiles, monitor lizards, exotic birds, and navigate through mystical mangrove tunnels.",
-    keywords: ['Bentota lagoon safari', 'mangrove boat tour', 'river safari Sri Lanka', 'bird watching Bentota', 'canoe safari', 'wildlife boat tour'],
-    ogImage: 'https://images.unsplash.com/photo-1569163139394-de4b5c4c4e3f?w=1200&h=630&fit=crop'
+    description:
+      'Book concierge-led Bentota lagoon safaris with naturalist skippers, cinnamon island visits, fish spas, and private charter upgrades. Sunrise & sunset slots confirmed via WhatsApp.',
+    keywords: [
+      'Bentota lagoon safari',
+      'mangrove boat tour Sri Lanka',
+      'Madu river safari',
+      'cinnamon island tour',
+      'sunset lagoon cruise'
+    ],
+    ogImage: 'https://images.unsplash.com/photo-1569163139394-de4b5c4c4e3f?auto=format&fit=crop&w=1200&q=80'
   }
+};
+
+const ensureArray = <T>(value: T[] | undefined, fallback: T[]): T[] => (value && value.length ? value : fallback);
+
+const mergeLagoonContent = (data?: Partial<LagoonSafariPageContent>): LagoonSafariPageContent => {
+  const source = data ?? {};
+
+  return {
+    ...defaultContent,
+    ...source,
+    hero: {
+      ...defaultContent.hero,
+      ...source.hero,
+      gallery: ensureArray(source.hero?.gallery, defaultContent.hero.gallery)
+    },
+    overview: {
+      ...defaultContent.overview,
+      ...source.overview,
+      badges: ensureArray(source.overview?.badges, defaultContent.overview.badges),
+      highlights: ensureArray(source.overview?.highlights, defaultContent.overview.highlights)
+    },
+    experiences: ensureArray(source.experiences, defaultContent.experiences),
+    combos: ensureArray(source.combos, defaultContent.combos),
+    logistics: {
+      ...defaultContent.logistics,
+      ...source.logistics,
+      sessionTimes: ensureArray(source.logistics?.sessionTimes, defaultContent.logistics.sessionTimes),
+      launchPoints: ensureArray(source.logistics?.launchPoints, defaultContent.logistics.launchPoints),
+      gearProvided: ensureArray(source.logistics?.gearProvided, defaultContent.logistics.gearProvided),
+      bringList: ensureArray(source.logistics?.bringList, defaultContent.logistics.bringList)
+    },
+    safety: ensureArray(source.safety, defaultContent.safety),
+    faqs: ensureArray(source.faqs, defaultContent.faqs),
+    gallery: ensureArray(source.gallery, defaultContent.gallery),
+    booking: {
+      ...defaultContent.booking,
+      ...source.booking
+    },
+    pricing: {
+      ...defaultContent.pricing,
+      ...source.pricing
+    },
+    seo: {
+      ...defaultContent.seo,
+      ...source.seo
+    },
+    updatedAt: source.updatedAt ?? defaultContent.updatedAt
+  };
 };
 
 // Service class
@@ -231,15 +409,16 @@ class LagoonSafariPageService {
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
-        return docSnap.data() as LagoonSafariPageContent;
+        const data = docSnap.data() as Partial<LagoonSafariPageContent>;
+        return mergeLagoonContent(data);
       } else {
         // Initialize with default content if doesn't exist
         await this.updatePageContent(defaultContent);
-        return defaultContent;
+        return mergeLagoonContent();
       }
     } catch (error) {
       console.error('Error fetching lagoon safari page content:', error);
-      return defaultContent;
+      return mergeLagoonContent();
     }
   }
 
@@ -272,7 +451,7 @@ class LagoonSafariPageService {
   }
 
   getDefaultContent(): LagoonSafariPageContent {
-    return defaultContent;
+    return mergeLagoonContent();
   }
 }
 

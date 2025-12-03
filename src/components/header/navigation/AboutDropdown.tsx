@@ -52,6 +52,7 @@ const aboutCategories = {
       aboutItemsByHref['/vehicle-rental/owner'],
       aboutItemsByHref['/list-property'],
       aboutItemsByHref['/vendor/register'],
+      aboutItemsByHref['/about/partners/b2b'],
     ].filter(Boolean)
   }
 } as const

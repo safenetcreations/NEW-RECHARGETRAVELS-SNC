@@ -144,7 +144,7 @@ const generateArticleSchema = () => {
     "@type": "Article",
     "headline": "Complete Sri Lanka Travel Guide 2025 - Everything You Need to Know",
     "description": "Comprehensive Sri Lanka travel guide covering destinations, wildlife safaris, beaches, culture, Ayurveda, food, and practical travel tips. Plan your perfect Sri Lanka trip.",
-    "image": "https://images.unsplash.com/photo-1586523969943-2d62a1a7d4d3?w=1200&q=80",
+    "image": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=80",
     "author": {
       "@type": "Organization",
       "name": "Recharge Travels & Tours Ltd",
@@ -155,7 +155,7 @@ const generateArticleSchema = () => {
       "name": "Recharge Travels & Tours Ltd",
       "logo": {
         "@type": "ImageObject",
-        "url": `${typeof window !== 'undefined' ? window.location.origin : 'https://recharge-travels-73e76.web.app'}/logo-v2.png`
+        "url": `${typeof window !== 'undefined' ? window.location.origin : 'https://www.rechargetravels.com'}/logo-v2.png`
       }
     },
     "datePublished": "2024-01-01",
@@ -362,7 +362,7 @@ const TravelGuidePage = () => {
         description="Comprehensive Sri Lanka travel guide with 60+ destinations, wildlife safaris, beaches, temples, Ramayana trail, Ayurveda, food guide & practical tips. Plan your perfect Sri Lanka trip with expert advice."
         keywords={travelGuideKeywords}
         canonicalUrl="/travel-guide"
-        ogImage="https://images.unsplash.com/photo-1586523969943-2d62a1a7d4d3?w=1200&q=80"
+        ogImage="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=80"
         ogType="article"
         alternateLanguages={[
           { lang: 'en', url: '/travel-guide' },
@@ -424,7 +424,7 @@ const TravelGuidePage = () => {
           <div className="absolute inset-0 bg-black/30" />
           <div
             className="absolute inset-0 bg-cover bg-center opacity-20"
-            style={{ backgroundImage: "url('https://images.unsplash.com/photo-1586523969943-2d62a1a7d4d3?w=1920&q=80')" }}
+            style={{ backgroundImage: "url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80')" }}
             role="img"
             aria-label="Sigiriya Rock Fortress Sri Lanka"
           />

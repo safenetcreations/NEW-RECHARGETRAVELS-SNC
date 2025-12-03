@@ -30,8 +30,13 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import EnhancedBookingModal from '@/components/EnhancedBookingModal';
+import { useNavigate } from 'react-router-dom';
+import DestinationMap from '@/components/destinations/DestinationMap';
+import WeatherWidget from '@/components/destinations/WeatherWidget';
 import { getDestinationBySlug } from '@/services/destinationContentService';
+
+// Ella coordinates
+const ELLA_CENTER = { lat: 6.8667, lng: 81.0466 };
 
 interface HeroSlide {
   image: string;
@@ -94,26 +99,35 @@ interface CTASection {
 }
 
 const Ella = () => {
+  const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedTab, setSelectedTab] = useState('attractions');
-  const [showBookingModal, setShowBookingModal] = useState(false);
-  const [selectedAttraction, setSelectedAttraction] = useState<string>('');
 
   const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([
     {
-      image: "https://images.unsplash.com/photo-1566296440685-38a26e48b3fa?auto=format&fit=crop&q=80",
-      title: "Welcome to Ella",
-      subtitle: "Scenic Hill Station with Breathtaking Views"
+      image: "https://images.unsplash.com/photo-1586613835341-78c143aef52c?auto=format&fit=crop&q=80",
+      title: "Discover Ella",
+      subtitle: "Mountain Paradise of Sri Lanka"
     },
     {
-      image: "https://images.unsplash.com/photo-1588312336500-1d50753d80f8?auto=format&fit=crop&q=80",
+      image: "https://images.unsplash.com/photo-1546587348-d12660c30c50?auto=format&fit=crop&q=80",
       title: "Nine Arch Bridge",
-      subtitle: "Architectural Marvel Amidst Lush Greenery"
+      subtitle: "Iconic Colonial Railway Masterpiece"
     },
     {
-      image: "https://images.unsplash.com/photo-1584467735815-f04249e61c67?auto=format&fit=crop&q=80",
-      title: "Tea Country Paradise",
-      subtitle: "Rolling Hills of Emerald Tea Plantations"
+      image: "https://images.unsplash.com/photo-1580835845419-bb7c9c878f57?auto=format&fit=crop&q=80",
+      title: "Ella Rock",
+      subtitle: "Breathtaking Panoramic Views"
+    },
+    {
+      image: "https://images.unsplash.com/photo-1571536802807-30451e3f3d43?auto=format&fit=crop&q=80",
+      title: "Tea Plantations",
+      subtitle: "Rolling Hills of Green Gold"
+    },
+    {
+      image: "https://images.unsplash.com/photo-1588598198321-39f8c2be97ba?auto=format&fit=crop&q=80",
+      title: "Little Adam's Peak",
+      subtitle: "Scenic Hiking Trail"
     }
   ]);
 
@@ -404,11 +418,24 @@ const Ella = () => {
     return iconMap[iconName] || Camera;
   };
 
+  const handleBooking = (service: string = 'Ella Tour') => {
+    const params = new URLSearchParams({
+      title: service,
+      id: service.toLowerCase().replace(/\s+/g, '-'),
+      duration: 'Full Day',
+      price: '55',
+      image: 'https://images.unsplash.com/photo-1546708770-599a3abdf230?w=800',
+      subtitle: `Ella - ${service}`
+    });
+    navigate(`/book-tour?${params.toString()}`);
+  };
+
   const tabs = [
     { id: 'attractions', label: 'Attractions', count: attractions.length },
     { id: 'activities', label: 'Activities', count: activities.length },
     { id: 'accommodation', label: 'Stay', count: accommodations.length },
     { id: 'dining', label: 'Dining', count: restaurants.length },
+    { id: 'map', label: 'Map', count: null },
     { id: 'info', label: 'Travel Info', count: null }
   ];
 
@@ -424,7 +451,7 @@ const Ella = () => {
       
       <div className="min-h-screen bg-background">
         {/* Hero Section with Slideshow */}
-        <div className="relative h-[70vh] overflow-hidden">
+        <div className="relative aspect-video max-h-[80vh] overflow-hidden">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentSlide}
@@ -467,10 +494,10 @@ const Ella = () => {
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.7 }}
               >
-                <Button 
-                  size="lg" 
+                <Button
+                  size="lg"
                   className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-6 text-lg"
-                  onClick={() => setShowBookingModal(true)}
+                  onClick={() => handleBooking('Ella Tour')}
                 >
                   Plan Your Ella Adventure
                 </Button>
@@ -587,12 +614,9 @@ const Ella = () => {
                           <span>{attraction.price}</span>
                         </div>
                       </div>
-                      <Button 
+                      <Button
                         className="w-full bg-emerald-600 hover:bg-emerald-700"
-                        onClick={() => {
-                          setSelectedAttraction(attraction.name);
-                          setShowBookingModal(true);
-                        }}
+                        onClick={() => handleBooking(attraction.name)}
                       >
                         Book Now
                       </Button>
@@ -636,13 +660,10 @@ const Ella = () => {
                         <span className="text-lg font-semibold text-emerald-600">{activity.price}</span>
                         <span className="text-sm text-muted-foreground">{activity.duration}</span>
                       </div>
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         className="w-full hover:bg-emerald-600 hover:text-white"
-                        onClick={() => {
-                          setSelectedAttraction(activity.name);
-                          setShowBookingModal(true);
-                        }}
+                        onClick={() => handleBooking(activity.name)}
                       >
                         Book Activity
                       </Button>
@@ -684,12 +705,9 @@ const Ella = () => {
                         <div className="mt-4 md:mt-0 md:ml-8 text-right">
                           <p className="text-2xl font-bold text-emerald-600">{hotel.price}</p>
                           <p className="text-sm text-muted-foreground">per night</p>
-                          <Button 
+                          <Button
                             className="mt-4 bg-emerald-600 hover:bg-emerald-700"
-                            onClick={() => {
-                              setSelectedAttraction(hotel.name);
-                              setShowBookingModal(true);
-                            }}
+                            onClick={() => handleBooking(hotel.name)}
                           >
                             Check Availability
                           </Button>
@@ -727,6 +745,50 @@ const Ella = () => {
                     </CardContent>
                   </Card>
                 ))}
+              </motion.div>
+            )}
+
+            {/* Map Tab */}
+            {selectedTab === 'map' && (
+              <motion.div
+                key="map"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="space-y-8"
+              >
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Ella Map & Attractions</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <DestinationMap
+                      center={ELLA_CENTER}
+                      destinationName="Ella"
+                      attractions={[
+                        { name: 'Nine Arch Bridge', lat: 6.8725, lng: 81.0583 },
+                        { name: 'Ella Rock', lat: 6.8847, lng: 81.0378 },
+                        { name: "Little Adam's Peak", lat: 6.8614, lng: 81.0464 },
+                        { name: 'Ravana Falls', lat: 6.8392, lng: 81.0533 },
+                        { name: 'Demodara Loop', lat: 6.8794, lng: 81.0569 },
+                        { name: 'Ella Gap Viewpoint', lat: 6.8667, lng: 81.0466 }
+                      ]}
+                    />
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Current Weather in Ella</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <WeatherWidget
+                      latitude={ELLA_CENTER.lat}
+                      longitude={ELLA_CENTER.lng}
+                      locationName="Ella"
+                    />
+                  </CardContent>
+                </Card>
               </motion.div>
             )}
 
@@ -849,10 +911,10 @@ const Ella = () => {
             <p className="text-xl mb-8 max-w-2xl mx-auto">
               {ctaSection.subtitle}
             </p>
-            <Button 
-              size="lg" 
+            <Button
+              size="lg"
               className="bg-white text-emerald-600 hover:bg-gray-100"
-              onClick={() => setShowBookingModal(true)}
+              onClick={() => handleBooking('Ella Tour Package')}
             >
               {ctaSection.buttonText}
             </Button>
@@ -862,12 +924,23 @@ const Ella = () => {
 
       <Footer />
 
-      {/* Enhanced Booking Modal */}
-      <EnhancedBookingModal
-        isOpen={showBookingModal}
-        onClose={() => setShowBookingModal(false)}
-        preSelectedService={selectedAttraction}
-      />
+      {/* WhatsApp Float Button */}
+      <a
+        href="https://wa.me/94777123456?text=Hi!%20I'm%20interested%20in%20booking%20an%20Ella%20tour."
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 z-50 bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
+        aria-label="Contact us on WhatsApp"
+      >
+        <svg
+          className="w-6 h-6"
+          fill="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+        </svg>
+      </a>
     </>
   );
 };

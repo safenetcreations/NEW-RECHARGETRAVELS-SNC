@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import DestinationMap from '@/components/destinations/DestinationMap';
+import WeatherWidget from '@/components/destinations/WeatherWidget';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Waves, 
-  Sun, 
-  Palmtree, 
+import {
+  Waves,
+  Sun,
+  Palmtree,
   MapPin,
   Calendar,
   Clock,
@@ -44,10 +47,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import EnhancedBookingModal from '@/components/EnhancedBookingModal';
 import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { toast } from 'sonner';
+
+const MATARA_CENTER = { lat: 5.9485, lng: 80.5353 };
 
 interface HeroSlide {
   id: string;
@@ -138,21 +142,33 @@ const defaultContent: MataraContent = {
     slides: [
       {
         id: '1',
-        image: "https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?auto=format&fit=crop&q=80",
-        title: "Welcome to Matara",
-        subtitle: "Where Dutch Heritage Meets Ocean Beauty"
+        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80",
+        title: "Discover Matara",
+        subtitle: "Southern Coastal Gem"
       },
       {
         id: '2',
-        image: "https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?auto=format&fit=crop&q=80",
-        title: "Historic Fortifications",
-        subtitle: "Explore Centuries of Colonial Architecture"
+        image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&q=80",
+        title: "Polhena Beach",
+        subtitle: "Coral Reef Paradise"
       },
       {
         id: '3',
-        image: "https://images.unsplash.com/photo-1519904981063-b0cf448d479e?auto=format&fit=crop&q=80",
-        title: "Southern Beaches",
-        subtitle: "Pristine Coastlines and Hidden Coves"
+        image: "https://images.unsplash.com/photo-1559827291-72ee739d0d9a?auto=format&fit=crop&q=80",
+        title: "Star Fort",
+        subtitle: "Dutch Colonial Heritage"
+      },
+      {
+        id: '4',
+        image: "https://images.unsplash.com/photo-1583212292454-1fe6229603b7?auto=format&fit=crop&q=80",
+        title: "Dondra Lighthouse",
+        subtitle: "Southernmost Point of Sri Lanka"
+      },
+      {
+        id: '5',
+        image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&q=80",
+        title: "Weherahena Temple",
+        subtitle: "Underground Buddhist Temple"
       }
     ],
     title: "Matara",
@@ -422,11 +438,10 @@ const defaultContent: MataraContent = {
 };
 
 const Matara = () => {
+  const navigate = useNavigate();
   const [content, setContent] = useState<MataraContent>(defaultContent);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedTab, setSelectedTab] = useState('attractions');
-  const [showBookingModal, setShowBookingModal] = useState(false);
-  const [selectedService, setSelectedService] = useState<string>('');
   const [galleryIndex, setGalleryIndex] = useState(0);
 
   // Load content from Firebase and set up real-time listener
@@ -486,22 +501,61 @@ const Matara = () => {
     { id: 'attractions', label: 'Attractions', count: content.attractions.length },
     { id: 'activities', label: 'Activities', count: content.activities.length },
     { id: 'itineraries', label: 'Tours', count: content.itineraries.length },
+    { id: 'map', label: 'Map' },
     { id: 'travel-tips', label: 'Travel Tips', count: content.travelTips.length },
     { id: 'faqs', label: 'FAQs', count: content.faqs.length }
   ];
 
-  const handleBooking = (service: string) => {
-    setSelectedService(service);
-    setShowBookingModal(true);
+  const handleBooking = (service: string = 'Matara Tour', tourData?: { id: string; name: string; description: string; duration: string; price: number; features: string[]; image?: string }) => {
+    const params = new URLSearchParams({
+      title: tourData?.name || service,
+      id: tourData?.id || service.toLowerCase().replace(/\s+/g, '-'),
+      duration: tourData?.duration || 'Full Day',
+      price: String(tourData?.price || 50),
+      image: tourData?.image || 'https://images.unsplash.com/photo-1596402184320-417e7178b2cd?w=800',
+      subtitle: `Matara - ${tourData?.name || service}`
+    });
+    navigate(`/book-tour?${params.toString()}`);
   };
 
   // JSON-LD Structured Data for SEO
+  const canonicalUrl = "https://www.rechargetravels.com/destinations/matara";
+
+  const parsePrice = (price: string) => {
+    const match = price.match(/[\d.]+/);
+    if (!match) return null;
+    const value = parseFloat(match[0]);
+    return Number.isFinite(value) ? value : null;
+  };
+
+  const offerEntries = [...content.activities, ...content.itineraries]
+    .map(({ name, price }) => {
+      const parsedPrice = parsePrice(price);
+      if (parsedPrice === null) return null;
+      return {
+        "@type": "Offer",
+        "name": name,
+        "price": parsedPrice,
+        "priceCurrency": "USD",
+        "availability": "https://schema.org/InStock",
+        "url": canonicalUrl
+      };
+    })
+    .filter((offer): offer is { "@type": string; name: string; price: number; priceCurrency: string; availability: string; url: string } => Boolean(offer));
+
   const structuredData = {
     "@context": "https://schema.org",
-    "@type": "TouristDestination",
+    "@type": ["Product", "TouristDestination"],
     "name": "Matara, Sri Lanka",
     "description": content.overview.description,
+    "url": canonicalUrl,
     "image": content.hero.slides.map(slide => slide.image),
+    "brand": {
+      "@type": "Organization",
+      "name": "Recharge Travels",
+      "url": "https://www.rechargetravels.com",
+      "logo": "https://www.rechargetravels.com/logo-v2.png"
+    },
     "touristType": ["Cultural Tourism", "Beach Tourism", "Historical Tourism"],
     "geo": {
       "@type": "GeoCoordinates",
@@ -510,15 +564,12 @@ const Matara = () => {
     },
     "aggregateRating": {
       "@type": "AggregateRating",
-      "ratingValue": "4.6",
-      "reviewCount": "1847"
+      "ratingValue": 4.6,
+      "reviewCount": 1847,
+      "bestRating": 5,
+      "worstRating": 1
     },
-    "offers": content.activities.map(activity => ({
-      "@type": "Offer",
-      "name": activity.name,
-      "price": activity.price,
-      "priceCurrency": "USD"
-    }))
+    "offers": offerEntries.length ? offerEntries : undefined
   };
 
   return (
@@ -532,7 +583,7 @@ const Matara = () => {
         <meta property="og:title" content={content.seo.title} />
         <meta property="og:description" content={content.seo.description} />
         <meta property="og:image" content={content.hero.slides[0].image} />
-        <meta property="og:url" content="https://rechargetravels.com/destinations/matara" />
+        <meta property="og:url" content={canonicalUrl} />
         <meta property="og:type" content="website" />
         
         {/* Twitter Card Tags */}
@@ -542,7 +593,7 @@ const Matara = () => {
         <meta name="twitter:image" content={content.hero.slides[0].image} />
         
         {/* Canonical URL */}
-        <link rel="canonical" href="https://rechargetravels.com/destinations/matara" />
+        <link rel="canonical" href={canonicalUrl} />
         
         {/* JSON-LD Structured Data */}
         <script type="application/ld+json">
@@ -554,7 +605,7 @@ const Matara = () => {
       
       <main className="min-h-screen bg-background">
         {/* Hero Section with Video/Image Slideshow */}
-        <section className="relative h-[80vh] overflow-hidden" aria-label="Hero">
+        <section className="relative aspect-video max-h-[80vh] overflow-hidden" aria-label="Hero">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentSlide}
@@ -891,6 +942,44 @@ const Matara = () => {
               </motion.section>
             )}
 
+            {/* Map Tab */}
+            {selectedTab === 'map' && (
+              <motion.section
+                key="map"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                aria-label="Map"
+              >
+                <h2 className="text-3xl font-bold mb-8">Explore Matara Map</h2>
+                <div className="grid lg:grid-cols-3 gap-8">
+                  <div className="lg:col-span-2">
+                    <Card className="overflow-hidden h-[500px]">
+                      <DestinationMap
+                        destinationName="Matara"
+                        center={MATARA_CENTER}
+                        attractions={[
+                          { name: 'Matara Fort', description: 'Dutch colonial fort', coordinates: { lat: 5.9485, lng: 80.5353 } },
+                          { name: 'Polhena Beach', description: 'Calm swimming beach', coordinates: { lat: 5.9300, lng: 80.5400 } },
+                          { name: 'Dondra Head Lighthouse', description: 'Southernmost point of Sri Lanka', coordinates: { lat: 5.9200, lng: 80.5900 } },
+                          { name: 'Weherahena Temple', description: 'Temple with underground shrine', coordinates: { lat: 5.9600, lng: 80.5500 } },
+                          { name: 'Star Fort', description: 'Unique star-shaped fortification', coordinates: { lat: 5.9500, lng: 80.5350 } }
+                        ]}
+                        height="500px"
+                      />
+                    </Card>
+                  </div>
+                  <div className="lg:col-span-1">
+                    <WeatherWidget
+                      locationName="Matara"
+                      latitude={MATARA_CENTER.lat}
+                      longitude={MATARA_CENTER.lng}
+                    />
+                  </div>
+                </div>
+              </motion.section>
+            )}
+
             {/* Travel Tips Tab */}
             {selectedTab === 'travel-tips' && (
               <motion.section
@@ -1111,12 +1200,18 @@ const Matara = () => {
 
       <Footer />
 
-      {/* Enhanced Booking Modal */}
-      <EnhancedBookingModal
-        isOpen={showBookingModal}
-        onClose={() => setShowBookingModal(false)}
-        preSelectedService={selectedService}
-      />
+      {/* WhatsApp Floating Button */}
+      <a
+        href="https://wa.me/94777721999?text=Hi! I'm interested in booking a Matara tour."
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 z-50 bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-lg transition-all hover:scale-110"
+        aria-label="Contact via WhatsApp"
+      >
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+      </a>
     </>
   );
 };

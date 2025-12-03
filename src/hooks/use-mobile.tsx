@@ -1,19 +1,22 @@
-import * as React from "react"
+/**
+ * Mobile Detection Hook (Backward Compatible)
+ * This file now re-exports from the comprehensive useDevice system
+ * for backward compatibility with existing components
+ */
 
-const MOBILE_BREAKPOINT = 768
+// Re-export from the new comprehensive device detection system
+export { useIsMobile } from './useDevice';
 
-export function useIsMobile() {
-  const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined)
+// Also export additional hooks for convenience
+export { 
+  useIsTablet, 
+  useIsDesktop, 
+  useDevice,
+  useIsTouchDevice,
+  useResponsiveValue,
+  useBreakpointValue,
+  BREAKPOINTS 
+} from './useDevice';
 
-  React.useEffect(() => {
-    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
-    const onChange = () => {
-      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
-    }
-    mql.addEventListener("change", onChange)
-    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
-    return () => mql.removeEventListener("change", onChange)
-  }, [])
-
-  return !!isMobile
-}
+// Legacy constant export for backward compatibility
+export const MOBILE_BREAKPOINT = 768;

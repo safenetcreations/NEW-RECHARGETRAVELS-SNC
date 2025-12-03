@@ -33,9 +33,12 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import EnhancedBookingModal from '@/components/EnhancedBookingModal';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { getDestinationBySlug } from '@/services/destinationContentService';
+import DestinationMap from '@/components/destinations/DestinationMap';
+import WeatherWidget from '@/components/destinations/WeatherWidget';
+
+const PUTTALAM_CENTER = { lat: 8.0362, lng: 79.8283 };
 
 interface HeroSlide {
   image: string;
@@ -112,27 +115,16 @@ interface CTASection {
 }
 
 const Puttalam = () => {
+  const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedTab, setSelectedTab] = useState('attractions');
-  const [showBookingModal, setShowBookingModal] = useState(false);
-  const [selectedAttraction, setSelectedAttraction] = useState<string>('');
 
   const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([
-    {
-      image: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&q=80",
-      title: "Discover Puttalam",
-      subtitle: "Where Lagoons Meet the Sky"
-    },
-    {
-      image: "https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?auto=format&fit=crop&q=80",
-      title: "Salt Pans & Flamingos",
-      subtitle: "A Haven for Migratory Birds"
-    },
-    {
-      image: "https://images.unsplash.com/photo-1546026423-cc4642628d2b?auto=format&fit=crop&q=80",
-      title: "Coastal Paradise",
-      subtitle: "Untouched Lagoons & Pristine Nature"
-    }
+    { image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80", title: "Discover Puttalam", subtitle: "Salt & Lagoon Country" },
+    { image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&q=80", title: "Puttalam Lagoon", subtitle: "Vast Coastal Wetlands" },
+    { image: "https://images.unsplash.com/photo-1559827291-72ee739d0d9a?auto=format&fit=crop&q=80", title: "Salt Flats", subtitle: "Traditional Salt Harvesting" },
+    { image: "https://images.unsplash.com/photo-1583212292454-1fe6229603b7?auto=format&fit=crop&q=80", title: "Wilpattu Gateway", subtitle: "Wildlife National Park" },
+    { image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&q=80", title: "St. Anne's Church", subtitle: "Historic Pilgrimage Site" }
   ]);
 
   const [attractions, setAttractions] = useState<Attraction[]>([
@@ -377,9 +369,16 @@ const Puttalam = () => {
     return () => clearInterval(timer);
   }, [heroSlides.length]);
 
-  const handleBookNow = (attractionName: string = '') => {
-    setSelectedAttraction(attractionName);
-    setShowBookingModal(true);
+  const handleBooking = (service: string = 'Puttalam Tour', tourData?: { id: string; name: string; description: string; duration: string; price: number; features: string[]; image?: string }) => {
+    const params = new URLSearchParams({
+      title: tourData?.name || service,
+      id: tourData?.id || service.toLowerCase().replace(/\s+/g, '-'),
+      duration: tourData?.duration || 'Full Day',
+      price: String(tourData?.price || 45),
+      image: tourData?.image || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800',
+      subtitle: `Puttalam - ${tourData?.name || service}`
+    });
+    navigate(`/book-tour?${params.toString()}`);
   };
 
   return (
@@ -393,7 +392,7 @@ const Puttalam = () => {
       
       <div className="min-h-screen bg-background">
         {/* Hero Section */}
-        <section className="relative h-[80vh] overflow-hidden">
+        <section className="relative aspect-video max-h-[80vh] overflow-hidden">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentSlide}
@@ -438,7 +437,7 @@ const Puttalam = () => {
                 transition={{ duration: 0.8, delay: 0.4 }}
                 className="flex gap-4 justify-center"
               >
-                <Button size="lg" onClick={() => handleBookNow()}>
+                <Button size="lg" onClick={() => handleBooking()}>
                   Book Your Experience
                 </Button>
                 <Button
@@ -512,7 +511,7 @@ const Puttalam = () => {
         <section className="sticky top-0 z-40 bg-white shadow-md">
           <div className="container mx-auto px-4">
             <div className="flex space-x-8 overflow-x-auto">
-              {['attractions', 'activities', 'hotels', 'restaurants', 'weather'].map((tab) => (
+              {['attractions', 'activities', 'hotels', 'restaurants', 'weather', 'map'].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setSelectedTab(tab)}
@@ -569,9 +568,9 @@ const Puttalam = () => {
                         </div>
                       </div>
                       
-                      <Button 
+                      <Button
                         className="w-full"
-                        onClick={() => handleBookNow(attraction.name)}
+                        onClick={() => handleBooking(attraction.name)}
                       >
                         Book Now
                       </Button>
@@ -605,7 +604,7 @@ const Puttalam = () => {
                       <p className="text-gray-600 mb-4">{activity.description}</p>
                       <div className="flex items-center justify-between">
                         <span className="text-2xl font-bold text-amber-600">{activity.price}</span>
-                        <Button onClick={() => handleBookNow(activity.name)}>
+                        <Button onClick={() => handleBooking(activity.name)}>
                           Book Now
                         </Button>
                       </div>
@@ -677,7 +676,7 @@ const Puttalam = () => {
                         )}
                         <Button
                           className="w-full mt-3"
-                          onClick={() => handleBookNow(hotel.name)}
+                          onClick={() => handleBooking(hotel.name)}
                         >
                           Book This Stay
                         </Button>
@@ -762,7 +761,7 @@ const Puttalam = () => {
                     <p className="text-gray-600">Warm coastal climate</p>
                   </CardContent>
                 </Card>
-                
+
                 <Card>
                   <CardHeader>
                     <Cloud className="w-8 h-8 text-blue-500 mb-2" />
@@ -773,7 +772,7 @@ const Puttalam = () => {
                     <p className="text-gray-600">Coastal influence</p>
                   </CardContent>
                 </Card>
-                
+
                 <Card>
                   <CardHeader>
                     <Cloud className="w-8 h-8 text-gray-500 mb-2" />
@@ -784,7 +783,7 @@ const Puttalam = () => {
                     <p className="text-gray-600">Oct-Dec monsoon</p>
                   </CardContent>
                 </Card>
-                
+
                 <Card>
                   <CardHeader>
                     <Calendar className="w-8 h-8 text-green-500 mb-2" />
@@ -795,6 +794,38 @@ const Puttalam = () => {
                     <p className="text-gray-600">Bird migration season</p>
                   </CardContent>
                 </Card>
+              </div>
+            </div>
+          )}
+
+          {/* Map Tab */}
+          {selectedTab === 'map' && (
+            <div>
+              <h2 className="text-3xl font-bold mb-8">Explore Puttalam Map</h2>
+              <div className="grid lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-2">
+                  <Card className="overflow-hidden h-[500px]">
+                    <DestinationMap
+                      destinationName="Puttalam"
+                      center={PUTTALAM_CENTER}
+                      attractions={[
+                        { name: 'Puttalam Lagoon', description: 'Large coastal lagoon', coordinates: { lat: 8.0362, lng: 79.8283 } },
+                        { name: 'Wilpattu National Park', description: 'Famous wildlife park', coordinates: { lat: 8.4500, lng: 80.0000 } },
+                        { name: 'Munneswaram Temple', description: 'Ancient Hindu temple', coordinates: { lat: 7.9700, lng: 79.8500 } },
+                        { name: 'Salt Pans', description: 'Traditional salt harvesting', coordinates: { lat: 8.0500, lng: 79.8100 } },
+                        { name: 'Thalawila Church', description: 'St. Anne\'s Church pilgrimage site', coordinates: { lat: 8.1000, lng: 79.7500 } }
+                      ]}
+                      height="500px"
+                    />
+                  </Card>
+                </div>
+                <div className="lg:col-span-1">
+                  <WeatherWidget
+                    locationName="Puttalam"
+                    latitude={PUTTALAM_CENTER.lat}
+                    longitude={PUTTALAM_CENTER.lng}
+                  />
+                </div>
               </div>
             </div>
           )}
@@ -861,7 +892,7 @@ const Puttalam = () => {
               {ctaSection.subtitle}
             </p>
             <div className="flex gap-4 justify-center">
-              <Button size="lg" variant="secondary" onClick={() => handleBookNow()}>
+              <Button size="lg" variant="secondary" onClick={() => handleBooking()}>
                 {ctaSection.buttonText}
               </Button>
               <Button
@@ -879,12 +910,18 @@ const Puttalam = () => {
         </section>
       </div>
 
-      {/* Booking Modal */}
-      <EnhancedBookingModal
-        isOpen={showBookingModal}
-        onClose={() => setShowBookingModal(false)}
-        preSelectedService={selectedAttraction}
-      />
+      {/* WhatsApp Floating Button */}
+      <a
+        href="https://wa.me/94777721999?text=Hi! I'm interested in booking a Puttalam tour."
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 z-50 bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-lg transition-all hover:scale-110"
+        aria-label="Contact via WhatsApp"
+      >
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+      </a>
 
       <Footer />
     </>

@@ -360,7 +360,7 @@ class QuoteCalculator {
 
       let total: number;
       let quantity = 1;
-      let unitPrice = service.price || service.pricePerDay || 0;
+      const unitPrice = service.price || service.pricePerDay || 0;
 
       if (service.pricePerDay) {
         quantity = days;

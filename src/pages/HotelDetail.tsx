@@ -20,7 +20,7 @@ import HotelLoadingSpinner from './HotelDetail/components/HotelLoadingSpinner'
 import GoogleHotelNotice from './HotelDetail/components/GoogleHotelNotice'
 
 const HotelDetail = () => {
-  const { hotelId } = useParams<{ hotelId: string }>()
+  const { id: hotelId } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [checkIn, setCheckIn] = useState('')

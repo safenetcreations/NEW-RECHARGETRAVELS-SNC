@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -19,7 +19,6 @@ import {
   CheckCircle,
   Clock,
   Crown,
-  Globe,
   Mail,
   MessageCircle,
   Phone,
@@ -85,7 +84,7 @@ const PrivateCharters = () => {
   const heroVideoRef = useRef<HTMLVideoElement | null>(null);
   const fallbackTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [videoReady, setVideoReady] = useState(false);
-  const [heroFallback, setHeroFallback] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
   const [microFormValues, setMicroFormValues] = useState<Record<string, string>>({});
   const [microFormStatus, setMicroFormStatus] = useState<'idle' | 'success'>('idle');
   const [formData, setFormData] = useState({
@@ -141,7 +140,7 @@ const PrivateCharters = () => {
     const video = heroVideoRef.current;
     if (!video) return;
     setVideoReady(false);
-    setHeroFallback(false);
+    setShowVideo(false);
     if (fallbackTimerRef.current) {
       clearTimeout(fallbackTimerRef.current);
     }
@@ -150,11 +149,11 @@ const PrivateCharters = () => {
         clearTimeout(fallbackTimerRef.current);
       }
       setVideoReady(true);
-      setHeroFallback(false);
+      setShowVideo(true);
       const playPromise = video.play();
       if (playPromise?.catch) {
         playPromise.catch(() => {
-          setHeroFallback(true);
+          setShowVideo(false);
         });
       }
     };
@@ -162,16 +161,16 @@ const PrivateCharters = () => {
       if (fallbackTimerRef.current) {
         clearTimeout(fallbackTimerRef.current);
       }
-      setHeroFallback(true);
+      setShowVideo(false);
       setVideoReady(true);
     };
     video.addEventListener('canplay', handleCanPlay);
     video.addEventListener('error', handleError);
     video.load();
     fallbackTimerRef.current = setTimeout(() => {
-      setHeroFallback(true);
+      setShowVideo(false);
       setVideoReady(true);
-    }, 6000);
+    }, 4000);
     return () => {
       video.removeEventListener('canplay', handleCanPlay);
       video.removeEventListener('error', handleError);
@@ -266,34 +265,29 @@ const PrivateCharters = () => {
       {/* HERO */}
       <section className="relative min-h-[85vh] overflow-hidden bg-black text-white">
         <div className="absolute inset-0" aria-live="polite">
-          {!heroFallback ? (
-            <>
-              <video
-                ref={heroVideoRef}
-                className="h-full w-full object-cover"
-                src={heroVideo}
-                poster={heroPoster}
-                autoPlay
-                playsInline
-                muted
-                loop
-                preload="auto"
-              />
-              <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/55 to-black/90" />
-              {!videoReady && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black/80 text-center text-white">
-                  <div className="h-12 w-12 animate-spin rounded-full border-2 border-white/30 border-t-transparent" />
-                  <p className="text-sm uppercase tracking-[0.4em] text-white/60">
-                    Warming up the charter reel…
-                  </p>
-                </div>
-              )}
-            </>
-          ) : (
-            <>
-              <img src={heroPoster} alt={content.hero.title} className="h-full w-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/55 to-black/90" />
-            </>
+          {/* Always render poster as base to avoid black gaps */}
+          <img src={heroPoster} alt={content.hero.title} className="h-full w-full object-cover" />
+          {showVideo && (
+            <video
+              ref={heroVideoRef}
+              className="absolute inset-0 h-full w-full object-cover"
+              src={heroVideo}
+              poster={heroPoster}
+              autoPlay
+              playsInline
+              muted
+              loop
+              preload="metadata"
+            />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/55 to-black/90" />
+          {!videoReady && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black/70 text-center text-white">
+              <div className="h-12 w-12 animate-spin rounded-full border-2 border-white/30 border-t-transparent" />
+              <p className="text-sm uppercase tracking-[0.4em] text-white/60">
+                Warming up the charter reel…
+              </p>
+            </div>
           )}
         </div>
 
@@ -549,6 +543,7 @@ const PrivateCharters = () => {
                     transition={{ duration: 0.6 }}
                     src={asset.image}
                     alt={asset.name}
+                    loading="lazy"
                     className="h-56 w-full object-cover"
                   />
                   <div className="space-y-4 px-6 py-6">
@@ -917,7 +912,7 @@ const PrivateCharters = () => {
                 transition={{ duration: 0.5 }}
                 className="relative overflow-hidden rounded-[32px]"
               >
-                <img src={image.image} alt={image.caption} className="h-72 w-full object-cover" />
+                <img src={image.image} alt={image.caption} loading="lazy" className="h-72 w-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/0" />
                 <figcaption className="absolute bottom-4 left-4 text-sm text-white">{image.caption}</figcaption>
               </motion.figure>

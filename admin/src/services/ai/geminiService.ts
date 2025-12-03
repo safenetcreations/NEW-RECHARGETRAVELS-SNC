@@ -160,7 +160,7 @@ FOCUS ON:
   private parseContentResponse(text: string, request: ContentGenerationRequest): ContentGenerationResponse {
     try {
       // Clean up the response - remove any markdown code blocks
-      let cleanText = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      const cleanText = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
 
       const parsed = JSON.parse(cleanText);
 

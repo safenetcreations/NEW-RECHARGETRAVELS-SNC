@@ -8,6 +8,8 @@ import { PlatformTabs } from '@/components/social/PlatformTabs'
 import { PublicPostsGrid } from '@/components/social/PublicPostsGrid'
 import { AdminAccountManager } from '@/components/social/AdminAccountManager'
 import { SocialWelcomeSection } from '@/components/social/SocialWelcomeSection'
+import { LiveSocialFeed } from '@/components/social/LiveSocialFeed'
+import { TourismNewsSection } from '@/components/social/TourismNewsSection'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 
@@ -77,6 +79,8 @@ const AboutSocial = () => {
 
       <Header />
       <SocialWelcomeSection />
+      <LiveSocialFeed />
+      <TourismNewsSection />
       <Footer />
     </>
   )

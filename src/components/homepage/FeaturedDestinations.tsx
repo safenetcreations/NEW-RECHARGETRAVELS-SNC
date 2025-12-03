@@ -318,16 +318,19 @@ const FeaturedDestinations = () => {
               variant="outline"
               size="icon"
               onClick={prevPage}
+              aria-label="Previous destinations"
               className="w-12 h-12 rounded-full bg-white/5 border-white/20 hover:bg-white/15 hover:border-white/40 text-white transition-all"
             >
               <ChevronLeft className="w-6 h-6" />
             </Button>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2" role="tablist" aria-label="Destination pages">
               {Array.from({ length: totalPages }).map((_, idx) => (
                 <button
                   type="button"
                   key={idx}
+                  role="tab"
+                  aria-selected={currentPage === idx}
                   onClick={() => setCurrentPage(idx)}
                   className={`h-3 rounded-full transition-all duration-300 ${
                     currentPage === idx
@@ -343,6 +346,7 @@ const FeaturedDestinations = () => {
               variant="outline"
               size="icon"
               onClick={nextPage}
+              aria-label="Next destinations"
               className="w-12 h-12 rounded-full bg-white/5 border-white/20 hover:bg-white/15 hover:border-white/40 text-white transition-all"
             >
               <ChevronRight className="w-6 h-6" />

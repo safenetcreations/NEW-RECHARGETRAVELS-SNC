@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
     Building2, MapPin, DollarSign, Image as ImageIcon, CheckCircle,
     Loader2, Upload, X, Home, User, Mail, Phone, ChevronRight,
-    ChevronLeft, Star, Shield, Globe, Camera, MessageCircle
+    ChevronLeft, Star, Shield, Globe, Camera, MessageCircle, Sparkles,
+    BadgeCheck, CreditCard, Building, FileText
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -12,9 +13,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
-import { firebaseHotelService } from '@/services/firebaseHotelService'
-import { storage } from '@/lib/firebase'
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { propertyListingService, PropertyType } from '@/services/propertyListingService'
 
 const PROPERTY_TYPES = [
     { value: 'vacation_home', label: 'Vacation Home', icon: Home },
@@ -55,6 +54,7 @@ const ListProperty = () => {
     const { toast } = useToast()
     const [currentStep, setCurrentStep] = useState(1)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [submitSuccess, setSubmitSuccess] = useState(false)
     const [photos, setPhotos] = useState<File[]>([])
     const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -125,47 +125,38 @@ const ListProperty = () => {
         setIsSubmitting(true)
 
         try {
-            const uploadedImages = []
-            for (let i = 0; i < photos.length; i++) {
-                const file = photos[i]
-                const storageRef = ref(storage, `hotel_images/${Date.now()}_${file.name}`)
-                await uploadBytes(storageRef, file)
-                const url = await getDownloadURL(storageRef)
-                uploadedImages.push({
-                    id: `img_${Date.now()}_${i}`,
-                    hotel_id: '',
-                    image_url: url,
-                    is_primary: i === 0,
-                    sort_order: i
-                })
-            }
-
-            await firebaseHotelService.createHotel({
+            // Create the listing first to get an ID
+            const listingId = await propertyListingService.createListing({
                 name: formData.name,
+                type: formData.type as PropertyType,
                 description: formData.description,
-                hotel_type: formData.type as any,
-                city: { id: 'custom', name: formData.city, country: 'Sri Lanka' },
+                city: formData.city,
                 address: formData.address,
                 base_price_per_night: Number(formData.price),
+                currency: 'USD',
                 amenities: formData.amenities,
-                images: uploadedImages,
+                images: [],
+                owner_name: formData.ownerName,
+                owner_email: formData.ownerEmail,
+                owner_phone: formData.ownerPhone,
+                is_featured: false,
                 is_active: false,
-                hostProfile: {
-                    name: formData.ownerName,
-                    joinedDate: new Date().toISOString(),
-                    isVerified: false
-                },
-                email: formData.ownerEmail,
-                phone: formData.ownerPhone,
-                country: 'Sri Lanka'
+                documents_verified: false,
+                identity_verified: false,
+                property_verified: false
             })
 
+            // Upload images if any
+            if (photos.length > 0) {
+                const uploadedImages = await propertyListingService.uploadImages(listingId, photos)
+                await propertyListingService.updateListing(listingId, { images: uploadedImages })
+            }
+
+            setSubmitSuccess(true)
             toast({
-                title: "Application Submitted!",
-                description: "Your property is now under review. We'll contact you shortly.",
+                title: "🎉 Application Submitted Successfully!",
+                description: "Check your email for confirmation. We'll review your property within 24-48 hours.",
             })
-
-            setTimeout(() => navigate('/'), 2000)
 
         } catch (error) {
             console.error('Error listing property:', error)
@@ -177,6 +168,52 @@ const ListProperty = () => {
         } finally {
             setIsSubmitting(false)
         }
+    }
+
+    // Success Screen
+    if (submitSuccess) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-teal-50 to-emerald-50 flex items-center justify-center p-4">
+                <motion.div 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="max-w-lg w-full bg-white rounded-3xl shadow-2xl p-8 text-center"
+                >
+                    <div className="w-20 h-20 bg-gradient-to-br from-teal-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <CheckCircle className="w-10 h-10 text-white" />
+                    </div>
+                    <h1 className="text-3xl font-bold text-slate-900 mb-4">Application Submitted!</h1>
+                    <p className="text-slate-600 mb-6">
+                        Thank you for your interest in partnering with Recharge Travels. We've sent a confirmation email to <span className="font-semibold text-teal-600">{formData.ownerEmail}</span>.
+                    </p>
+                    <div className="bg-teal-50 rounded-xl p-4 mb-6">
+                        <h3 className="font-semibold text-teal-900 mb-2">What happens next?</h3>
+                        <ul className="text-sm text-teal-700 space-y-2 text-left">
+                            <li className="flex items-start gap-2">
+                                <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                                Our team will review your property within 24-48 hours
+                            </li>
+                            <li className="flex items-start gap-2">
+                                <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                                We may contact you for additional verification
+                            </li>
+                            <li className="flex items-start gap-2">
+                                <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                                Once approved, your property will be live on our platform
+                            </li>
+                        </ul>
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                        <Button onClick={() => navigate('/')} className="flex-1 bg-teal-600 hover:bg-teal-700 text-white">
+                            Return to Homepage
+                        </Button>
+                        <Button onClick={() => { setSubmitSuccess(false); setCurrentStep(1) }} variant="outline" className="flex-1">
+                            List Another Property
+                        </Button>
+                    </div>
+                </motion.div>
+            </div>
+        )
     }
 
     return (

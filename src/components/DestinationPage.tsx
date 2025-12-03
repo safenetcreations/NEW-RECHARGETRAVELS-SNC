@@ -197,7 +197,7 @@ const DestinationPage: React.FC<DestinationPageProps> = ({ config }) => {
     "@type": "TouristDestination",
     "name": dynamicContent.name,
     "description": dynamicContent.description,
-    "url": `https://recharge-travels-73e76.web.app/destinations/${config.id}`,
+    "url": `https://www.rechargetravels.com/destinations/${config.id}`,
     "image": dynamicContent.heroImages[0].image,
     "address": {
       "@type": "PostalAddress",

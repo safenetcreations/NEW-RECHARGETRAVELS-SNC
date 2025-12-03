@@ -4,8 +4,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { FeaturedDestination, FeaturedDestinationFormData } from '@/types/cms';
+import { FeaturedDestination, FeaturedDestinationFormData, HeroImage } from '@/types/cms';
 import ImageUpload from '@/components/ui/image-upload';
+import { Plus, Trash2, Image as ImageIcon, Edit2 } from 'lucide-react';
 
 interface FeaturedDestinationFormProps {
   destination: FeaturedDestination | null;
@@ -25,6 +26,7 @@ const FeaturedDestinationForm: React.FC<FeaturedDestinationFormProps> = ({ desti
     rating: 5,
     features: [],
     image: '',
+    images: [],
     isActive: true,
     isFeatured: false,
     order: 0,
@@ -46,6 +48,7 @@ const FeaturedDestinationForm: React.FC<FeaturedDestinationFormProps> = ({ desti
         rating: destination.rating || 5,
         features: destination.features || [],
         image: destination.image,
+        images: destination.images || [],
         isActive: destination.isActive,
         isFeatured: destination.isFeatured,
         order: destination.order,
@@ -129,15 +132,103 @@ const FeaturedDestinationForm: React.FC<FeaturedDestinationFormProps> = ({ desti
         </div>
       </div>
 
-      <div>
-        <Label>Destination Image</Label>
-        <ImageUpload
-          value={formData.image}
-          onChange={(url) => setFormData(prev => ({ ...prev, image: url }))}
-          onRemove={() => setFormData(prev => ({ ...prev, image: '' }))}
-          folder="destinations"
-          helperText="Recommended: 800x600px. Max: 10MB. Formats: JPG, PNG, WEBP"
-        />
+      {/* Hero Images Section - Up to 5 images with titles */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Label className="text-lg font-semibold">Hero Images with Titles (16:9 format, up to 5)</Label>
+          <span className="text-sm text-gray-500">{formData.images.length}/5 images</span>
+        </div>
+
+        {/* Display existing images with title/subtitle editing */}
+        <div className="space-y-4">
+          {formData.images.map((img, index) => (
+            <div key={index} className="border rounded-lg p-4 bg-gray-50">
+              <div className="flex gap-4">
+                {/* Image Preview */}
+                <div className="relative w-48 flex-shrink-0">
+                  <div className="aspect-video rounded-lg overflow-hidden border-2 border-gray-200">
+                    <img src={img.url} alt={img.title || `Hero ${index + 1}`} className="w-full h-full object-cover" />
+                  </div>
+                  <div className="absolute top-1 left-1 bg-black/70 text-white text-xs px-2 py-0.5 rounded">
+                    {index + 1}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newImages = formData.images.filter((_, i) => i !== index);
+                      setFormData(prev => ({ ...prev, images: newImages, image: newImages[0]?.url || '' }));
+                    }}
+                    className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded hover:bg-red-600"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                </div>
+
+                {/* Title and Subtitle Fields */}
+                <div className="flex-1 space-y-3">
+                  <div>
+                    <Label className="text-sm">Image {index + 1} Title (displays over image)</Label>
+                    <Input
+                      value={img.title}
+                      onChange={(e) => {
+                        const newImages = [...formData.images];
+                        newImages[index] = { ...newImages[index], title: e.target.value };
+                        setFormData(prev => ({ ...prev, images: newImages }));
+                      }}
+                      placeholder="e.g., Discover Sigiriya"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-sm">Image {index + 1} Subtitle (displays below title)</Label>
+                    <Input
+                      value={img.subtitle}
+                      onChange={(e) => {
+                        const newImages = [...formData.images];
+                        newImages[index] = { ...newImages[index], subtitle: e.target.value };
+                        setFormData(prev => ({ ...prev, images: newImages }));
+                      }}
+                      placeholder="e.g., Ancient Rock Fortress"
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Add new image slot */}
+        {formData.images.length < 5 && (
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50">
+            <p className="text-sm text-gray-600 mb-3">Add Image {formData.images.length + 1} of 5</p>
+            <ImageUpload
+              value=""
+              onChange={(url) => {
+                if (url && formData.images.length < 5) {
+                  const newImage: HeroImage = {
+                    url: url,
+                    title: `Discover ${formData.name || 'Destination'}`,
+                    subtitle: ''
+                  };
+                  const newImages = [...formData.images, newImage];
+                  setFormData(prev => ({
+                    ...prev,
+                    images: newImages,
+                    image: newImages[0]?.url || url
+                  }));
+                }
+              }}
+              onRemove={() => {}}
+              folder="destinations"
+              helperText="Recommended: 1920x1080px (16:9 ratio). Max: 10MB. Formats: JPG, PNG, WEBP"
+            />
+          </div>
+        )}
+
+        <p className="text-xs text-gray-500">
+          Each image can have its own title and subtitle that displays as an overlay. First image will be used as the primary/thumbnail.
+        </p>
       </div>
 
       <div>

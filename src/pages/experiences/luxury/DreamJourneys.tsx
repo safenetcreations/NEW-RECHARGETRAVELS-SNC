@@ -1,6 +1,5 @@
-import React, { useState, useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -10,9 +9,119 @@ import { Crown, Plane, Anchor, Mountain, MapPin, Phone, Mail, ArrowRight, Shield
 import { db } from '@/lib/firebase';
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
 import { toast } from 'sonner';
+import DreamHero from './DreamHero';
+
+// NUCLEAR OPTION: Force EVERYTHING to be visible - NO ANIMATIONS WHATSOEVER
+const heroStyles = `
+  /* GLOBAL: Kill EVERY animation on this entire page */
+  .dream-page-no-animation,
+  .dream-page-no-animation *,
+  .dream-page-no-animation *::before,
+  .dream-page-no-animation *::after,
+  .dream-page-no-animation h1,
+  .dream-page-no-animation h2,
+  .dream-page-no-animation h3,
+  .dream-page-no-animation p,
+  .dream-page-no-animation div,
+  .dream-page-no-animation span,
+  .dream-page-no-animation button,
+  .dream-page-no-animation section {
+    opacity: 1 !important;
+    transform: none !important;
+    visibility: visible !important;
+    animation: none !important;
+    animation-delay: 0s !important;
+    animation-duration: 0s !important;
+    animation-play-state: paused !important;
+    transition: none !important;
+    transition-delay: 0s !important;
+    transition-duration: 0s !important;
+    will-change: auto !important;
+  }
+  
+  /* Specifically kill fade-in and fade-in-up classes that might be applied */
+  .fade-in,
+  .fade-in-up,
+  .animate-fade-in,
+  .animate-fade-up {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+  
+  /* Force hero section and ALL descendants to be 100% visible */
+  .dream-hero-content,
+  .dream-hero-content *,
+  .dream-hero-content h1,
+  .dream-hero-content h2,
+  .dream-hero-content p,
+  .dream-hero-content div,
+  .dream-hero-content button,
+  .dream-hero-content span,
+  .dream-hero-content a {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: inherit !important;
+    pointer-events: auto !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  /* Specifically target hero text classes */
+  .hero-title,
+  .hero-subtitle,
+  .hero-description {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+    color: white !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  /* Override ANY inline styles */
+  [style*="opacity: 0"],
+  [style*="opacity:0"],
+  [style*="display: none"],
+  [style*="display:none"],
+  [style*="visibility: hidden"],
+  [style*="visibility:hidden"] {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: inherit !important;
+  }
+  
+  /* Override Framer Motion or any JS-injected styles */
+  [data-framer-motion],
+  [data-motion] {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+`;
 
 // Signature Journeys - each one is a masterpiece
-const signatureJourneys = [
+type CMSJourney = {
+  id?: string;
+  name: string;
+  image?: string;
+  description: string;
+  features?: string[];
+  pricePerDay?: string;
+  passengers?: number;
+  sortOrder?: number;
+  duration?: string;
+  route?: string;
+  highlights?: string[];
+  tagline?: string;
+  inclusions?: string[];
+  guests?: string;
+  startingFrom?: string;
+};
+
+const signatureJourneys: CMSJourney[] = [
   {
     id: 'ceylon-awakening',
     name: 'The Ceylon Awakening',
@@ -97,23 +206,16 @@ const testimonials = [
   { text: 'The access they arranged simply doesn\'t exist elsewhere.', attribution: 'Private Office, Singapore', context: 'Cultural immersion program' }
 ];
 
-const AnimatedSection = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
-  return (
-    <motion.div ref={ref} initial={{ opacity: 0, y: 60 }} animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 60 }} transition={{ duration: 1 }} className={className}>
-      {children}
-    </motion.div>
-  );
-};
+const AnimatedSection = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
+  <div className={className}>{children}</div>
+);
 
 const DreamJourneys = () => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', preferredDates: '', guests: '', interests: '', requirements: '' });
+  const journeys: CMSJourney[] = signatureJourneys;
   const heroRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
-  const heroY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+  const heroImageUrl = 'https://images.unsplash.com/photo-1596402184320-417e7178b2cd?w=1920&q=85&auto=format&fit=crop';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -136,95 +238,47 @@ const DreamJourneys = () => {
   };
 
   return (
-    <>
+    <div className="dream-page-no-animation">
       <Helmet>
         <title>Dream Journeys | Ultra-Luxury Multi-Day Experiences | Recharge Travels</title>
         <meta name="description" content="Bespoke multi-day journeys combining private helicopters, superyachts, and exclusive access. For discerning travelers who expect the extraordinary." />
       </Helmet>
+
       <Header />
-      <main className="min-h-screen bg-[#030303] text-white overflow-hidden">
-        
-        {/* CINEMATIC HERO - Full immersion */}
-        <section ref={heroRef} className="relative h-[100vh] overflow-hidden">
-          <motion.div style={{ y: heroY }} className="absolute inset-0">
-            <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1596402184320-417e7178b2cd?w=1920&q=90')] bg-cover bg-center" />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-[#030303]" />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-black/50" />
-          </motion.div>
+      <main className="min-h-screen bg-[#030303] text-white overflow-x-hidden">
 
-          <motion.div style={{ opacity: heroOpacity }} className="relative z-10 h-full flex flex-col justify-center items-center text-center px-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 2, delay: 0.5 }} className="max-w-4xl">
-              
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.5, delay: 1 }} className="mb-12">
-                <div className="inline-flex items-center gap-4 mb-8">
-                  <div className="h-px w-16 bg-gradient-to-r from-transparent via-amber-400/60 to-transparent" />
-                  <Crown className="w-6 h-6 text-amber-400/80" />
-                  <div className="h-px w-16 bg-gradient-to-r from-transparent via-amber-400/60 to-transparent" />
-                </div>
-              </motion.div>
-
-              <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.5, delay: 1.2 }} className="text-5xl md:text-7xl lg:text-8xl font-extralight tracking-tight mb-6">
-                Dream <span className="font-light text-amber-200">Journeys</span>
-              </motion.h1>
-
-              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.5, delay: 1.6 }} className="text-xl md:text-2xl text-gray-300 font-extralight tracking-wide mb-4">
-                Multi-day curated adventures
-              </motion.p>
-              
-              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.5, delay: 1.8 }} className="text-base text-gray-500 font-light max-w-2xl mx-auto mb-12">
-                Combining private helicopters, superyachts, and access that simply doesn't exist elsewhere. 
-                For those who have experienced everything—except this.
-              </motion.p>
-
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, delay: 2.2 }} className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" className="group bg-transparent border border-amber-400/30 text-amber-200 hover:bg-amber-400/10 hover:border-amber-400/50 px-10 py-7 text-sm tracking-[0.2em] uppercase rounded-none" onClick={() => document.getElementById('journeys')?.scrollIntoView({ behavior: 'smooth' })}>
-                  Explore Journeys
-                </Button>
-                <Button size="lg" className="bg-amber-400/10 border border-amber-400/20 text-amber-200 hover:bg-amber-400/20 px-10 py-7 text-sm tracking-[0.2em] uppercase rounded-none" onClick={() => document.getElementById('inquiry')?.scrollIntoView({ behavior: 'smooth' })}>
-                  Private Consultation
-                </Button>
-              </motion.div>
-            </motion.div>
-          </motion.div>
-
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 3, duration: 1 }} className="absolute bottom-8 left-1/2 -translate-x-1/2 text-center">
-            <div className="text-xs text-gray-600 tracking-[0.3em] uppercase mb-2">Scroll to discover</div>
-            <div className="w-px h-12 bg-gradient-to-b from-amber-400/50 to-transparent mx-auto" />
-          </motion.div>
-        </section>
+        {/* NEW STABLE HERO SECTION */}
+        <DreamHero />
 
         {/* PHILOSOPHY */}
-        <section className="py-32 relative">
-          <div className="absolute inset-0 bg-gradient-to-b from-[#030303] via-[#0a0805] to-[#030303]" />
-          <div className="container mx-auto px-4 relative z-10">
-            <AnimatedSection className="max-w-4xl mx-auto text-center">
-              <div className="text-amber-400/60 text-xs tracking-[0.4em] uppercase mb-8">Our Philosophy</div>
-              <h2 className="text-3xl md:text-5xl font-extralight leading-relaxed mb-8">
-                We don't offer tours.<br />
+        <section className="py-24 bg-[#050505] text-white">
+          <div className="container mx-auto px-4 max-w-6xl">
+            <div className="max-w-4xl mx-auto text-center mb-16">
+              <div className="text-amber-300/70 text-[11px] tracking-[0.35em] uppercase mb-6">Our Philosophy</div>
+              <h2 className="text-3xl md:text-5xl font-extralight leading-relaxed mb-6">
+                We don&apos;t offer tours.<br />
                 <span className="text-amber-200">We orchestrate transformations.</span>
               </h2>
-              <p className="text-gray-500 font-light text-lg leading-relaxed max-w-3xl mx-auto">
-                Every Dream Journey is a singular creation—conceived, designed, and executed for you alone. 
-                We combine assets that have never been combined, arrange access that has never been granted, 
-                and create moments that exist nowhere else on earth.
+              <p className="text-gray-300 font-light text-lg leading-relaxed">
+                Every Dream Journey is conceived, designed, and executed for you alone. We combine assets that have never been combined, arrange access that has never been granted, and create moments that exist nowhere else on earth.
               </p>
-            </AnimatedSection>
+            </div>
 
-            <AnimatedSection className="grid md:grid-cols-3 gap-8 mt-24">
+            <div className="grid md:grid-cols-3 gap-8">
               {[
                 { icon: Compass, title: 'Unprecedented Access', desc: 'Temples opened at dawn. Museums after hours. Experiences money alone cannot buy.' },
                 { icon: Shield, title: 'Absolute Discretion', desc: 'Your privacy is sacred. No social media. No press. Just you and the extraordinary.' },
                 { icon: Sparkles, title: 'Invisible Perfection', desc: 'Every detail anticipated. Every moment seamless. Nothing but wonder.' }
-              ].map((item, idx) => (
-                <motion.div key={idx} initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: idx * 0.2 }} className="text-center p-8 border border-white/5 bg-white/[0.01]">
-                  <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-amber-400/5 flex items-center justify-center border border-amber-400/10">
-                    <item.icon className="w-7 h-7 text-amber-400/70" />
+              ].map((item) => (
+                <div key={item.title} className="text-center p-8 border border-white/10 bg-white/5 backdrop-blur-sm">
+                  <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-amber-300/10 flex items-center justify-center border border-amber-300/20">
+                    <item.icon className="w-7 h-7 text-amber-300/80" />
                   </div>
                   <h3 className="text-lg font-light text-white mb-3">{item.title}</h3>
-                  <p className="text-sm text-gray-600 font-light leading-relaxed">{item.desc}</p>
-                </motion.div>
+                  <p className="text-sm text-gray-300 font-light leading-relaxed">{item.desc}</p>
+                </div>
               ))}
-            </AnimatedSection>
+            </div>
           </div>
         </section>
 
@@ -239,27 +293,32 @@ const DreamJourneys = () => {
             </AnimatedSection>
 
             <div className="space-y-32">
-              {signatureJourneys.map((journey, idx) => (
+              {journeys.map((journey, idx) => (
                 <AnimatedSection key={journey.id}>
                   <div className={`flex flex-col ${idx % 2 === 1 ? 'lg:flex-row-reverse' : 'lg:flex-row'} gap-12 items-center`}>
                     {/* Image */}
-                    <motion.div whileHover={{ scale: 1.02 }} transition={{ duration: 0.6 }} className="lg:w-1/2 relative">
+                    <div className="lg:w-1/2 relative">
                       <div className="aspect-[4/3] overflow-hidden">
-                        <img src={journey.image} alt={journey.name} className="w-full h-full object-cover" />
+                        <img src={journey.image || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1600&q=90'} alt={journey.name} className="w-full h-full object-cover" />
                       </div>
                       <div className="absolute top-6 left-6 bg-black/60 backdrop-blur-sm px-4 py-2">
-                        <div className="text-amber-400 text-xs tracking-[0.2em] uppercase">{journey.duration} • {journey.guests} Guests</div>
+                        <div className="text-amber-400 text-xs tracking-[0.2em] uppercase">
+                          {(journey.duration || journey.pricePerDay || 'Bespoke Journey')}
+                          {journey.passengers ? ` • ${journey.passengers} Guests` : ''}
+                        </div>
                       </div>
-                    </motion.div>
+                    </div>
 
                     {/* Content */}
                     <div className="lg:w-1/2">
-                      <div className="text-amber-400/60 text-xs tracking-[0.3em] uppercase mb-4">{journey.tagline}</div>
+                      <div className="text-amber-400/60 text-xs tracking-[0.3em] uppercase mb-4">
+                        {journey.tagline || journey.pricePerDay || 'Exclusive Access'}
+                      </div>
                       <h3 className="text-3xl md:text-4xl font-extralight text-white mb-6">{journey.name}</h3>
                       <p className="text-gray-400 font-light leading-relaxed mb-8">{journey.description}</p>
-                      
+
                       <div className="space-y-3 mb-8">
-                        {journey.highlights.slice(0, 4).map((highlight, i) => (
+                        {(journey.highlights || journey.features || []).slice(0, 4).map((highlight, i) => (
                           <div key={i} className="flex items-start gap-3">
                             <CheckCircle2 className="w-4 h-4 text-amber-400/60 mt-1 flex-shrink-0" />
                             <span className="text-sm text-gray-500 font-light">{highlight}</span>
@@ -271,7 +330,7 @@ const DreamJourneys = () => {
                         <Button className="bg-transparent border border-amber-400/30 text-amber-200 hover:bg-amber-400/10 rounded-none px-8 py-6 text-xs tracking-[0.2em] uppercase" onClick={() => document.getElementById('inquiry')?.scrollIntoView({ behavior: 'smooth' })}>
                           Request This Journey
                         </Button>
-                        <div className="text-xs text-gray-600 uppercase tracking-wider">Pricing upon consultation</div>
+                        <div className="text-xs text-gray-600 uppercase tracking-wider">{journey.pricePerDay || 'Pricing upon consultation'}</div>
                       </div>
                     </div>
                   </div>
@@ -290,12 +349,12 @@ const DreamJourneys = () => {
             </AnimatedSection>
             <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
               {testimonials.map((t, idx) => (
-                <motion.div key={idx} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: idx * 0.2 }} className="p-8 border border-white/5 bg-white/[0.01] relative">
+                <div key={idx} className="p-8 border border-white/5 bg-white/[0.01] relative">
                   <Quote className="absolute top-6 right-6 w-8 h-8 text-amber-400/10" />
                   <p className="text-gray-300 font-light italic mb-6 leading-relaxed">"{t.text}"</p>
                   <div className="text-xs text-amber-400/60 uppercase tracking-wider mb-1">{t.attribution}</div>
                   <div className="text-xs text-gray-600">{t.context}</div>
-                </motion.div>
+                </div>
               ))}
             </div>
           </div>
@@ -385,7 +444,7 @@ const DreamJourneys = () => {
         </section>
       </main>
       <Footer />
-    </>
+    </div>
   );
 };
 

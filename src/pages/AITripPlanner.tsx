@@ -20,6 +20,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { useToast } from '@/hooks/use-toast';
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { emailService } from '@/services/emailService';
 import SEOHead from '@/components/cms/SEOHead';
 import SmartDatePicker from '@/components/ai-planner/SmartDatePicker';
 import PrintableItinerary, { PrintableItineraryHandle } from '@/components/ai-planner/PrintableItinerary';
@@ -221,6 +222,7 @@ const AITripPlanner = () => {
 
     setIsSubmitting(true);
     try {
+      // Save to Firebase
       await addDoc(collection(db, 'ai_trip_requests'), {
         customerName: quoteForm.name,
         customerEmail: quoteForm.email,
@@ -245,12 +247,49 @@ const AITripPlanner = () => {
         source: 'ai-trip-planner',
       });
 
+      // Show success immediately - don't wait for emails
       toast({
         title: 'Request Sent!',
-        description: 'Our travel experts will contact you within 24 hours.',
+        description: 'Our travel experts will contact you within 24 hours with a personalized quote.',
       });
       setIsQuoteOpen(false);
       setQuoteForm({ name: '', email: '', phone: '', message: '' });
+
+      // Send emails in background (non-blocking)
+      const travelersText = `${preferences.travelers.adults} Adult${preferences.travelers.adults > 1 ? 's' : ''}${preferences.travelers.children > 0 ? `, ${preferences.travelers.children} Child${preferences.travelers.children > 1 ? 'ren' : ''}` : ''}`;
+      const travelDates = preferences.startDate && preferences.endDate
+        ? `${preferences.startDate.toLocaleDateString()} - ${preferences.endDate.toLocaleDateString()}`
+        : 'To be confirmed';
+
+      // Fire and forget - don't await
+      emailService.sendAITripPlannerConfirmation(quoteForm.email, {
+        customerName: quoteForm.name,
+        tripTitle: generatedItinerary?.title || 'Your Sri Lanka Adventure',
+        duration: generatedItinerary?.duration || calculateDuration(),
+        travelDates,
+        travelers: travelersText,
+        budget: preferences.budget,
+        estimatedCost: generatedItinerary?.totalCost?.total || 0,
+        highlights: generatedItinerary?.highlights,
+        specialRequests: quoteForm.message,
+      }).catch(err => console.error('Email error:', err));
+
+      emailService.sendAdminNotification('nanthan@rechargetravels.com', {
+        type: 'AI Trip Planner Request',
+        customerName: quoteForm.name,
+        customerEmail: quoteForm.email,
+        phone: quoteForm.phone,
+        details: `
+          <p><strong>Trip:</strong> ${generatedItinerary?.title || 'Custom Itinerary'}</p>
+          <p><strong>Duration:</strong> ${generatedItinerary?.duration || calculateDuration()} days</p>
+          <p><strong>Budget:</strong> ${preferences.budget}</p>
+          <p><strong>Estimated Cost:</strong> $${generatedItinerary?.totalCost?.total || 'TBD'}</p>
+          <p><strong>Interests:</strong> ${preferences.interests.join(', ') || 'General'}</p>
+          ${quoteForm.message ? `<p><strong>Message:</strong> ${quoteForm.message}</p>` : ''}
+        `,
+        adminUrl: 'https://recharge-travels-admin.web.app/ai-trip-requests',
+      }).catch(err => console.error('Admin email error:', err));
+
     } catch (error) {
       console.error('Error submitting quote:', error);
       toast({
@@ -279,7 +318,7 @@ const AITripPlanner = () => {
       <Header />
 
       {/* Hero Section */}
-      <section className="relative py-16 overflow-hidden">
+      <section className="relative pt-24 pb-16 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-teal-600/10" />
         <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-purple-400/20 to-transparent rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-teal-400/20 to-transparent rounded-full blur-3xl" />

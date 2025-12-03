@@ -15,6 +15,7 @@ export {
   subscribeNewsletter,
   unsubscribeNewsletter,
   getNewsletterStats,
+  sendEmail,
   // Train booking email & WhatsApp functions
   sendTrainBookingConfirmation,
   resendTrainBookingConfirmation,
@@ -24,7 +25,10 @@ export {
   // Global Tour booking email & WhatsApp functions
   sendGlobalTourBookingConfirmation,
   resendGlobalTourBookingConfirmation,
-  getGlobalTourBookingWhatsAppLink
+  getGlobalTourBookingWhatsAppLink,
+  // Email & WhatsApp queue processors
+  processEmailQueue,
+  processWhatsAppQueue
 } from './notifications';
 
 export { sendWhatsAppMessage } from './whatsapp';
@@ -51,3 +55,32 @@ export {
   bulkDeleteHotels,
   exportHotels
 } from './bulk-operations';
+
+// B2B Portal API
+export { b2bApi } from './b2b';
+
+// News Aggregator - Scheduled functions for tourism news
+export {
+  morningNewsAggregator,
+  eveningNewsAggregator,
+  manualNewsFetch,
+  getNewsSources,
+  forceNewsRefresh,
+  getNewsStats,
+  clearAndRefreshNews
+} from './newsAggregator';
+
+// SEO & Indexing - Auto-submit to Google
+export {
+  generateNewsSitemap,
+  pingSearchEngines,
+  generateRobotsTxt,
+  submitToIndexNow,
+  dailySeoReport
+} from './seoIndexing';
+
+// Experience Content Seeder (temporary utility)
+export { seedExperienceContent } from './seed-experiences';
+
+// Prerender for SEO - serves static HTML to search engine bots
+export { prerender, prerenderHealth } from './prerender';

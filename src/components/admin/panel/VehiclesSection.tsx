@@ -51,7 +51,8 @@ const VehiclesSection: React.FC = () => {
     location: '',
     features: [] as string[],
     is_available: true,
-    description: ''
+    description: '',
+    imagesText: ''
   });
 
   const vehicleTypes = ['all', 'sedan', 'suv', 'van', 'luxury', 'bus', 'motorcycle'];
@@ -80,9 +81,17 @@ const VehiclesSection: React.FC = () => {
 
   const handleCreateVehicle = async () => {
     try {
+      const imageUrls = formData.imagesText
+        .split('\n')
+        .map((url) => url.trim())
+        .filter((url) => url.length > 0);
+
+      const { imagesText, ...rest } = formData as any;
+
       await addDoc(collection(db, 'vehicles'), {
-        ...formData,
-        images: [],
+        ...rest,
+        images: imageUrls,
+        image_urls: imageUrls,
         created_at: new Date().toISOString(),
       });
       toast.success('Vehicle created successfully');
@@ -99,8 +108,19 @@ const VehiclesSection: React.FC = () => {
     if (!editingVehicle) return;
     
     try {
+      const imageUrls = formData.imagesText
+        .split('\n')
+        .map((url) => url.trim())
+        .filter((url) => url.length > 0);
+
+      const { imagesText, ...rest } = formData as any;
+
       const vehicleDoc = doc(db, 'vehicles', editingVehicle.id);
-      await updateDoc(vehicleDoc, formData);
+      await updateDoc(vehicleDoc, {
+        ...rest,
+        images: imageUrls,
+        image_urls: imageUrls,
+      });
       toast.success('Vehicle updated successfully');
       fetchVehicles();
       setShowEditDialog(false);
@@ -151,7 +171,8 @@ const VehiclesSection: React.FC = () => {
       location: '',
       features: [],
       is_available: true,
-      description: ''
+      description: '',
+      imagesText: ''
     });
     setEditingVehicle(null);
   };
@@ -171,7 +192,8 @@ const VehiclesSection: React.FC = () => {
       location: vehicle.location || '',
       features: vehicle.features || [],
       is_available: vehicle.is_available,
-      description: vehicle.description || ''
+      description: vehicle.description || '',
+      imagesText: (vehicle.images || []).join('\n')
     });
     setShowEditDialog(true);
   };
@@ -339,6 +361,19 @@ const VehiclesSection: React.FC = () => {
                   placeholder="Enter vehicle description"
                   rows={3}
                 />
+              </div>
+              <div>
+                <Label htmlFor="images">Gallery Image URLs (one per line)</Label>
+                <Textarea
+                  id="images"
+                  value={formData.imagesText}
+                  onChange={(e) => setFormData({ ...formData, imagesText: e.target.value })}
+                  placeholder="https://...jpg\nhttps://...jpg"
+                  rows={3}
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  These URLs will be used on the Our Fleet page and vehicle detail gallery.
+                </p>
               </div>
               <div>
                 <Label>Features</Label>
@@ -719,6 +754,19 @@ const VehiclesSection: React.FC = () => {
                 placeholder="Enter vehicle description"
                 rows={3}
               />
+            </div>
+            <div>
+              <Label htmlFor="edit-images">Gallery Image URLs (one per line)</Label>
+              <Textarea
+                id="edit-images"
+                value={formData.imagesText}
+                onChange={(e) => setFormData({ ...formData, imagesText: e.target.value })}
+                placeholder="https://...jpg\nhttps://...jpg"
+                rows={3}
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                These URLs will be used on the Our Fleet page and vehicle detail gallery.
+              </p>
             </div>
             <div>
               <Label>Features</Label>

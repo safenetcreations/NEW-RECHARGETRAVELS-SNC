@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import DestinationMap from '@/components/destinations/DestinationMap';
+import WeatherWidget from '@/components/destinations/WeatherWidget';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Waves, 
@@ -43,10 +46,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import EnhancedBookingModal from '@/components/EnhancedBookingModal';
 import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { toast } from 'sonner';
+
+const NEGOMBO_CENTER = { lat: 7.2008, lng: 79.8737 };
 
 interface HeroSlide {
   id: string;
@@ -135,24 +139,11 @@ interface NegomboContent {
 const defaultContent: NegomboContent = {
   hero: {
     slides: [
-      {
-        id: '1',
-        image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?auto=format&fit=crop&q=80",
-        title: "Welcome to Negombo",
-        subtitle: "The Beach Gateway to Sri Lanka"
-      },
-      {
-        id: '2',
-        image: "https://images.unsplash.com/photo-1586500036706-41963de24d8b?auto=format&fit=crop&q=80",
-        title: "Fishing Heritage",
-        subtitle: "Experience Traditional Lagoon Life"
-      },
-      {
-        id: '3',
-        image: "https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?auto=format&fit=crop&q=80",
-        title: "Dutch Canals",
-        subtitle: "Navigate Historic Waterways"
-      }
+      { id: '1', image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80", title: "Discover Negombo", subtitle: "Gateway to Sri Lanka" },
+      { id: '2', image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&q=80", title: "Golden Beach", subtitle: "Endless Sandy Shores" },
+      { id: '3', image: "https://images.unsplash.com/photo-1559827291-72ee739d0d9a?auto=format&fit=crop&q=80", title: "Dutch Canal", subtitle: "Historic Waterway Heritage" },
+      { id: '4', image: "https://images.unsplash.com/photo-1583212292454-1fe6229603b7?auto=format&fit=crop&q=80", title: "Fish Market", subtitle: "Vibrant Lellama Market" },
+      { id: '5', image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&q=80", title: "St. Mary's Church", subtitle: "Colonial Era Cathedral" }
     ],
     title: "Negombo",
     subtitle: "Beach Gateway Near Airport with Canals"
@@ -423,10 +414,10 @@ const defaultContent: NegomboContent = {
 };
 
 const Negombo = () => {
+  const navigate = useNavigate();
   const [content, setContent] = useState<NegomboContent>(defaultContent);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedTab, setSelectedTab] = useState('attractions');
-  const [showBookingModal, setShowBookingModal] = useState(false);
   const [selectedService, setSelectedService] = useState<string>('');
   const [galleryIndex, setGalleryIndex] = useState(0);
 
@@ -487,22 +478,54 @@ const Negombo = () => {
     { id: 'attractions', label: 'Attractions', count: content.attractions.length },
     { id: 'activities', label: 'Activities', count: content.activities.length },
     { id: 'itineraries', label: 'Tours', count: content.itineraries.length },
+    { id: 'map', label: 'Map', count: undefined },
     { id: 'travel-tips', label: 'Travel Tips', count: content.travelTips.length },
     { id: 'faqs', label: 'FAQs', count: content.faqs.length }
   ];
 
   const handleBooking = (service: string) => {
     setSelectedService(service);
-    setShowBookingModal(true);
+    navigate('/book-tour', { state: { preSelectedService: service } });
   };
 
   // JSON-LD Structured Data for SEO
+  const canonicalUrl = "https://www.rechargetravels.com/destinations/negombo";
+
+  const parsePrice = (price: string) => {
+    const match = price.match(/[\d.]+/);
+    if (!match) return null;
+    const value = parseFloat(match[0]);
+    return Number.isFinite(value) ? value : null;
+  };
+
+  const offerEntries = [...content.activities, ...content.itineraries]
+    .map(({ name, price }) => {
+      const parsedPrice = parsePrice(price);
+      if (parsedPrice === null) return null;
+      return {
+        "@type": "Offer",
+        "name": name,
+        "price": parsedPrice,
+        "priceCurrency": "USD",
+        "availability": "https://schema.org/InStock",
+        "url": canonicalUrl
+      };
+    })
+    .filter((offer): offer is { "@type": string; name: string; price: number; priceCurrency: string; availability: string; url: string } => Boolean(offer));
+
   const structuredData = {
     "@context": "https://schema.org",
-    "@type": "TouristDestination",
+    "@type": ["Product", "TouristDestination"],
     "name": "Negombo, Sri Lanka",
     "description": content.overview.description,
+    "url": canonicalUrl,
     "image": content.hero.slides.map(slide => slide.image),
+    "brand": {
+      "@type": "Organization",
+      "name": "Recharge Travels",
+      "url": "https://www.rechargetravels.com",
+      "logo": "https://www.rechargetravels.com/logo-v2.png"
+    },
     "touristType": ["Beach Tourism", "Cultural Tourism", "Transit Tourism"],
     "geo": {
       "@type": "GeoCoordinates",
@@ -511,15 +534,12 @@ const Negombo = () => {
     },
     "aggregateRating": {
       "@type": "AggregateRating",
-      "ratingValue": "4.5",
-      "reviewCount": "2156"
+      "ratingValue": 4.5,
+      "reviewCount": 2156,
+      "bestRating": 5,
+      "worstRating": 1
     },
-    "offers": content.activities.map(activity => ({
-      "@type": "Offer",
-      "name": activity.name,
-      "price": activity.price,
-      "priceCurrency": "USD"
-    }))
+    "offers": offerEntries.length ? offerEntries : undefined
   };
 
   return (
@@ -533,7 +553,7 @@ const Negombo = () => {
         <meta property="og:title" content={content.seo.title} />
         <meta property="og:description" content={content.seo.description} />
         <meta property="og:image" content={content.hero.slides[0].image} />
-        <meta property="og:url" content="https://rechargetravels.com/destinations/negombo" />
+        <meta property="og:url" content={canonicalUrl} />
         <meta property="og:type" content="website" />
         
         {/* Twitter Card Tags */}
@@ -543,7 +563,7 @@ const Negombo = () => {
         <meta name="twitter:image" content={content.hero.slides[0].image} />
         
         {/* Canonical URL */}
-        <link rel="canonical" href="https://rechargetravels.com/destinations/negombo" />
+        <link rel="canonical" href={canonicalUrl} />
         
         {/* JSON-LD Structured Data */}
         <script type="application/ld+json">
@@ -555,7 +575,7 @@ const Negombo = () => {
       
       <main className="min-h-screen bg-background">
         {/* Hero Section with Video/Image Slideshow */}
-        <section className="relative h-[80vh] overflow-hidden" aria-label="Hero">
+        <section className="relative aspect-video max-h-[80vh] overflow-hidden" aria-label="Hero">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentSlide}
@@ -927,6 +947,61 @@ const Negombo = () => {
               </motion.section>
             )}
 
+            {/* Map Tab */}
+            {selectedTab === 'map' && (
+              <motion.section
+                key="map"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                aria-label="Map and Weather"
+              >
+                <h3 className="text-3xl font-bold mb-8 text-center">Explore Negombo</h3>
+                <div className="grid lg:grid-cols-3 gap-8">
+                  <div className="lg:col-span-2">
+                    <DestinationMap
+                      center={NEGOMBO_CENTER}
+                      attractions={[
+                        {
+                          name: 'Negombo Beach',
+                          position: { lat: 7.2147, lng: 79.8383 },
+                          description: 'Long stretch of golden sand beach perfect for swimming and water sports'
+                        },
+                        {
+                          name: 'Fish Market',
+                          position: { lat: 7.2094, lng: 79.8353 },
+                          description: 'One of Sri Lanka\'s largest fish markets, bustling with early morning activity'
+                        },
+                        {
+                          name: 'Dutch Fort',
+                          position: { lat: 7.2042, lng: 79.8358 },
+                          description: 'Historic Dutch colonial fort with old ramparts'
+                        },
+                        {
+                          name: 'St Mary\'s Church',
+                          position: { lat: 7.2089, lng: 79.8419 },
+                          description: 'One of the largest cathedrals in Sri Lanka with beautiful religious art'
+                        },
+                        {
+                          name: 'Negombo Lagoon',
+                          position: { lat: 7.1767, lng: 79.8636 },
+                          description: 'Large lagoon famous for prawns and boat tours through mangroves'
+                        },
+                        {
+                          name: 'Angurukaramulla Temple',
+                          position: { lat: 7.2289, lng: 79.8814 },
+                          description: 'Ancient Buddhist temple with 6-meter Buddha statue and dragon entrance'
+                        }
+                      ]}
+                    />
+                  </div>
+                  <div>
+                    <WeatherWidget destination="Negombo" />
+                  </div>
+                </div>
+              </motion.section>
+            )}
+
             {/* FAQs Tab */}
             {selectedTab === 'faqs' && (
               <motion.section
@@ -1087,16 +1162,16 @@ const Negombo = () => {
               From convenient airport transfers to beach relaxation and cultural experiences, let us make your Negombo stay memorable
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 className="bg-white text-blue-600 hover:bg-gray-100"
                 onClick={() => handleBooking('Negombo Complete Package')}
               >
                 <Phone className="w-5 h-5 mr-2" />
                 Book Your Trip
               </Button>
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 variant="outline"
                 className="bg-transparent text-white border-white hover:bg-white/20"
                 onClick={() => window.location.href = 'mailto:info@rechargetravels.com?subject=Negombo Inquiry'}
@@ -1112,12 +1187,28 @@ const Negombo = () => {
 
       <Footer />
 
-      {/* Enhanced Booking Modal */}
-      <EnhancedBookingModal
-        isOpen={showBookingModal}
-        onClose={() => setShowBookingModal(false)}
-        preSelectedService={selectedService}
-      />
+      {/* WhatsApp Floating Button */}
+      <motion.a
+        href="https://wa.me/94766475936?text=Hi%2C%20I%27m%20interested%20in%20booking%20a%20Negombo%20tour"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-8 right-8 z-50 bg-green-500 hover:bg-green-600 text-white rounded-full p-4 shadow-2xl transition-all duration-300 hover:scale-110"
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ delay: 1, type: 'spring' }}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
+        aria-label="Contact us on WhatsApp"
+      >
+        <svg
+          className="w-8 h-8"
+          fill="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+      </motion.a>
     </>
   );
 };

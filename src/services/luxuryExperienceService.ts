@@ -387,8 +387,22 @@ class LuxuryExperienceService {
   async deleteExperience(id: string): Promise<void> {
     const experience = await this.getExperienceById(id);
     if (experience) {
-      if (experience.heroImage) try { await storageService.delete(experience.heroImage); } catch {}
-      if (experience.gallery) for (const image of experience.gallery) try { await storageService.delete(image.url); } catch {}
+      if (experience.heroImage) {
+        try {
+          await storageService.delete(experience.heroImage);
+        } catch (err) {
+          console.error('Failed to delete hero image', err);
+        }
+      }
+      if (experience.gallery) {
+        for (const image of experience.gallery) {
+          try {
+            await storageService.delete(image.url);
+          } catch (err) {
+            console.error('Failed to delete gallery image', err);
+          }
+        }
+      }
     }
     await dbService.delete(this.collection, id);
   }

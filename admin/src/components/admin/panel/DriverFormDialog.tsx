@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -20,9 +20,10 @@ import {
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-  User, Car, CreditCard, FileText, Star, Languages, Shield, Camera, Save, X, Loader2
+  User, Car, CreditCard, FileText, Star, Languages, Shield, Camera, Save, X, Loader2, Upload, Image, Trash2
 } from 'lucide-react';
-import { Driver, DriverTier, DriverStatus, VehicleType } from '../../../services/firebaseDriverService';
+import { Driver, DriverTier, DriverStatus, VehicleType, firebaseDriverService } from '../../../services/firebaseDriverService';
+import { toast } from 'sonner';
 
 interface DriverFormDialogProps {
   isOpen: boolean;
@@ -64,6 +65,13 @@ const DriverFormDialog: React.FC<DriverFormDialogProps> = ({
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState('basic');
+  const [uploadingImage, setUploadingImage] = useState<string | null>(null);
+  
+  // File input refs
+  const profilePhotosRef = useRef<HTMLInputElement>(null);
+  const coverImageRef = useRef<HTMLInputElement>(null);
+  const vehiclePhotosRef = useRef<HTMLInputElement>(null);
+  
   const [formData, setFormData] = useState<Partial<Driver>>({
     full_name: '',
     email: '',
@@ -98,6 +106,8 @@ const DriverFormDialog: React.FC<DriverFormDialogProps> = ({
       setFormData({
         ...driver,
         specialty_languages: driver.specialty_languages || ['English'],
+        profile_photos: driver.profile_photos || (driver.profile_photo ? [driver.profile_photo] : []),
+        vehicle_photos: driver.vehicle_photos || (driver.vehicle_photo ? [driver.vehicle_photo] : []),
       });
     } else {
       setFormData({
@@ -126,7 +136,9 @@ const DriverFormDialog: React.FC<DriverFormDialogProps> = ({
         per_km_rate: 0,
         average_rating: 5.0,
         profile_photo: '',
+        profile_photos: [],
         cover_image: '',
+        vehicle_photos: [],
       });
     }
     setActiveTab('basic');
@@ -142,6 +154,42 @@ const DriverFormDialog: React.FC<DriverFormDialogProps> = ({
       handleChange('specialty_languages', current.filter(l => l !== lang));
     } else {
       handleChange('specialty_languages', [...current, lang]);
+    }
+  };
+
+  // Image upload handler
+  const handleImageUpload = async (
+    file: File,
+    type: 'profile' | 'cover' | 'vehicle' | 'sltda_license' | 'driver_license' | 'national_id',
+    fieldName: keyof Driver
+  ) => {
+    if (!file) return;
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file');
+      return;
+    }
+    
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size must be less than 5MB');
+      return;
+    }
+    
+    setUploadingImage(type);
+    
+    try {
+      // If driver exists, use their ID, otherwise generate a temp ID
+      const driverId = driver?.id || `temp_${Date.now()}`;
+      const url = await firebaseDriverService.uploadDriverPhoto(file, driverId, type as any);
+      handleChange(fieldName, url);
+      toast.success(`${type.replace('_', ' ')} uploaded successfully`);
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('Failed to upload image');
+    } finally {
+      setUploadingImage(null);
     }
   };
 
@@ -470,10 +518,286 @@ const DriverFormDialog: React.FC<DriverFormDialogProps> = ({
 
             {/* Documents Tab */}
             <TabsContent value="documents" className="space-y-6">
-              <div className="grid grid-cols-2 gap-6">
+              {/* Driver Profile Photos (up to 5) */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg flex items-center gap-2">
+                  <Camera className="w-5 h-5 text-blue-500" /> 
+                  Driver Profile Photos 
+                  <span className="text-sm font-normal text-gray-500">(up to 5 photos)</span>
+                </h3>
+                
+                <input
+                  type="file"
+                  ref={profilePhotosRef}
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={async (e) => {
+                    const files = Array.from(e.target.files || []);
+                    const currentPhotos = formData.profile_photos || [];
+                    if (currentPhotos.length + files.length > 5) {
+                      toast.error('Maximum 5 profile photos allowed');
+                      return;
+                    }
+                    for (const file of files) {
+                      setUploadingImage('profile');
+                      try {
+                        const driverId = driver?.id || `temp_${Date.now()}`;
+                        const url = await firebaseDriverService.uploadDriverPhoto(file, driverId, 'profile');
+                        handleChange('profile_photos', [...(formData.profile_photos || []), url]);
+                        // Also set first photo as main profile photo
+                        if (!formData.profile_photo) {
+                          handleChange('profile_photo', url);
+                        }
+                      } catch (error) {
+                        toast.error('Failed to upload image');
+                      }
+                    }
+                    setUploadingImage(null);
+                    e.target.value = '';
+                  }}
+                />
+                
+                <div className="grid grid-cols-5 gap-3">
+                  {/* Show existing photos */}
+                  {(formData.profile_photos || []).map((photo, index) => (
+                    <div key={index} className="relative group aspect-square">
+                      <img 
+                        src={photo} 
+                        alt={`Profile ${index + 1}`} 
+                        className={`w-full h-full object-cover rounded-xl border-2 ${index === 0 ? 'border-blue-500' : 'border-gray-200'}`}
+                      />
+                      {index === 0 && (
+                        <span className="absolute top-1 left-1 bg-blue-500 text-white text-[10px] px-1.5 py-0.5 rounded">Main</span>
+                      )}
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center gap-1">
+                        {index !== 0 && (
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="secondary"
+                            className="h-7 w-7 p-0"
+                            onClick={() => {
+                              // Set as main photo
+                              handleChange('profile_photo', photo);
+                              const newPhotos = [photo, ...(formData.profile_photos || []).filter((_, i) => i !== index)];
+                              handleChange('profile_photos', newPhotos);
+                            }}
+                            title="Set as main"
+                          >
+                            <Star className="w-3 h-3" />
+                          </Button>
+                        )}
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="destructive"
+                          className="h-7 w-7 p-0"
+                          onClick={() => {
+                            const newPhotos = (formData.profile_photos || []).filter((_, i) => i !== index);
+                            handleChange('profile_photos', newPhotos);
+                            if (formData.profile_photo === photo) {
+                              handleChange('profile_photo', newPhotos[0] || '');
+                            }
+                          }}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {/* Add photo button */}
+                  {(formData.profile_photos?.length || 0) < 5 && (
+                    <button
+                      type="button"
+                      onClick={() => profilePhotosRef.current?.click()}
+                      disabled={uploadingImage === 'profile'}
+                      className="aspect-square border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center gap-1 hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                    >
+                      {uploadingImage === 'profile' ? (
+                        <Loader2 className="w-5 h-5 animate-spin text-blue-500" />
+                      ) : (
+                        <>
+                          <Upload className="w-5 h-5 text-gray-400" />
+                          <span className="text-[10px] text-gray-500">Add Photo</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Cover Image */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg flex items-center gap-2">
+                  <Image className="w-5 h-5 text-purple-500" /> Cover Image
+                </h3>
+                
+                <input
+                  type="file"
+                  ref={coverImageRef}
+                  accept="image/*"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setUploadingImage('cover');
+                      try {
+                        const driverId = driver?.id || `temp_${Date.now()}`;
+                        const url = await firebaseDriverService.uploadDriverPhoto(file, driverId, 'cover');
+                        handleChange('cover_image', url);
+                        toast.success('Cover image uploaded');
+                      } catch (error) {
+                        toast.error('Failed to upload cover image');
+                      }
+                      setUploadingImage(null);
+                    }
+                  }}
+                />
+                
+                {formData.cover_image ? (
+                  <div className="relative group">
+                    <img 
+                      src={formData.cover_image} 
+                      alt="Cover" 
+                      className="w-full h-40 object-cover rounded-xl border-2 border-gray-200" 
+                    />
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center gap-2">
+                      <Button type="button" size="sm" variant="secondary" onClick={() => coverImageRef.current?.click()}>
+                        <Upload className="w-4 h-4 mr-1" /> Replace
+                      </Button>
+                      <Button type="button" size="sm" variant="destructive" onClick={() => handleChange('cover_image', '')}>
+                        <Trash2 className="w-4 h-4 mr-1" /> Remove
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => coverImageRef.current?.click()}
+                    disabled={uploadingImage === 'cover'}
+                    className="w-full h-40 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center gap-2 hover:border-purple-400 hover:bg-purple-50 transition-colors"
+                  >
+                    {uploadingImage === 'cover' ? (
+                      <Loader2 className="w-6 h-6 animate-spin text-purple-500" />
+                    ) : (
+                      <>
+                        <Image className="w-8 h-8 text-gray-400" />
+                        <span className="text-sm text-gray-500">Click to upload cover image</span>
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
+
+              {/* Vehicle Photos (multiple) */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg flex items-center gap-2">
+                  <Car className="w-5 h-5 text-green-500" /> 
+                  Vehicle Photos 
+                  <span className="text-sm font-normal text-gray-500">(multiple photos)</span>
+                </h3>
+                
+                <input
+                  type="file"
+                  ref={vehiclePhotosRef}
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={async (e) => {
+                    const files = Array.from(e.target.files || []);
+                    for (const file of files) {
+                      setUploadingImage('vehicle');
+                      try {
+                        const driverId = driver?.id || `temp_${Date.now()}`;
+                        const url = await firebaseDriverService.uploadDriverPhoto(file, driverId, 'vehicle');
+                        handleChange('vehicle_photos', [...(formData.vehicle_photos || []), url]);
+                        // Also set first photo as main vehicle photo
+                        if (!formData.vehicle_photo) {
+                          handleChange('vehicle_photo', url);
+                        }
+                      } catch (error) {
+                        toast.error('Failed to upload vehicle image');
+                      }
+                    }
+                    setUploadingImage(null);
+                    e.target.value = '';
+                  }}
+                />
+                
+                <div className="grid grid-cols-4 gap-3">
+                  {/* Show existing vehicle photos */}
+                  {(formData.vehicle_photos || []).map((photo, index) => (
+                    <div key={index} className="relative group aspect-video">
+                      <img 
+                        src={photo} 
+                        alt={`Vehicle ${index + 1}`} 
+                        className={`w-full h-full object-cover rounded-xl border-2 ${index === 0 ? 'border-green-500' : 'border-gray-200'}`}
+                      />
+                      {index === 0 && (
+                        <span className="absolute top-1 left-1 bg-green-500 text-white text-[10px] px-1.5 py-0.5 rounded">Main</span>
+                      )}
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center gap-1">
+                        {index !== 0 && (
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="secondary"
+                            className="h-7 w-7 p-0"
+                            onClick={() => {
+                              handleChange('vehicle_photo', photo);
+                              const newPhotos = [photo, ...(formData.vehicle_photos || []).filter((_, i) => i !== index)];
+                              handleChange('vehicle_photos', newPhotos);
+                            }}
+                            title="Set as main"
+                          >
+                            <Star className="w-3 h-3" />
+                          </Button>
+                        )}
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="destructive"
+                          className="h-7 w-7 p-0"
+                          onClick={() => {
+                            const newPhotos = (formData.vehicle_photos || []).filter((_, i) => i !== index);
+                            handleChange('vehicle_photos', newPhotos);
+                            if (formData.vehicle_photo === photo) {
+                              handleChange('vehicle_photo', newPhotos[0] || '');
+                            }
+                          }}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {/* Add vehicle photo button */}
+                  <button
+                    type="button"
+                    onClick={() => vehiclePhotosRef.current?.click()}
+                    disabled={uploadingImage === 'vehicle'}
+                    className="aspect-video border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center gap-1 hover:border-green-400 hover:bg-green-50 transition-colors"
+                  >
+                    {uploadingImage === 'vehicle' ? (
+                      <Loader2 className="w-5 h-5 animate-spin text-green-500" />
+                    ) : (
+                      <>
+                        <Upload className="w-5 h-5 text-gray-400" />
+                        <span className="text-[10px] text-gray-500">Add Vehicle Photo</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Licenses Section */}
+              <div className="grid grid-cols-2 gap-6 pt-4 border-t">
                 <div className="space-y-4">
                   <h3 className="font-semibold text-lg flex items-center gap-2">
-                    <FileText className="w-5 h-5 text-purple-500" /> Licenses
+                    <FileText className="w-5 h-5 text-purple-500" /> License Numbers
                   </h3>
 
                   <div>
@@ -481,6 +805,7 @@ const DriverFormDialog: React.FC<DriverFormDialogProps> = ({
                     <Input
                       value={formData.sltda_license_number || ''}
                       onChange={(e) => handleChange('sltda_license_number', e.target.value)}
+                      placeholder="SLTDA-XXXX-XXXX"
                     />
                   </div>
 
@@ -489,39 +814,49 @@ const DriverFormDialog: React.FC<DriverFormDialogProps> = ({
                     <Input
                       value={formData.drivers_license_number || ''}
                       onChange={(e) => handleChange('drivers_license_number', e.target.value)}
+                      placeholder="B1234567"
                     />
                   </div>
 
                   <div>
-                    <Label>National ID</Label>
+                    <Label>National ID Number</Label>
                     <Input
                       value={formData.national_id_number || ''}
                       onChange={(e) => handleChange('national_id_number', e.target.value)}
+                      placeholder="123456789V"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-4">
                   <h3 className="font-semibold text-lg flex items-center gap-2">
-                    <Camera className="w-5 h-5 text-blue-500" /> Photos
+                    <Shield className="w-5 h-5 text-green-500" /> License Expiry Dates
                   </h3>
 
                   <div>
-                    <Label>Profile Photo URL</Label>
+                    <Label>SLTDA License Expiry</Label>
                     <Input
-                      value={formData.profile_photo || ''}
-                      onChange={(e) => handleChange('profile_photo', e.target.value)}
+                      type="date"
+                      value={formData.sltda_license_expiry || ''}
+                      onChange={(e) => handleChange('sltda_license_expiry', e.target.value)}
                     />
-                    {formData.profile_photo && (
-                      <img src={formData.profile_photo} alt="Profile" className="w-16 h-16 rounded-full object-cover mt-2" />
-                    )}
                   </div>
 
                   <div>
-                    <Label>Cover Image URL</Label>
+                    <Label>Driver's License Expiry</Label>
                     <Input
-                      value={formData.cover_image || ''}
-                      onChange={(e) => handleChange('cover_image', e.target.value)}
+                      type="date"
+                      value={formData.drivers_license_expiry || ''}
+                      onChange={(e) => handleChange('drivers_license_expiry', e.target.value)}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Police Clearance Expiry</Label>
+                    <Input
+                      type="date"
+                      value={formData.police_clearance_expiry || ''}
+                      onChange={(e) => handleChange('police_clearance_expiry', e.target.value)}
                     />
                   </div>
                 </div>

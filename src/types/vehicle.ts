@@ -5,6 +5,10 @@ export interface VehicleCategory {
   description: string | null
   icon: string | null
   created_at: string
+  slug?: string
+  is_hero?: boolean
+  hero_order?: number
+  hero_images?: string[]
 }
 
 export interface Vehicle {

@@ -21,7 +21,16 @@ import {
     Tv,
     Play,
     GripVertical,
+    Linkedin,
+    Twitter,
 } from 'lucide-react';
+
+// Pinterest icon component (not in lucide)
+const PinterestIcon = ({ className }: { className?: string }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/>
+    </svg>
+);
 
 interface YouTubeTVVideo {
     id: string;
@@ -48,18 +57,39 @@ interface SocialMediaConfig {
         profileUrl: string;
         followersCount: string;
         postsCount: string;
+        postUrl: string;
     };
     facebook: {
         enabled: boolean;
         pageUrl: string;
         pageName: string;
         followersCount: string;
+        postUrl: string;
     };
     tiktok: {
         enabled: boolean;
         username: string;
         profileUrl: string;
         followersCount: string;
+    };
+    linkedin: {
+        enabled: boolean;
+        companyUrl: string;
+        companyName: string;
+        followersCount: string;
+        latestPostUrl: string;
+    };
+    pinterest: {
+        enabled: boolean;
+        username: string;
+        profileUrl: string;
+        followersCount: string;
+        boardsCount: string;
+    };
+    twitter: {
+        enabled: boolean;
+        username: string;
+        profileUrl: string;
     };
     whatsapp: {
         enabled: boolean;
@@ -72,6 +102,12 @@ interface SocialMediaConfig {
         channelUrl: string;
         channelName: string;
         membersCount: string;
+    };
+    widgets: {
+        facebookWidgetId: string;
+        instagramWidgetId: string;
+        tiktokWidgetId: string;
+        allInOneWidgetId: string;
     };
 }
 
@@ -95,18 +131,39 @@ const defaultConfig: SocialMediaConfig = {
         profileUrl: 'https://instagram.com/rechargetravels',
         followersCount: '25K+',
         postsCount: '500+',
+        postUrl: '',
     },
     facebook: {
         enabled: true,
         pageUrl: 'https://facebook.com/rechargetravels',
         pageName: 'Recharge Travels',
         followersCount: '15K+',
+        postUrl: '',
     },
     tiktok: {
         enabled: true,
         username: 'rechargetravels',
         profileUrl: 'https://tiktok.com/@rechargetravels',
         followersCount: '30K+',
+    },
+    linkedin: {
+        enabled: true,
+        companyUrl: 'https://www.linkedin.com/company/rechargetravels',
+        companyName: 'Recharge Travels',
+        followersCount: '2K+',
+        latestPostUrl: '',
+    },
+    pinterest: {
+        enabled: true,
+        username: 'rechargetravels',
+        profileUrl: 'https://www.pinterest.com/rechargetravels',
+        followersCount: '5K+',
+        boardsCount: '20+',
+    },
+    twitter: {
+        enabled: true,
+        username: 'rechargetours',
+        profileUrl: 'https://x.com/rechargetours',
     },
     whatsapp: {
         enabled: true,
@@ -119,6 +176,12 @@ const defaultConfig: SocialMediaConfig = {
         channelUrl: 'https://t.me/rechargetravels',
         channelName: 'Recharge Travels',
         membersCount: '5K+',
+    },
+    widgets: {
+        facebookWidgetId: '',
+        instagramWidgetId: '',
+        tiktokWidgetId: '',
+        allInOneWidgetId: '',
     },
 };
 
@@ -261,6 +324,60 @@ const SocialMediaManager: React.FC = () => {
                     {saving ? 'Saving...' : 'Save Changes'}
                 </Button>
             </div>
+
+            {/* Live Feed Widgets Section */}
+            <Card className="border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50">
+                <CardHeader>
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-emerald-500 rounded-lg">
+                            <RefreshCw className="h-6 w-6 text-white" />
+                        </div>
+                        <div>
+                            <CardTitle className="text-emerald-800">🔴 Live Feed Widget IDs (Elfsight)</CardTitle>
+                            <CardDescription className="text-emerald-600">
+                                Get free widget IDs from elfsight.com for automatic live social feeds
+                            </CardDescription>
+                        </div>
+                    </div>
+                </CardHeader>
+                <CardContent className="space-y-4 pt-4">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <Label>Facebook Widget ID</Label>
+                            <Input
+                                value={config.widgets?.facebookWidgetId || ''}
+                                onChange={(e) => updateField('widgets', 'facebookWidgetId', e.target.value)}
+                                placeholder="e.g., abc123def456"
+                            />
+                        </div>
+                        <div>
+                            <Label>Instagram Widget ID</Label>
+                            <Input
+                                value={config.widgets?.instagramWidgetId || ''}
+                                onChange={(e) => updateField('widgets', 'instagramWidgetId', e.target.value)}
+                                placeholder="e.g., xyz789ghi012"
+                            />
+                        </div>
+                        <div>
+                            <Label>TikTok Widget ID</Label>
+                            <Input
+                                value={config.widgets?.tiktokWidgetId || ''}
+                                onChange={(e) => updateField('widgets', 'tiktokWidgetId', e.target.value)}
+                                placeholder="e.g., tik123tok456"
+                            />
+                        </div>
+                        <div>
+                            <Label>All-in-One Social Wall</Label>
+                            <Input
+                                value={config.widgets?.allInOneWidgetId || ''}
+                                onChange={(e) => updateField('widgets', 'allInOneWidgetId', e.target.value)}
+                                placeholder="e.g., wall789abc123"
+                            />
+                        </div>
+                    </div>
+                    <p className="text-xs text-emerald-600">Visit elfsight.com, create a free widget, and paste the ID here for automatic live feeds</p>
+                </CardContent>
+            </Card>
 
             {/* YouTube Section */}
             <Card className="border-red-200">
@@ -564,6 +681,17 @@ const SocialMediaManager: React.FC = () => {
                             />
                         </div>
                     </div>
+                    <div className="mt-4">
+                        <Label>Latest Post URL</Label>
+                        <Input
+                            value={config.instagram.postUrl || ''}
+                            onChange={(e) => updateField('instagram', 'postUrl', e.target.value)}
+                            placeholder="https://www.instagram.com/p/ABC123..."
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                            Paste the full URL of your Instagram post (e.g., https://www.instagram.com/p/ABC123/)
+                        </p>
+                    </div>
                 </CardContent>
             </Card>
 
@@ -618,6 +746,17 @@ const SocialMediaManager: React.FC = () => {
                             />
                         </div>
                     </div>
+                    <div className="mt-4">
+                        <Label>Latest Post Embed URL</Label>
+                        <Input
+                            value={config.facebook.postUrl || ''}
+                            onChange={(e) => updateField('facebook', 'postUrl', e.target.value)}
+                            placeholder="https://www.facebook.com/plugins/post.php?href=..."
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                            To get this URL: Go to your Facebook post → Click "..." → Embed → Copy the URL from the iframe src attribute
+                        </p>
+                    </div>
                 </CardContent>
             </Card>
 
@@ -671,6 +810,183 @@ const SocialMediaManager: React.FC = () => {
                                 placeholder="30K+"
                             />
                         </div>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* LinkedIn Section */}
+            <Card className="border-blue-300">
+                <CardHeader className="bg-gradient-to-r from-blue-50 to-sky-50">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-blue-700 rounded-lg">
+                                <Linkedin className="h-6 w-6 text-white" />
+                            </div>
+                            <div>
+                                <CardTitle>LinkedIn</CardTitle>
+                                <CardDescription>Connect your LinkedIn company page</CardDescription>
+                            </div>
+                        </div>
+                        <label className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                checked={config.linkedin?.enabled ?? true}
+                                onChange={(e) => updateField('linkedin', 'enabled', e.target.checked)}
+                                className="rounded"
+                            />
+                            <span className="text-sm font-medium">Enabled</span>
+                        </label>
+                    </div>
+                </CardHeader>
+                <CardContent className="space-y-4 pt-6">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <Label>Company Name</Label>
+                            <Input
+                                value={config.linkedin?.companyName || ''}
+                                onChange={(e) => updateField('linkedin', 'companyName', e.target.value)}
+                                placeholder="Recharge Travels"
+                            />
+                        </div>
+                        <div>
+                            <Label>Company URL</Label>
+                            <Input
+                                value={config.linkedin?.companyUrl || ''}
+                                onChange={(e) => updateField('linkedin', 'companyUrl', e.target.value)}
+                                placeholder="https://linkedin.com/company/rechargetravels"
+                            />
+                        </div>
+                        <div>
+                            <Label>Followers Count</Label>
+                            <Input
+                                value={config.linkedin?.followersCount || ''}
+                                onChange={(e) => updateField('linkedin', 'followersCount', e.target.value)}
+                                placeholder="2K+"
+                            />
+                        </div>
+                        <div>
+                            <Label>Latest Post Embed URL</Label>
+                            <Input
+                                value={config.linkedin?.latestPostUrl || ''}
+                                onChange={(e) => updateField('linkedin', 'latestPostUrl', e.target.value)}
+                                placeholder="LinkedIn post embed URL"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">Paste the embed URL of your latest LinkedIn post</p>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* Pinterest Section */}
+            <Card className="border-red-200">
+                <CardHeader className="bg-gradient-to-r from-red-50 to-rose-50">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-red-600 rounded-lg">
+                                <PinterestIcon className="h-6 w-6 text-white" />
+                            </div>
+                            <div>
+                                <CardTitle>Pinterest</CardTitle>
+                                <CardDescription>Connect your Pinterest profile</CardDescription>
+                            </div>
+                        </div>
+                        <label className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                checked={config.pinterest?.enabled ?? true}
+                                onChange={(e) => updateField('pinterest', 'enabled', e.target.checked)}
+                                className="rounded"
+                            />
+                            <span className="text-sm font-medium">Enabled</span>
+                        </label>
+                    </div>
+                </CardHeader>
+                <CardContent className="space-y-4 pt-6">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <Label>Username</Label>
+                            <Input
+                                value={config.pinterest?.username || ''}
+                                onChange={(e) => updateField('pinterest', 'username', e.target.value)}
+                                placeholder="rechargetravels"
+                            />
+                        </div>
+                        <div>
+                            <Label>Profile URL</Label>
+                            <Input
+                                value={config.pinterest?.profileUrl || ''}
+                                onChange={(e) => updateField('pinterest', 'profileUrl', e.target.value)}
+                                placeholder="https://pinterest.com/rechargetravels"
+                            />
+                        </div>
+                        <div>
+                            <Label>Followers Count</Label>
+                            <Input
+                                value={config.pinterest?.followersCount || ''}
+                                onChange={(e) => updateField('pinterest', 'followersCount', e.target.value)}
+                                placeholder="5K+"
+                            />
+                        </div>
+                        <div>
+                            <Label>Boards Count</Label>
+                            <Input
+                                value={config.pinterest?.boardsCount || ''}
+                                onChange={(e) => updateField('pinterest', 'boardsCount', e.target.value)}
+                                placeholder="20+"
+                            />
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* Twitter/X Section */}
+            <Card className="border-slate-300">
+                <CardHeader className="bg-gradient-to-r from-slate-50 to-gray-50">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-black rounded-lg">
+                                <Twitter className="h-6 w-6 text-white" />
+                            </div>
+                            <div>
+                                <CardTitle>X / Twitter</CardTitle>
+                                <CardDescription>Connect your Twitter profile - Latest tweets auto-display</CardDescription>
+                            </div>
+                        </div>
+                        <label className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                checked={config.twitter?.enabled ?? true}
+                                onChange={(e) => updateField('twitter', 'enabled', e.target.checked)}
+                                className="rounded"
+                            />
+                            <span className="text-sm font-medium">Enabled</span>
+                        </label>
+                    </div>
+                </CardHeader>
+                <CardContent className="space-y-4 pt-6">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <Label>Username (without @)</Label>
+                            <Input
+                                value={config.twitter?.username || ''}
+                                onChange={(e) => updateField('twitter', 'username', e.target.value)}
+                                placeholder="rechargetravels"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">Your Twitter handle without the @ symbol</p>
+                        </div>
+                        <div>
+                            <Label>Profile URL</Label>
+                            <Input
+                                value={config.twitter?.profileUrl || ''}
+                                onChange={(e) => updateField('twitter', 'profileUrl', e.target.value)}
+                                placeholder="https://twitter.com/rechargetravels"
+                            />
+                        </div>
+                    </div>
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <p className="text-sm text-blue-800">
+                            <strong>Auto Live Feed:</strong> Your latest tweets will automatically display on the Connect With Us page using Twitter's timeline widget.
+                        </p>
                     </div>
                 </CardContent>
             </Card>

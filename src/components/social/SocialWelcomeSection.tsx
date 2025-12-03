@@ -24,7 +24,15 @@ import {
   Maximize2
 } from 'lucide-react'
 
-const socialPlatforms = [
+// Pinterest icon component (not in lucide)
+const PinterestIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/>
+  </svg>
+)
+
+// Default social platforms configuration - will be overridden by Firebase
+const getDefaultPlatforms = () => [
   {
     id: 'youtube',
     name: 'YouTube',
@@ -38,7 +46,8 @@ const socialPlatforms = [
     mainColor: 'bg-red-600',
     textColor: 'text-red-400',
     borderColor: 'border-red-500/30',
-    glowColor: 'shadow-red-500/50'
+    glowColor: 'shadow-red-500/50',
+    enabled: true
   },
   {
     id: 'instagram',
@@ -53,7 +62,8 @@ const socialPlatforms = [
     mainColor: 'bg-gradient-to-r from-purple-600 to-pink-600',
     textColor: 'text-pink-400',
     borderColor: 'border-pink-500/30',
-    glowColor: 'shadow-pink-500/50'
+    glowColor: 'shadow-pink-500/50',
+    enabled: true
   },
   {
     id: 'facebook',
@@ -68,7 +78,8 @@ const socialPlatforms = [
     mainColor: 'bg-blue-600',
     textColor: 'text-blue-400',
     borderColor: 'border-blue-500/30',
-    glowColor: 'shadow-blue-500/50'
+    glowColor: 'shadow-blue-500/50',
+    enabled: true
   },
   {
     id: 'tiktok',
@@ -83,13 +94,14 @@ const socialPlatforms = [
     mainColor: 'bg-black',
     textColor: 'text-cyan-400',
     borderColor: 'border-cyan-500/30',
-    glowColor: 'shadow-cyan-500/50'
+    glowColor: 'shadow-cyan-500/50',
+    enabled: true
   },
   {
     id: 'twitter',
     name: 'X / Twitter',
-    handle: '@rechargetravels',
-    url: 'https://twitter.com/rechargetravels',
+    handle: '@rechargetours',
+    url: 'https://x.com/rechargetours',
     description: 'Real-time updates, travel tips & bite-sized inspiration',
     stats: '3.2K+ Followers',
     accent: 'from-slate-700 via-slate-600 to-slate-500',
@@ -98,7 +110,8 @@ const socialPlatforms = [
     mainColor: 'bg-slate-800',
     textColor: 'text-slate-400',
     borderColor: 'border-slate-500/30',
-    glowColor: 'shadow-slate-500/50'
+    glowColor: 'shadow-slate-500/50',
+    enabled: true
   },
   {
     id: 'linkedin',
@@ -106,14 +119,31 @@ const socialPlatforms = [
     handle: 'Recharge Travels',
     url: 'https://www.linkedin.com/company/rechargetravels',
     description: 'Corporate travel solutions & tourism industry insights',
-    stats: '1.5K+ Connections',
+    stats: '2K+ Followers',
     accent: 'from-blue-700 via-blue-600 to-sky-600',
     hoverAccent: 'group-hover:from-blue-600 group-hover:via-blue-500 group-hover:to-sky-500',
     icon: Linkedin,
     mainColor: 'bg-blue-700',
     textColor: 'text-blue-400',
     borderColor: 'border-blue-500/30',
-    glowColor: 'shadow-blue-500/50'
+    glowColor: 'shadow-blue-500/50',
+    enabled: true
+  },
+  {
+    id: 'pinterest',
+    name: 'Pinterest',
+    handle: '@rechargetravels',
+    url: 'https://www.pinterest.com/rechargetravels',
+    description: 'Travel inspiration boards & stunning destination pins',
+    stats: '5K+ Followers',
+    accent: 'from-red-600 via-red-500 to-rose-500',
+    hoverAccent: 'group-hover:from-red-500 group-hover:via-red-400 group-hover:to-rose-400',
+    icon: PinterestIcon,
+    mainColor: 'bg-red-600',
+    textColor: 'text-red-400',
+    borderColor: 'border-red-500/30',
+    glowColor: 'shadow-red-500/50',
+    enabled: true
   },
   {
     id: 'tripadvisor',
@@ -128,9 +158,71 @@ const socialPlatforms = [
     mainColor: 'bg-emerald-600',
     textColor: 'text-emerald-400',
     borderColor: 'border-emerald-500/30',
-    glowColor: 'shadow-emerald-500/50'
+    glowColor: 'shadow-emerald-500/50',
+    enabled: true
   },
 ]
+
+// Function to merge Firebase config with default platforms
+const getSocialPlatforms = (config: SocialMediaConfig | null) => {
+  const defaults = getDefaultPlatforms()
+  
+  if (!config) return defaults
+  
+  return defaults.map(platform => {
+    switch (platform.id) {
+      case 'youtube':
+        return {
+          ...platform,
+          handle: config.youtube?.channelName ? `@${config.youtube.channelName}` : platform.handle,
+          stats: config.youtube?.subscribersCount || platform.stats,
+          enabled: config.youtube?.enabled ?? true
+        }
+      case 'instagram':
+        return {
+          ...platform,
+          handle: config.instagram?.username ? `@${config.instagram.username}` : platform.handle,
+          url: config.instagram?.profileUrl || platform.url,
+          stats: config.instagram?.followersCount ? `${config.instagram.followersCount} Followers` : platform.stats,
+          enabled: config.instagram?.enabled ?? true
+        }
+      case 'facebook':
+        return {
+          ...platform,
+          handle: config.facebook?.pageName || platform.handle,
+          url: config.facebook?.pageUrl || platform.url,
+          stats: config.facebook?.followersCount ? `${config.facebook.followersCount} Likes` : platform.stats,
+          enabled: config.facebook?.enabled ?? true
+        }
+      case 'tiktok':
+        return {
+          ...platform,
+          handle: config.tiktok?.username ? `@${config.tiktok.username}` : platform.handle,
+          url: config.tiktok?.profileUrl || platform.url,
+          stats: config.tiktok?.followersCount ? `${config.tiktok.followersCount} Followers` : platform.stats,
+          enabled: config.tiktok?.enabled ?? true
+        }
+      case 'linkedin':
+        return {
+          ...platform,
+          handle: config.linkedin?.companyName || platform.handle,
+          url: config.linkedin?.companyUrl || platform.url,
+          stats: config.linkedin?.followersCount ? `${config.linkedin.followersCount} Followers` : platform.stats,
+          enabled: config.linkedin?.enabled ?? true
+        }
+      case 'pinterest':
+        return {
+          ...platform,
+          handle: config.pinterest?.username ? `@${config.pinterest.username}` : platform.handle,
+          url: config.pinterest?.profileUrl || platform.url,
+          stats: config.pinterest?.followersCount ? `${config.pinterest.followersCount} Followers` : platform.stats,
+          enabled: config.pinterest?.enabled ?? true
+        }
+      default:
+        return platform
+    }
+  }).filter(p => p.enabled)
+}
 
 interface TVVideo {
   id: string
@@ -138,7 +230,69 @@ interface TVVideo {
   title: string
 }
 
+interface SocialMediaConfig {
+  youtube: {
+    enabled: boolean
+    channelId: string
+    channelName: string
+    livestreamTitle: string
+    livestreamDescription: string
+    livestreamUrl: string
+    subscribersCount: string
+    featuredVideoId: string
+    tvPlaylist: TVVideo[]
+  }
+  instagram: {
+    enabled: boolean
+    username: string
+    profileUrl: string
+    followersCount: string
+    postsCount: string
+  }
+  facebook: {
+    enabled: boolean
+    pageUrl: string
+    pageName: string
+    followersCount: string
+  }
+  tiktok: {
+    enabled: boolean
+    username: string
+    profileUrl: string
+    followersCount: string
+  }
+  linkedin: {
+    enabled: boolean
+    companyUrl: string
+    companyName: string
+    followersCount: string
+    latestPostUrl: string
+  }
+  pinterest: {
+    enabled: boolean
+    username: string
+    profileUrl: string
+    followersCount: string
+    boardsCount: string
+  }
+  whatsapp: {
+    enabled: boolean
+    phoneNumber: string
+    businessName: string
+    welcomeMessage: string
+  }
+  telegram: {
+    enabled: boolean
+    channelUrl: string
+    channelName: string
+    membersCount: string
+  }
+}
+
 export const SocialWelcomeSection = () => {
+  // State for social media config from Firebase
+  const [socialConfig, setSocialConfig] = useState<SocialMediaConfig | null>(null)
+  
   // State for TV playlist videos from Firebase
   const [tvPlaylist, setTvPlaylist] = useState<TVVideo[]>([
     { id: '1', url: 'https://www.youtube.com/watch?v=92Np5UkerSQ', title: 'Default Video' }
@@ -166,15 +320,18 @@ export const SocialWelcomeSection = () => {
     return null
   }
 
-  // Fetch TV playlist from Firebase
+  // Fetch social media config from Firebase
   useEffect(() => {
-    const fetchTVPlaylist = async () => {
+    const fetchSocialConfig = async () => {
       try {
         const docRef = doc(db, 'settings', 'socialMedia')
         const docSnap = await getDoc(docRef)
 
         if (docSnap.exists()) {
-          const data = docSnap.data()
+          const data = docSnap.data() as SocialMediaConfig
+          setSocialConfig(data)
+          
+          // Set TV playlist if available
           if (data.youtube?.tvPlaylist && data.youtube.tvPlaylist.length > 0) {
             // Filter out videos with empty URLs
             const validVideos = data.youtube.tvPlaylist.filter((v: TVVideo) => v.url && extractVideoId(v.url))
@@ -184,12 +341,12 @@ export const SocialWelcomeSection = () => {
           }
         }
       } catch (error) {
-        console.error('Error fetching TV playlist:', error)
-        // Keep default video if fetch fails
+        console.error('Error fetching social media config:', error)
+        // Keep defaults if fetch fails
       }
     }
 
-    fetchTVPlaylist()
+    fetchSocialConfig()
   }, [])
 
   // Handle video end - move to next video
@@ -644,10 +801,10 @@ export const SocialWelcomeSection = () => {
               </Button>
             </div>
 
-            {/* Stats bar */}
+            {/* Stats bar - Dynamic from Firebase */}
             <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700 rounded-xl p-4 text-center">
-                <div className="text-2xl font-bold text-red-400">2.5K+</div>
+                <div className="text-2xl font-bold text-red-400">{socialConfig?.youtube?.subscribersCount || '2.5K+'}</div>
                 <div className="text-xs text-slate-400 uppercase tracking-wider mt-1">Subscribers</div>
               </div>
               <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700 rounded-xl p-4 text-center">
@@ -688,9 +845,9 @@ export const SocialWelcomeSection = () => {
             </p>
           </div>
 
-          {/* Social Platforms Grid */}
+          {/* Social Platforms Grid - Dynamic from Firebase */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
-            {socialPlatforms.map((platform) => {
+            {getSocialPlatforms(socialConfig).map((platform) => {
               const Icon = platform.icon
               return (
                 <a

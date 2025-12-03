@@ -1,331 +1,759 @@
-import React, { useState, Suspense } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { AnimatePresence, motion } from 'framer-motion';
+import {
+  Award,
+  Building,
+  Calendar,
+  CheckCircle,
+  ChefHat,
+  ChevronRight,
+  Clock,
+  Coffee,
+  Flame,
+  Fish,
+  Heart,
+  Home,
+  Loader2,
+  Mail,
+  MapPin,
+  MessageCircle,
+  Phone,
+  Shield,
+  Sparkles,
+  Star,
+  TreePine,
+  Users,
+  UtensilsCrossed
+} from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
-  UtensilsCrossed,
-  Clock,
-  MapPin,
-  Users,
-  ChefHat,
-  Star,
-  CheckCircle,
-  ArrowRight,
-  Loader2
-} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { useToast } from '@/hooks/use-toast';
+import cookingClassPageService, {
+  CookingClassBookingContent,
+  defaultCookingClassContent
+} from '@/services/cookingClassPageService';
+import cookingClassBookingService from '@/services/cookingClassBookingService';
+import { cachedFetch } from '@/lib/cache';
 
-// Lazy load the booking wizard
-const MultiStepBookingWizard = React.lazy(() => import('@/components/booking/MultiStepBookingWizard'));
-
-// --- Data ---
-
-interface CookingClassItem {
-  id: string;
-  city: string;
-  title: string;
-  description: string;
-  price: number;
-  duration: string;
-  image: string;
-  highlights: string[];
-  rating: number;
-  reviews: number;
-}
-
-const CITY_COOKING_CLASSES: CookingClassItem[] = [
-  {
-    id: 'colombo-cooking',
-    city: 'Colombo',
-    title: 'Urban Flavors & Seafood Market Tour',
-    description: 'Dive into the bustling heart of Colombo. Visit the famous Pettah market to pick fresh seafood and spices, then cook a storm in a modern kitchen.',
-    price: 55,
-    duration: '4 Hours',
-    image: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=600&auto=format&fit=crop',
-    highlights: ['Pettah Market Visit', 'Crab Curry Masterclass', 'AC Kitchen'],
-    rating: 4.8,
-    reviews: 124
-  },
-  {
-    id: 'dambulla-cooking',
-    city: 'Dambulla',
-    title: 'Village Mud House Cooking',
-    description: 'Experience authentic rural life. Cook in a traditional clay house using firewood and clay pots. A truly rustic and grounding experience.',
-    price: 45,
-    duration: '3 Hours',
-    image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?q=80&w=600&auto=format&fit=crop',
-    highlights: ['Traditional Clay Pots', 'Organic Garden Picking', 'Village Walk'],
-    rating: 4.9,
-    reviews: 89
-  },
-  {
-    id: 'kandy-cooking',
-    city: 'Kandy',
-    title: 'Hill Country Spice Garden Cooking',
-    description: 'Surrounded by lush spice gardens, learn the medicinal and culinary uses of fresh spices before grinding them for your curry.',
-    price: 50,
-    duration: '3.5 Hours',
-    image: 'https://images.unsplash.com/photo-1596797038530-2c107229654b?q=80&w=600&auto=format&fit=crop',
-    highlights: ['Spice Garden Tour', 'Kandyan Chicken Curry', 'Mountain Views'],
-    rating: 4.9,
-    reviews: 210
-  },
-  {
-    id: 'jaffna-cooking',
-    city: 'Jaffna',
-    title: 'Northern Crab Curry & Palmyrah Feast',
-    description: 'Discover the distinct flavors of the North. Master the fiery Jaffna Crab Curry and learn to work with Palmyrah flour.',
-    price: 60,
-    duration: '4 Hours',
-    image: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?q=80&w=600&auto=format&fit=crop',
-    highlights: ['Jaffna Crab Curry', 'Palmyrah Tasting', 'Tamil Cuisine'],
-    rating: 5.0,
-    reviews: 45
-  },
-  {
-    id: 'nuwara-eliya-cooking',
-    city: 'Nuwara Eliya',
-    title: 'Tea Country Garden Fresh Cooking',
-    description: 'Cook with cool-climate vegetables freshly picked from the garden. Enjoy a cozy meal with a cup of premium Ceylon tea.',
-    price: 55,
-    duration: '3 Hours',
-    image: 'https://images.unsplash.com/photo-1625398407796-82650a8c135f?q=80&w=600&auto=format&fit=crop',
-    highlights: ['Farm Fresh Veggies', 'High Tea Experience', 'Colonial Bungalow'],
-    rating: 4.7,
-    reviews: 76
-  },
-  {
-    id: 'sigiriya-cooking',
-    city: 'Sigiriya',
-    title: 'Ancient Rock Shadow Traditional Lunch',
-    description: 'Cook a grand lunch spread with a view of the Sigiriya Rock Fortress. Learn to make "Ambula" (sour fish curry) and lotus root curry.',
-    price: 45,
-    duration: '3 Hours',
-    image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=600&auto=format&fit=crop',
-    highlights: ['Rock Fortress View', 'Lotus Leaf Dining', 'Traditional Sweets'],
-    rating: 4.8,
-    reviews: 156
-  },
-  {
-    id: 'bentota-cooking',
-    city: 'Bentota',
-    title: 'Coastal Seafood & Coconut Curry',
-    description: 'Fresh from the ocean to the pot. Learn to clean and cook fresh fish, prawns, and calamari with freshly scraped coconut milk.',
-    price: 65,
-    duration: '4 Hours',
-    image: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=600&auto=format&fit=crop',
-    highlights: ['Fresh Catch Selection', 'Coconut Scraping', 'Beachside Dining'],
-    rating: 4.9,
-    reviews: 112
-  }
-];
+const iconMap: Record<string, React.ComponentType<any>> = {
+  UtensilsCrossed,
+  MapPin,
+  Star,
+  Users,
+  Clock,
+  Calendar,
+  Building,
+  Home,
+  TreePine,
+  Flame,
+  Fish,
+  Coffee,
+  Sparkles,
+  Award,
+  Heart,
+  ChefHat,
+  Shield
+};
 
 const CookingClass = () => {
-  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
-  const [selectedClass, setSelectedClass] = useState<CookingClassItem | null>(null);
+  const { toast } = useToast();
+  const [content, setContent] = useState<CookingClassBookingContent>(defaultCookingClassContent);
+  const [isLoading, setIsLoading] = useState(true);
+  const [bookingSuccess, setBookingSuccess] = useState<{ ref: string; whatsAppLink: string } | null>(null);
+  const heroSlides = useMemo(
+    () => (content.hero.gallery?.length ? content.hero.gallery : defaultCookingClassContent.hero.gallery),
+    [content.hero.gallery]
+  );
+  const [slideIndex, setSlideIndex] = useState(0);
+  const [selectedClass, setSelectedClass] = useState(content.experiences[0]?.name ?? '');
+  const [selectedCity, setSelectedCity] = useState(content.experiences[0]?.city ?? '');
+  const [formData, setFormData] = useState({
+    date: '',
+    session: content.logistics.sessionTimes[0] ?? '',
+    adults: 2,
+    children: 0,
+    dietaryRequirements: '',
+    contactName: '',
+    contactEmail: '',
+    contactPhone: '',
+    requests: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const bookingSectionRef = useRef<HTMLElement | null>(null);
 
-  const handleBook = (cookingClass: CookingClassItem) => {
-    setSelectedClass(cookingClass);
-    setIsBookingModalOpen(true);
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const data = await cachedFetch<CookingClassBookingContent>(
+          'cooking-class-booking',
+          () => cookingClassPageService.getPageContent(),
+          5 * 60 * 1000
+        );
+        setContent(data);
+        setSelectedClass(data.experiences[0]?.name ?? '');
+        setSelectedCity(data.experiences[0]?.city ?? '');
+        setFormData((prev) => ({
+          ...prev,
+          session: data.logistics.sessionTimes[0] ?? prev.session
+        }));
+      } catch (error) {
+        console.error('Failed to load cooking class page content', error);
+        setContent(defaultCookingClassContent);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  useEffect(() => {
+    const ticker = setInterval(() => {
+      setSlideIndex((prev) => (prev + 1) % heroSlides.length);
+    }, 6000);
+    return () => clearInterval(ticker);
+  }, [heroSlides.length]);
+
+  const handleInputChange = (field: string, value: string | number) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleClassSelect = (name: string, city: string) => {
+    setSelectedClass(name);
+    setSelectedCity(city);
+  };
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (isSubmitting) return;
+
+    if (!formData.contactName || !formData.contactEmail || !formData.contactPhone || !formData.date) {
+      toast({
+        title: 'Missing Information',
+        description: 'Please fill in all required fields.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const result = await cookingClassBookingService.submitBooking({
+        contactName: formData.contactName,
+        contactEmail: formData.contactEmail,
+        contactPhone: formData.contactPhone,
+        date: formData.date,
+        session: formData.session,
+        classType: selectedClass,
+        city: selectedCity,
+        adults: formData.adults,
+        children: formData.children,
+        dietaryRequirements: formData.dietaryRequirements,
+        requests: formData.requests,
+        estimatedTotal,
+        currency: content.pricing.currency
+      });
+
+      if (result.success) {
+        setBookingSuccess({
+          ref: result.bookingRef,
+          whatsAppLink: result.whatsAppLink
+        });
+
+        toast({
+          title: '🍳 Booking Submitted!',
+          description: `Reference: ${result.bookingRef}. Check your email for confirmation.`
+        });
+
+        setFormData({
+          date: '',
+          session: content.logistics.sessionTimes[0] ?? '',
+          adults: 2,
+          children: 0,
+          dietaryRequirements: '',
+          contactName: '',
+          contactEmail: '',
+          contactPhone: '',
+          requests: ''
+        });
+      } else {
+        toast({
+          title: 'Booking Failed',
+          description: result.error || 'Please try again or contact us directly.',
+          variant: 'destructive'
+        });
+      }
+    } catch (error) {
+      console.error('Booking error:', error);
+      toast({
+        title: 'Error',
+        description: 'Something went wrong. Please try again or WhatsApp us directly.',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const scrollToBooking = (className?: string, city?: string) => {
+    if (className && city) {
+      setSelectedClass(className);
+      setSelectedCity(city);
+    }
+    bookingSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const basePrice = content.pricing.startingPrice || 0;
+  const childPrice = Math.round(basePrice * 0.5);
+  const estimatedTotal = basePrice * formData.adults + childPrice * formData.children;
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-stone-50">
+        <Loader2 className="h-12 w-12 animate-spin text-amber-600" />
+      </div>
+    );
+  }
+
+  const getIcon = (iconName: string) => iconMap[iconName] || UtensilsCrossed;
+
   return (
-    <div className="min-h-screen bg-stone-50 font-sans text-gray-900">
+    <>
       <Helmet>
-        <title>Sri Lankan Cooking Classes | Authentic Culinary Experiences</title>
-        <meta name="description" content="Join authentic cooking classes across Sri Lanka. From Colombo to Kandy, learn to cook traditional curries with local experts." />
+        <title>{content.seo.title}</title>
+        <meta name="description" content={content.seo.description} />
+        <meta name="keywords" content={content.seo.keywords.join(', ')} />
+        <meta property="og:title" content={content.seo.title} />
+        <meta property="og:description" content={content.seo.description} />
+        <meta property="og:image" content={content.seo.ogImage} />
+        <link rel="canonical" href="https://www.rechargetravels.com/experiences/cooking-class-sri-lanka" />
       </Helmet>
 
       <Header />
 
-      {/* Hero Section */}
-      <section className="relative h-[60vh] min-h-[500px] flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <img
-            src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?q=80&w=1600&auto=format&fit=crop"
-            alt="Sri Lankan Spices"
-            className="w-full h-full object-cover"
-            loading="eager"
-            fetchPriority="high"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-stone-50" />
-        </div>
-
-        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto mt-16">
+      {/* Hero */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
+        <AnimatePresence mode="wait">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+            key={heroSlides[slideIndex]?.image}
+            className="absolute inset-0"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.1 }}
           >
-            <Badge className="bg-emerald-600 text-white hover:bg-emerald-700 mb-4 px-4 py-1 text-sm uppercase tracking-wider">
-              Culinary Adventures
-            </Badge>
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 drop-shadow-lg font-serif">
-              Taste of Ceylon
-            </h1>
-            <p className="text-xl md:text-2xl text-white/90 font-light max-w-2xl mx-auto drop-shadow-md">
-              Master the art of Sri Lankan cuisine in the country's most iconic cities.
-            </p>
+            <img
+              src={heroSlides[slideIndex]?.image}
+              alt={heroSlides[slideIndex]?.caption}
+              className="h-full w-full object-cover object-center"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-slate-950/90 via-slate-950/70 to-slate-950/90" />
           </motion.div>
-        </div>
-      </section>
+        </AnimatePresence>
 
-      {/* Intro Section */}
-      <section className="py-16 px-4 bg-stone-50">
-        <div className="max-w-3xl mx-auto text-center">
-          <UtensilsCrossed className="w-12 h-12 text-emerald-600 mx-auto mb-6" />
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-6 font-serif">
-            Cook Like a Local, Eat Like a King
-          </h2>
-          <p className="text-lg text-gray-600 leading-relaxed">
-            Sri Lankan food is a symphony of spices, colors, and flavors. Our cooking classes aren't just about following a recipe; they are about immersing yourself in the culture. Choose your destination and discover the unique regional flavors that make this island a food lover's paradise.
-          </p>
-        </div>
-      </section>
-
-      {/* City Classes Grid */}
-      <section className="py-12 px-4 md:px-8 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {CITY_COOKING_CLASSES.map((item, index) => (
-            <motion.div
-              key={item.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
+        <div className="relative mx-auto flex min-h-[520px] max-w-6xl flex-col items-center gap-6 px-4 py-24 text-center">
+          <Badge className="bg-white/10 text-white backdrop-blur">{content.hero.badge}</Badge>
+          <h1 className="text-4xl font-semibold leading-tight sm:text-5xl lg:text-6xl">{content.hero.title}</h1>
+          <p className="max-w-3xl text-lg text-white/80">{content.hero.subtitle}</p>
+          <div className="flex flex-wrap items-center justify-center gap-3 text-xs uppercase tracking-[0.4em] text-amber-200/80">
+            <span>{heroSlides[slideIndex]?.tag}</span>
+          </div>
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+            {content.overview.badges.map((badge) => {
+              const Icon = getIcon(badge.iconName);
+              return (
+                <span
+                  key={badge.label}
+                  className="inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 text-sm text-white/90 backdrop-blur"
+                >
+                  <Icon className="h-4 w-4 text-amber-200" />
+                  {badge.label}: <strong className="font-semibold">{badge.value}</strong>
+                </span>
+              );
+            })}
+          </div>
+          <div className="mt-8 flex flex-wrap justify-center gap-4">
+            <Button
+              size="lg"
+              className="bg-amber-500 hover:bg-amber-600 px-8 py-6 text-base"
+              onClick={() => scrollToBooking()}
             >
-              <Card className="h-full border-none shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden bg-white group flex flex-col">
-                <div className="relative h-64 overflow-hidden">
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
-                    loading="lazy"
-                  />
-                  <div className="absolute top-4 left-4">
-                    <Badge className="bg-white/90 text-gray-900 hover:bg-white backdrop-blur-sm font-bold shadow-sm">
-                      <MapPin className="w-3 h-3 mr-1 text-emerald-600" />
-                      {item.city}
-                    </Badge>
-                  </div>
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                    <div className="flex items-center text-white/90 text-sm">
-                      <Clock className="w-4 h-4 mr-1" />
-                      {item.duration}
-                      <span className="mx-2">•</span>
-                      <Users className="w-4 h-4 mr-1" />
-                      Small Group
+              Book a class
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              className="border-white/40 bg-white/10 px-8 py-6 text-base text-white hover:bg-white/20"
+              onClick={() => scrollToBooking()}
+            >
+              Talk to concierge
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Overview */}
+      <section className="bg-white py-16">
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 md:grid-cols-[1.2fr_0.8fr]">
+          <div>
+            <h2 className="text-3xl font-semibold text-slate-900">Why cook with Recharge</h2>
+            <p className="mt-4 text-lg text-slate-600">{content.overview.summary}</p>
+          </div>
+          <div className="grid gap-4">
+            {content.overview.highlights.map((highlight) => (
+              <div key={highlight.label} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <p className="text-xs uppercase tracking-[0.3em] text-slate-500">{highlight.label}</p>
+                <p className="mt-2 text-sm text-slate-700">{highlight.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Cooking Classes by City */}
+      <section className="bg-stone-50 py-16">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="mb-8 flex flex-col gap-2">
+            <p className="text-xs uppercase tracking-[0.4em] text-slate-500">Regional Experiences</p>
+            <h3 className="text-3xl font-semibold text-slate-900">Choose your culinary adventure</h3>
+          </div>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {content.experiences.map((experience) => (
+              <motion.button
+                key={experience.id}
+                whileHover={{ y: -4 }}
+                onClick={() => handleClassSelect(experience.name, experience.city)}
+                className={`flex h-full flex-col overflow-hidden rounded-3xl border bg-white text-left shadow-sm transition ${
+                  selectedClass === experience.name ? 'border-amber-400 shadow-lg' : 'border-slate-100'
+                }`}
+                type="button"
+              >
+                {experience.image && (
+                  <div className="relative h-48 w-full overflow-hidden">
+                    <img src={experience.image} alt={experience.name} className="h-full w-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/20 to-transparent" />
+                    <div className="absolute top-4 left-4">
+                      <Badge className="bg-white/90 text-slate-900 backdrop-blur-sm">
+                        <MapPin className="mr-1 h-3 w-3 text-amber-600" />
+                        {experience.city}
+                      </Badge>
+                    </div>
+                    <div className="absolute bottom-4 left-4 flex items-center gap-2 text-sm font-medium text-white">
+                      <Badge className="bg-amber-500/90 text-white">{experience.level}</Badge>
+                      <span>{experience.duration}</span>
                     </div>
                   </div>
-                </div>
-
-                <CardContent className="p-6 flex-grow flex flex-col">
-                  <div className="flex justify-between items-start mb-2">
+                )}
+                <div className="flex flex-1 flex-col gap-3 p-5">
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center text-amber-500 text-sm font-bold">
-                      <Star className="w-4 h-4 fill-current mr-1" />
-                      {item.rating} <span className="text-gray-400 font-normal ml-1">({item.reviews})</span>
+                      <Star className="h-4 w-4 fill-current mr-1" />
+                      {experience.rating}
+                      <span className="text-slate-400 font-normal ml-1">({experience.reviews})</span>
                     </div>
-                    <div className="text-xl font-bold text-emerald-700">
-                      ${item.price}
-                      <span className="text-sm text-gray-500 font-normal"> / person</span>
-                    </div>
+                    <span className="text-lg font-semibold text-amber-700">{experience.priceLabel}</span>
                   </div>
+                  <div>
+                    <h4 className="text-lg font-semibold">{experience.name}</h4>
+                    <p className="mt-1 text-sm text-slate-600 line-clamp-2">{experience.summary}</p>
+                  </div>
+                  <ul className="space-y-1 text-sm text-slate-600">
+                    {experience.includes.slice(0, 3).map((include) => (
+                      <li key={include} className="flex items-center gap-2">
+                        <CheckCircle className="h-3.5 w-3.5 text-amber-500" />
+                        <span>{include}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Button
+                    size="sm"
+                    className="mt-auto bg-amber-600 hover:bg-amber-700"
+                    onClick={() => scrollToBooking(experience.name, experience.city)}
+                  >
+                    Book this class
+                  </Button>
+                </div>
+              </motion.button>
+            ))}
+          </div>
+        </div>
+      </section>
 
-                  <h3 className="text-xl font-bold text-gray-900 mb-3 font-serif group-hover:text-emerald-700 transition-colors">
-                    {item.title}
-                  </h3>
-
-                  <p className="text-gray-600 text-sm mb-6 line-clamp-3 flex-grow">
-                    {item.description}
-                  </p>
-
-                  <div className="space-y-3 mb-6">
-                    {item.highlights.map((highlight, idx) => (
-                      <div key={idx} className="flex items-center text-sm text-gray-700">
-                        <CheckCircle className="w-4 h-4 text-emerald-500 mr-2 flex-shrink-0" />
-                        {highlight}
+      {/* Combo packages */}
+      <section className="bg-white py-16">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="mb-8 flex flex-col gap-2">
+            <p className="text-xs uppercase tracking-[0.4em] text-slate-500">Curated Bundles</p>
+            <h3 className="text-3xl font-semibold text-slate-900">Multi-day culinary experiences</h3>
+          </div>
+          <div className="grid gap-6 lg:grid-cols-3">
+            {content.combos.map((combo) => {
+              const Icon = getIcon(combo.iconName);
+              return (
+                <div
+                  key={combo.id}
+                  className="rounded-3xl border border-slate-100 bg-gradient-to-b from-white to-stone-50 p-6 shadow-sm"
+                >
+                  <div className="mb-4 flex items-center justify-between">
+                    <Icon className="h-10 w-10 text-amber-600" />
+                    <Badge className="bg-amber-600/10 text-amber-700">{combo.badge}</Badge>
+                  </div>
+                  <h4 className="text-xl font-semibold text-slate-900">{combo.name}</h4>
+                  <p className="mt-2 text-sm font-medium text-amber-700">{combo.priceLabel}</p>
+                  <p className="text-sm text-slate-500">{combo.duration}</p>
+                  <div className="mt-4 space-y-2 text-sm text-slate-600">
+                    {combo.highlights.map((highlight) => (
+                      <div key={highlight} className="flex items-start gap-2">
+                        <ChevronRight className="h-4 w-4 text-amber-500" />
+                        <span>{highlight}</span>
                       </div>
                     ))}
                   </div>
-
+                  <div className="mt-4 space-y-1 text-sm text-slate-500">
+                    {combo.includes.map((include) => (
+                      <div key={include} className="flex items-center gap-2">
+                        <CheckCircle className="h-3.5 w-3.5 text-amber-500" />
+                        <span>{include}</span>
+                      </div>
+                    ))}
+                  </div>
                   <Button
-                    onClick={() => handleBook(item)}
-                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-md group-hover:shadow-lg transition-all"
+                    className="mt-6 w-full bg-amber-600 hover:bg-amber-700"
+                    onClick={() => scrollToBooking(combo.name, 'Multiple Cities')}
                   >
-                    Book Now <ArrowRight className="w-4 h-4 ml-2" />
+                    Reserve package
                   </Button>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </section>
 
-      {/* Why Choose Us */}
-      <section className="py-20 bg-emerald-900 text-white mt-12">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 font-serif">The Authentic Experience</h2>
-            <p className="text-emerald-100 max-w-2xl mx-auto">
-              We don't just teach you recipes; we invite you into our kitchens and our hearts.
-            </p>
+      {/* Logistics + Chef Credentials */}
+      <section className="bg-slate-950 py-16 text-white">
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="space-y-5">
+            <p className="text-xs uppercase tracking-[0.4em] text-amber-200/70">Logistics</p>
+            <h3 className="text-3xl font-semibold">Everything you need to know</h3>
+            <div className="space-y-4 text-sm text-white/80">
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-amber-200/80">Meeting point</p>
+                <p className="text-base">{content.logistics.meetingPoint}</p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-amber-200/80">Session times</p>
+                <ul className="mt-2 space-y-1">
+                  {content.logistics.sessionTimes.map((slot) => (
+                    <li key={slot} className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-amber-300" />
+                      {slot}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-amber-200/80">What's provided</p>
+                <p>{content.logistics.gearProvided.join(', ')}</p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-amber-200/80">What to bring</p>
+                <p>{content.logistics.bringList.join(', ')}</p>
+              </div>
+              <p className="text-amber-100">{content.logistics.dietaryNote}</p>
+            </div>
           </div>
+          <div className="space-y-4 rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+            <h4 className="text-xl font-semibold">Our Chefs</h4>
+            <ul className="space-y-3 text-sm text-white/80">
+              {content.chefCredentials.map((item) => (
+                <li key={item} className="flex items-start gap-2">
+                  <ChefHat className="mt-0.5 h-4 w-4 text-amber-300" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
 
-          <div className="grid md:grid-cols-3 gap-8 text-center">
-            <div className="p-6 rounded-2xl bg-emerald-800/50 backdrop-blur-sm">
-              <ChefHat className="w-12 h-12 mx-auto mb-4 text-emerald-300" />
-              <h3 className="text-xl font-bold mb-2">Expert Local Chefs</h3>
-              <p className="text-emerald-100/80">Learn from home cooks and professional chefs who have mastered these recipes over generations.</p>
+      {/* FAQs & Gallery */}
+      <section className="bg-white py-16">
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 lg:grid-cols-[1fr_1.1fr]">
+          <div>
+            <h3 className="text-3xl font-semibold text-slate-900">Cooking class FAQ</h3>
+            <Accordion type="single" collapsible className="mt-6">
+              {content.faqs.map((faq) => (
+                <AccordionItem key={faq.id} value={faq.id} className="border-b border-slate-200">
+                  <AccordionTrigger className="text-left text-sm font-semibold text-slate-800">
+                    {faq.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-sm text-slate-600">{faq.answer}</AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </div>
+          <div>
+            <h3 className="text-3xl font-semibold text-slate-900">Culinary gallery</h3>
+            <div className="mt-6 grid gap-4 sm:grid-cols-2">
+              {content.gallery.map((item) => (
+                <div key={item.id} className="group relative h-48 overflow-hidden rounded-2xl">
+                  <img
+                    src={item.image}
+                    alt={item.caption}
+                    className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-transparent to-transparent opacity-0 transition group-hover:opacity-100" />
+                  <p className="absolute bottom-3 left-3 text-sm font-medium text-white drop-shadow">
+                    {item.caption}
+                  </p>
+                </div>
+              ))}
             </div>
-            <div className="p-6 rounded-2xl bg-emerald-800/50 backdrop-blur-sm">
-              <UtensilsCrossed className="w-12 h-12 mx-auto mb-4 text-emerald-300" />
-              <h3 className="text-xl font-bold mb-2">Hands-on Learning</h3>
-              <p className="text-emerald-100/80">Grind spices, scrape coconut, and cook in clay pots. This is a full sensory experience.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Booking form */}
+      <section
+        ref={bookingSectionRef}
+        className="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 py-20 text-white"
+      >
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="grid gap-10 md:grid-cols-[1.05fr_0.95fr]">
+            <div>
+              <p className="text-xs uppercase tracking-[0.4em] text-amber-200/70">Book Your Class</p>
+              <h3 className="mt-2 text-3xl font-semibold">Reserve your cooking experience</h3>
+              <p className="mt-3 text-slate-300">{content.booking.conciergeNote}</p>
+              <div className="mt-8 space-y-4 rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+                <div className="flex items-center gap-3 text-sm text-slate-100">
+                  <Phone className="h-4 w-4 text-amber-300" />
+                  <span>{content.booking.contactPhone}</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm text-slate-100">
+                  <Mail className="h-4 w-4 text-amber-300" />
+                  <span>{content.booking.email}</span>
+                </div>
+                <div className="text-xs uppercase tracking-[0.3em] text-slate-300">
+                  {content.booking.responseTime}
+                </div>
+                <Button
+                  size="sm"
+                  className="mt-2 w-full justify-center bg-amber-500/90 text-white hover:bg-amber-500"
+                  onClick={() =>
+                    window.open(content.booking.whatsapp || 'https://wa.me/94777721999', '_blank')
+                  }
+                >
+                  <MessageCircle className="mr-2 h-4 w-4" />
+                  WhatsApp concierge
+                </Button>
+              </div>
             </div>
-            <div className="p-6 rounded-2xl bg-emerald-800/50 backdrop-blur-sm">
-              <MapPin className="w-12 h-12 mx-auto mb-4 text-emerald-300" />
-              <h3 className="text-xl font-bold mb-2">Stunning Locations</h3>
-              <p className="text-emerald-100/80">From village mud houses to colonial bungalows, our settings are as memorable as the food.</p>
-            </div>
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-5 rounded-3xl border border-white/15 bg-white/95 p-6 text-slate-900 shadow-2xl shadow-slate-950/30"
+            >
+              <div className="grid gap-4 md:grid-cols-2">
+                <label className="text-sm font-medium text-slate-800">
+                  Class Date
+                  <input
+                    type="date"
+                    required
+                    value={formData.date}
+                    onChange={(e) => handleInputChange('date', e.target.value)}
+                    className="mt-1 w-full rounded-2xl border border-slate-300 bg-white/90 px-3 py-3 text-slate-900 placeholder-slate-400 focus:border-amber-500 focus:outline-none"
+                  />
+                </label>
+                <label className="text-sm font-medium text-slate-800">
+                  Session
+                  <select
+                    value={formData.session}
+                    onChange={(e) => handleInputChange('session', e.target.value)}
+                    className="mt-1 w-full rounded-2xl border border-slate-300 bg-white/90 px-3 py-3 text-slate-900 focus:border-amber-500 focus:outline-none"
+                  >
+                    {content.logistics.sessionTimes.map((slot) => (
+                      <option key={slot}>{slot}</option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+              <label className="text-sm font-medium text-slate-800">
+                Cooking class
+                <select
+                  value={selectedClass}
+                  onChange={(e) => {
+                    const exp = content.experiences.find((ex) => ex.name === e.target.value);
+                    if (exp) {
+                      setSelectedClass(exp.name);
+                      setSelectedCity(exp.city);
+                    }
+                  }}
+                  className="mt-1 w-full rounded-2xl border border-slate-300 bg-white/90 px-3 py-3 text-slate-900 focus:border-amber-500 focus:outline-none"
+                >
+                  {content.experiences.map((experience) => (
+                    <option key={experience.id} value={experience.name}>
+                      {experience.city} - {experience.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <div className="grid gap-4 md:grid-cols-2">
+                <label className="text-sm font-medium text-slate-800">
+                  Adults
+                  <input
+                    type="number"
+                    min={1}
+                    value={formData.adults}
+                    onChange={(e) => handleInputChange('adults', Number(e.target.value))}
+                    className="mt-1 w-full rounded-2xl border border-slate-300 bg-white/90 px-3 py-3 text-slate-900 focus:border-amber-500 focus:outline-none"
+                  />
+                </label>
+                <label className="text-sm font-medium text-slate-800">
+                  Children (under 12)
+                  <input
+                    type="number"
+                    min={0}
+                    value={formData.children}
+                    onChange={(e) => handleInputChange('children', Number(e.target.value))}
+                    className="mt-1 w-full rounded-2xl border border-slate-300 bg-white/90 px-3 py-3 text-slate-900 focus:border-amber-500 focus:outline-none"
+                  />
+                </label>
+              </div>
+              <label className="text-sm font-medium text-slate-800">
+                Dietary requirements
+                <input
+                  type="text"
+                  value={formData.dietaryRequirements}
+                  onChange={(e) => handleInputChange('dietaryRequirements', e.target.value)}
+                  className="mt-1 w-full rounded-2xl border border-slate-300 bg-white/90 px-3 py-3 text-slate-900 placeholder-slate-400 focus:border-amber-500 focus:outline-none"
+                  placeholder="Vegetarian, vegan, allergies..."
+                />
+              </label>
+              <div className="grid gap-4 md:grid-cols-2">
+                <label className="text-sm font-medium text-slate-800">
+                  Full name
+                  <input
+                    type="text"
+                    required
+                    value={formData.contactName}
+                    onChange={(e) => handleInputChange('contactName', e.target.value)}
+                    className="mt-1 w-full rounded-2xl border border-slate-300 bg-white/90 px-3 py-3 text-slate-900 focus:border-amber-500 focus:outline-none"
+                  />
+                </label>
+                <label className="text-sm font-medium text-slate-800">
+                  Email
+                  <input
+                    type="email"
+                    required
+                    value={formData.contactEmail}
+                    onChange={(e) => handleInputChange('contactEmail', e.target.value)}
+                    className="mt-1 w-full rounded-2xl border border-slate-300 bg-white/90 px-3 py-3 text-slate-900 focus:border-amber-500 focus:outline-none"
+                  />
+                </label>
+              </div>
+              <label className="text-sm font-medium text-slate-800">
+                Phone / WhatsApp
+                <input
+                  type="tel"
+                  required
+                  value={formData.contactPhone}
+                  onChange={(e) => handleInputChange('contactPhone', e.target.value)}
+                  className="mt-1 w-full rounded-2xl border border-slate-300 bg-white/90 px-3 py-3 text-slate-900 focus:border-amber-500 focus:outline-none"
+                />
+              </label>
+              <label className="text-sm font-medium text-slate-800">
+                Special requests
+                <textarea
+                  value={formData.requests}
+                  onChange={(e) => handleInputChange('requests', e.target.value)}
+                  rows={3}
+                  className="mt-1 w-full rounded-2xl border border-slate-300 bg-white/90 px-3 py-3 text-slate-900 placeholder-slate-400 focus:border-amber-500 focus:outline-none"
+                  placeholder="Hotel pickup, celebration setup, specific dishes..."
+                />
+              </label>
+              <div className="rounded-3xl border border-slate-200/60 bg-stone-50/80 p-4 text-sm text-slate-600">
+                <div className="flex items-center justify-between text-slate-800">
+                  <span className="font-medium">Estimated from</span>
+                  <span className="text-lg font-semibold">
+                    {content.pricing.currency} {estimatedTotal.toLocaleString()}
+                  </span>
+                </div>
+                <p className="mt-2 text-xs text-slate-500">
+                  Adults at {content.pricing.currency} {basePrice.toLocaleString()} • Children at{' '}
+                  {content.pricing.currency} {childPrice.toLocaleString()}
+                </p>
+                <p className="mt-3 text-xs text-slate-500">{content.pricing.depositNote}</p>
+                <p className="text-xs text-slate-500">{content.pricing.refundPolicy}</p>
+              </div>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full bg-gradient-to-r from-amber-500 to-amber-600 py-3 text-base font-semibold text-white hover:from-amber-600 hover:to-amber-700"
+              >
+                {isSubmitting ? 'Sending request…' : 'Book cooking class'}
+              </Button>
+
+              {/* Booking Success Message */}
+              {bookingSuccess && (
+                <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-center">
+                  <CheckCircle className="mx-auto h-8 w-8 text-amber-500" />
+                  <p className="mt-2 font-semibold text-amber-800">Booking Submitted!</p>
+                  <p className="text-sm text-amber-700">Reference: {bookingSuccess.ref}</p>
+                  <p className="mt-1 text-xs text-amber-600">Check your email for confirmation details.</p>
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="mt-3 bg-amber-500 hover:bg-amber-600"
+                    onClick={() => window.open(bookingSuccess.whatsAppLink, '_blank')}
+                  >
+                    <MessageCircle className="mr-2 h-4 w-4" />
+                    Chat on WhatsApp
+                  </Button>
+                </div>
+              )}
+            </form>
+          </div>
+        </div>
+      </section>
+
+      {/* Concierge contact */}
+      <section className="bg-slate-950 px-4 py-12 text-white">
+        <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-3">
+          <a
+            href={content.booking.whatsapp || 'https://wa.me/94777721999'}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex flex-col items-center rounded-3xl border border-white/10 bg-white/5 p-6 text-center transition hover:border-amber-300/60 hover:bg-white/10"
+          >
+            <svg className="h-9 w-9 text-amber-400" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347" />
+              <path d="M11.999 2c-5.511 0-10 4.489-10 10 0 1.77.465 3.494 1.347 5.009L2 22l5.154-1.349A10 10 0 1 0 12 2Zm0 18c-1.64 0-3.228-.438-4.626-1.267l-.33-.195-3.053.8.82-2.991-.199-.316A7.98 7.98 0 0 1 4 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8Z" />
+            </svg>
+            <p className="mt-4 text-sm uppercase tracking-[0.3em] text-amber-200/80">WhatsApp</p>
+            <p className="mt-2 text-lg font-semibold">{content.booking.contactPhone}</p>
+            <p className="text-sm text-slate-300">Tap to open concierge chat</p>
+          </a>
+          <div className="flex flex-col items-center rounded-3xl border border-white/10 bg-white/5 p-6 text-center">
+            <Mail className="h-9 w-9 text-amber-300" />
+            <p className="mt-4 text-sm uppercase tracking-[0.3em] text-amber-200/80">Email</p>
+            <p className="mt-2 text-lg font-semibold">{content.booking.email}</p>
+            <p className="text-sm text-slate-300">{content.booking.responseTime}</p>
+          </div>
+          <div className="flex flex-col items-center rounded-3xl border border-white/10 bg-white/5 p-6 text-center">
+            <Phone className="h-9 w-9 text-orange-300" />
+            <p className="mt-4 text-sm uppercase tracking-[0.3em] text-orange-200/80">Hotline</p>
+            <p className="mt-2 text-lg font-semibold">{content.booking.contactPhone}</p>
+            <p className="text-sm text-slate-300">Global support 6 AM – 10 PM (GMT+5:30)</p>
           </div>
         </div>
       </section>
 
       <Footer />
-
-      {/* Booking Modal */}
-      {isBookingModalOpen && selectedClass && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
-            onClick={() => setIsBookingModalOpen(false)}
-          />
-          <div className="relative w-full max-w-6xl h-[90vh] bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col">
-            <Suspense fallback={
-              <div className="flex items-center justify-center h-full">
-                <Loader2 className="w-12 h-12 text-emerald-600 animate-spin" />
-              </div>
-            }>
-              <MultiStepBookingWizard
-                onClose={() => setIsBookingModalOpen(false)}
-                initialTripType="experience"
-                tourData={{
-                  id: selectedClass.id,
-                  name: selectedClass.title,
-                  price: selectedClass.price,
-                  image: selectedClass.image,
-                  description: selectedClass.description,
-                  duration: selectedClass.duration
-                }}
-              />
-            </Suspense>
-          </div>
-        </div>
-      )}
-    </div>
+    </>
   );
 };
 

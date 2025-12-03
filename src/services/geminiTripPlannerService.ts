@@ -89,6 +89,23 @@ export const getGeminiApiKey = async (): Promise<string | null> => {
   }
 };
 
+// Get OpenAI API key from Firebase settings
+export const getOpenAIApiKey = async (): Promise<string | null> => {
+  try {
+    const settingsDoc = await getDoc(doc(db, 'settings', 'ai_config'));
+    if (settingsDoc.exists()) {
+      const data = settingsDoc.data();
+      if (data?.openai_api_key) {
+        return data.openai_api_key;
+      }
+    }
+    return null;
+  } catch (error) {
+    console.error('Error fetching OpenAI API key:', error);
+    return null;
+  }
+};
+
 // Sri Lanka travel knowledge base for context
 const SRI_LANKA_CONTEXT = `
 You are an expert Sri Lanka travel planner with deep knowledge of:
@@ -289,6 +306,169 @@ Return ONLY valid JSON, no additional text.
     return itinerary;
   } catch (error) {
     console.error('Gemini API error:', error);
+    // Try OpenAI as backup
+    console.log('Attempting OpenAI backup...');
+    return generateOpenAIItinerary(preferences);
+  }
+};
+
+// Generate itinerary using OpenAI ChatGPT as backup
+const generateOpenAIItinerary = async (
+  preferences: TripPreferences
+): Promise<GeneratedItinerary> => {
+  const apiKey = await getOpenAIApiKey();
+
+  if (!apiKey) {
+    console.warn('No OpenAI API key found, using fallback generation');
+    return generateFallbackItinerary(preferences);
+  }
+
+  const { startDate, endDate, travelers, interests, budget, pace, specialRequests } = preferences;
+
+  // Calculate duration
+  const start = startDate || new Date();
+  const end = endDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+  const duration = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+
+  const prompt = `
+${SRI_LANKA_CONTEXT}
+
+Create a detailed ${duration}-day Sri Lanka itinerary with these preferences:
+
+TRIP DETAILS:
+- Duration: ${duration} days
+- Start Date: ${start.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+- Travelers: ${travelers.adults} adults${travelers.children > 0 ? `, ${travelers.children} children` : ''}
+- Budget Level: ${budget}
+- Pace: ${pace}
+- Interests: ${interests.length > 0 ? interests.join(', ') : 'general sightseeing'}
+${specialRequests ? `- Special Requests: ${specialRequests}` : ''}
+
+Generate a JSON response with this exact structure:
+{
+  "title": "Catchy trip title",
+  "summary": "2-3 sentence trip overview",
+  "highlights": ["highlight1", "highlight2", "highlight3", "highlight4", "highlight5"],
+  "bestTimeToVisit": "Best months for this itinerary",
+  "packingTips": ["tip1", "tip2", "tip3"],
+  "days": [
+    {
+      "day": 1,
+      "date": "${start.toLocaleDateString()}",
+      "location": "City/Area name",
+      "description": "Day overview",
+      "activities": [
+        {
+          "time": "09:00 AM",
+          "activity": "Activity name",
+          "description": "What you'll do",
+          "duration": "2 hours",
+          "cost": 30,
+          "tips": ["tip1"]
+        }
+      ],
+      "accommodation": {
+        "name": "Hotel name",
+        "type": "Hotel type",
+        "rating": 4,
+        "price": 80,
+        "amenities": ["Pool", "Wifi", "Breakfast"]
+      },
+      "meals": {
+        "breakfast": "Included at hotel",
+        "lunch": "Local restaurant recommendation",
+        "dinner": "Restaurant recommendation"
+      },
+      "transport": "How to get around",
+      "weatherTip": "Weather advice for this location"
+    }
+  ],
+  "totalCost": {
+    "accommodation": 0,
+    "activities": 0,
+    "transport": 0,
+    "meals": 0,
+    "total": 0,
+    "perPerson": 0
+  },
+  "aiInsights": ["insight1", "insight2", "insight3"]
+}
+
+IMPORTANT:
+- Include realistic Sri Lankan hotel names and restaurants
+- Calculate accurate costs in USD based on budget level
+- Make the itinerary flow logically (minimize backtracking)
+- Include the famous Kandy-Ella train if hill country is included
+- Add cultural tips and local experiences
+- Consider travel times between destinations
+- For ${pace} pace, ${pace === 'relaxed' ? 'include rest time and fewer activities' : pace === 'active' ? 'maximize activities and experiences' : 'balance activities with downtime'}
+
+Return ONLY valid JSON, no additional text.
+`;
+
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are an expert Sri Lanka travel planner. Always respond with valid JSON only.',
+          },
+          {
+            role: 'user',
+            content: prompt,
+          },
+        ],
+        temperature: 0.7,
+        max_tokens: 4096,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`OpenAI API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const textContent = data.choices?.[0]?.message?.content;
+
+    if (!textContent) {
+      throw new Error('No content in OpenAI response');
+    }
+
+    // Extract JSON from response (handle markdown code blocks)
+    let jsonStr = textContent;
+    if (textContent.includes('```json')) {
+      jsonStr = textContent.split('```json')[1].split('```')[0].trim();
+    } else if (textContent.includes('```')) {
+      jsonStr = textContent.split('```')[1].split('```')[0].trim();
+    }
+
+    const itinerary = JSON.parse(jsonStr) as GeneratedItinerary;
+
+    // Ensure duration is set
+    itinerary.duration = duration;
+
+    // Calculate totals if not provided
+    if (!itinerary.totalCost.total) {
+      const totalPeople = travelers.adults + travelers.children * 0.5;
+      itinerary.totalCost.accommodation = itinerary.days.reduce((sum, day) => sum + (day.accommodation?.price || 0), 0);
+      itinerary.totalCost.activities = itinerary.days.reduce((sum, day) =>
+        sum + day.activities.reduce((actSum, act) => actSum + (act.cost || 0), 0), 0) * totalPeople;
+      itinerary.totalCost.transport = duration * 50;
+      itinerary.totalCost.meals = duration * (budget === 'budget' ? 20 : budget === 'mid-range' ? 40 : budget === 'luxury' ? 80 : 120) * totalPeople;
+      itinerary.totalCost.total = itinerary.totalCost.accommodation + itinerary.totalCost.activities + itinerary.totalCost.transport + itinerary.totalCost.meals;
+      itinerary.totalCost.perPerson = Math.round(itinerary.totalCost.total / totalPeople);
+    }
+
+    return itinerary;
+  } catch (error) {
+    console.error('OpenAI API error:', error);
     return generateFallbackItinerary(preferences);
   }
 };

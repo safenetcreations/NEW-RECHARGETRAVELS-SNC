@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import DestinationMap from '@/components/destinations/DestinationMap';
+import WeatherWidget from '@/components/destinations/WeatherWidget';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Building,
@@ -48,13 +51,16 @@ import {
   Landmark,
   BookOpen,
   UtensilsCrossed,
-  Leaf
+  Leaf,
+  MessageCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import EnhancedBookingModal from '@/components/EnhancedBookingModal';
 import { getDestinationBySlug } from '@/services/destinationContentService';
+
+// Coordinates for Anuradhapura
+const ANURADHAPURA_CENTER = { lat: 8.3114, lng: 80.4037 };
 
 // Type Definitions
 interface HeroSlide {
@@ -152,24 +158,11 @@ interface CTASection {
 
 // Default Content
 const defaultHeroSlides: HeroSlide[] = [
-  {
-    id: '1',
-    image: 'https://images.unsplash.com/photo-1588002013238-64f0e1a8f6cf?auto=format&fit=crop&q=80',
-    title: 'Welcome to Anuradhapura',
-    subtitle: 'Sacred City & UNESCO World Heritage Site'
-  },
-  {
-    id: '2',
-    image: 'https://images.unsplash.com/photo-1624287532544-c5fc3c7a4d87?auto=format&fit=crop&q=80',
-    title: 'Cradle of Buddhism',
-    subtitle: '2,500 Years of Sacred Heritage'
-  },
-  {
-    id: '3',
-    image: 'https://images.unsplash.com/photo-1610109703742-6e5c8b1a4871?auto=format&fit=crop&q=80',
-    title: 'Ancient Capital',
-    subtitle: 'Sri Lanka\'s First Kingdom'
-  }
+  { id: '1', image: "https://images.unsplash.com/photo-1588598198321-39f8c2be97ba?auto=format&fit=crop&q=80", title: "Discover Anuradhapura", subtitle: "Ancient Kingdom of Sri Lanka" },
+  { id: '2', image: "https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&fit=crop&q=80", title: "Sacred Bo Tree", subtitle: "Sri Maha Bodhi - Oldest Tree" },
+  { id: '3', image: "https://images.unsplash.com/photo-1586613835341-78c143aef52c?auto=format&fit=crop&q=80", title: "Ruwanwelisaya", subtitle: "Magnificent Ancient Stupa" },
+  { id: '4', image: "https://images.unsplash.com/photo-1571536802807-30451e3f3d43?auto=format&fit=crop&q=80", title: "Jetavanaramaya", subtitle: "Tallest Ancient Brick Structure" },
+  { id: '5', image: "https://images.unsplash.com/photo-1578128178243-721cd32ce739?auto=format&fit=crop&q=80", title: "Thuparamaya", subtitle: "First Stupa in Sri Lanka" }
 ];
 
 const defaultAttractions: Attraction[] = [
@@ -541,6 +534,8 @@ const getIconComponent = (iconName: string) => {
 };
 
 const Anuradhapura = () => {
+  const navigate = useNavigate();
+
   // State for content
   const [heroSlides, setHeroSlides] = useState<HeroSlide[]>(defaultHeroSlides);
   const [attractions, setAttractions] = useState<Attraction[]>(defaultAttractions);
@@ -556,8 +551,6 @@ const Anuradhapura = () => {
   // UI State
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedTab, setSelectedTab] = useState('attractions');
-  const [showBookingModal, setShowBookingModal] = useState(false);
-  const [selectedService, setSelectedService] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
 
   // Load content from Firebase
@@ -608,12 +601,17 @@ const Anuradhapura = () => {
     { id: 'dining', label: 'Dining', count: restaurants.length },
     { id: 'stay', label: 'Stay', count: hotels.length },
     { id: 'weather', label: 'Weather', count: null },
+    { id: 'map', label: 'Map', count: null },
     { id: 'tips', label: 'Travel Tips', count: travelTips.length }
   ];
 
-  const handleBooking = (service: string) => {
-    setSelectedService(service);
-    setShowBookingModal(true);
+  const handleBooking = () => {
+    navigate('/book-tour');
+  };
+
+  const handleWhatsAppClick = () => {
+    const message = encodeURIComponent('Hi! I\'m interested in booking an Anuradhapura tour. Could you provide more information?');
+    window.open(`https://wa.me/94772557560?text=${message}`, '_blank');
   };
 
   if (isLoading) {
@@ -636,15 +634,15 @@ const Anuradhapura = () => {
         <meta property="og:title" content={seoSettings.title} />
         <meta property="og:description" content={seoSettings.description} />
         <meta property="og:image" content={heroSlides[0]?.image} />
-        <meta property="og:url" content="https://recharge-travels-73e76.web.app/destinations/anuradhapura" />
-        <link rel="canonical" href="https://recharge-travels-73e76.web.app/destinations/anuradhapura" />
+        <meta property="og:url" content="https://www.rechargetravels.com/destinations/anuradhapura" />
+        <link rel="canonical" href="https://www.rechargetravels.com/destinations/anuradhapura" />
       </Helmet>
 
       <Header />
 
       <main className="min-h-screen bg-background">
         {/* Hero Section */}
-        <section className="relative h-[85vh] overflow-hidden">
+        <section className="relative aspect-video max-h-[80vh] overflow-hidden">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentSlide}
@@ -701,7 +699,7 @@ const Anuradhapura = () => {
                 <Button
                   size="lg"
                   className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-6 text-lg"
-                  onClick={() => handleBooking('Anuradhapura Sacred Tour')}
+                  onClick={handleBooking}
                 >
                   Book Now
                 </Button>
@@ -898,7 +896,7 @@ const Anuradhapura = () => {
                             </div>
                             <Button
                               className="w-full bg-amber-600 hover:bg-amber-700"
-                              onClick={() => handleBooking(attraction.name)}
+                              onClick={handleBooking}
                             >
                               Book Visit
                             </Button>
@@ -965,7 +963,7 @@ const Anuradhapura = () => {
                             <Button
                               variant="outline"
                               className="w-full border-amber-600 text-amber-600 hover:bg-amber-600 hover:text-white"
-                              onClick={() => handleBooking(activity.name)}
+                              onClick={handleBooking}
                             >
                               Book Activity
                             </Button>
@@ -1110,7 +1108,7 @@ const Anuradhapura = () => {
                           </div>
                           <Button
                             className="w-full bg-amber-600 hover:bg-amber-700"
-                            onClick={() => handleBooking(`${hotel.name} Booking`)}
+                            onClick={handleBooking}
                           >
                             Check Availability
                           </Button>
@@ -1203,6 +1201,45 @@ const Anuradhapura = () => {
               </motion.section>
             )}
 
+            {/* Map Tab */}
+            {selectedTab === 'map' && (
+              <motion.section
+                key="map"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+              >
+                <div className="text-center mb-12">
+                  <h2 className="text-4xl font-bold mb-4">Explore Anuradhapura</h2>
+                  <p className="text-muted-foreground max-w-2xl mx-auto">
+                    Discover the locations of major attractions and plan your visit
+                  </p>
+                </div>
+                <div className="grid lg:grid-cols-3 gap-8">
+                  <div className="lg:col-span-2">
+                    <Card className="overflow-hidden">
+                      <CardContent className="p-0">
+                        <DestinationMap
+                          center={ANURADHAPURA_CENTER}
+                          attractions={[
+                            { lat: 8.3456, lng: 80.3967, name: 'Sri Maha Bodhi', type: 'Sacred Site' },
+                            { lat: 8.3514, lng: 80.3989, name: 'Ruwanwelisaya', type: 'Religious' },
+                            { lat: 8.3589, lng: 80.4028, name: 'Jetavanaramaya', type: 'Archaeological' },
+                            { lat: 8.3656, lng: 80.3992, name: 'Abhayagiri Monastery', type: 'Monastery' },
+                            { lat: 8.3520, lng: 80.4100, name: 'Isurumuniya', type: 'Temple' },
+                            { lat: 8.3478, lng: 80.3945, name: 'Thuparamaya', type: 'Stupa' }
+                          ]}
+                        />
+                      </CardContent>
+                    </Card>
+                  </div>
+                  <div>
+                    <WeatherWidget city="Anuradhapura" />
+                  </div>
+                </div>
+              </motion.section>
+            )}
+
             {/* Travel Tips Tab */}
             {selectedTab === 'tips' && (
               <motion.section
@@ -1271,19 +1308,18 @@ const Anuradhapura = () => {
                 <Button
                   size="lg"
                   className="bg-white text-amber-600 hover:bg-gray-100"
-                  onClick={() => handleBooking('Anuradhapura Complete Package')}
+                  onClick={handleBooking}
                 >
                   <Phone className="w-5 h-5 mr-2" />
                   {ctaSection.buttonText}
                 </Button>
                 <Button
                   size="lg"
-                  variant="outline"
-                  className="bg-transparent text-white border-white hover:bg-white/20"
-                  onClick={() => window.location.href = 'mailto:info@rechargetravels.com?subject=Anuradhapura Inquiry'}
+                  className="bg-green-500 text-white hover:bg-green-600 border-0"
+                  onClick={handleWhatsAppClick}
                 >
-                  <Mail className="w-5 h-5 mr-2" />
-                  Contact Us
+                  <MessageCircle className="w-5 h-5 mr-2" />
+                  WhatsApp Us
                 </Button>
               </div>
             </motion.div>
@@ -1292,13 +1328,6 @@ const Anuradhapura = () => {
       </main>
 
       <Footer />
-
-      {/* Booking Modal */}
-      <EnhancedBookingModal
-        isOpen={showBookingModal}
-        onClose={() => setShowBookingModal(false)}
-        preSelectedService={selectedService}
-      />
     </>
   );
 };

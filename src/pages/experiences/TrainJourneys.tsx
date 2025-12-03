@@ -1,9 +1,40 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { AnimatePresence, motion } from 'framer-motion';
+import {
+  Calendar,
+  Camera,
+  CheckCircle,
+  ChevronRight,
+  Clock,
+  Crown,
+  Loader2,
+  Mail,
+  Map,
+  MapPin,
+  MessageCircle,
+  Mountain,
+  Phone,
+  Shield,
+  Sparkles,
+  Star,
+  Train,
+  TreePine
+} from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { useToast } from '@/hooks/use-toast';
+import trainJourneysPageService, {
+  TrainJourneysBookingContent,
+  defaultTrainJourneysContent
+} from '@/services/trainJourneysPageService';
+import trainJourneysBookingService from '@/services/trainJourneysBookingService';
+import { cachedFetch } from '@/lib/cache';
+
+const iconMap: Record<string, React.ComponentType<any>> = {
   Train,
   Mountain,
   Camera,
@@ -11,129 +42,165 @@ import {
   MapPin,
   Calendar,
   Star,
-  Users,
-  Ticket,
   Map,
-  Coffee,
-  Eye,
-  Sunrise,
-  Cloud,
   TreePine,
-  ChevronDown,
-  CheckCircle,
-  Info,
-  DollarSign,
-  Wifi,
-  Package,
-  AlertCircle,
-  ChevronRight,
-  Globe,
-  Phone,
-  Mail,
-  Navigation
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import EnhancedBookingModal from '@/components/EnhancedBookingModal';
-import { trainJourneysPageService, TrainJourneysPageContent } from '@/services/trainJourneysPageService';
-import { toast } from 'sonner';
-import { cachedFetch } from '@/lib/cache';
-
-// Optimized image URL generator
-const getOptimizedImageUrl = (url: string, width: number = 1200): string => {
-  if (!url) return '';
-  if (url.includes('unsplash.com')) {
-    const baseUrl = url.split('?')[0];
-    return `${baseUrl}?w=${width}&q=80&auto=format&fit=crop`;
-  }
-  return url;
+  Sparkles,
+  Shield,
+  Crown
 };
 
-// Default fallback hero images for train journeys
-const defaultHeroImages = [
-  { id: '1', url: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957', caption: 'Scenic Train Through Tea Country' },
-  { id: '2', url: 'https://images.unsplash.com/photo-1474487548417-781cb71495f3', caption: 'Famous Nine Arch Bridge' },
-  { id: '3', url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4', caption: 'Mountain Railway Views' },
-  { id: '4', url: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4', caption: 'Blue Train Journey' }
-];
-
 const TrainJourneys = () => {
-  const [activeTab, setActiveTab] = useState('routes');
-  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
-  const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
-  const [heroImageIndex, setHeroImageIndex] = useState(0);
-  const [content, setContent] = useState<TrainJourneysPageContent | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+  const [content, setContent] = useState<TrainJourneysBookingContent>(defaultTrainJourneysContent);
+  const [isLoading, setIsLoading] = useState(true);
+  const [bookingSuccess, setBookingSuccess] = useState<{ ref: string; whatsAppLink: string } | null>(null);
+  const heroSlides = useMemo(
+    () => (content.hero.gallery?.length ? content.hero.gallery : defaultTrainJourneysContent.hero.gallery),
+    [content.hero.gallery]
+  );
+  const [slideIndex, setSlideIndex] = useState(0);
+  const [selectedRoute, setSelectedRoute] = useState(content.experiences[0]?.name ?? '');
+  const [formData, setFormData] = useState({
+    date: '',
+    session: content.logistics.sessionTimes[0] ?? '',
+    adults: 2,
+    children: 0,
+    pickup: 'Kandy hotel',
+    contactName: '',
+    contactEmail: '',
+    contactPhone: '',
+    requests: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const bookingSectionRef = useRef<HTMLElement | null>(null);
 
-  // Icon mapping function
-  const getIconComponent = (iconName: string) => {
-    const iconMap: Record<string, React.FC<any>> = {
-      Train, Mountain, Camera, Clock, MapPin, Calendar, Star, Users,
-      Ticket, Map, Coffee, Eye, Sunrise, Cloud, TreePine, Package,
-      Navigation, Info, DollarSign, Phone, Mail, Globe
-    };
-    return iconMap[iconName] || Star;
-  };
-
-  // Load content from Firebase with caching
   useEffect(() => {
-    const loadContent = async () => {
+    const load = async () => {
       try {
-        setLoading(true);
-        const data = await cachedFetch<TrainJourneysPageContent>(
-          'train-journeys-page',
+        const data = await cachedFetch<TrainJourneysBookingContent>(
+          'train-journeys-booking',
           () => trainJourneysPageService.getPageContent(),
-          10 * 60 * 1000 // Cache for 10 minutes
+          5 * 60 * 1000
         );
         setContent(data);
-
-        // Preload hero images for faster display
-        if (data?.hero?.images?.length) {
-          data.hero.images.slice(0, 3).forEach((img, index) => {
-            const link = document.createElement('link');
-            link.rel = index === 0 ? 'preload' : 'prefetch';
-            link.as = 'image';
-            link.href = getOptimizedImageUrl(img.url, 1920);
-            document.head.appendChild(link);
-          });
-        }
+        setSelectedRoute(data.experiences[0]?.name ?? '');
+        setFormData((prev) => ({
+          ...prev,
+          session: data.logistics.sessionTimes[0] ?? prev.session
+        }));
       } catch (error) {
-        console.error('Error loading train journeys content:', error);
-        toast.error('Failed to load page content');
+        console.error('Failed to load train journeys page content', error);
+        setContent(defaultTrainJourneysContent);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
-
-    loadContent();
+    load();
   }, []);
 
-  // Get hero images with fallback
-  const heroImages = content?.hero?.images?.length ? content.hero.images : defaultHeroImages;
-
-  // Hero image carousel
   useEffect(() => {
-    const interval = setInterval(() => {
-      setHeroImageIndex((prev) => (prev + 1) % heroImages.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [heroImages.length]);
+    const ticker = setInterval(() => {
+      setSlideIndex((prev) => (prev + 1) % heroSlides.length);
+    }, 6000);
+    return () => clearInterval(ticker);
+  }, [heroSlides.length]);
 
-  const handleBookingClick = (packageName?: string) => {
-    setSelectedPackage(packageName || null);
-    setIsBookingModalOpen(true);
+  const handleInputChange = (field: string, value: string | number) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  if (loading || !content) {
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (isSubmitting) return;
+    
+    if (!formData.contactName || !formData.contactEmail || !formData.contactPhone || !formData.date) {
+      toast({
+        title: 'Missing Information',
+        description: 'Please fill in all required fields.',
+        variant: 'destructive'
+      });
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    try {
+      const result = await trainJourneysBookingService.submitBooking({
+        contactName: formData.contactName,
+        contactEmail: formData.contactEmail,
+        contactPhone: formData.contactPhone,
+        date: formData.date,
+        session: formData.session,
+        route: selectedRoute,
+        adults: formData.adults,
+        children: formData.children,
+        pickup: formData.pickup,
+        requests: formData.requests,
+        estimatedTotal,
+        currency: content.pricing.currency
+      });
+      
+      if (result.success) {
+        setBookingSuccess({
+          ref: result.bookingRef,
+          whatsAppLink: result.whatsAppLink
+        });
+        
+        toast({
+          title: '🚂 Booking Submitted!',
+          description: `Reference: ${result.bookingRef}. Check your email for confirmation.`,
+        });
+        
+        setFormData({
+          date: '',
+          session: content.logistics.sessionTimes[0] ?? '',
+          adults: 2,
+          children: 0,
+          pickup: 'Kandy hotel',
+          contactName: '',
+          contactEmail: '',
+          contactPhone: '',
+          requests: ''
+        });
+      } else {
+        toast({
+          title: 'Booking Failed',
+          description: result.error || 'Please try again or contact us directly.',
+          variant: 'destructive'
+        });
+      }
+    } catch (error) {
+      console.error('Booking error:', error);
+      toast({
+        title: 'Error',
+        description: 'Something went wrong. Please try again or WhatsApp us directly.',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const scrollToBooking = (routeName?: string) => {
+    if (routeName) {
+      setSelectedRoute(routeName);
+    }
+    bookingSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const basePrice = content.pricing.startingPrice || 0;
+  const childPrice = Math.round(basePrice * 0.6);
+  const estimatedTotal = basePrice * formData.adults + childPrice * formData.children;
+
+  if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+        <Loader2 className="h-12 w-12 animate-spin text-emerald-600" />
       </div>
     );
   }
+
+  const getIcon = (iconName: string) => iconMap[iconName] || Train;
 
   return (
     <>
@@ -149,504 +216,482 @@ const TrainJourneys = () => {
 
       <Header />
 
-      {/* Hero Section */}
-      <section className="relative h-[70vh] min-h-[600px] w-full overflow-hidden">
+      {/* Hero */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
         <AnimatePresence mode="wait">
           <motion.div
-            key={heroImageIndex}
+            key={heroSlides[slideIndex]?.image}
+            className="absolute inset-0"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 1 }}
-            className="absolute inset-0"
+            transition={{ duration: 1.1 }}
           >
             <img
-              src={getOptimizedImageUrl(heroImages[heroImageIndex]?.url || '', 1920)}
-              alt={heroImages[heroImageIndex]?.caption || 'Scenic Train Journey'}
-              className="w-full h-full object-cover"
-              loading={heroImageIndex === 0 ? 'eager' : 'lazy'}
-              fetchPriority={heroImageIndex === 0 ? 'high' : 'auto'}
+              src={heroSlides[slideIndex]?.image}
+              alt={heroSlides[slideIndex]?.caption}
+              className="h-full w-full object-cover object-center"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/20" />
+            <div className="absolute inset-0 bg-gradient-to-b from-slate-950/90 via-slate-950/70 to-slate-950/90" />
           </motion.div>
         </AnimatePresence>
 
-        <div className="absolute inset-0 flex items-center justify-center z-10">
-          <div className="text-center text-white px-4 max-w-5xl">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
+        <div className="relative mx-auto flex min-h-[520px] max-w-6xl flex-col items-center gap-6 px-4 py-24 text-center">
+          <Badge className="bg-white/10 text-white backdrop-blur">{content.hero.badge}</Badge>
+          <h1 className="text-4xl font-semibold leading-tight sm:text-5xl lg:text-6xl">{content.hero.title}</h1>
+          <p className="max-w-3xl text-lg text-white/80">{content.hero.subtitle}</p>
+          <div className="flex flex-wrap items-center justify-center gap-3 text-xs uppercase tracking-[0.4em] text-emerald-200/80">
+            <span>{heroSlides[slideIndex]?.tag}</span>
+          </div>
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+            {content.overview.badges.map((badge) => {
+              const Icon = getIcon(badge.iconName);
+              return (
+                <span
+                  key={badge.label}
+                  className="inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 text-sm text-white/90 backdrop-blur"
+                >
+                  <Icon className="h-4 w-4 text-emerald-200" />
+                  {badge.label}: <strong className="font-semibold">{badge.value}</strong>
+                </span>
+              );
+            })}
+          </div>
+          <div className="mt-8 flex flex-wrap justify-center gap-4">
+            <Button size="lg" className="bg-emerald-500 hover:bg-emerald-600 px-8 py-6 text-base" onClick={() => scrollToBooking()}>
+              Reserve now
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              className="border-white/40 bg-white/10 px-8 py-6 text-base text-white hover:bg-white/20"
+              onClick={() => scrollToBooking()}
             >
-              <h1 className="text-5xl md:text-7xl font-bold mb-6 drop-shadow-lg">
-                {content.hero.title}
-              </h1>
-              <p className="text-xl md:text-2xl mb-8 font-light drop-shadow">
-                {content.hero.subtitle}
-              </p>
-              <Button
-                onClick={() => handleBookingClick()}
-                size="lg"
-                className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-6 text-lg rounded-full
-                         transform hover:scale-105 transition-all duration-300 shadow-xl"
-              >
-                <Train className="mr-2 h-5 w-5" />
-                {content.hero.ctaText}
-              </Button>
-            </motion.div>
+              Talk to concierge
+            </Button>
           </div>
         </div>
-
-        <motion.div
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white z-10"
-        >
-          <ChevronDown className="h-8 w-8" />
-        </motion.div>
       </section>
 
-      {/* Overview Section */}
-      <section className="py-16 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-4xl font-bold mb-6">{content.overview.title}</h2>
-            <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
-              {content.overview.description}
-            </p>
-          </motion.div>
+      {/* Overview */}
+      <section className="bg-white py-16">
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 md:grid-cols-[1.2fr_0.8fr]">
+          <div>
+            <h2 className="text-3xl font-semibold text-slate-900">Why book trains with Recharge</h2>
+            <p className="mt-4 text-lg text-slate-600">{content.overview.summary}</p>
+          </div>
+          <div className="grid gap-4">
+            {content.overview.highlights.map((highlight) => (
+              <div key={highlight.label} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <p className="text-xs uppercase tracking-[0.3em] text-slate-500">{highlight.label}</p>
+                <p className="mt-2 text-sm text-slate-700">{highlight.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-          {/* Quick Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-            {content.stats.map((stat, index) => {
-              const IconComponent = getIconComponent(stat.iconName);
+      {/* Experiences */}
+      <section className="bg-slate-50 py-16">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="mb-8 flex flex-col gap-2">
+            <p className="text-xs uppercase tracking-[0.4em] text-slate-500">Iconic Routes</p>
+            <h3 className="text-3xl font-semibold text-slate-900">Pick your scenic journey</h3>
+          </div>
+          <div className="grid gap-6 md:grid-cols-2">
+            {content.experiences.map((experience) => (
+              <motion.button
+                key={experience.id}
+                whileHover={{ y: -4 }}
+                onClick={() => setSelectedRoute(experience.name)}
+                className={`flex h-full flex-col overflow-hidden rounded-3xl border bg-white text-left shadow-sm transition ${
+                  selectedRoute === experience.name ? 'border-emerald-400 shadow-lg' : 'border-slate-100'
+                }`}
+                type="button"
+              >
+                {experience.image && (
+                  <div className="relative h-56 w-full overflow-hidden">
+                    <img src={experience.image} alt={experience.name} className="h-full w-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/20 to-transparent" />
+                    <div className="absolute bottom-4 left-4 flex items-center gap-2 text-sm font-medium text-white">
+                      <Badge className="bg-emerald-500/90 text-white">{experience.level}</Badge>
+                      <span>{experience.duration}</span>
+                    </div>
+                  </div>
+                )}
+                <div className="flex flex-1 flex-col gap-4 p-6">
+                  <div>
+                    <h4 className="text-xl font-semibold">{experience.name}</h4>
+                    <p className="mt-2 text-sm text-slate-600">{experience.summary}</p>
+                  </div>
+                  <ul className="space-y-2 text-sm text-slate-600">
+                    {experience.includes.map((include) => (
+                      <li key={include} className="flex items-center gap-2">
+                        <CheckCircle className="h-3.5 w-3.5 text-emerald-500" />
+                        <span>{include}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="mt-auto flex items-center justify-between">
+                    <span className="text-lg font-semibold text-emerald-700">{experience.priceLabel}</span>
+                    <Button size="sm" variant="outline" onClick={() => scrollToBooking(experience.name)}>
+                      Reserve
+                    </Button>
+                  </div>
+                </div>
+              </motion.button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Combo packages */}
+      <section className="bg-white py-16">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="mb-8 flex flex-col gap-2">
+            <p className="text-xs uppercase tracking-[0.4em] text-slate-500">Concierge Bundles</p>
+            <h3 className="text-3xl font-semibold text-slate-900">Curated rail packages</h3>
+          </div>
+          <div className="grid gap-6 lg:grid-cols-3">
+            {content.combos.map((combo) => {
+              const Icon = getIcon(combo.iconName);
               return (
-                <motion.div
-                  key={stat.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  className="text-center"
-                >
-                  <IconComponent className="h-12 w-12 text-emerald-600 mx-auto mb-3" />
-                  <div className="text-3xl font-bold text-gray-800">{stat.value}</div>
-                  <div className="text-gray-600">{stat.label}</div>
-                </motion.div>
+                <div key={combo.id} className="rounded-3xl border border-slate-100 bg-gradient-to-b from-white to-slate-50 p-6 shadow-sm">
+                  <div className="mb-4 flex items-center justify-between">
+                    <Icon className="h-10 w-10 text-emerald-600" />
+                    <Badge className="bg-emerald-600/10 text-emerald-700">{combo.badge}</Badge>
+                  </div>
+                  <h4 className="text-xl font-semibold text-slate-900">{combo.name}</h4>
+                  <p className="mt-2 text-sm font-medium text-emerald-700">{combo.priceLabel}</p>
+                  <p className="text-sm text-slate-500">{combo.duration}</p>
+                  <div className="mt-4 space-y-2 text-sm text-slate-600">
+                    {combo.highlights.map((highlight) => (
+                      <div key={highlight} className="flex items-start gap-2">
+                        <ChevronRight className="h-4 w-4 text-emerald-500" />
+                        <span>{highlight}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-4 space-y-1 text-sm text-slate-500">
+                    {combo.includes.map((include) => (
+                      <div key={include} className="flex items-center gap-2">
+                        <CheckCircle className="h-3.5 w-3.5 text-emerald-500" />
+                        <span>{include}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <Button className="mt-6 w-full bg-emerald-600 hover:bg-emerald-700" onClick={() => scrollToBooking(combo.name)}>
+                    Reserve package
+                  </Button>
+                </div>
               );
             })}
           </div>
         </div>
       </section>
 
-      {/* Main Content Tabs */}
-      <section className="py-16 px-4 bg-gray-50">
-        <div className="max-w-6xl mx-auto">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4 mb-8">
-              <TabsTrigger value="routes">Popular Routes</TabsTrigger>
-              <TabsTrigger value="classes">Train Classes</TabsTrigger>
-              <TabsTrigger value="packages">Tour Packages</TabsTrigger>
-              <TabsTrigger value="tips">Travel Tips</TabsTrigger>
-            </TabsList>
+      {/* Logistics + Safety */}
+      <section className="bg-slate-950 py-16 text-white">
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="space-y-5">
+            <p className="text-xs uppercase tracking-[0.4em] text-emerald-200/70">Logistics</p>
+            <h3 className="text-3xl font-semibold">Everything handled</h3>
+            <div className="space-y-4 text-sm text-white/80">
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-emerald-200/80">Meeting point</p>
+                <p className="text-base">{content.logistics.meetingPoint}</p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-emerald-200/80">Departure times</p>
+                <ul className="mt-2 space-y-1">
+                  {content.logistics.sessionTimes.map((slot) => (
+                    <li key={slot} className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-emerald-300" />
+                      {slot}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-emerald-200/80">Included</p>
+                <p>{content.logistics.gearProvided.join(', ')}</p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-emerald-200/80">Bring along</p>
+                <p>{content.logistics.bringList.join(', ')}</p>
+              </div>
+              <p>{content.logistics.transferNote}</p>
+              <p className="text-emerald-100">{content.logistics.weatherPolicy}</p>
+            </div>
+          </div>
+          <div className="space-y-4 rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+            <h4 className="text-xl font-semibold">Safety & Support</h4>
+            <ul className="space-y-3 text-sm text-white/80">
+              {content.safety.map((item) => (
+                <li key={item} className="flex items-start gap-2">
+                  <Shield className="mt-0.5 h-4 w-4 text-emerald-300" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
 
-            {/* Routes Tab */}
-            <TabsContent value="routes" className="space-y-6">
-              <h3 className="text-2xl font-bold mb-6">Iconic Railway Routes</h3>
-              <div className="grid md:grid-cols-2 gap-6">
-                {content.routes.map((route, index) => (
-                  <motion.div
-                    key={route.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: index * 0.1 }}
+      {/* FAQs & Gallery */}
+      <section className="bg-white py-16">
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 lg:grid-cols-[1fr_1.1fr]">
+          <div>
+            <h3 className="text-3xl font-semibold text-slate-900">Train journeys FAQ</h3>
+            <Accordion type="single" collapsible className="mt-6">
+              {content.faqs.map((faq) => (
+                <AccordionItem key={faq.id} value={faq.id} className="border-b border-slate-200">
+                  <AccordionTrigger className="text-left text-sm font-semibold text-slate-800">
+                    {faq.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-sm text-slate-600">{faq.answer}</AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </div>
+          <div>
+            <h3 className="text-3xl font-semibold text-slate-900">Journey gallery</h3>
+            <div className="mt-6 grid gap-4 sm:grid-cols-2">
+              {content.gallery.map((item) => (
+                <div key={item.id} className="group relative h-48 overflow-hidden rounded-2xl">
+                  <img src={item.image} alt={item.caption} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-transparent to-transparent opacity-0 transition group-hover:opacity-100" />
+                  <p className="absolute bottom-3 left-3 text-sm font-medium text-white drop-shadow">{item.caption}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Booking form */}
+      <section
+        ref={bookingSectionRef}
+        className="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 py-20 text-white"
+      >
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="grid gap-10 md:grid-cols-[1.05fr_0.95fr]">
+            <div>
+              <p className="text-xs uppercase tracking-[0.4em] text-emerald-200/70">Concierge Request</p>
+              <h3 className="mt-2 text-3xl font-semibold">Book your rail journey</h3>
+              <p className="mt-3 text-slate-300">{content.booking.conciergeNote}</p>
+              <div className="mt-8 space-y-4 rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+                <div className="flex items-center gap-3 text-sm text-slate-100">
+                  <Phone className="h-4 w-4 text-emerald-300" />
+                  <span>{content.booking.contactPhone}</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm text-slate-100">
+                  <Mail className="h-4 w-4 text-emerald-300" />
+                  <span>{content.booking.email}</span>
+                </div>
+                <div className="text-xs uppercase tracking-[0.3em] text-slate-300">{content.booking.responseTime}</div>
+                <Button
+                  size="sm"
+                  className="mt-2 w-full justify-center bg-emerald-500/90 text-white hover:bg-emerald-500"
+                  onClick={() => window.open(content.booking.whatsapp || 'https://wa.me/94777721999', '_blank')}
+                >
+                  <MessageCircle className="mr-2 h-4 w-4" />
+                  WhatsApp concierge
+                </Button>
+              </div>
+            </div>
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-5 rounded-3xl border border-white/15 bg-white/95 p-6 text-slate-900 shadow-2xl shadow-slate-950/30"
+            >
+              <div className="grid gap-4 md:grid-cols-2">
+                <label className="text-sm font-medium text-slate-800">
+                  Travel Date
+                  <input
+                    type="date"
+                    required
+                    value={formData.date}
+                    onChange={(e) => handleInputChange('date', e.target.value)}
+                    className="mt-1 w-full rounded-2xl border border-slate-300 bg-white/90 px-3 py-3 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:outline-none"
+                  />
+                </label>
+                <label className="text-sm font-medium text-slate-800">
+                  Departure
+                  <select
+                    value={formData.session}
+                    onChange={(e) => handleInputChange('session', e.target.value)}
+                    className="mt-1 w-full rounded-2xl border border-slate-300 bg-white/90 px-3 py-3 text-slate-900 focus:border-emerald-500 focus:outline-none"
                   >
-                    <Card className="h-full hover:shadow-lg transition-shadow">
-                      <CardHeader>
-                        <div className="flex justify-between items-start mb-2">
-                          <CardTitle className="text-xl">{route.name}</CardTitle>
-                          <Badge variant={route.difficulty === 'Easy' ? 'default' : 'secondary'}>
-                            {route.difficulty}
-                          </Badge>
-                        </div>
-                        <p className="text-gray-600">{route.description}</p>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4 text-sm">
-                          <div className="flex items-center">
-                            <Clock className="h-4 w-4 mr-2 text-gray-500" />
-                            <span>{route.duration}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <MapPin className="h-4 w-4 mr-2 text-gray-500" />
-                            <span>{route.distance}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <DollarSign className="h-4 w-4 mr-2 text-gray-500" />
-                            <span>{route.price}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <Sunrise className="h-4 w-4 mr-2 text-gray-500" />
-                            <span>{route.bestTime}</span>
-                          </div>
-                        </div>
-                        <div>
-                          <h4 className="font-semibold mb-2">Highlights:</h4>
-                          <div className="flex flex-wrap gap-2">
-                            {route.highlights.map((highlight, idx) => (
-                              <Badge key={idx} variant="outline">
-                                {highlight}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                        <Button
-                          className="w-full"
-                          onClick={() => handleBookingClick(`${route.name} Journey`)}
-                        >
-                          Book This Route
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))}
+                    {content.logistics.sessionTimes.map((slot) => (
+                      <option key={slot}>{slot}</option>
+                    ))}
+                  </select>
+                </label>
               </div>
-            </TabsContent>
-
-            {/* Train Classes Tab */}
-            <TabsContent value="classes" className="space-y-6">
-              <h3 className="text-2xl font-bold mb-6">Choose Your Train Class</h3>
-              <div className="grid md:grid-cols-2 gap-6">
-                {content.trainClasses.map((trainClass, index) => {
-                  const IconComponent = getIconComponent(trainClass.iconName);
-                  return (
-                    <motion.div
-                      key={trainClass.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: index * 0.1 }}
-                    >
-                      <Card className="h-full hover:shadow-lg transition-shadow">
-                        <CardHeader>
-                          <div className="flex items-center mb-3">
-                            <IconComponent className="h-8 w-8 text-emerald-600 mr-3" />
-                            <div>
-                              <CardTitle>{trainClass.name}</CardTitle>
-                              <p className="text-lg font-semibold text-emerald-600">{trainClass.price}</p>
-                            </div>
-                          </div>
-                          <p className="text-gray-600">{trainClass.description}</p>
-                        </CardHeader>
-                        <CardContent>
-                          <h4 className="font-semibold mb-3">Features:</h4>
-                          <ul className="space-y-2">
-                            {trainClass.features.map((feature, idx) => (
-                              <li key={idx} className="flex items-center">
-                                <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                                <span className="text-gray-700">{feature}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </TabsContent>
-
-            {/* Tour Packages Tab */}
-            <TabsContent value="packages" className="space-y-6">
-              <h3 className="text-2xl font-bold mb-6">Curated Rail Experiences</h3>
-              <div className="grid lg:grid-cols-3 gap-6">
-                {content.tourPackages.map((pkg, index) => {
-                  const IconComponent = getIconComponent(pkg.iconName);
-                  return (
-                    <motion.div
-                      key={pkg.id}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: index * 0.1 }}
-                    >
-                      <Card className="h-full hover:shadow-xl transition-shadow">
-                        <CardHeader>
-                          <div className="flex items-center justify-between mb-3">
-                            <IconComponent className="h-10 w-10 text-emerald-600" />
-                            <Badge className="bg-emerald-600">{pkg.duration}</Badge>
-                          </div>
-                          <CardTitle className="text-xl">{pkg.name}</CardTitle>
-                          <p className="text-2xl font-bold text-emerald-600">From {pkg.price}</p>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                          <div>
-                            <h4 className="font-semibold mb-2">Highlights:</h4>
-                            <ul className="space-y-1 text-sm">
-                              {pkg.highlights.map((highlight, idx) => (
-                                <li key={idx} className="flex items-start">
-                                  <ChevronRight className="h-4 w-4 text-emerald-600 mr-1 mt-0.5 flex-shrink-0" />
-                                  <span>{highlight}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                          <div>
-                            <h4 className="font-semibold mb-2">Included:</h4>
-                            <ul className="space-y-1 text-sm">
-                              {pkg.included.map((item, idx) => (
-                                <li key={idx} className="flex items-center">
-                                  <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                                  <span>{item}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                          <Button
-                            className="w-full bg-emerald-600 hover:bg-emerald-700"
-                            onClick={() => handleBookingClick(pkg.name)}
-                          >
-                            Book Package
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </TabsContent>
-
-            {/* Travel Tips Tab */}
-            <TabsContent value="tips" className="space-y-6">
-              <h3 className="text-2xl font-bold mb-6">Essential Travel Tips</h3>
-              <div className="grid md:grid-cols-2 gap-6 mb-8">
-                {content.bookingTips.map((tip, index) => {
-                  const IconComponent = getIconComponent(tip.iconName);
-                  return (
-                    <motion.div
-                      key={tip.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: index * 0.1 }}
-                    >
-                      <Card>
-                        <CardHeader>
-                          <div className="flex items-center">
-                            <IconComponent className="h-8 w-8 text-emerald-600 mr-3" />
-                            <CardTitle className="text-lg">{tip.title}</CardTitle>
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-gray-600">{tip.description}</p>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  );
-                })}
-              </div>
-
-              {/* What to Bring */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-xl">What to Bring</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid md:grid-cols-3 gap-4">
-                    <div>
-                      <h4 className="font-semibold mb-2">Essentials</h4>
-                      <ul className="space-y-1 text-sm text-gray-600">
-                        {content.whatToBring.essentials.map((item, idx) => (
-                          <li key={idx}>• {item}</li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold mb-2">Comfort Items</h4>
-                      <ul className="space-y-1 text-sm text-gray-600">
-                        {content.whatToBring.comfortItems.map((item, idx) => (
-                          <li key={idx}>• {item}</li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold mb-2">Photography</h4>
-                      <ul className="space-y-1 text-sm text-gray-600">
-                        {content.whatToBring.photography.map((item, idx) => (
-                          <li key={idx}>• {item}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </div>
-      </section>
-
-      {/* Journey Highlights Section */}
-      <section className="py-16 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">Journey Highlights</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {content.journeyHighlights.map((highlight, index) => {
-              const IconComponent = getIconComponent(highlight.iconName);
-              return (
-                <motion.div
-                  key={highlight.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  className="group cursor-pointer"
+              <label className="text-sm font-medium text-slate-800">
+                Train route
+                <select
+                  value={selectedRoute}
+                  onChange={(e) => setSelectedRoute(e.target.value)}
+                  className="mt-1 w-full rounded-2xl border border-slate-300 bg-white/90 px-3 py-3 text-slate-900 focus:border-emerald-500 focus:outline-none"
                 >
-                  <div className="relative overflow-hidden rounded-lg mb-4">
-                    <img
-                      src={getOptimizedImageUrl(highlight.image, 400)}
-                      alt={highlight.title}
-                      className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                    <IconComponent className="absolute bottom-4 left-4 h-8 w-8 text-white" />
-                  </div>
-                  <h3 className="font-semibold text-lg mb-2">{highlight.title}</h3>
-                  <p className="text-gray-600 text-sm">{highlight.description}</p>
-                </motion.div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Photo Gallery */}
-      <section className="py-16 px-4 bg-gray-50">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">Journey Through Our Lens</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {content.photoGallery.map((image, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.05 }}
-                className="relative overflow-hidden rounded-lg group cursor-pointer"
-              >
-                <img
-                  src={getOptimizedImageUrl(image, 400)}
-                  alt={`Train journey ${index + 1}`}
-                  className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
-                  loading="lazy"
+                  {content.experiences.map((experience) => (
+                    <option key={experience.id}>{experience.name}</option>
+                  ))}
+                </select>
+              </label>
+              <div className="grid gap-4 md:grid-cols-2">
+                <label className="text-sm font-medium text-slate-800">
+                  Adults
+                  <input
+                    type="number"
+                    min={1}
+                    value={formData.adults}
+                    onChange={(e) => handleInputChange('adults', Number(e.target.value))}
+                    className="mt-1 w-full rounded-2xl border border-slate-300 bg-white/90 px-3 py-3 text-slate-900 focus:border-emerald-500 focus:outline-none"
+                  />
+                </label>
+                <label className="text-sm font-medium text-slate-800">
+                  Children (5-12)
+                  <input
+                    type="number"
+                    min={0}
+                    value={formData.children}
+                    onChange={(e) => handleInputChange('children', Number(e.target.value))}
+                    className="mt-1 w-full rounded-2xl border border-slate-300 bg-white/90 px-3 py-3 text-slate-900 focus:border-emerald-500 focus:outline-none"
+                  />
+                </label>
+              </div>
+              <label className="text-sm font-medium text-slate-800">
+                Hotel / pickup note
+                <input
+                  type="text"
+                  value={formData.pickup}
+                  onChange={(e) => handleInputChange('pickup', e.target.value)}
+                  className="mt-1 w-full rounded-2xl border border-slate-300 bg-white/90 px-3 py-3 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:outline-none"
+                  placeholder="e.g. Cinnamon Citadel Kandy"
                 />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
-              </motion.div>
-            ))}
+              </label>
+              <div className="grid gap-4 md:grid-cols-2">
+                <label className="text-sm font-medium text-slate-800">
+                  Full name
+                  <input
+                    type="text"
+                    required
+                    value={formData.contactName}
+                    onChange={(e) => handleInputChange('contactName', e.target.value)}
+                    className="mt-1 w-full rounded-2xl border border-slate-300 bg-white/90 px-3 py-3 text-slate-900 focus:border-emerald-500 focus:outline-none"
+                  />
+                </label>
+                <label className="text-sm font-medium text-slate-800">
+                  Email
+                  <input
+                    type="email"
+                    required
+                    value={formData.contactEmail}
+                    onChange={(e) => handleInputChange('contactEmail', e.target.value)}
+                    className="mt-1 w-full rounded-2xl border border-slate-300 bg-white/90 px-3 py-3 text-slate-900 focus:border-emerald-500 focus:outline-none"
+                  />
+                </label>
+              </div>
+              <label className="text-sm font-medium text-slate-800">
+                Phone / WhatsApp
+                <input
+                  type="tel"
+                  required
+                  value={formData.contactPhone}
+                  onChange={(e) => handleInputChange('contactPhone', e.target.value)}
+                  className="mt-1 w-full rounded-2xl border border-slate-300 bg-white/90 px-3 py-3 text-slate-900 focus:border-emerald-500 focus:outline-none"
+                />
+              </label>
+              <label className="text-sm font-medium text-slate-800">
+                Requests or add-ons
+                <textarea
+                  value={formData.requests}
+                  onChange={(e) => handleInputChange('requests', e.target.value)}
+                  rows={3}
+                  className="mt-1 w-full rounded-2xl border border-slate-300 bg-white/90 px-3 py-3 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:outline-none"
+                  placeholder="Photography guide, private transfers, overnight accommodation..."
+                />
+              </label>
+              <div className="rounded-3xl border border-slate-200/60 bg-slate-50/80 p-4 text-sm text-slate-600">
+                <div className="flex items-center justify-between text-slate-800">
+                  <span className="font-medium">Estimated from</span>
+                  <span className="text-lg font-semibold">
+                    {content.pricing.currency} {estimatedTotal.toLocaleString()}
+                  </span>
+                </div>
+                <p className="mt-2 text-xs text-slate-500">
+                  Adults at {content.pricing.currency} {basePrice.toLocaleString()} • Children at {content.pricing.currency}{' '}
+                  {childPrice.toLocaleString()}
+                </p>
+                <p className="mt-3 text-xs text-slate-500">{content.pricing.depositNote}</p>
+                <p className="text-xs text-slate-500">{content.pricing.refundPolicy}</p>
+              </div>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 py-3 text-base font-semibold text-white hover:from-emerald-600 hover:to-emerald-700"
+              >
+                {isSubmitting ? 'Sending request…' : 'Request tickets'}
+              </Button>
+              
+              {/* Booking Success Message */}
+              {bookingSuccess && (
+                <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-center">
+                  <CheckCircle className="mx-auto h-8 w-8 text-emerald-500" />
+                  <p className="mt-2 font-semibold text-emerald-800">Booking Submitted!</p>
+                  <p className="text-sm text-emerald-700">Reference: {bookingSuccess.ref}</p>
+                  <p className="mt-1 text-xs text-emerald-600">Check your email for confirmation details.</p>
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="mt-3 bg-emerald-500 hover:bg-emerald-600"
+                    onClick={() => window.open(bookingSuccess.whatsAppLink, '_blank')}
+                  >
+                    <MessageCircle className="mr-2 h-4 w-4" />
+                    Chat on WhatsApp
+                  </Button>
+                </div>
+              )}
+            </form>
           </div>
         </div>
       </section>
 
-      {/* FAQs Section */}
-      <section className="py-16 px-4 bg-white">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
-          <Accordion type="single" collapsible className="space-y-4">
-            {content.faqs.map((faq, index) => (
-              <AccordionItem key={faq.id} value={faq.id}>
-                <AccordionTrigger className="text-left hover:text-emerald-600">
-                  {faq.question}
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-600">
-                  {faq.answer}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-20 px-4 bg-gradient-to-br from-emerald-600 to-teal-700">
-        <div className="max-w-4xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+      {/* Concierge contact */}
+      <section className="bg-slate-950 px-4 py-12 text-white">
+        <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-3">
+          <a
+            href={content.booking.whatsapp || 'https://wa.me/94777721999'}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex flex-col items-center rounded-3xl border border-white/10 bg-white/5 p-6 text-center transition hover:border-emerald-300/60 hover:bg-white/10"
           >
-            <h2 className="text-4xl font-bold mb-6 text-white">
-              {content.cta.title}
-            </h2>
-            <p className="text-xl mb-8 text-white/90">
-              {content.cta.description}
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button
-                size="lg"
-                className="bg-white text-emerald-700 hover:bg-gray-100 px-8 py-6 text-lg"
-                onClick={() => handleBookingClick()}
-              >
-                <Ticket className="mr-2 h-5 w-5" />
-                {content.cta.primaryButtonText}
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-white text-white hover:bg-white/10 px-8 py-6 text-lg"
-                onClick={() => window.location.href = `tel:${content.contact.phone.replace(/\s/g, '')}`}
-              >
-                <Phone className="mr-2 h-5 w-5" />
-                {content.cta.secondaryButtonText}
-              </Button>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Contact Info */}
-      <section className="py-12 px-4 bg-gray-900 text-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-3 gap-8 text-center">
-            <div className="flex flex-col items-center">
-              <Phone className="h-8 w-8 mb-3 text-emerald-400" />
-              <h3 className="font-semibold mb-2">Call Us</h3>
-              <p className="text-gray-300">{content.contact.phone}</p>
-              <p className="text-sm text-gray-400">Available 24/7</p>
-            </div>
-            <div className="flex flex-col items-center">
-              <Mail className="h-8 w-8 mb-3 text-emerald-400" />
-              <h3 className="font-semibold mb-2">Email Us</h3>
-              <p className="text-gray-300">{content.contact.email}</p>
-              <p className="text-sm text-gray-400">Quick response</p>
-            </div>
-            <div className="flex flex-col items-center">
-              <Globe className="h-8 w-8 mb-3 text-emerald-400" />
-              <h3 className="font-semibold mb-2">Visit Website</h3>
-              <p className="text-gray-300">{content.contact.website}</p>
-              <p className="text-sm text-gray-400">More experiences</p>
-            </div>
+            <svg className="h-9 w-9 text-emerald-400" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347" />
+              <path d="M11.999 2c-5.511 0-10 4.489-10 10 0 1.77.465 3.494 1.347 5.009L2 22l5.154-1.349A10 10 0 1 0 12 2Zm0 18c-1.64 0-3.228-.438-4.626-1.267l-.33-.195-3.053.8.82-2.991-.199-.316A7.98 7.98 0 0 1 4 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8Z" />
+            </svg>
+            <p className="mt-4 text-sm uppercase tracking-[0.3em] text-emerald-200/80">WhatsApp</p>
+            <p className="mt-2 text-lg font-semibold">{content.booking.contactPhone}</p>
+            <p className="text-sm text-slate-300">Tap to open concierge chat</p>
+          </a>
+          <div className="flex flex-col items-center rounded-3xl border border-white/10 bg-white/5 p-6 text-center">
+            <Mail className="h-9 w-9 text-emerald-300" />
+            <p className="mt-4 text-sm uppercase tracking-[0.3em] text-emerald-200/80">Email</p>
+            <p className="mt-2 text-lg font-semibold">{content.booking.email}</p>
+            <p className="text-sm text-slate-300">{content.booking.responseTime}</p>
+          </div>
+          <div className="flex flex-col items-center rounded-3xl border border-white/10 bg-white/5 p-6 text-center">
+            <Phone className="h-9 w-9 text-orange-300" />
+            <p className="mt-4 text-sm uppercase tracking-[0.3em] text-orange-200/80">Hotline</p>
+            <p className="mt-2 text-lg font-semibold">{content.booking.contactPhone}</p>
+            <p className="text-sm text-slate-300">Global support 6 AM – 10 PM (GMT+5:30)</p>
           </div>
         </div>
       </section>
 
       <Footer />
-
-      {/* Booking Modal */}
-      <EnhancedBookingModal
-        isOpen={isBookingModalOpen}
-        onClose={() => {
-          setIsBookingModalOpen(false);
-          setSelectedPackage(null);
-        }}
-        type="tour"
-        itemTitle={selectedPackage || "Scenic Train Journey"}
-      />
     </>
   );
 };

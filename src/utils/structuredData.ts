@@ -1,4 +1,5 @@
 import { PopularRoute } from '@/data/popularRoutes';
+import { buildAggregateRating, buildBrand, getBaseUrl } from './seoSchemaHelpers';
 
 export interface TransferStructuredData {
   '@context': string;
@@ -62,26 +63,15 @@ export interface TransferStructuredData {
 }
 
 export const generateTransferStructuredData = (route: PopularRoute): TransferStructuredData => {
-  const baseUrl = typeof window !== 'undefined'
-    ? window.location.origin
-    : 'https://recharge-travels-73e76.web.app';
+  const baseUrl = getBaseUrl();
+  const brand = buildBrand(baseUrl);
 
   const structuredData: TransferStructuredData = {
     '@context': 'https://schema.org',
     '@type': ['TaxiService', 'TransferService'],
     name: `${route.origin} to ${route.destination} Transfer`,
     description: route.metaDescription,
-    provider: {
-      '@type': 'Organization',
-      name: 'Recharge Travels',
-      url: baseUrl,
-      logo: `${baseUrl}/logo-v2.png`,
-      sameAs: [
-        'https://facebook.com/rechargetravels',
-        'https://instagram.com/rechargetravels',
-        'https://twitter.com/rechargetravels'
-      ]
-    },
+    provider: brand,
     offers: {
       '@type': 'Offer',
       price: route.startingPrice.toString(),
@@ -116,11 +106,10 @@ export const generateTransferStructuredData = (route: PopularRoute): TransferStr
   };
 
   // Add aggregate rating if available
-  structuredData.aggregateRating = {
-    '@type': 'AggregateRating',
-    ratingValue: '4.9',
-    reviewCount: '2341'
-  };
+  const rating = buildAggregateRating(4.9, 2341);
+  if (rating) {
+    structuredData.aggregateRating = rating;
+  }
 
   // Add FAQ structured data
   if (route.faqs && route.faqs.length > 0) {
@@ -142,9 +131,8 @@ export const generateTransferStructuredData = (route: PopularRoute): TransferStr
 
 // Local Business structured data for company
 export const generateLocalBusinessData = () => {
-  const baseUrl = typeof window !== 'undefined'
-    ? window.location.origin
-    : 'https://recharge-travels-73e76.web.app';
+  const baseUrl = getBaseUrl();
+  const brand = buildBrand(baseUrl);
 
   return {
     '@context': 'https://schema.org',
@@ -178,12 +166,8 @@ export const generateLocalBusinessData = () => {
       closes: '23:59'
     },
     priceRange: '$$',
-    image: 'https://rechargetravels.com/images/office.jpg',
-    sameAs: [
-      'https://facebook.com/rechargetravels',
-      'https://instagram.com/rechargetravels',
-      'https://linkedin.com/company/rechargetravels'
-    ]
+    image: `${baseUrl}/logo-v2.png`,
+    sameAs: brand.sameAs
   };
 };
 
@@ -203,16 +187,17 @@ export const generateBreadcrumbData = (items: Array<{ name: string; url: string 
 
 // WebSite with search action
 export const generateWebsiteData = () => {
+  const baseUrl = getBaseUrl();
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: 'Recharge Travels',
-    url: 'https://rechargetravels.com',
+    url: baseUrl,
     potentialAction: {
       '@type': 'SearchAction',
       target: {
         '@type': 'EntryPoint',
-        urlTemplate: 'https://rechargetravels.com/search?q={search_term_string}'
+        urlTemplate: `${baseUrl}/search?q={search_term_string}`
       },
       'query-input': 'required name=search_term_string'
     }
@@ -221,6 +206,7 @@ export const generateWebsiteData = () => {
 
 // Tour Package structured data
 export const generateTourPackageData = (tour: any) => {
+  const baseUrl = getBaseUrl();
   return {
     '@context': 'https://schema.org',
     '@type': 'TouristTrip',
@@ -230,7 +216,7 @@ export const generateTourPackageData = (tour: any) => {
     provider: {
       '@type': 'Organization',
       name: 'Recharge Travels',
-      url: 'https://rechargetravels.com'
+      url: baseUrl
     },
     offers: {
       '@type': 'Offer',

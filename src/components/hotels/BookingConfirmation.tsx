@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Helmet } from 'react-helmet-async'
 import {
   CheckCircle, CreditCard, User, Mail, Phone, Calendar,
-  MapPin, Users, Star, Shield, Clock, AlertCircle
+  MapPin, Users, Star, Shield, Clock, AlertCircle, Loader2
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -15,6 +15,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { Hotel } from '@/types/hotel'
+import { hotelBookingService } from '@/services/hotelBookingService'
+import { useToast } from '@/components/ui/use-toast'
 
 interface BookingConfirmationProps {
   hotel: Hotel
@@ -37,6 +39,7 @@ const BookingConfirmation: React.FC<BookingConfirmationProps> = ({
   onConfirmBooking,
   onBack
 }) => {
+  const { toast } = useToast()
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -84,27 +87,73 @@ const BookingConfirmation: React.FC<BookingConfirmationProps> = ({
     e.preventDefault()
 
     if (!agreements.termsAndConditions || !agreements.cancellationPolicy) {
-      alert('Please accept the required terms and conditions.')
+      toast({
+        title: "Terms Required",
+        description: "Please accept the required terms and conditions.",
+        variant: "destructive"
+      })
       return
     }
 
     setIsProcessing(true)
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      // Create booking in Firebase
+      const booking = await hotelBookingService.createBooking({
+        hotel_id: hotel.id,
+        hotel_name: hotel.name,
+        room_type_id: roomType.id || 'standard',
+        room_type_name: roomType.name || 'Standard Room',
+        check_in: bookingDetails.checkIn,
+        check_out: bookingDetails.checkOut,
+        nights: bookingDetails.nights,
+        guests: bookingDetails.guests,
+        guest_info: {
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
+          special_requests: formData.specialRequests
+        },
+        pricing: {
+          room_rate_per_night: roomType.price_per_night || bookingDetails.totalPrice / bookingDetails.nights,
+          subtotal: taxes.subtotal,
+          tax: taxes.tax,
+          service_fee: taxes.serviceFee,
+          total: taxes.total,
+          currency: 'USD'
+        },
+        payment_method: formData.paymentMethod,
+        status: 'confirmed'
+      })
+
+      toast({
+        title: "🎉 Booking Confirmed!",
+        description: `Your booking reference is ${booking.booking_reference}. Check your email for confirmation.`
+      })
+
       const bookingData = {
         hotel,
         roomType,
         bookingDetails,
         guestInfo: formData,
         taxes,
-        bookingReference: `BK${Date.now()}`,
+        bookingReference: booking.booking_reference,
+        bookingId: booking.id,
         status: 'confirmed'
       }
 
       onConfirmBooking(bookingData)
+    } catch (error) {
+      console.error('Booking failed:', error)
+      toast({
+        title: "Booking Failed",
+        description: "There was an error processing your booking. Please try again.",
+        variant: "destructive"
+      })
+    } finally {
       setIsProcessing(false)
-    }, 2000)
+    }
   }
 
   const isFormValid = () => {

@@ -42,9 +42,22 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import EnhancedBookingModal from '@/components/EnhancedBookingModal';
+import { useNavigate } from 'react-router-dom';
+import DestinationMap from '@/components/destinations/DestinationMap';
+import WeatherWidget from '@/components/destinations/WeatherWidget';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import {
+  COMPANY,
+  createTouristAttractionSchema,
+  createBreadcrumbSchema,
+  createOrganizationSchema,
+  createHowToSchema,
+  createSpeakableSchema
+} from '@/utils/schemaMarkup';
+
+// Galle coordinates
+const GALLE_CENTER = { lat: 6.0535, lng: 80.2210 };
 
 interface HeroSlide {
   id?: string;
@@ -179,19 +192,29 @@ const tipCategoryIcons: { [key: string]: any } = {
 // Default content for Galle
 const DEFAULT_HERO_SLIDES: HeroSlide[] = [
   {
-    image: "https://images.unsplash.com/photo-1586183189334-3d0e7f3c0c11?auto=format&fit=crop&q=80",
-    title: "Welcome to Galle",
-    subtitle: "UNESCO World Heritage Fort City"
+    image: "https://images.unsplash.com/photo-1586613835341-78c143aef52c?auto=format&fit=crop&q=80",
+    title: "Discover Galle",
+    subtitle: "Colonial Heritage Meets Coastal Beauty"
   },
   {
-    image: "https://images.unsplash.com/photo-1590123715937-e3ae9d56c618?auto=format&fit=crop&q=80",
-    title: "Dutch Colonial Heritage",
-    subtitle: "Where History Meets the Ocean"
+    image: "https://images.unsplash.com/photo-1578128178243-721cd32ce739?auto=format&fit=crop&q=80",
+    title: "Galle Fort",
+    subtitle: "UNESCO World Heritage Dutch Colonial Fort"
   },
   {
-    image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?auto=format&fit=crop&q=80",
-    title: "Coastal Paradise",
-    subtitle: "Explore Ancient Ramparts & Beaches"
+    image: "https://images.unsplash.com/photo-1624461810179-5c7f89f7d0e9?auto=format&fit=crop&q=80",
+    title: "Lighthouse Point",
+    subtitle: "Iconic Maritime Heritage"
+  },
+  {
+    image: "https://images.unsplash.com/photo-1590123597862-1d4e0b6e9a0b?auto=format&fit=crop&q=80",
+    title: "Fort Streets",
+    subtitle: "Charming Colonial Architecture"
+  },
+  {
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80",
+    title: "Unawatuna Beach",
+    subtitle: "Golden Sands Near the Fort"
   }
 ];
 
@@ -327,10 +350,9 @@ const DEFAULT_SEO: SEOInfo = {
 };
 
 const Galle = () => {
+  const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedTab, setSelectedTab] = useState('attractions');
-  const [showBookingModal, setShowBookingModal] = useState(false);
-  const [selectedAttraction, setSelectedAttraction] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
   // Content state
@@ -414,9 +436,16 @@ const Galle = () => {
     return () => clearInterval(timer);
   }, [heroSlides.length]);
 
-  const handleBookNow = (attractionName: string = '') => {
-    setSelectedAttraction(attractionName);
-    setShowBookingModal(true);
+  const handleBooking = (service: string = 'Galle Tour') => {
+    const params = new URLSearchParams({
+      title: service,
+      id: service.toLowerCase().replace(/\s+/g, '-'),
+      duration: 'Full Day',
+      price: '60',
+      image: 'https://images.unsplash.com/photo-1586016413664-864c0dd76f53?w=800',
+      subtitle: `Galle - ${service}`
+    });
+    navigate(`/book-tour?${params.toString()}`);
   };
 
   // Get available tabs based on content
@@ -424,6 +453,7 @@ const Galle = () => {
     const tabs = ['attractions', 'activities'];
     if (restaurants.length > 0) tabs.push('restaurants');
     if (hotels.length > 0) tabs.push('hotels');
+    tabs.push('map');
     tabs.push('weather');
     if (travelTips.length > 0) tabs.push('tips');
     return tabs;
@@ -439,14 +469,133 @@ const Galle = () => {
         <meta name="keywords" content={seoInfo.keywords.join(', ')} />
         <meta property="og:title" content={seoInfo.title} />
         <meta property="og:description" content={seoInfo.description} />
-        <link rel="canonical" href="https://rechargetravels.com/destinations/galle" />
+        <meta property="og:image" content={heroSlides[0]?.image || 'https://i.imgur.com/AEnBWJf.jpeg'} />
+        <meta property="og:url" content="https://www.rechargetravels.com/destinations/galle" />
+        <meta property="og:type" content="place" />
+        <meta property="og:locale" content="en_US" />
+        <meta property="og:site_name" content="Recharge Travels" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <link rel="canonical" href="https://www.rechargetravels.com/destinations/galle" />
+
+        {/* TouristAttraction Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify(createTouristAttractionSchema({
+            name: 'Galle Fort - Dutch Colonial Heritage',
+            description: seoInfo.description,
+            image: heroSlides.map(s => s.image),
+            latitude: GALLE_CENTER.lat,
+            longitude: GALLE_CENTER.lng,
+            address: 'Galle Fort, Southern Province, Sri Lanka',
+            openingHours: 'Mo-Su 00:00-23:59',
+            priceRange: 'Free entry',
+            rating: { value: 4.9, count: 4125 },
+            url: 'https://www.rechargetravels.com/destinations/galle'
+          }))}
+        </script>
+
+        {/* Breadcrumb Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify(createBreadcrumbSchema([
+            { name: 'Home', url: COMPANY.url },
+            { name: 'Destinations', url: `${COMPANY.url}/about/sri-lanka` },
+            { name: 'Galle', url: `${COMPANY.url}/destinations/galle` }
+          ]))}
+        </script>
+
+        {/* Organization Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify(createOrganizationSchema())}
+        </script>
+
+        {/* HowTo Schema - Visit Guide */}
+        <script type="application/ld+json">
+          {JSON.stringify(createHowToSchema(
+            'How to Explore Galle Fort',
+            'Complete guide to visiting Galle Fort, a UNESCO World Heritage Site and the best-preserved colonial fort in Asia.',
+            [
+              { name: 'Plan Your Visit', text: 'Galle Fort is open 24/7 with free entry. Best visited early morning or late afternoon to avoid heat. Sunset from ramparts is spectacular.' },
+              { name: 'Get There', text: 'Galle is 120km from Colombo. Take the scenic coastal train (2.5 hours) or book a private transfer with Recharge Travels at +94777721999.' },
+              { name: 'Walk the Ramparts', text: 'Start at the Main Gate and walk the entire rampart circuit (1.5km). Key stops: Flag Rock, Lighthouse, Clock Tower, and Moon Bastion.' },
+              { name: 'Explore the Streets', text: 'Wander through Church Street, Pedlar Street, and Leyn Baan Street. Visit boutique shops, cafes, art galleries, and colonial-era churches.' },
+              { name: 'Visit Key Attractions', text: 'See the Maritime Museum, Dutch Reformed Church (1755), Galle Lighthouse, and the National Museum. Enjoy fresh seafood at Fort restaurants.' }
+            ],
+            { totalTime: 'PT4H', estimatedCost: '0', currency: 'LKR' }
+          ))}
+        </script>
+
+        {/* Speakable Schema for Voice Search */}
+        <script type="application/ld+json">
+          {JSON.stringify(createSpeakableSchema(
+            'https://www.rechargetravels.com/destinations/galle',
+            ['h1', '.hero-subtitle', '.destination-description']
+          ))}
+        </script>
+
+        {/* UNESCO World Heritage Site Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": ["LandmarksOrHistoricalBuildings", "TouristDestination"],
+            "@id": "https://www.rechargetravels.com/destinations/galle#fort",
+            "name": "Galle Fort",
+            "alternateName": ["Dutch Fort", "Fort de Galle", "Galle Dutch Fort"],
+            "description": "Galle Fort is a UNESCO World Heritage Site and the best-preserved sea fortress in South Asia. Built by the Portuguese in 1588 and fortified by the Dutch in 1649, it combines European architecture with South Asian traditions.",
+            "image": heroSlides.map(s => s.image),
+            "url": "https://www.rechargetravels.com/destinations/galle",
+            "telephone": COMPANY.phone,
+            "geo": {
+              "@type": "GeoCoordinates",
+              "latitude": 6.0535,
+              "longitude": 80.2210
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "Galle",
+              "addressRegion": "Southern Province",
+              "addressCountry": "LK"
+            },
+            "isAccessibleForFree": true,
+            "publicAccess": true,
+            "containsPlace": [
+              {
+                "@type": "LandmarksOrHistoricalBuildings",
+                "name": "Galle Lighthouse",
+                "description": "Oldest lighthouse in Sri Lanka, built in 1848"
+              },
+              {
+                "@type": "Museum",
+                "name": "Maritime Museum",
+                "description": "Museum showcasing maritime history and archaeology"
+              },
+              {
+                "@type": "Church",
+                "name": "Dutch Reformed Church",
+                "description": "Historic church built in 1755"
+              }
+            ],
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": 4.9,
+              "reviewCount": 4125,
+              "bestRating": 5,
+              "worstRating": 1
+            },
+            "award": "UNESCO World Heritage Site (1988)",
+            "foundingDate": "1588",
+            "containedInPlace": {
+              "@type": "Country",
+              "name": "Sri Lanka"
+            },
+            "touristType": ["Cultural Tourism", "Heritage Tourism", "Photography Tourism", "Beach Tourism"]
+          })}
+        </script>
       </Helmet>
 
       <Header />
 
       <div className="min-h-screen bg-background">
         {/* Hero Section */}
-        <section className="relative h-[80vh] overflow-hidden">
+        <section className="relative aspect-video max-h-[80vh] overflow-hidden">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentSlide}
@@ -491,7 +640,7 @@ const Galle = () => {
                 transition={{ duration: 0.8, delay: 0.4 }}
                 className="flex gap-4 justify-center"
               >
-                <Button size="lg" onClick={() => handleBookNow()} className="bg-teal-600 hover:bg-teal-700">
+                <Button size="lg" onClick={() => handleBooking()} className="bg-teal-600 hover:bg-teal-700">
                   Book Your Experience
                 </Button>
                 <Button size="lg" variant="outline" className="bg-white/10 backdrop-blur-sm border-white text-white hover:bg-white/20">
@@ -622,7 +771,7 @@ const Galle = () => {
 
                       <Button
                         className="w-full bg-teal-600 hover:bg-teal-700"
-                        onClick={() => handleBookNow(attraction.name)}
+                        onClick={() => handleBooking(attraction.name)}
                       >
                         Book Now
                       </Button>
@@ -658,7 +807,7 @@ const Galle = () => {
                         <p className="text-gray-600 mb-4">{activity.description}</p>
                         <div className="flex items-center justify-between">
                           <span className="text-2xl font-bold text-teal-600">{activity.price}</span>
-                          <Button onClick={() => handleBookNow(activity.name)} className="bg-teal-600 hover:bg-teal-700">
+                          <Button onClick={() => handleBooking(activity.name)} className="bg-teal-600 hover:bg-teal-700">
                             Book Now
                           </Button>
                         </div>
@@ -794,7 +943,7 @@ const Galle = () => {
                           </div>
                         )}
 
-                        <Button className="w-full bg-teal-600 hover:bg-teal-700" onClick={() => handleBookNow(hotel.name)}>
+                        <Button className="w-full bg-teal-600 hover:bg-teal-700" onClick={() => handleBooking(hotel.name)}>
                           Check Availability
                         </Button>
                       </CardContent>
@@ -808,6 +957,57 @@ const Galle = () => {
                   <p className="text-gray-600">We're working on bringing you the best hotel recommendations in Galle</p>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Map Tab */}
+          {selectedTab === 'map' && (
+            <div>
+              <h2 className="text-3xl font-bold mb-8">Explore Galle</h2>
+              <div className="mb-6">
+                <DestinationMap
+                  center={GALLE_CENTER}
+                  destinationName="Galle"
+                  attractions={[
+                    {
+                      name: "Galle Fort",
+                      position: { lat: 6.0266, lng: 80.2168 },
+                      description: "UNESCO World Heritage Site - 17th century Dutch fort"
+                    },
+                    {
+                      name: "Dutch Reformed Church",
+                      position: { lat: 6.0282, lng: 80.2171 },
+                      description: "Historic Protestant church from 1755"
+                    },
+                    {
+                      name: "National Maritime Museum",
+                      position: { lat: 6.0273, lng: 80.2165 },
+                      description: "Maritime history museum in old Dutch warehouse"
+                    },
+                    {
+                      name: "Galle Lighthouse",
+                      position: { lat: 6.0244, lng: 80.2189 },
+                      description: "Oldest lighthouse in Sri Lanka built in 1848"
+                    },
+                    {
+                      name: "Japanese Peace Pagoda",
+                      position: { lat: 6.0156, lng: 80.2456 },
+                      description: "White stupa on Rumassala Hill with panoramic views"
+                    },
+                    {
+                      name: "Unawatuna Beach",
+                      position: { lat: 6.0108, lng: 80.2489 },
+                      description: "Beautiful beach perfect for swimming and snorkeling"
+                    }
+                  ]}
+                />
+              </div>
+              <div className="mt-6">
+                <WeatherWidget
+                  coordinates={GALLE_CENTER}
+                  locationName="Galle"
+                />
+              </div>
             </div>
           )}
 
@@ -902,7 +1102,7 @@ const Galle = () => {
               {ctaSection.subtitle}
             </p>
             <div className="flex gap-4 justify-center">
-              <Button size="lg" variant="secondary" onClick={() => handleBookNow()} className="bg-white text-teal-600 hover:bg-gray-100">
+              <Button size="lg" variant="secondary" onClick={() => handleBooking()} className="bg-white text-teal-600 hover:bg-gray-100">
                 {ctaSection.buttonText}
               </Button>
               <Button size="lg" variant="outline" className="bg-white/10 backdrop-blur-sm text-white border-white hover:bg-white/20">
@@ -913,12 +1113,16 @@ const Galle = () => {
         </section>
       </div>
 
-      {/* Booking Modal */}
-      <EnhancedBookingModal
-        isOpen={showBookingModal}
-        onClose={() => setShowBookingModal(false)}
-        preSelectedService={selectedAttraction}
-      />
+      {/* WhatsApp Float Button */}
+      <a
+        href="https://wa.me/94777123456?text=Hi!%20I'm%20interested%20in%20booking%20a%20Galle%20tour."
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 z-50 bg-green-500 hover:bg-green-600 text-white rounded-full p-4 shadow-lg transition-all hover:scale-110"
+        aria-label="Contact us on WhatsApp"
+      >
+        <MessageCircle className="w-6 h-6" />
+      </a>
 
       <Footer />
     </>

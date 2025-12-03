@@ -34,9 +34,21 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import EnhancedBookingModal from '@/components/EnhancedBookingModal';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import DestinationMap from '@/components/destinations/DestinationMap';
+import WeatherWidget from '@/components/destinations/WeatherWidget';
 import { getDestinationBySlug } from '@/services/destinationContentService';
+import {
+  COMPANY,
+  createTouristAttractionSchema,
+  createBreadcrumbSchema,
+  createOrganizationSchema,
+  createHowToSchema,
+  createSpeakableSchema
+} from '@/utils/schemaMarkup';
+
+// Kandy coordinates
+const KANDY_CENTER = { lat: 7.2906, lng: 80.6337 };
 
 interface HeroSlide {
   image: string;
@@ -113,10 +125,9 @@ interface CTASection {
 }
 
 const Kandy = () => {
+  const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedTab, setSelectedTab] = useState('attractions');
-  const [showBookingModal, setShowBookingModal] = useState(false);
-  const [selectedAttraction, setSelectedAttraction] = useState<string>('');
 
   const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([
     {
@@ -133,6 +144,16 @@ const Kandy = () => {
       image: "https://images.unsplash.com/photo-1627894483216-2138af692e32?auto=format&fit=crop&q=80",
       title: "Hill Country Paradise",
       subtitle: "Where Culture Meets Nature"
+    },
+    {
+      image: "https://images.unsplash.com/photo-1586077427825-15dca6b44dba?auto=format&fit=crop&q=80",
+      title: "Kandy Lake",
+      subtitle: "Serene Waters in the Heart of the City"
+    },
+    {
+      image: "https://images.unsplash.com/photo-1588598198321-39f8c2be97ba?auto=format&fit=crop&q=80",
+      title: "Royal Botanical Gardens",
+      subtitle: "Peradeniya's Natural Splendor"
     }
   ]);
 
@@ -337,22 +358,145 @@ const Kandy = () => {
     return () => clearInterval(timer);
   }, [heroSlides.length]);
 
-  const handleBookNow = (attractionName: string = '') => {
-    setSelectedAttraction(attractionName);
-    setShowBookingModal(true);
+  const handleBooking = (service: string = 'Kandy Tour', tourData?: { id: string; name: string; description: string; duration: string; price: number; features: string[]; image?: string }) => {
+    const params = new URLSearchParams({
+      title: tourData?.name || service,
+      id: tourData?.id || service.toLowerCase().replace(/\s+/g, '-'),
+      duration: tourData?.duration || 'Full Day',
+      price: String(tourData?.price || 65),
+      image: tourData?.image || 'https://images.unsplash.com/photo-1580541832626-2a7131ee809f?w=800',
+      subtitle: `Kandy - ${tourData?.name || service}`
+    });
+    navigate(`/book-tour?${params.toString()}`);
   };
   return (
     <>
       <Helmet>
         <title>Kandy - Cultural Capital of Sri Lanka | Sacred Sites, Tours & Travel Guide</title>
         <meta name="description" content="Discover Kandy's Temple of the Tooth, botanical gardens, and cultural heritage. Plan your visit to Sri Lanka's hill capital with our complete travel guide." />
+        <meta name="keywords" content="Kandy, Temple of the Tooth, Sri Lanka, UNESCO, cultural heritage, Peradeniya Gardens, Esala Perahera, travel, tours" />
+        <meta property="og:title" content="Kandy - Cultural Capital of Sri Lanka | Recharge Travels" />
+        <meta property="og:description" content="Discover Kandy's Temple of the Tooth, botanical gardens, and cultural heritage. Plan your visit to Sri Lanka's hill capital." />
+        <meta property="og:image" content={heroSlides[0]?.image || 'https://i.imgur.com/AEnBWJf.jpeg'} />
+        <meta property="og:url" content="https://www.rechargetravels.com/destinations/kandy" />
+        <meta property="og:type" content="place" />
+        <meta property="og:locale" content="en_US" />
+        <meta property="og:site_name" content="Recharge Travels" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <link rel="canonical" href="https://www.rechargetravels.com/destinations/kandy" />
+
+        {/* TouristAttraction Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify(createTouristAttractionSchema({
+            name: 'Kandy - Cultural Capital of Sri Lanka',
+            description: "Discover Kandy's Temple of the Tooth, botanical gardens, and cultural heritage. The last royal capital of Sri Lanka and UNESCO World Heritage Site.",
+            image: heroSlides.map(s => s.image),
+            latitude: KANDY_CENTER.lat,
+            longitude: KANDY_CENTER.lng,
+            address: 'Kandy, Central Province, Sri Lanka',
+            openingHours: 'Mo-Su 05:30-20:00',
+            priceRange: 'LKR 1500',
+            rating: { value: 4.8, count: 3256 },
+            url: 'https://www.rechargetravels.com/destinations/kandy'
+          }))}
+        </script>
+
+        {/* Breadcrumb Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify(createBreadcrumbSchema([
+            { name: 'Home', url: COMPANY.url },
+            { name: 'Destinations', url: `${COMPANY.url}/about/sri-lanka` },
+            { name: 'Kandy', url: `${COMPANY.url}/destinations/kandy` }
+          ]))}
+        </script>
+
+        {/* Organization Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify(createOrganizationSchema())}
+        </script>
+
+        {/* HowTo Schema - Visit Guide */}
+        <script type="application/ld+json">
+          {JSON.stringify(createHowToSchema(
+            'How to Visit Kandy and Temple of the Tooth',
+            'Complete guide to visiting Kandy, the cultural capital of Sri Lanka. Home to the sacred Temple of the Tooth Relic.',
+            [
+              { name: 'Plan Your Visit', text: 'Best time to visit is during puja ceremonies (5:30 AM, 9:30 AM, 6:30 PM). The Esala Perahera festival in July/August is spectacular.' },
+              { name: 'Book Transportation', text: 'Kandy is 115km from Colombo. Take the scenic train (3.5 hours) or book a private transfer with Recharge Travels at +94777721999.' },
+              { name: 'Visit Temple of the Tooth', text: 'Entry: LKR 1500 for foreigners. Dress modestly (covered shoulders/knees). Remove shoes before entering. Photography restricted in some areas.' },
+              { name: 'Explore Peradeniya Gardens', text: 'Visit the Royal Botanical Gardens (entry LKR 1500). Best time: early morning. Famous for orchids, spices, and giant bamboo.' },
+              { name: 'Experience Cultural Shows', text: 'Watch traditional Kandyan dance performances at Cultural Centre (7:00 PM daily). Fire walking and drumming included.' }
+            ],
+            { totalTime: 'PT6H', estimatedCost: '1500', currency: 'LKR' }
+          ))}
+        </script>
+
+        {/* Speakable Schema for Voice Search */}
+        <script type="application/ld+json">
+          {JSON.stringify(createSpeakableSchema(
+            'https://www.rechargetravels.com/destinations/kandy',
+            ['h1', '.hero-subtitle', '.destination-description']
+          ))}
+        </script>
+
+        {/* UNESCO World Heritage Site Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": ["City", "TouristDestination"],
+            "@id": "https://www.rechargetravels.com/destinations/kandy#city",
+            "name": "Kandy",
+            "alternateName": ["Maha Nuvara", "Senkadagalapura", "Cultural Capital of Sri Lanka"],
+            "description": "Kandy is the cultural capital of Sri Lanka, home to the sacred Temple of the Tooth Relic. A UNESCO World Heritage Site surrounded by mountains and the beautiful Kandy Lake.",
+            "image": heroSlides.map(s => s.image),
+            "url": "https://www.rechargetravels.com/destinations/kandy",
+            "telephone": COMPANY.phone,
+            "geo": {
+              "@type": "GeoCoordinates",
+              "latitude": 7.2906,
+              "longitude": 80.6337,
+              "elevation": "465 meters"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "Kandy",
+              "addressRegion": "Central Province",
+              "addressCountry": "LK"
+            },
+            "containsPlace": [
+              {
+                "@type": "TouristAttraction",
+                "name": "Temple of the Tooth Relic",
+                "description": "Sacred Buddhist temple housing the tooth relic of Buddha"
+              },
+              {
+                "@type": "Park",
+                "name": "Royal Botanical Gardens, Peradeniya",
+                "description": "Largest botanical garden in Sri Lanka"
+              }
+            ],
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": 4.8,
+              "reviewCount": 3256,
+              "bestRating": 5,
+              "worstRating": 1
+            },
+            "award": "UNESCO World Heritage Site (1988)",
+            "containedInPlace": {
+              "@type": "Country",
+              "name": "Sri Lanka"
+            },
+            "touristType": ["Cultural Tourism", "Religious Tourism", "Heritage Tourism", "Nature Tourism"]
+          })}
+        </script>
       </Helmet>
       
       <Header />
       
       <div className="min-h-screen bg-background">
         {/* Hero Section */}
-        <section className="relative h-[80vh] overflow-hidden">
+        <section className="relative aspect-video max-h-[80vh] overflow-hidden">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentSlide}
@@ -397,7 +541,7 @@ const Kandy = () => {
                 transition={{ duration: 0.8, delay: 0.4 }}
                 className="flex gap-4 justify-center"
               >
-                <Button size="lg" onClick={() => handleBookNow()}>
+                <Button size="lg" onClick={() => handleBooking()}>
                   Book Your Experience
                 </Button>
                 <Button asChild size="lg" variant="outline" className="bg-white/10 backdrop-blur-sm">
@@ -466,7 +610,7 @@ const Kandy = () => {
         <section className="sticky top-0 z-40 bg-white shadow-md">
           <div className="container mx-auto px-4">
             <div className="flex space-x-8 overflow-x-auto">
-              {['attractions', 'activities', 'hotels', 'restaurants', 'weather'].map((tab) => (
+              {['attractions', 'activities', 'hotels', 'restaurants', 'map', 'weather'].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setSelectedTab(tab)}
@@ -525,7 +669,7 @@ const Kandy = () => {
                       
                       <Button 
                         className="w-full"
-                        onClick={() => handleBookNow(attraction.name)}
+                        onClick={() => handleBooking(attraction.name)}
                       >
                         Book Now
                       </Button>
@@ -559,7 +703,7 @@ const Kandy = () => {
                       <p className="text-gray-600 mb-4">{activity.description}</p>
                       <div className="flex items-center justify-between">
                         <span className="text-2xl font-bold text-amber-600">{activity.price}</span>
-                        <Button onClick={() => handleBookNow(activity.name)}>
+                        <Button onClick={() => handleBooking(activity.name)}>
                           Book Now
                         </Button>
                       </div>
@@ -623,7 +767,7 @@ const Kandy = () => {
                         )}
                         <Button
                           className="w-full mt-3"
-                          onClick={() => handleBookNow(hotel.name)}
+                          onClick={() => handleBooking(hotel.name)}
                         >
                           Book This Stay
                         </Button>
@@ -680,6 +824,45 @@ const Kandy = () => {
                   ))}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Map Tab */}
+          {selectedTab === 'map' && (
+            <div>
+              <h2 className="text-3xl font-bold mb-8">Explore Kandy Map</h2>
+              <p className="text-gray-600 mb-8 text-center max-w-2xl mx-auto">
+                Discover temples, gardens, and cultural landmarks across Kandy
+              </p>
+              <div className="grid lg:grid-cols-3 gap-8">
+                {/* Interactive Map */}
+                <div className="lg:col-span-2">
+                  <Card className="overflow-hidden h-[500px]">
+                    <DestinationMap
+                      destinationName="Kandy"
+                      center={KANDY_CENTER}
+                      attractions={[
+                        { name: 'Temple of the Tooth', description: 'Sacred Buddhist temple', coordinates: { lat: 7.2936, lng: 80.6413 } },
+                        { name: 'Royal Botanical Gardens', description: 'Famous Peradeniya gardens', coordinates: { lat: 7.2690, lng: 80.5958 } },
+                        { name: 'Kandy Lake', description: 'Scenic lake in city center', coordinates: KANDY_CENTER },
+                        { name: 'Bahiravokanda Buddha', description: 'Giant Buddha statue', coordinates: { lat: 7.2975, lng: 80.6292 } },
+                        { name: 'Ceylon Tea Museum', description: 'Tea history museum', coordinates: { lat: 7.2650, lng: 80.6100 } },
+                        { name: 'Udawatta Kele Sanctuary', description: 'Forest reserve', coordinates: { lat: 7.2980, lng: 80.6400 } },
+                      ]}
+                      height="500px"
+                    />
+                  </Card>
+                </div>
+
+                {/* Weather Widget */}
+                <div className="lg:col-span-1">
+                  <WeatherWidget
+                    locationName="Kandy"
+                    latitude={KANDY_CENTER.lat}
+                    longitude={KANDY_CENTER.lng}
+                  />
+                </div>
+              </div>
             </div>
           )}
 
@@ -761,7 +944,7 @@ const Kandy = () => {
               {ctaSection.subtitle}
             </p>
             <div className="flex gap-4 justify-center">
-              <Button size="lg" variant="secondary" onClick={() => handleBookNow()}>
+              <Button size="lg" variant="secondary" onClick={() => handleBooking()}>
                 {ctaSection.buttonText}
               </Button>
               <Button
@@ -779,14 +962,20 @@ const Kandy = () => {
         </section>
       </div>
 
-      {/* Booking Modal */}
-      <EnhancedBookingModal
-        isOpen={showBookingModal}
-        onClose={() => setShowBookingModal(false)}
-        preSelectedService={selectedAttraction}
-      />
-
       <Footer />
+
+      {/* WhatsApp Float Button */}
+      <a
+        href="https://wa.me/94777721999?text=Hi! I'm interested in booking a Kandy tour."
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 z-50 bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-lg transition-all hover:scale-110"
+        aria-label="Contact via WhatsApp"
+      >
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+      </a>
     </>
   );
 };

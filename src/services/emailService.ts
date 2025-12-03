@@ -10,7 +10,8 @@ export type EmailTemplateType =
   | 'inquiryReply'
   | 'welcomeEmail'
   | 'adminNotification'
-  | 'bookingReminder';
+  | 'bookingReminder'
+  | 'aiTripPlannerConfirmation';
 
 // Template data interfaces
 export interface BookingConfirmationData {
@@ -50,12 +51,25 @@ export interface BookingReminderData {
   daysUntil: number;
 }
 
+export interface AITripPlannerConfirmationData {
+  customerName: string;
+  tripTitle: string;
+  duration: number;
+  travelDates: string;
+  travelers: string;
+  budget: string;
+  estimatedCost: number;
+  highlights?: string[];
+  specialRequests?: string;
+}
+
 export type EmailTemplateData =
   | BookingConfirmationData
   | InquiryReplyData
   | WelcomeEmailData
   | AdminNotificationData
-  | BookingReminderData;
+  | BookingReminderData
+  | AITripPlannerConfirmationData;
 
 export interface SendEmailParams {
   to: string;
@@ -171,6 +185,20 @@ export const emailService = {
       subject,
       html,
       text: text || html.replace(/<[^>]*>/g, '') // Strip HTML tags for text version
+    });
+  },
+
+  /**
+   * Send AI Trip Planner confirmation email
+   */
+  async sendAITripPlannerConfirmation(
+    to: string,
+    data: AITripPlannerConfirmationData
+  ): Promise<EmailResponse> {
+    return this.sendEmail({
+      to,
+      templateType: 'aiTripPlannerConfirmation',
+      templateData: data
     });
   }
 };
