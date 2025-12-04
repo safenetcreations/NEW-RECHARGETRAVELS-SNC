@@ -288,11 +288,90 @@
     ]
   },
   {
-    "timestamp": "2025-12-03T12:18:25Z",
-    "summary": "Pinned the luxury hero booking widget open for consistent CTA visibility.",
+    "timestamp": "2025-12-03T12:45:00Z",
+    "summary": "Reverted LuxuryHeroSection to the earlier toggle-based booking widget after accidental homepage change.",
     "details": [
-      "Removed the hero toggle/close controls so the multi-tab booking menu stays visible on load.",
-      "Cleaned up unused quick-access styles and scroll indicator logic tied to the old toggle state."
+      "Restored the hero CTA toggle with quick-access chips and the scroll indicator instead of the always-open booking card.",
+      "Undid the pinned-open menu so the booking card can be opened/closed per the prior experience; Book Now page remains untouched."
+    ],
+    "files": [
+      "src/components/homepage/LuxuryHeroSection.tsx"
+    ]
+  },
+  {
+    "timestamp": "2025-12-03T12:30:27Z",
+    "summary": "Made Book Now hero booking CTA permanently visible and anchored to the form.",
+    "details": [
+      "Added persistent Book Now buttons (inline and floating) in the Book Now hero to keep the booking CTA visible.",
+      "Anchored the booking form with an ID so both CTAs scroll smoothly to the correct section."
+    ],
+    "files": [
+      "src/pages/BookNow.tsx"
+    ]
+  },
+  {
+    "timestamp": "2025-12-03T13:05:00Z",
+    "summary": "Removed the first Book Now hero image per request.",
+    "details": [
+      "Filtered hero slides to drop the first image from both Firebase and default slide sources.",
+      "Adjusted the fallback current slide to start from the second default image."
+    ],
+    "files": [
+      "src/pages/BookNow.tsx"
+    ]
+  },
+  {
+    "timestamp": "2025-12-03T13:35:22Z",
+    "summary": "Redesigned Book Now page with premium hero, service cards, and WhatsApp booking modal.",
+    "details": [
+      "Added gradient hero with sticky header, quick search bar, and prominent CTAs.",
+      "Built four service categories (Tours, Airport Transfers, Train Bookings, Vehicle Rentals) with rich cards, pricing, ratings, and highlights.",
+      "Implemented WhatsApp-driven booking modal capturing traveler details and sending formatted messages to the concierge number."
+    ],
+    "files": [
+      "src/pages/BookNow.tsx"
+    ]
+  },
+  {
+    "timestamp": "2025-12-03T13:52:06Z",
+    "summary": "Simplified Book Now page: static hero and embedded existing booking engine tabs.",
+    "details": [
+      "Replaced the carousel with a single static hero image and CTA, per request.",
+      "Embedded existing booking engine tabs for Airport Transfers, Private Tours, Group Transport, and Train Bookings using current forms.",
+      "Kept contact info and sticky header/footer; removed custom cards and extra layers."
+    ],
+    "files": [
+      "src/pages/BookNow.tsx"
+    ]
+  },
+  {
+    "timestamp": "2025-12-03T14:05:00Z",
+    "summary": "Restored Book Now hero carousel with admin-managed slides (random start, up to 5).",
+    "details": [
+      "Re-enabled slide rotation with arrows/dots and gradients; starts at a random slide and auto-advances every 6s.",
+      "Still skips the broken first default image; uses up to five valid slides from Firebase/defaults."
+    ],
+    "files": [
+      "src/pages/BookNow.tsx"
+    ]
+  },
+  {
+    "timestamp": "2025-12-03T14:40:14Z",
+    "summary": "Refreshed Cultural Tours hero and validated clean builds.",
+    "details": [
+      "Rebuilt /tours/cultural hero layering with a new Sigiriya backdrop, clearer gradient overlays, and isolated stacking so CTA buttons stay bright and clickable.",
+      "Re-ran eslint plus npm run build:all (main + admin) to confirm the page and footers compile without Vite overlay errors."
+    ],
+    "files": [
+      "src/pages/CulturalTours.tsx"
+    ]
+  },
+  {
+    "timestamp": "2025-12-03T15:15:21Z",
+    "summary": "Stabilized homepage hero slides so all images load and stay visible.",
+    "details": [
+      "Skip srcSet for non-HTTP images and build query-safe srcsets for remote slides to prevent broken local hero images.",
+      "Eager-load the currently visible slide so the first hero image doesn't flash out before the booking CTA shows."
     ],
     "files": [
       "src/components/homepage/LuxuryHeroSection.tsx"

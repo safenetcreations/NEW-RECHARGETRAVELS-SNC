@@ -229,85 +229,89 @@ const FeaturedDestinations = () => {
           {currentDestinations.map((destination, index) => {
             const href = (destination as any).path || `/destinations/${destination.name.toLowerCase().replace(/\s+/g, '-')}`;
             return (
-            <div key={destination.id} className="group">
-              <a href={href}>
-                <div className="relative h-[420px] rounded-3xl overflow-hidden shadow-2xl shadow-black/40 hover:shadow-orange-500/20 transition-all duration-500 transform hover:-translate-y-2 cursor-pointer">
-                  {/* Background Image */}
-                  <div
-                    className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-                    style={{ backgroundImage: `url(${destination.image})` }}
-                  />
+              <div key={destination.id} className="group">
+                <a href={href}>
+                  <div className="relative h-[420px] rounded-3xl overflow-hidden shadow-2xl shadow-black/40 hover:shadow-orange-500/20 transition-all duration-500 transform hover:-translate-y-2 cursor-pointer">
+                    {/* Background Image */}
+                    <img
+                      src={destination.image}
+                      alt={destination.name}
+                      loading="lazy"
+                      width="800"
+                      height="600"
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
 
-                  {/* Gradient Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
 
-                  {/* Category Badge */}
-                  <div className="absolute top-5 left-5 z-10">
-                    <span className="px-4 py-2 bg-white/95 backdrop-blur-sm rounded-full text-sm font-bold text-gray-800 shadow-lg">
-                      {destination.category}
-                    </span>
-                  </div>
-
-                  {/* Rating Badge */}
-                  {destination.rating && (
-                    <div className="absolute top-5 right-5 z-10">
-                      <div className="flex items-center gap-1.5 px-3 py-2 bg-black/70 backdrop-blur-sm rounded-full border border-white/10">
-                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        <span className="text-white font-bold text-sm">{destination.rating}</span>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Content */}
-                  <div className="absolute bottom-0 left-0 right-0 p-7 z-10">
-                    {/* Location */}
-                    <div className="flex items-center gap-2 mb-3">
-                      <MapPin className="w-4 h-4 text-orange-400" />
-                      <span className="text-orange-300 text-sm font-medium">{destination.title}</span>
+                    {/* Category Badge */}
+                    <div className="absolute top-5 left-5 z-10">
+                      <span className="px-4 py-2 bg-white/95 backdrop-blur-sm rounded-full text-sm font-bold text-gray-800 shadow-lg">
+                        {destination.category}
+                      </span>
                     </div>
 
-                    {/* Name */}
-                    <h3 className="text-3xl font-bold text-white mb-3" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
-                      {destination.name}
-                    </h3>
-
-                    {/* Description */}
-                    <p className="text-gray-300 text-sm mb-4 line-clamp-2">
-                      {destination.description}
-                    </p>
-
-                    {/* Features */}
-                    {destination.features && destination.features.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mb-5">
-                        {destination.features.slice(0, 3).map((feature, idx) => (
-                          <span
-                            key={idx}
-                            className="px-3 py-1 bg-white/15 backdrop-blur-sm rounded-full text-xs text-white font-medium border border-white/10"
-                          >
-                            {feature}
-                          </span>
-                        ))}
+                    {/* Rating Badge */}
+                    {destination.rating && (
+                      <div className="absolute top-5 right-5 z-10">
+                        <div className="flex items-center gap-1.5 px-3 py-2 bg-black/70 backdrop-blur-sm rounded-full border border-white/10">
+                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                          <span className="text-white font-bold text-sm">{destination.rating}</span>
+                        </div>
                       </div>
                     )}
 
-                    {/* CTA */}
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-400 text-sm">
-                        {destination.duration || 'Full Day Trip'}
-                      </span>
-                      <div className="flex items-center gap-2 text-orange-400 font-semibold group-hover:gap-3 transition-all">
-                        <span>Explore</span>
-                        <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                    {/* Content */}
+                    <div className="absolute bottom-0 left-0 right-0 p-7 z-10">
+                      {/* Location */}
+                      <div className="flex items-center gap-2 mb-3">
+                        <MapPin className="w-4 h-4 text-orange-400" />
+                        <span className="text-orange-300 text-sm font-medium">{destination.title}</span>
+                      </div>
+
+                      {/* Name */}
+                      <h3 className="text-3xl font-bold text-white mb-3" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
+                        {destination.name}
+                      </h3>
+
+                      {/* Description */}
+                      <p className="text-gray-300 text-sm mb-4 line-clamp-2">
+                        {destination.description}
+                      </p>
+
+                      {/* Features */}
+                      {destination.features && destination.features.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mb-5">
+                          {destination.features.slice(0, 3).map((feature, idx) => (
+                            <span
+                              key={idx}
+                              className="px-3 py-1 bg-white/15 backdrop-blur-sm rounded-full text-xs text-white font-medium border border-white/10"
+                            >
+                              {feature}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* CTA */}
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-400 text-sm">
+                          {destination.duration || 'Full Day Trip'}
+                        </span>
+                        <div className="flex items-center gap-2 text-orange-400 font-semibold group-hover:gap-3 transition-all">
+                          <span>Explore</span>
+                          <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Hover Border Glow */}
-                  <div className="absolute inset-0 rounded-3xl border-2 border-transparent group-hover:border-orange-400/40 transition-all duration-300" />
-                </div>
-              </a>
-            </div>
-          );
+                    {/* Hover Border Glow */}
+                    <div className="absolute inset-0 rounded-3xl border-2 border-transparent group-hover:border-orange-400/40 transition-all duration-300" />
+                  </div>
+                </a>
+              </div>
+            );
           })}
         </div>
 
@@ -332,11 +336,10 @@ const FeaturedDestinations = () => {
                   role="tab"
                   aria-selected={currentPage === idx}
                   onClick={() => setCurrentPage(idx)}
-                  className={`h-3 rounded-full transition-all duration-300 ${
-                    currentPage === idx
+                  className={`h-3 rounded-full transition-all duration-300 ${currentPage === idx
                       ? 'w-10 bg-gradient-to-r from-orange-400 to-amber-500'
                       : 'w-3 bg-white/30 hover:bg-white/50'
-                  }`}
+                    }`}
                   aria-label={`Go to page ${idx + 1}`}
                 />
               ))}

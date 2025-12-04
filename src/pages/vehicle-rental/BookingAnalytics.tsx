@@ -264,7 +264,6 @@ const BookingAnalytics: React.FC = () => {
     } finally {
       setLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.uid]);
 
   const calculateAnalytics = (
@@ -466,7 +465,6 @@ const BookingAnalytics: React.FC = () => {
     if (bookings.length > 0 && vehicles.length > 0) {
       calculateAnalytics(bookings, vehicles);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPeriod, selectedVehicle]);
 
   const formatCurrency = (amount: number) => {

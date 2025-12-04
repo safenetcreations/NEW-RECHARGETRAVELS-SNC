@@ -3,6 +3,7 @@
 
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { generateAIItinerary } from './aiTripPlannerService';
 
 export interface TripPreferences {
   startDate: Date | null;
@@ -475,8 +476,6 @@ Return ONLY valid JSON, no additional text.
 
 // Fallback itinerary generator (when API key is not available)
 const generateFallbackItinerary = async (preferences: TripPreferences): Promise<GeneratedItinerary> => {
-  // Import the original service as fallback
-  const { generateAIItinerary } = await import('./aiTripPlannerService');
   const fallback = await generateAIItinerary(preferences);
 
   // Convert to new format

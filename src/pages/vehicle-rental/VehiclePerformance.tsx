@@ -142,7 +142,6 @@ const VehiclePerformance: React.FC = () => {
     } finally {
       setLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [vehicleId, user?.uid, navigate]);
 
   const calculateMetrics = (
@@ -307,7 +306,6 @@ const VehiclePerformance: React.FC = () => {
     if (vehicle && bookings.length > 0) {
       calculateMetrics(bookings, reviews, vehicle);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPeriod]);
 
   const formatCurrency = (amount: number) => {

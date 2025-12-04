@@ -104,7 +104,8 @@ service cloud.firestore {
     // Cultural Bookings - Authenticated create, admin full
     match /cultural_bookings/{bookingId} {
       allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
-      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      // Allow guest bookings to be captured alongside authenticated users
+      allow create: if (isAuthenticated() && request.resource.data.userId == request.auth.uid) || request.resource.data.userId == 'guest';
       allow update, delete: if isAdmin();
     }
 

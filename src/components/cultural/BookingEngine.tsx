@@ -16,6 +16,9 @@ import {
   ChevronDown
 } from 'lucide-react'
 import { format } from 'date-fns'
+import { toast } from 'sonner'
+import { useAuth } from '@/contexts/AuthContext'
+import { culturalToursService } from '@/services/culturalToursService'
 
 interface ItineraryOption {
   duration: string
@@ -39,6 +42,7 @@ const BookingEngine: React.FC<BookingEngineProps> = ({
   selectedDuration,
   setSelectedDuration
 }) => {
+  const { user } = useAuth()
   const [isOpen, setIsOpen] = useState(false)
   const [selectedDate, setSelectedDate] = useState<Date>()
   const [partySize, setPartySize] = useState(2)
@@ -48,27 +52,53 @@ const BookingEngine: React.FC<BookingEngineProps> = ({
     phone: '',
     specialRequests: ''
   })
+  const [submitting, setSubmitting] = useState(false)
 
   const selectedOption = itineraryOptions.find(opt => opt.duration === selectedDuration)
   const totalPrice = selectedOption ? selectedOption.dailyRate[selectedCurrency] * parseInt(selectedDuration) * partySize : 0
 
-  const handleBooking = () => {
+  const handleBooking = async () => {
     if (!selectedDate || !bookingForm.fullName || !bookingForm.email) {
-      alert('Please fill in all required fields')
+      toast.error('Please add your date, name, and email to book.')
       return
     }
+
+    setSubmitting(true)
     
-    const bookingData = {
-      ...bookingForm,
-      selectedDate,
-      partySize,
-      duration: selectedDuration,
-      totalPrice,
-      currency: selectedCurrency
+    try {
+      await culturalToursService.createBooking({
+        tourId: `cultural-circuit-${selectedDuration}`,
+        tourTitle: `Cultural Circuit (${selectedDuration} days)`,
+        date: format(selectedDate, 'yyyy-MM-dd'),
+        adults: partySize,
+        children: 0,
+        pickupOption: 'Cultural circuit builder',
+        pickupAddress: '',
+        specialRequests: bookingForm.specialRequests,
+        contactName: bookingForm.fullName,
+        contactEmail: bookingForm.email,
+        contactPhone: bookingForm.phone,
+        totalPrice,
+        currency: selectedCurrency,
+        userId: user?.uid || 'guest'
+      })
+
+      toast.success('Booking received! We will confirm within 24 hours.')
+      setIsOpen(false)
+      setBookingForm({
+        fullName: '',
+        email: '',
+        phone: '',
+        specialRequests: ''
+      })
+      setPartySize(2)
+      setSelectedDate(undefined)
+    } catch (error) {
+      console.error('Error saving cultural booking', error)
+      toast.error('Unable to save your booking. Please try again.')
+    } finally {
+      setSubmitting(false)
     }
-    
-    console.log('Cultural tour booking:', bookingData)
-    alert('Thank you! We will contact you within 24 hours to confirm your cultural circuit booking.')
   }
 
   return (
@@ -264,10 +294,11 @@ const BookingEngine: React.FC<BookingEngineProps> = ({
               {/* Booking Button */}
               <Button
                 onClick={handleBooking}
-                className="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold py-4 text-lg"
+                disabled={submitting}
+                className="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold py-4 text-lg disabled:opacity-60"
               >
                 <CreditCard className="w-5 h-5 mr-2" />
-                Book Your Cultural Circuit
+                {submitting ? 'Submitting...' : 'Book Your Cultural Circuit'}
               </Button>
               
               <div className="text-xs text-gray-500 text-center">

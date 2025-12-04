@@ -186,7 +186,6 @@ const PrivateCharters = () => {
       defaults[field.id] = field.defaultValue || '';
     });
     setMicroFormValues((prev) => ({ ...defaults, ...prev }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [heroMicroForm.fields.map((field) => `${field.id}-${field.defaultValue ?? ''}`).join('|')]);
 
   const handleMicroFieldChange = (field: HeroMicroFormField, value: string) => {

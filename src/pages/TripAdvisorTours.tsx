@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { MapPin, Star, Clock, ArrowUpRight, Sparkles, Filter, Compass } from 'lucide-react'
+import { MapPin, Star, Clock, ArrowUpRight, Sparkles, Filter, Compass, X, ExternalLink, Eye, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -13,6 +13,154 @@ import { SEOMetaTags } from '@/components/seo/SEOMetaTags'
 import { SEOSchema } from '@/components/seo/SEOSchema'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import { useTripAdvisorTours } from '@/hooks/useTripAdvisorTours'
+
+// TripAdvisor Preview Modal Component
+const TripAdvisorPreviewModal = ({
+  tour,
+  onClose
+}: {
+  tour: TripAdvisorTour | null
+  onClose: () => void
+}) => {
+  const [isLoading, setIsLoading] = useState(true)
+  const [hasError, setHasError] = useState(false)
+
+  if (!tour) return null
+
+  return (
+    <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        onClick={onClose}
+      />
+
+      {/* Modal */}
+      <div className="relative z-10 w-full max-w-5xl rounded-2xl bg-white shadow-2xl overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b bg-gradient-to-r from-emerald-600 to-emerald-700 px-6 py-4">
+          <div className="flex items-center gap-3">
+            <img
+              src="https://static.tacdn.com/img2/brand_refresh/Tripadvisor_lockup_horizontal_secondary_registered.svg"
+              alt="TripAdvisor"
+              className="h-6 brightness-0 invert"
+            />
+            <span className="text-white font-medium">Live Preview</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <a
+              href={tour.tripAdvisorUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-lg bg-white/20 px-4 py-2 text-sm font-medium text-white hover:bg-white/30 transition"
+            >
+              Open in TripAdvisor
+              <ExternalLink className="h-4 w-4" />
+            </a>
+            <button
+              onClick={onClose}
+              className="rounded-full p-2 text-white hover:bg-white/20 transition"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Tour Info Bar */}
+        <div className="bg-emerald-50 px-6 py-3 border-b">
+          <h3 className="font-semibold text-gray-900">{tour.title}</h3>
+          <p className="text-sm text-gray-600 mt-1">
+            {tour.location} • {tour.duration} • From ${tour.priceUsd}
+          </p>
+          <p className="text-xs text-emerald-700 mt-1 font-mono break-all">
+            {tour.tripAdvisorUrl}
+          </p>
+        </div>
+
+        {/* iframe Container */}
+        <div className="relative h-[60vh] bg-gray-100">
+          {isLoading && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-white">
+              <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
+              <p className="mt-3 text-gray-600">Loading TripAdvisor page...</p>
+            </div>
+          )}
+
+          {hasError ? (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-emerald-50 to-white p-8 text-center">
+              <div className="rounded-full bg-amber-100 p-4 mb-4">
+                <ExternalLink className="h-8 w-8 text-amber-600" />
+              </div>
+              <h4 className="text-xl font-semibold text-gray-900 mb-2">
+                TripAdvisor blocks iframe embedding
+              </h4>
+              <p className="text-gray-600 max-w-md mb-6">
+                For security reasons, TripAdvisor doesn't allow their pages to be embedded.
+                Click below to view the tour directly on TripAdvisor.
+              </p>
+              <a
+                href={tour.tripAdvisorUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-6 py-3 text-white font-semibold hover:bg-emerald-700 transition shadow-lg"
+              >
+                <img
+                  src="https://static.tacdn.com/img2/brand_refresh/Tripadvisor_lockup_horizontal_secondary_registered.svg"
+                  alt="TripAdvisor"
+                  className="h-5 brightness-0 invert"
+                />
+                View on TripAdvisor
+                <ArrowUpRight className="h-5 w-5" />
+              </a>
+
+              {/* Tour Card Preview */}
+              <div className="mt-8 w-full max-w-md rounded-xl bg-white shadow-lg overflow-hidden border">
+                <img
+                  src={tour.image}
+                  alt={tour.title}
+                  className="w-full h-40 object-cover"
+                />
+                <div className="p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Badge className="bg-emerald-100 text-emerald-700">{tour.duration}</Badge>
+                    <Badge className="bg-amber-100 text-amber-700">{tour.region}</Badge>
+                  </div>
+                  <h5 className="font-semibold text-gray-900">{tour.title}</h5>
+                  <p className="text-sm text-gray-600 mt-1">{tour.description}</p>
+                  <div className="flex items-center justify-between mt-3 pt-3 border-t">
+                    <div className="flex items-center gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`h-4 w-4 ${i < Math.floor(tour.rating) ? 'text-amber-400 fill-amber-400' : 'text-gray-200'}`}
+                        />
+                      ))}
+                      <span className="text-sm font-medium ml-1">{tour.rating}</span>
+                      <span className="text-xs text-gray-500">({tour.reviews} reviews)</span>
+                    </div>
+                    <span className="text-lg font-bold text-emerald-600">${tour.priceUsd}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <iframe
+              src={tour.tripAdvisorUrl}
+              className="w-full h-full border-0"
+              onLoad={() => setIsLoading(false)}
+              onError={() => {
+                setIsLoading(false)
+                setHasError(true)
+              }}
+              sandbox="allow-scripts allow-same-origin allow-popups"
+              title={`TripAdvisor - ${tour.title}`}
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 type PriceRangeId = 'all' | '0-100' | '100-300' | '300-500' | '500+'
 type SortOption = 'rating' | 'price-asc' | 'price-desc' | 'reviews'
@@ -31,6 +179,14 @@ const sortTourList = (tours: TripAdvisorTour[], sortBy: SortOption) => {
   if (sortBy === 'price-desc') return [...tours].sort((a, b) => b.priceUsd - a.priceUsd)
   return [...tours].sort((a, b) => b.reviews - a.reviews || b.rating - a.rating)
 }
+
+// Featured tour titles to highlight
+const FEATURED_TOUR_TITLES = [
+  "Discover Sri Lanka's Unique Marine Farming Culture",
+  "Sigiriya Rock and Dambulla Cave Temple all inclusive Private Day Trip"
+]
+
+const isFeaturedTour = (title: string) => FEATURED_TOUR_TITLES.includes(title)
 
 const renderStars = (rating: number) => {
   const stars = []
@@ -53,6 +209,7 @@ const TripAdvisorTours = () => {
   const [region, setRegion] = useState<TripAdvisorRegion | ''>('')
   const [priceRange, setPriceRange] = useState<PriceRangeId>('all')
   const [sortBy, setSortBy] = useState<SortOption>('rating')
+  const [previewTour, setPreviewTour] = useState<TripAdvisorTour | null>(null)
   const { tours, isLoading, error } = useTripAdvisorTours()
 
   const baseTours = useMemo(() => {
@@ -77,7 +234,11 @@ const TripAdvisorTours = () => {
       return matchesSearch && matchesRegion && matchesPrice
     })
 
-    return sortTourList(filtered, sortBy)
+    // Sort with featured tours first, then apply the selected sort
+    const sorted = sortTourList(filtered, sortBy)
+    const featured = sorted.filter(t => isFeaturedTour(t.title))
+    const nonFeatured = sorted.filter(t => !isFeaturedTour(t.title))
+    return [...featured, ...nonFeatured]
   }, [baseTours, priceRange, region, search, sortBy])
 
   if (isLoading) {
@@ -297,13 +458,27 @@ const TripAdvisorTours = () => {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/5 to-transparent" />
                     <div className="absolute left-3 top-3 flex items-center gap-2">
                       <Badge className="bg-emerald-600 text-white">{tour.duration}</Badge>
+                      {isFeaturedTour(tour.title) && (
+                        <Badge className="bg-amber-500 text-white animate-pulse">
+                          <Sparkles className="h-3 w-3 mr-1" />
+                          Featured
+                        </Badge>
+                      )}
                       {tour.badge && <Badge className="bg-amber-100 text-amber-800">{tour.badge}</Badge>}
                     </div>
                     <div className="absolute right-3 top-3 rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-emerald-800">
                       {tour.region.toUpperCase()}
                     </div>
+                    {/* Preview Button Overlay */}
+                    <button
+                      onClick={() => setPreviewTour(tour)}
+                      className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-lg bg-black/60 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm transition hover:bg-black/80"
+                    >
+                      <Eye className="h-3.5 w-3.5" />
+                      Preview
+                    </button>
                   </div>
-                  <div className="flex flex-1 flex-col space-y-4 px-4 py-4">
+                  <div className="flex flex-1 flex-col space-y-3 px-4 py-4">
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <h3 className="text-lg font-semibold text-gray-900 group-hover:text-emerald-700">{tour.title}</h3>
@@ -321,25 +496,60 @@ const TripAdvisorTours = () => {
                       <MapPin className="h-4 w-4 text-emerald-600" />
                       <span>{tour.location}</span>
                     </div>
-                    <div className="flex items-center justify-between border-t border-gray-100 pt-3">
+
+                    {/* TripAdvisor URL Display */}
+                    <a
+                      href={tour.tripAdvisorUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-xs text-emerald-700 hover:bg-emerald-100 transition group/link"
+                    >
+                      <img
+                        src="https://static.tacdn.com/img2/brand_refresh/Tripadvisor_logoset_solid_green.svg"
+                        alt="TripAdvisor"
+                        className="h-4 w-4"
+                      />
+                      <span className="truncate flex-1 font-mono">
+                        {tour.tripAdvisorUrl.replace('https://www.tripadvisor.com/', '').substring(0, 40)}...
+                      </span>
+                      <ExternalLink className="h-3 w-3 opacity-0 group-hover/link:opacity-100 transition" />
+                    </a>
+
+                    <div className="flex items-center justify-between border-t border-gray-100 pt-3 mt-auto">
                       <div>
                         <p className="text-xs uppercase tracking-wide text-gray-500">From</p>
                         <p className="text-xl font-bold text-emerald-700">${tour.priceUsd}</p>
                       </div>
-                      <a
-                        href={tour.tripAdvisorUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow hover:bg-emerald-700"
-              >
-                Book on TripAdvisor
-                <ArrowUpRight className="h-4 w-4" />
-              </a>
-            </div>
-          </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setPreviewTour(tour)}
+                          className="inline-flex items-center gap-1 rounded-lg border border-emerald-200 bg-white px-3 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50 transition"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </button>
+                        <a
+                          href={tour.tripAdvisorUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow hover:bg-emerald-700 transition"
+                        >
+                          Book
+                          <ArrowUpRight className="h-4 w-4" />
+                        </a>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
+          )}
+
+          {/* Preview Modal */}
+          {previewTour && (
+            <TripAdvisorPreviewModal
+              tour={previewTour}
+              onClose={() => setPreviewTour(null)}
+            />
           )}
         </div>
       </section>

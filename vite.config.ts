@@ -28,7 +28,7 @@ export default defineConfig(({ mode }) => ({
       drop: ['console', 'debugger'],
     } : {},
     // Increase chunk size warning limit
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 1500,
     // Enable CSS code splitting
     cssCodeSplit: true,
     // Optimize asset handling

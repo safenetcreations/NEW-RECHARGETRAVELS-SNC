@@ -211,7 +211,6 @@ const DestinationContentManager: React.FC = () => {
 
   useEffect(() => {
     loadContent(slug);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
 
   const loadContent = async (currentSlug: string) => {

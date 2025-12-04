@@ -1,5 +1,4 @@
-
-import RechargeFooter from './ui/RechargeFooter'
+import RechargeFooter from '@/components/ui/RechargeFooter'
 
 const Footer = () => {
   return <RechargeFooter />

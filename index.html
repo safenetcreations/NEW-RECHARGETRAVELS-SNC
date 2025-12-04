@@ -74,11 +74,15 @@
   <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
   <link rel="dns-prefetch" href="https://apis.google.com" />
 
+  <!-- Preload Critical Hero Images -->
+  <link rel="preload" as="image" href="/mobile-hero.jpg" fetchpriority="high" media="(max-width: 767px)" />
+  <link rel="preload" as="image" href="/desktop-hero.png" fetchpriority="high" media="(min-width: 768px)" />
+
   <!-- Optimized Font Loading - Blocking to prevent FOUT (Flash of Unstyled Text) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Playfair+Display:wght@500;600;700&family=DM+Sans:wght@400;500;600&family=Montserrat:wght@500;600&display=block"
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Playfair+Display:wght@500;600;700&family=DM+Sans:wght@400;500;600&family=Montserrat:wght@500;600&display=swap"
     rel="stylesheet" />
 
   <!-- Security Headers (X-Frame-Options moved to firebase.json headers) -->
@@ -135,8 +139,8 @@
     }
     </script>
 
-    <!-- WebSite Schema for Sitelinks Search Box -->
-    <script type="application/ld+json">
+  <!-- WebSite Schema for Sitelinks Search Box -->
+  <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
@@ -156,10 +160,13 @@
 
   <!-- Fallback content for search engine crawlers that cannot execute JavaScript -->
   <noscript>
-    <div style="max-width: 1200px; margin: 0 auto; padding: 40px 20px; font-family: system-ui, -apple-system, sans-serif;">
+    <div
+      style="max-width: 1200px; margin: 0 auto; padding: 40px 20px; font-family: system-ui, -apple-system, sans-serif;">
       <header style="text-align: center; margin-bottom: 40px;">
-        <h1 style="color: #0d5c46; font-size: 2.5em; margin-bottom: 10px;">Travel Agency Colombo | Sri Lanka Tours & Safaris | Recharge Travels</h1>
-        <p style="color: #666; font-size: 1.2em;">Colombo's #1 Rated Travel Agency (4.9★ from 2,847+ Reviews) | 24/7 Support | Best Price Guaranteed</p>
+        <h1 style="color: #0d5c46; font-size: 2.5em; margin-bottom: 10px;">Travel Agency Colombo | Sri Lanka Tours &
+          Safaris | Recharge Travels</h1>
+        <p style="color: #666; font-size: 1.2em;">Colombo's #1 Rated Travel Agency (4.9★ from 2,847+ Reviews) | 24/7
+          Support | Best Price Guaranteed</p>
       </header>
 
       <main>
@@ -177,12 +184,17 @@
         <section style="margin-bottom: 40px;">
           <h2 style="color: #333;">Popular Experiences</h2>
           <ul style="line-height: 2;">
-            <li><a href="/experiences/whale-watching">Whale Watching Mirissa</a> - See blue whales in their natural habitat</li>
-            <li><a href="/experiences/yala-safari">Yala National Park Safari</a> - Sri Lanka's premier wildlife destination</li>
-            <li><a href="/experiences/hot-air-balloon">Hot Air Balloon Sigiriya</a> - Sunrise flights over ancient ruins</li>
+            <li><a href="/experiences/whale-watching">Whale Watching Mirissa</a> - See blue whales in their natural
+              habitat</li>
+            <li><a href="/experiences/yala-safari">Yala National Park Safari</a> - Sri Lanka's premier wildlife
+              destination</li>
+            <li><a href="/experiences/hot-air-balloon">Hot Air Balloon Sigiriya</a> - Sunrise flights over ancient ruins
+            </li>
             <li><a href="/experiences/tea-trails">Ceylon Tea Trails</a> - Explore world-famous tea plantations</li>
-            <li><a href="/experiences/ayurveda-wellness">Ayurveda Wellness Retreats</a> - Traditional healing experiences</li>
-            <li><a href="/experiences/cooking-class">Sri Lankan Cooking Classes</a> - Learn authentic Ceylon cuisine</li>
+            <li><a href="/experiences/ayurveda-wellness">Ayurveda Wellness Retreats</a> - Traditional healing
+              experiences</li>
+            <li><a href="/experiences/cooking-class">Sri Lankan Cooking Classes</a> - Learn authentic Ceylon cuisine
+            </li>
           </ul>
         </section>
 

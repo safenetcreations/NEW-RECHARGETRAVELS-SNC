@@ -54,6 +54,7 @@ export default defineConfig(({ mode }) => ({
     sourcemap: mode !== 'production',
     minify: 'esbuild',
     cssMinify: true,
+    chunkSizeWarningLimit: 1500,
     // Remove console.logs in production
     esbuild: mode === 'production' ? {
       drop: ['console', 'debugger'],

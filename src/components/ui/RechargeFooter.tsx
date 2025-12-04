@@ -1016,30 +1016,48 @@ const RechargeFooter: React.FC = () => {
         /* Crafted By */
         .crafted-by {
           text-align: center !important;
-          padding: 16px !important;
+          padding: 28px 16px !important;
           background-color: #071f1f !important;
         }
 
         .crafted-by a {
-          color: #5a8a7a !important;
-          font-size: 0.85rem !important;
+          color: #a8d5ba !important;
+          font-size: 1.25rem !important;
+          font-weight: 500 !important;
           text-decoration: none !important;
-          transition: all 0.3s ease !important;
+          transition: all 0.4s ease !important;
+          text-shadow: 0 0 10px rgba(46, 204, 113, 0.5), 0 0 20px rgba(46, 204, 113, 0.3), 0 0 30px rgba(46, 204, 113, 0.2) !important;
+          animation: glow-pulse 2s ease-in-out infinite !important;
+        }
+
+        @keyframes glow-pulse {
+          0%, 100% {
+            text-shadow: 0 0 10px rgba(46, 204, 113, 0.5), 0 0 20px rgba(46, 204, 113, 0.3), 0 0 30px rgba(46, 204, 113, 0.2);
+          }
+          50% {
+            text-shadow: 0 0 15px rgba(46, 204, 113, 0.8), 0 0 30px rgba(46, 204, 113, 0.5), 0 0 45px rgba(46, 204, 113, 0.3);
+          }
         }
 
         .crafted-by a:hover {
-          color: #a8d5ba !important;
+          color: #ffffff !important;
+          text-shadow: 0 0 20px rgba(255, 107, 53, 0.8), 0 0 40px rgba(255, 107, 53, 0.5), 0 0 60px rgba(255, 107, 53, 0.3) !important;
         }
 
         .crafted-by span {
-          font-weight: 600 !important;
+          font-weight: 700 !important;
+          font-size: 1.4rem !important;
+          color: #2ecc71 !important;
           text-decoration: underline !important;
           text-decoration-style: wavy !important;
-          text-decoration-color: rgba(46, 204, 113, 0.5) !important;
+          text-decoration-color: rgba(46, 204, 113, 0.7) !important;
+          text-shadow: 0 0 15px rgba(46, 204, 113, 0.8), 0 0 30px rgba(46, 204, 113, 0.5) !important;
         }
 
         .crafted-by a:hover span {
-          text-decoration-color: #2ecc71 !important;
+          color: #ff6b35 !important;
+          text-decoration-color: #ff6b35 !important;
+          text-shadow: 0 0 20px rgba(255, 107, 53, 0.8), 0 0 40px rgba(255, 107, 53, 0.5) !important;
         }
       `}</style>
     </>

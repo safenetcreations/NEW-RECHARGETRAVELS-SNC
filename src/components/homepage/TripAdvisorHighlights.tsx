@@ -21,12 +21,24 @@ const renderStars = (rating: number) => {
   return stars
 }
 
+// Featured tour titles to highlight on homepage
+const FEATURED_TOUR_TITLES = [
+  "Discover Sri Lanka's Unique Marine Farming Culture",
+  "Sigiriya Rock and Dambulla Cave Temple all inclusive Private Day Trip"
+]
+
 const TripAdvisorHighlights = () => {
   const { tours, isLoading } = useTripAdvisorTours()
-  const rechargeTours = (tours.length ? tours : tripAdvisorTours).filter(
-    (tour) => tour.operatorProfileUrl === RECHARGE_TRIPADVISOR_URL
-  )
-  const highlights = (rechargeTours.length ? rechargeTours : tripAdvisorTours).slice(0, 6)
+  const allTours = tours.length ? tours : tripAdvisorTours
+
+  // Get featured tours first, then fill with remaining if needed
+  const featuredTours = FEATURED_TOUR_TITLES
+    .map(title => allTours.find(t => t.title === title))
+    .filter(Boolean)
+
+  // If we don't have enough featured tours, add more from the list
+  const remainingTours = allTours.filter(t => !FEATURED_TOUR_TITLES.includes(t.title))
+  const highlights = [...featuredTours, ...remainingTours].slice(0, 6)
 
   if (isLoading && highlights.length === 0) {
     return (

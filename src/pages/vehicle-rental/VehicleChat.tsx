@@ -105,7 +105,6 @@ const VehicleChat: React.FC = () => {
 
   useEffect(() => {
     loadConversations();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

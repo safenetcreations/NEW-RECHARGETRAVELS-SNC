@@ -243,7 +243,6 @@ const EarningsReports: React.FC = () => {
     } finally {
       setLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.uid]);
 
   const calculateEarnings = (
@@ -417,7 +416,6 @@ const EarningsReports: React.FC = () => {
     if (bookings.length > 0 && vehicles.length > 0) {
       calculateEarnings(bookings, vehicles);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPeriod, selectedVehicle]);
 
   const formatCurrency = (amount: number) => {

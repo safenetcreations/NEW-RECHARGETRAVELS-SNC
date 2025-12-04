@@ -33,7 +33,11 @@ import { Link } from 'react-router-dom';
  * - Safety information
  */
 
-const AboutSriLanka: React.FC = () => {
+interface AboutSriLankaProps {
+  embedded?: boolean;
+}
+
+const AboutSriLanka: React.FC<AboutSriLankaProps> = ({ embedded = false }) => {
   const { content, loading, error } = useAboutSriLankaContent();
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
   const [selectedGalleryImage, setSelectedGalleryImage] = useState<number | null>(null);
@@ -65,31 +69,31 @@ const AboutSriLanka: React.FC = () => {
   }, []);
 
   // Sync hero slides with CMS content
-useEffect(() => {
-  if (content?.heroSlides && content.heroSlides.length > 0) {
-    const customSlides = content.heroSlides
-      .filter((slide) => slide.image && slide.image.trim() !== '')
-      .map((slide, index) => ({
-        id: `cms-slide-${index}`,
-        ...slide
-      }));
+  useEffect(() => {
+    if (content?.heroSlides && content.heroSlides.length > 0) {
+      const customSlides = content.heroSlides
+        .filter((slide) => slide.image && slide.image.trim() !== '')
+        .map((slide, index) => ({
+          id: `cms-slide-${index}`,
+          ...slide
+        }));
 
-    if (customSlides.length > 0) {
-      setHeroSlides(customSlides);
-      return;
+      if (customSlides.length > 0) {
+        setHeroSlides(customSlides);
+        return;
+      }
     }
-  }
 
-  if (content?.heroImage) {
-    setHeroSlides([{
-      id: 'cms-hero',
-      image: content.heroImage,
-      title: content.heroTitle || 'The Pearl of the Indian Ocean',
-      subtitle: content.heroSubtitle || 'Discover Sri Lanka\'s Rich Heritage and Natural Beauty',
-      badge: 'Discover Paradise'
-    }]);
-  }
-}, [content]);
+    if (content?.heroImage) {
+      setHeroSlides([{
+        id: 'cms-hero',
+        image: content.heroImage,
+        title: content.heroTitle || 'The Pearl of the Indian Ocean',
+        subtitle: content.heroSubtitle || 'Discover Sri Lanka\'s Rich Heritage and Natural Beauty',
+        badge: 'Discover Paradise'
+      }]);
+    }
+  }, [content]);
 
   // Auto-advance slides every 6 seconds
   useEffect(() => {
@@ -153,7 +157,7 @@ useEffect(() => {
   // Loading state - AFTER all hooks
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-teal-50">
+      <div className={`${embedded ? 'min-h-[400px]' : 'min-h-screen'} flex items-center justify-center bg-gradient-to-br from-blue-50 to-teal-50`}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-6"></div>
           <p className="text-xl text-gray-600 font-medium">Loading Sri Lanka information...</p>
@@ -309,23 +313,25 @@ useEffect(() => {
 
   return (
     <>
-      <Helmet>
-        <title>{content.seoTitle}</title>
-        <meta name="description" content={content.seoDescription} />
-        <meta name="keywords" content={content.seoKeywords} />
-        <meta property="og:title" content={content.seoTitle} />
-        <meta property="og:description" content={content.seoDescription} />
-        <meta property="og:image" content={currentSlide?.image || content.heroImage} />
-        <meta property="og:type" content="website" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <link rel="canonical" href="https://recharge-travels.com/about/sri-lanka" />
-      </Helmet>
+      {!embedded && (
+        <Helmet>
+          <title>{content.seoTitle}</title>
+          <meta name="description" content={content.seoDescription} />
+          <meta name="keywords" content={content.seoKeywords} />
+          <meta property="og:title" content={content.seoTitle} />
+          <meta property="og:description" content={content.seoDescription} />
+          <meta property="og:image" content={currentSlide?.image || content.heroImage} />
+          <meta property="og:type" content="website" />
+          <meta name="twitter:card" content="summary_large_image" />
+          <link rel="canonical" href="https://recharge-travels.com/about/sri-lanka" />
+        </Helmet>
+      )}
 
-      <Header />
+      {!embedded && <Header />}
 
       <div className="bg-white">
         {/* ========== HERO SECTION - COMPLETELY REBUILT ========== */}
-        <section className="relative h-screen overflow-hidden">
+        <section className={`relative ${embedded ? 'h-[60vh] min-h-[500px]' : 'h-screen'} overflow-hidden`}>
 
           {/* LAYER 1: Background Images from Admin Panel */}
           {heroSlides.map((slide, index) => (
@@ -342,7 +348,7 @@ useEffect(() => {
                 src={slide.image}
                 alt={slide.title || 'Sri Lanka'}
                 className="w-full h-full object-cover"
-                loading={index === 0 ? 'eager' : 'lazy'}
+                loading="lazy"
               />
             </div>
           ))}
@@ -443,11 +449,10 @@ useEffect(() => {
                     key={`indicator-${index}`}
                     type="button"
                     onClick={() => setCurrentSlideIndex(index)}
-                    className={`h-2 sm:h-3 rounded-full transition-all duration-300 ${
-                      index === currentSlideIndex
+                    className={`h-2 sm:h-3 rounded-full transition-all duration-300 ${index === currentSlideIndex
                         ? 'w-8 sm:w-10 bg-orange-400'
                         : 'w-2 sm:w-3 bg-white/50 hover:bg-white/70'
-                    }`}
+                      }`}
                     aria-label={`Go to slide ${index + 1}`}
                   />
                 ))}
@@ -1159,8 +1164,8 @@ useEffect(() => {
                         key={index}
                         onClick={() => setCurrentTestimonial(index)}
                         className={`relative transition-all duration-500 ${index === currentTestimonial
-                            ? 'w-12 h-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full'
-                            : 'w-3 h-3 bg-white/30 rounded-full hover:bg-white/50'
+                          ? 'w-12 h-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full'
+                          : 'w-3 h-3 bg-white/30 rounded-full hover:bg-white/50'
                           }`}
                         whileHover={{ scale: 1.2 }}
                         whileTap={{ scale: 0.9 }}

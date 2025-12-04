@@ -85,7 +85,6 @@ export interface MessageEmailData {
 }
 
 // Helper to safely access data properties
-/* eslint-disable @typescript-eslint/no-explicit-any */
 const get = (data: any, key: string, fallback: string | number = ''): string => {
   const value = data?.[key];
   if (typeof value === 'number') return value.toFixed(2);

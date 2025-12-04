@@ -1,5 +1,7 @@
-import { Plane, Shield, Clock, Users, Star } from 'lucide-react';
-import AirportTransferBookingEngine from '@/components/booking/AirportTransferBookingEngine';
+import { Plane, Shield, Clock, Users, Star, Loader2 } from 'lucide-react';
+import { lazy, Suspense } from 'react';
+
+const AirportTransferBookingEngine = lazy(() => import('@/components/booking/AirportTransferBookingEngine'));
 
 const AirportTransferSection = () => {
   return (
@@ -77,10 +79,17 @@ const AirportTransferSection = () => {
             backgroundColor: '#f8fafc',
             borderRadius: '24px',
             padding: '24px',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+            minHeight: '400px'
           }}
         >
-          <AirportTransferBookingEngine embedded={true} />
+          <Suspense fallback={
+            <div className="w-full h-[400px] flex items-center justify-center">
+              <Loader2 className="w-10 h-10 text-sky-600 animate-spin" />
+            </div>
+          }>
+            <AirportTransferBookingEngine embedded={true} />
+          </Suspense>
         </div>
       </div>
     </section>
