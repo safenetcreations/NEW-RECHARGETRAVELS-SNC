@@ -47,6 +47,7 @@ const ModernNavigation: React.FC = () => {
         { id: 'hero-section', label: 'Hero Section', icon: Layers, path: '/hero-section' },
         { id: 'featured-destinations', label: 'Destinations', icon: Compass, path: '/featured-destinations' },
         { id: 'luxury-experiences', label: 'Luxury Experiences', icon: Crown, path: '/luxury-experiences' },
+        { id: 'exclusive-access', label: 'Exclusive Access', icon: Shield, path: '/exclusive-access' },
         { id: 'travel-packages', label: 'Travel Packages', icon: Package, path: '/travel-packages' },
         { id: 'testimonials', label: 'Testimonials', icon: MessageCircle, path: '/testimonials' },
         { id: 'about-section', label: 'About Section', icon: Info, path: '/about-section' },
@@ -193,11 +194,11 @@ const ModernNavigation: React.FC = () => {
   const isChildActive = (children: NavItem[]) => children?.some(child => isActive(child.path || ''));
 
   // Search functionality
-  const allPages = navItems.flatMap(item => 
+  const allPages = navItems.flatMap(item =>
     item.children ? item.children : [item]
   );
-  
-  const filteredPages = allPages.filter(page => 
+
+  const filteredPages = allPages.filter(page =>
     page.label.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -226,11 +227,10 @@ const ModernNavigation: React.FC = () => {
                   {item.children ? (
                     <button
                       onClick={() => setActiveDropdown(activeDropdown === item.id ? null : item.id)}
-                      className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                        isChildActive(item.children) || activeDropdown === item.id
+                      className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${isChildActive(item.children) || activeDropdown === item.id
                           ? 'bg-emerald-50 text-emerald-700'
                           : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                      }`}
+                        }`}
                     >
                       <item.icon className="w-4 h-4" />
                       <span>{item.label}</span>
@@ -239,11 +239,10 @@ const ModernNavigation: React.FC = () => {
                   ) : (
                     <Link
                       to={item.path || '/'}
-                      className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                        isActive(item.path || '')
+                      className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${isActive(item.path || '')
                           ? 'bg-emerald-50 text-emerald-700'
                           : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                      }`}
+                        }`}
                     >
                       <item.icon className="w-4 h-4" />
                       <span>{item.label}</span>
@@ -258,17 +257,15 @@ const ModernNavigation: React.FC = () => {
                           key={child.id}
                           to={child.path || '/'}
                           onClick={() => setActiveDropdown(null)}
-                          className={`flex items-center gap-3 px-4 py-2.5 text-sm transition-all ${
-                            isActive(child.path || '')
+                          className={`flex items-center gap-3 px-4 py-2.5 text-sm transition-all ${isActive(child.path || '')
                               ? 'bg-emerald-50 text-emerald-700 font-medium'
                               : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                          }`}
+                            }`}
                         >
-                          <div className={`p-1.5 rounded-lg ${
-                            isActive(child.path || '') 
-                              ? 'bg-emerald-100' 
+                          <div className={`p-1.5 rounded-lg ${isActive(child.path || '')
+                              ? 'bg-emerald-100'
                               : 'bg-gray-100'
-                          }`}>
+                            }`}>
                             <child.icon className="w-3.5 h-3.5" />
                           </div>
                           <span>{child.label}</span>
@@ -304,7 +301,7 @@ const ModernNavigation: React.FC = () => {
                   </div>
                   <ChevronDown className="w-4 h-4 text-gray-400" />
                 </button>
-                
+
                 {/* User Dropdown */}
                 <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
                   <div className="px-4 py-3 border-b border-gray-100">
@@ -357,7 +354,7 @@ const ModernNavigation: React.FC = () => {
                         </span>
                         <ChevronDown className={`w-4 h-4 transition-transform ${activeDropdown === item.id ? 'rotate-180' : ''}`} />
                       </button>
-                      
+
                       {activeDropdown === item.id && (
                         <div className="ml-8 mt-1 space-y-1">
                           {item.children.map((child) => (
@@ -378,11 +375,10 @@ const ModernNavigation: React.FC = () => {
                     <Link
                       to={item.path || '/'}
                       onClick={() => setMobileMenuOpen(false)}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-lg ${
-                        isActive(item.path || '')
+                      className={`flex items-center gap-3 px-4 py-3 rounded-lg ${isActive(item.path || '')
                           ? 'bg-emerald-50 text-emerald-700'
                           : 'text-gray-700 hover:bg-gray-50'
-                      }`}
+                        }`}
                     >
                       <item.icon className="w-5 h-5" />
                       <span className="font-medium">{item.label}</span>
@@ -418,7 +414,7 @@ const ModernNavigation: React.FC = () => {
                 </button>
               </div>
             </div>
-            
+
             <div className="max-h-96 overflow-y-auto">
               {searchQuery && (
                 <div className="p-2">
@@ -443,7 +439,7 @@ const ModernNavigation: React.FC = () => {
                   )}
                 </div>
               )}
-              
+
               {!searchQuery && (
                 <div className="p-4">
                   <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">Quick Actions</p>
@@ -484,7 +480,7 @@ const ModernNavigation: React.FC = () => {
                 </div>
               )}
             </div>
-            
+
             <div className="px-4 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between text-xs text-gray-400">
               <span>Press <kbd className="px-1.5 py-0.5 bg-gray-200 rounded text-gray-600">ESC</kbd> to close</span>
               <span>Press <kbd className="px-1.5 py-0.5 bg-gray-200 rounded text-gray-600">⌘K</kbd> to open</span>

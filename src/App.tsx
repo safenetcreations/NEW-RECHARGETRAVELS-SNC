@@ -19,6 +19,15 @@ import { CurrencyProvider } from '@/contexts/CurrencyContext';
 import { OptimizedSuspense, PageSkeleton } from '@/components/OptimizedSuspense';
 import { prefetchCommonRoutes } from '@/utils/routePrefetch';
 
+// Security Components
+import ContentProtection from '@/components/security/ContentProtection';
+const CookieConsentEnhanced = lazy(() => import('@/components/security/CookieConsentEnhanced'));
+
+// Legal Pages
+const PrivacyPolicy = lazy(() => import('@/pages/legal/PrivacyPolicy'));
+const CookiePolicy = lazy(() => import('@/pages/legal/CookiePolicy'));
+const TermsOfService = lazy(() => import('@/pages/legal/TermsOfService'));
+
 // CRITICAL: Index page loads directly for instant homepage
 import Index from '@/pages/Index';
 const CulturalTours = lazy(() => import('@/pages/CulturalTours'));
@@ -32,6 +41,7 @@ const BlogPost = lazy(() => import('@/pages/BlogPost'));
 const AboutSriLanka = lazy(() => import('@/pages/AboutSriLanka'));
 const AboutRechargeTravel = lazy(() => import('@/pages/AboutRechargeTravel'));
 const AboutSocial = lazy(() => import('@/pages/AboutSocial'));
+const Contact = lazy(() => import('@/pages/Contact'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 const FAQ = lazy(() => import('@/pages/FAQ'));
 const TourismNews = lazy(() => import('@/pages/TourismNews'));
@@ -517,9 +527,16 @@ const AllRoutes = () => (
     <Route path="/blog/:slug" element={withSiteChrome(BlogPost)} />
     <Route path="/about/sri-lanka" element={withSiteChrome(AboutSriLanka)} />
     <Route path="/about" element={withSiteChrome(AboutRechargeTravel)} />
+    <Route path="/contact" element={withSiteChrome(Contact)} />
     <Route path="/faq" element={withSiteChrome(FAQ)} />
     <Route path="/news" element={withSiteChrome(TourismNews)} />
     <Route path="/connect-with-us" element={withSiteChrome(AboutSocial)} />
+
+    {/* Legal Pages */}
+    <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+    <Route path="/cookie-policy" element={<CookiePolicy />} />
+    <Route path="/terms-of-service" element={<TermsOfService />} />
+
     <Route path="/drivers" element={withSiteChrome(DriversDirectory)} />
     <Route path="/drivers/:id" element={withSiteChrome(DriverPublicProfile)} />
     <Route path="/join-with-us" element={withSiteChrome(JoinUsDrivers)} />
@@ -567,6 +584,10 @@ function App() {
               <CurrencyProvider>
                 <ScrollToTop />
                 <GoogleAnalytics />
+
+                {/* Content Protection - prevents copying, right-click, etc. */}
+                <ContentProtection />
+
                 <AppRoutes />
 
                 {/* YALU Voice AI Agent - Leopard Travel Companion */}
@@ -584,6 +605,11 @@ function App() {
 
                 <Toaster />
                 <Sonner />
+
+                {/* GDPR/CCPA Cookie Consent Banner */}
+                <Suspense fallback={null}>
+                  <CookieConsentEnhanced />
+                </Suspense>
               </CurrencyProvider>
             </B2BAuthProvider>
           </LanguageProvider>

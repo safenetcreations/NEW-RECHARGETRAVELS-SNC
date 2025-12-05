@@ -84,6 +84,7 @@ const PropertyListingsManager = lazy(() => import('@/components/admin/panel/Prop
 const FleetVehiclesManager = lazy(() => import('@/components/admin/panel/FleetVehiclesManager'));
 const YaluManager = lazy(() => import('@/components/admin/panel/YaluManager'));
 const WildToursManager = lazy(() => import('@/components/cms/WildToursManager'));
+const ExclusiveAccessAdmin = lazy(() => import('@/pages/admin/ExclusiveAccessAdmin'));
 
 interface AdminPanelProps {
   initialSection?: string;
@@ -136,6 +137,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ initialSection }) => {
           return <TravelPackagesSection />;
         case 'luxury-experiences':
           return <LuxuryExperiencesManager />;
+        case 'exclusive-access':
+          return <ExclusiveAccessAdmin />;
         case 'travel-guide':
           return <TravelGuideManager />;
         case 'book-now':

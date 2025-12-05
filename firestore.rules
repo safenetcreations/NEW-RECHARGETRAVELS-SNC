@@ -1122,6 +1122,18 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Exclusive Access Hero - Public read, admin write
+    match /exclusiveAccessHero/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Exclusive Access Categories - Public read, admin write
+    match /exclusiveAccessCategories/{categoryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // Luxury Hotels Collection - Public read, admin write
     match /luxuryHotels/{hotelId} {
       allow read: if true;

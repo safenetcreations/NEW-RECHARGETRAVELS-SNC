@@ -55,10 +55,10 @@ const Index = memo(() => {
       <>
         <ComprehensiveSEO
           title="Travel Agency Colombo | Sri Lanka Tours & Safaris | Recharge Travels"
-          description="Recharge Travels is Colombo's #1 rated travel agency. Book luxury Sri Lanka tours, Yala safaris, and airport transfers."
+          description="Your Premium Guide to Sri Lanka's Wonders. Recharge Travels is Colombo's #1 rated travel agency. Book luxury Sri Lanka tours, Yala safaris, and airport transfers."
           keywords={['travel agency Colombo', 'Sri Lanka tours', 'Colombo airport transfer']}
           canonicalUrl="/"
-          ogImage="https://i.imgur.com/AEnBWJf.jpeg"
+          ogImage="https://www.rechargetravels.com/logo-v2.png"
         />
         <HomepageSchema />
         <Header />
@@ -72,7 +72,7 @@ const Index = memo(() => {
     <>
       <ComprehensiveSEO
         title="Travel Agency Colombo | Sri Lanka Tours & Safaris | Recharge Travels"
-        description="Recharge Travels is Colombo's #1 rated travel agency (4.9★ from 2,847+ reviews). Book luxury Sri Lanka tours, Yala safaris, Colombo airport transfers, whale watching, and cultural experiences. 24/7 support. Best price guaranteed!"
+        description="Your Premium Guide to Sri Lanka's Wonders. Recharge Travels is Colombo's #1 rated travel agency (4.9★ from 2,847+ reviews). Book luxury Sri Lanka tours, Yala safaris, Colombo airport transfers, whale watching, and cultural experiences. 24/7 support. Best price guaranteed!"
         keywords={[
           'travel agency Colombo',
           'Sri Lanka travel agency',
@@ -97,7 +97,7 @@ const Index = memo(() => {
           'Colombo city tours'
         ]}
         canonicalUrl="/"
-        ogImage="https://i.imgur.com/AEnBWJf.jpeg"
+        ogImage="https://www.rechargetravels.com/logo-v2.png"
         alternateLanguages={[
           { lang: 'en', url: '/' },
           { lang: 'ta', url: '/ta/' },

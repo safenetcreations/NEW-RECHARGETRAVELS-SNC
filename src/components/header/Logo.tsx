@@ -10,7 +10,7 @@ interface LogoProps {
   isScrolled?: boolean
 }
 
-const Logo = ({ isAnimating, onAnimationTrigger, isScrolled = false }: LogoProps) => {
+const Logo = ({ isAnimating, onAnimationTrigger }: LogoProps) => {
   const [logoUrl, setLogoUrl] = useState('/logo-v2.png')
 
   useEffect(() => {
@@ -51,14 +51,6 @@ const Logo = ({ isAnimating, onAnimationTrigger, isScrolled = false }: LogoProps
         {isAnimating && (
           <div className="absolute inset-0 bg-white/20 rounded-full animate-ping"></div>
         )}
-      </div>
-      <div className="flex flex-col">
-        <span className={`text-xl font-bold transition-all duration-300 ${isScrolled ? 'text-gray-900' : 'text-white'}`}>
-          Recharge Travels
-        </span>
-        <span className={`text-xs font-medium transition-all duration-300 ${isScrolled ? 'text-gray-600' : 'text-white/80'}`}>
-          Sri Lanka
-        </span>
       </div>
     </Link>
   )

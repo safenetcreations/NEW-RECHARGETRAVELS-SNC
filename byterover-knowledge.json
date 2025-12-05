@@ -376,5 +376,38 @@
     "files": [
       "src/components/homepage/LuxuryHeroSection.tsx"
     ]
+  },
+  {
+    "timestamp": "2025-12-04T04:48:49Z",
+    "summary": "Reduced hero payload to speed up LCP without altering layout.",
+    "details": [
+      "Added a URL optimizer that appends auto=format/fit crop params to remote hero images and tightens srcset quality targets.",
+      "Only preloads current and next hero slides to avoid downloading extra large images, while keeping eager load on the visible slide."
+    ],
+    "files": [
+      "src/components/homepage/LuxuryHeroSection.tsx"
+    ]
+  },
+  {
+    "timestamp": "2025-12-04T05:21:00Z",
+    "summary": "Further trimmed homepage hero payload and lazy-loaded heavy booking forms.",
+    "details": [
+      "Lazy-loaded transfer, tour, group, and train booking forms inside the hero to keep the initial JS bundle lighter until the booking widget opens.",
+      "Capped CMS hero slides to the first three entries and reduced hero image quality targets to shrink network weight without changing layout."
+    ],
+    "files": [
+      "src/components/homepage/LuxuryHeroSection.tsx"
+    ]
+  },
+  {
+    "timestamp": "2025-12-04T05:33:00Z",
+    "summary": "Halved hero image weight for better LCP while keeping design intact.",
+    "details": [
+      "Capped hero CMS slides to two items, with remote images constrained to 1400px max and lower srcset quality to cut download size.",
+      "Kept eager load only on the visible slide, still preloading just the next slide for smooth fade without extra payload."
+    ],
+    "files": [
+      "src/components/homepage/LuxuryHeroSection.tsx"
+    ]
   }
 ]

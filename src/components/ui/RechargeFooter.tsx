@@ -18,6 +18,7 @@ import {
   Sparkles
 } from 'lucide-react'
 import { getFeaturedDestinations, FeaturedDestination, DEFAULT_FEATURED_DESTINATIONS } from '@/services/featuredDestinationsService'
+import FooterDestinationMarquee from './FooterDestinationMarquee'
 
 const RechargeFooter: React.FC = () => {
   const [email, setEmail] = useState('')
@@ -94,18 +95,40 @@ const RechargeFooter: React.FC = () => {
     { to: '/destinations', label: 'Popular Destinations' },
     { to: '/tours', label: 'Tour Packages' },
     { to: '/experiences', label: 'Unique Experiences' },
-    { to: '/blog', label: 'Blog & Travel Tips' },
-    { to: '/book-now', label: 'Book Now' }
+    { to: '/transport/airport-transfers', label: 'Airport Transfers' },
+    { to: '/transport/private-tours', label: 'Chauffeur Services' },
+    { to: '/experiences/train-journeys', label: 'Rail Bookings' },
+    { to: '/vehicle-rental', label: 'Vehicle Rental' },
+    { to: '/blog', label: 'Blog & Travel Tips' }
   ]
 
   const supportLinks = [
+    { to: '/about', label: 'Our Story' },
+    { to: '/team', label: 'Meet the Team' },
+    { to: '/sustainability', label: 'Sustainability' },
+    { to: '/careers', label: 'Careers' },
+    { to: '/press', label: 'Press & Media' },
+    { to: '/contact', label: 'Contact Us' },
+    { to: '/faq', label: 'FAQ' },
+    { to: '/travel-guide', label: 'Travel Guide' },
+    { to: '/list-property', label: 'List Your Property' }
+  ]
+
+  const aboutMenuLinks = [
     { to: '/about', label: 'About Us' },
     { to: '/about/sri-lanka', label: 'About Sri Lanka' },
-    { to: '/transport/airport-transfers', label: 'Airport Transfers' },
+    { to: '/vehicle-rental', label: 'Vehicle Rental' },
+    { to: '/blog', label: 'Travel Blog' },
     { to: '/travel-guide', label: 'Travel Guide' },
-    { to: '/hotels', label: 'Hotels' },
-    { to: '/tours/driver-guide', label: 'Driver Guides' },
-    { to: '/list-property', label: 'List Your Property' }
+    { to: '/contact', label: 'Contact Us' },
+    { to: '/connect-with-us', label: 'Connect With Us' },
+    { to: '/faq', label: 'FAQs' },
+    { to: '/drivers', label: 'Find Drivers' },
+    { to: '/join-with-us', label: 'Join With Us (Drivers)' },
+    { to: '/vendor/register', label: 'Vendor Registration' },
+    { to: '/vehicle-rental/owner', label: 'Vehicle Owner Registration' },
+    { to: '/list-property', label: 'List Your Property' },
+    { to: '/about/partners/b2b', label: 'B2B Agency Portal' }
   ]
 
   const socialLinks = [
@@ -126,192 +149,137 @@ const RechargeFooter: React.FC = () => {
         <div className="palm-decoration palm-left">🌴</div>
         <div className="palm-decoration palm-right">🌴</div>
 
-        {/* Newsletter Section */}
-        <section className="newsletter-section">
-          <div className="newsletter-container">
-            <div className="newsletter-text">
-              <h2>
-                <span className="newsletter-emoji">🌺</span>
-                Ready for Your Next Adventure?
-              </h2>
-              <p>Get exclusive travel deals and insider tips delivered weekly</p>
-            </div>
-            <form className="newsletter-form" onSubmit={handleNewsletterSubmit}>
-              <input
-                type="email"
-                className="newsletter-input"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-              <button type="submit" className="newsletter-btn">
-                Get Offers
-                <Send size={18} />
-              </button>
-            </form>
+
+
+        {/* Destination Marquee - Live Carousel */}
+        <section className="mt-10 mb-6">
+          <div className="text-center mb-6">
+            <h3 className="text-white/90 font-outfit text-xl font-semibold tracking-wide">
+              <span className="text-orange-500 mr-2">✦</span>
+              Trending Destinations
+              <span className="text-orange-500 ml-2">✦</span>
+            </h3>
           </div>
+          <FooterDestinationMarquee />
         </section>
 
-        {/* Main Content Grid */}
-        <div className="main-content">
-          <div className="footer-grid">
+        {/* Main Content - Glass Card Layout */}
+        <div className="main-content relative z-10">
+          <div className="glass-footer-card">
+            <div className="footer-split-layout">
 
-            {/* Column 1: Company */}
-            <div className="footer-column">
-              <div className="brand-logo">
-                <img
-                  src="/logo-v2.png"
-                  alt="Recharge Travels logo - Redefine your journey, refresh your soul"
-                  className="brand-logo-icon-image"
-                  loading="lazy"
-                />
-                <h2 className="brand-name">Recharge<span>Travels</span></h2>
-              </div>
-              <p className="brand-description">
-                Curated tropical experiences across Sri Lanka. We design unforgettable journeys with 10+ years of expertise in paradise destinations.
-              </p>
-              <div className="social-icons">
-                {socialLinks.map((social) => (
-                  <a
-                    key={social.label}
-                    href={social.href}
-                    className="social-icon"
-                    aria-label={social.label}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <social.icon size={20} />
-                  </a>
-                ))}
-              </div>
-            </div>
+              {/* Left Side: Brand & Newsletter */}
+              <div className="footer-brand-section">
+                <h2 className="text-3xl font-bold text-white mb-4 font-outfit">RechargeTravels</h2>
+                <p className="text-white/80 mb-8 max-w-sm">
+                  Curated tropical experiences across Sri Lanka.
+                </p>
 
-            {/* Column 2: Quick Links */}
-            <div className="footer-column">
-              <h3>Explore</h3>
-              <ul className="footer-links">
-                {exploreLinks.map((link) => (
-                  <li key={link.to}>
-                    <Link to={link.to} className="footer-link">{link.label}</Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Column 3: Support */}
-            <div className="footer-column">
-              <h3>Support</h3>
-              <ul className="footer-links">
-                {supportLinks.map((link) => (
-                  <li key={link.to}>
-                    <Link to={link.to} className="footer-link">{link.label}</Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Column 4: Destinations */}
-            <div className="footer-column">
-              <h3>Featured Destinations</h3>
-              <div className="destinations-grid">
-                {destinations.map((dest) => (
-                  <Link to={dest.to} key={dest.name} className="destination-card">
-                    <img
-                      src={dest.image}
-                      alt={dest.name}
-                      onError={(e) => {
-                        e.currentTarget.onerror = null
-                        e.currentTarget.src = '/logo-v2.png'
-                      }}
-                    />
-                    <div className="card-content">
-                      <span>{dest.emoji} {dest.name}</span>
-                      <span className="explore-text">
-                        Explore Paradise
-                        <ArrowRight size={14} />
-                      </span>
+                <div className="mb-8">
+                  <h3 className="text-xl font-bold text-white mb-2">
+                    Subscribe to Our Newsletter
+                  </h3>
+                  <form className="mt-4" onSubmit={handleNewsletterSubmit}>
+                    <div className="flex flex-col gap-3">
+                      <input
+                        type="email"
+                        className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder:text-white/50 focus:outline-none focus:border-yellow-400 transition-all"
+                        placeholder="Email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                      />
+                      <button type="submit" className="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-3 rounded-lg transition-all shadow-lg shadow-yellow-500/20">
+                        Download
+                      </button>
                     </div>
+                  </form>
+                </div>
+
+                <div className="mb-8">
+                  <h3 className="text-xl font-bold text-white mb-4">Contact Us</h3>
+                  <div className="space-y-2 text-white/80">
+                    <p>Colombo, Jaffna, Sri Lanka</p>
+                    <p className="mt-4">+94 77 772 1999</p>
+                    <p>info@rechargetravels.com</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Side: Links Grid */}
+              <div className="footer-links-grid">
+                {/* Column 1: Explore */}
+                <div className="footer-column">
+                  <h3 className="text-white font-bold mb-6 text-lg">Explore</h3>
+                  <ul className="space-y-3">
+                    {exploreLinks.map((link) => (
+                      <li key={link.to}>
+                        <Link to={link.to} className="text-white/70 hover:text-white transition-colors block">{link.label}</Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Column 1: About */}
+                <div className="footer-column">
+                  <h3 className="text-yellow-400 font-bold mb-6 uppercase tracking-wider text-sm">About Us</h3>
+                  <ul className="space-y-2">
+                    {aboutMenuLinks.map((link) => (
+                      <li key={link.to}>
+                        <Link to={link.to} className="text-white/70 hover:text-white hover:pl-2 transition-all duration-300 block text-sm">{link.label}</Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Column 3: Free Guide & Social */}
+                <div className="footer-column">
+                  <h3 className="text-white font-bold mb-4 text-lg">Free Sri Lanka Travel Guide</h3>
+                  <p className="text-white/70 mb-6 text-sm">
+                    Get Sri Lanka travel Guide to learn more about our websites.
+                  </p>
+                  <Link to="/travel-guide">
+                    <button className="bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-2 px-6 rounded-lg transition-all mb-8">
+                      Get it Now
+                    </button>
                   </Link>
-                ))}
+
+                  <div className="social-icons flex gap-4">
+                    {socialLinks.map((social) => (
+                      <a
+                        key={social.label}
+                        href={social.href}
+                        className="text-white hover:text-yellow-400 transition-colors"
+                        aria-label={social.label}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <social.icon size={24} />
+                      </a>
+                    ))}
+                  </div>
+                </div>
               </div>
+
             </div>
 
+            {/* Copyright inside the glass card */}
+            <div className="border-t border-white/10 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center text-white/60 text-sm">
+              <p>&copy; 2025 Recharge Travels & Tours Pvt Ltd. All Rights Reserved.</p>
+              <div className="flex items-center gap-2 mt-4 md:mt-0">
+                <span>Crafted with 💚 by SafeNet Creations</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Travel Guide CTA Section */}
-        <section className="travel-guide-cta">
-          <div className="travel-guide-container">
-            <div className="travel-guide-content">
-              <div className="travel-guide-icon">
-                <BookOpen size={32} />
-                <Sparkles className="sparkle-icon" size={16} />
-              </div>
-              <div className="travel-guide-text">
-                <h3>Free Sri Lanka Travel Guide</h3>
-                <p>Discover hidden gems, local tips & must-see destinations in our comprehensive guide</p>
-              </div>
-            </div>
-            <Link to="/travel-guide" className="travel-guide-btn">
-              <Download size={20} />
-              Get Free Guide
-              <ArrowRight size={18} className="arrow-icon" />
-            </Link>
-          </div>
-        </section>
 
-        {/* Contact Strip */}
-        <section className="contact-strip">
-          <div className="contact-container">
-            <h3>~ Get in Touch ~</h3>
-            <div className="contact-grid">
-              <a href="tel:+94777721999" className="contact-item">
-                <Phone size={18} />
-                +94 7777 21 999
-              </a>
-              <a href="mailto:info@rechargetravels.com" className="contact-item">
-                <Mail size={18} />
-                info@rechargetravels.com
-              </a>
-              <a href="https://maps.google.com/?q=Colombo,Sri+Lanka" target="_blank" rel="noopener noreferrer" className="contact-item">
-                <MapPin size={18} />
-                Colombo, Sri Lanka
-              </a>
-              <span className="contact-item">
-                <Clock size={18} />
-                Mon-Fri 9AM-6PM
-              </span>
-            </div>
-          </div>
-        </section>
 
-        {/* Bottom Bar */}
-        <div className="bottom-bar">
-          <div className="bottom-container">
-            <p className="copyright">&copy; 2025 <span>Recharge Travels</span>. All rights reserved.</p>
-            <div className="language-currency">
-              <a href="#usd">USD</a>
-              <span>|</span>
-              <a href="#lkr">LKR</a>
-            </div>
-            <button className="back-to-top" onClick={scrollToTop}>
-              <ChevronUp size={16} />
-              Back to Top
-            </button>
-          </div>
-        </div>
 
-        {/* Crafted By Section */}
-        <div className="crafted-by">
-          <a
-            href="https://www.safenetcreations.com"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Crafted with 💚 by <span>SafeNet Creations</span>
-          </a>
-        </div>
+
+
+
+
 
       </footer>
 
@@ -319,8 +287,18 @@ const RechargeFooter: React.FC = () => {
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Architects+Daughter&display=swap');
 
         .tropical-footer {
-          background: linear-gradient(180deg, #0d3b3b 0%, #0a2e2e 100%) !important;
+          background-image: url('/footer-jungle-bg.png') !important;
+          background-size: cover !important;
+          background-position: center bottom !important;
+          background-repeat: no-repeat !important;
           font-family: 'Plus Jakarta Sans', sans-serif !important;
+          position: relative;
+          padding: 60px 20px !important; /* Add padding to contain the glass card */
+        }
+
+        /* Remove old pseudo-elements that might conflict */
+        .tropical-footer::before {
+          display: none !important;
         }
 
         /* Wave Decoration */
@@ -463,11 +441,21 @@ const RechargeFooter: React.FC = () => {
           box-shadow: 0 8px 25px rgba(13, 92, 74, 0.5) !important;
         }
 
-        /* Main Content */
-        .main-content {
-          padding: 70px 60px !important;
-          max-width: 1200px !important;
-          margin: 0 auto !important;
+        .glass-footer-card {
+          background: rgba(255, 255, 255, 0.05);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          border-radius: 24px;
+          padding: 60px;
+          max-width: 1400px;
+          margin: 0 auto;
+        }
+
+        @media (max-width: 768px) {
+          .glass-footer-card {
+            padding: 30px;
+          }
         }
 
         @media (max-width: 768px) {
@@ -476,23 +464,44 @@ const RechargeFooter: React.FC = () => {
           }
         }
 
-        .footer-grid {
-          display: grid !important;
-          grid-template-columns: 1.3fr 1fr 1fr 1.2fr !important;
-          gap: 50px !important;
+        .footer-split-layout {
+          display: grid;
+          grid-template-columns: 1.2fr 2fr;
+          gap: 80px;
+          align-items: start;
+        }
+
+        .footer-brand-section {
+          max-width: 450px;
+        }
+
+        .footer-links-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 40px;
         }
 
         @media (max-width: 1024px) {
-          .footer-grid {
-            grid-template-columns: repeat(2, 1fr) !important;
-            gap: 40px !important;
+          .footer-split-layout {
+            grid-template-columns: 1fr;
+            gap: 60px;
+          }
+          
+          .footer-brand-section {
+            max-width: 100%;
           }
         }
 
         @media (max-width: 768px) {
-          .footer-grid {
-            grid-template-columns: 1fr !important;
-            gap: 40px !important;
+          .footer-links-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .footer-links-grid {
+            grid-template-columns: 1fr;
           }
         }
 

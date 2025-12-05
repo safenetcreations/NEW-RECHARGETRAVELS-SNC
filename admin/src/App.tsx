@@ -13,6 +13,7 @@ const AdminPanel = lazy(() => import('@/pages/admin/AdminPanel'));
 const CulturalHeritageAdmin = lazy(() => import('@/pages/admin/CulturalHeritageAdmin'));
 const WildlifeAdmin = lazy(() => import('@/pages/admin/WildlifeAdmin'));
 const AyurvedaWellnessAdmin = lazy(() => import('@/pages/admin/AyurvedaWellnessAdmin'));
+const ExclusiveAccessAdmin = lazy(() => import('@/pages/admin/ExclusiveAccessAdmin'));
 const CreatePost = lazy(() => import('@/pages/admin/CreatePost'));
 const PostsSection = lazy(() => import('@/components/admin/panel/PostsSection'));
 const CulinaryToursManager = lazy(() => import('@/components/cms/CulinaryToursManager'));
@@ -158,6 +159,7 @@ function App() {
                 <Route path="/wildlife" element={<WildlifeAdmin />} />
                 <Route path="/cultural" element={<CulturalHeritageAdmin />} />
                 <Route path="/ayurveda" element={<AyurvedaWellnessAdmin />} />
+                <Route path="/exclusive-access" element={<ExclusiveAccessAdmin />} />
                 <Route path="/culinary" element={<CulinaryToursManager />} />
                 <Route path="/hillcountry" element={<HillCountryToursManager />} />
                 <Route path="/photography" element={<PhotographyToursManager />} />

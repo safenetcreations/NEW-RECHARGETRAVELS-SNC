@@ -1,14 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Car, ChevronDown, Star, Shield, Headphones, Map, Bus, Train, Crown, Building2, CalendarCheck, Sparkles, Calendar, Users, Compass, ArrowRight, Plus, Minus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import TransferBookingForm from '@/modules/transfers/components/TransferBookingForm';
-import PrivateTourBookingForm from '@/components/booking/PrivateTourBookingForm';
-import GroupTransportBookingForm from '@/components/booking/GroupTransportBookingForm';
-import TrainBookingForm from '@/components/booking/TrainBookingForm';
 import { heroSlidesService } from '@/services/cmsService';
 import type { HeroSlide } from '@/types/cms';
+
+const TransferBookingForm = lazy(() => import('@/modules/transfers/components/TransferBookingForm'));
+const PrivateTourBookingForm = lazy(() => import('@/components/booking/PrivateTourBookingForm'));
+const GroupTransportBookingForm = lazy(() => import('@/components/booking/GroupTransportBookingForm'));
+const TrainBookingForm = lazy(() => import('@/components/booking/TrainBookingForm'));
 
 // Default fallback slides
 const DEFAULT_HERO_SLIDES: HeroSlide[] = [
@@ -28,7 +29,7 @@ const DEFAULT_HERO_SLIDES: HeroSlide[] = [
     title: 'Ancient Wonders',
     subtitle: 'Explore 2500 Years of History',
     description: 'Visit UNESCO World Heritage sites',
-    image: 'https://images.unsplash.com/photo-1588598198321-9735fd52045b?w=1920&q=65',
+    image: 'https://images.unsplash.com/photo-1588598198321-9735fd52045b?auto=format&fit=crop&w=1400&q=55',
     order: 1,
     isActive: true,
     createdAt: null,
@@ -80,6 +81,15 @@ const LuxuryHeroSection = ({ hoveredRegion, onLocationsChange }: LuxuryHeroSecti
     navigate(`/ai-trip-planner?${params.toString()}`);
   };
 
+  const optimizeImageUrl = (image?: string) => {
+    if (!image || typeof image !== 'string') return image;
+    if (!image.startsWith('http')) return image;
+    const hasQuery = image.includes('?');
+    // Cap width/quality for LCP without altering layout
+    const suffix = `${hasQuery ? '&' : '?'}auto=format&fit=crop&w=1400&q=55`;
+    return `${image}${suffix}`;
+  };
+
   useEffect(() => {
     const loadSlides = async () => {
       try {
@@ -94,7 +104,8 @@ const LuxuryHeroSection = ({ hoveredRegion, onLocationsChange }: LuxuryHeroSecti
 
         console.log('[LuxuryHeroSection] Active slides after filter:', activeSlides);
 
-        const finalSlides = activeSlides.length > 0 ? activeSlides : DEFAULT_HERO_SLIDES;
+        const limitedSlides = activeSlides.slice(0, 2);
+        const finalSlides = limitedSlides.length > 0 ? limitedSlides : DEFAULT_HERO_SLIDES;
 
         setSlides(finalSlides);
         const startIndex = Math.floor(Math.random() * finalSlides.length);
@@ -152,20 +163,20 @@ const LuxuryHeroSection = ({ hoveredRegion, onLocationsChange }: LuxuryHeroSecti
       {slides.map((slide, index) => {
         // Load current, next (for preloading), and previous (for smooth transition out)
         const nextIndex = (currentIndex + 1) % slides.length;
-        const prevIndex = (currentIndex - 1 + slides.length) % slides.length;
-        const shouldLoad = index === currentIndex || index === nextIndex || index === prevIndex;
+        const shouldLoad = index === currentIndex || index === nextIndex;
 
         const isCurrent = index === currentIndex;
+        const optimizedBase = optimizeImageUrl(slide.image) || slide.image;
 
         // Helper to build optimized srcSet with lower quality
         const buildSrcSet = (image: string) => {
           if (!image || !image.startsWith('http')) return undefined;
           const separator = image.includes('?') ? '&' : '?';
           return [
-            `${image}${separator}w=640&q=50 640w`,
-            `${image}${separator}w=1024&q=55 1024w`,
-            `${image}${separator}w=1500&q=60 1500w`,
-            `${image}${separator}w=1920&q=65 1920w`
+            `${image}${separator}w=480&q=50 480w`,
+            `${image}${separator}w=900&q=52 900w`,
+            `${image}${separator}w=1200&q=54 1200w`,
+            `${image}${separator}w=1400&q=55 1400w`
           ].join(', ');
         };
 
@@ -173,11 +184,11 @@ const LuxuryHeroSection = ({ hoveredRegion, onLocationsChange }: LuxuryHeroSecti
         const getOptimizedSrc = (image: string) => {
           if (!image || !image.startsWith('http')) return image;
           const separator = image.includes('?') ? '&' : '?';
-          return `${image}${separator}w=1920&q=65`;
-        }
+          return `${image}${separator}w=1400&q=55`;
+        };
 
-        const imageSrcSet = buildSrcSet(slide.image);
-        const optimizedSrc = getOptimizedSrc(slide.image);
+        const imageSrcSet = buildSrcSet(optimizedBase);
+        const optimizedSrc = getOptimizedSrc(optimizedBase);
 
         return (
           <div
@@ -197,7 +208,7 @@ const LuxuryHeroSection = ({ hoveredRegion, onLocationsChange }: LuxuryHeroSecti
               <img
                 src={optimizedSrc}
                 srcSet={imageSrcSet}
-                sizes="100vw"
+                sizes={imageSrcSet ? "100vw" : undefined}
                 alt={slide.title || 'Sri Lanka'}
                 width="1920"
                 height="1080"
@@ -243,10 +254,59 @@ const LuxuryHeroSection = ({ hoveredRegion, onLocationsChange }: LuxuryHeroSecti
         padding: '0 20px'
       }}>
 
+        {/* Fixed Welcome Heading */}
+        <div style={{
+          position: 'absolute',
+          top: '120px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          textAlign: 'center',
+          width: '100%',
+          zIndex: 20
+        }}>
+          <p style={{
+            fontSize: 'clamp(16px, 2.5vw, 22px)',
+            fontWeight: 400,
+            letterSpacing: '0.4em',
+            textTransform: 'uppercase',
+            color: '#ffffff',
+            textShadow: '0 2px 15px rgba(0,0,0,0.4)',
+            fontFamily: '"Cormorant Garamond", "Playfair Display", Georgia, serif',
+            margin: '0 0 8px 0'
+          }}>
+            Welcome to
+          </p>
+          <h2 style={{
+            fontSize: 'clamp(32px, 5vw, 56px)',
+            fontWeight: 500,
+            letterSpacing: '0.25em',
+            textTransform: 'uppercase',
+            color: '#ffffff',
+            textShadow: '0 4px 30px rgba(0,0,0,0.5), 0 2px 10px rgba(255,255,255,0.2)',
+            fontFamily: '"Cormorant Garamond", "Playfair Display", Georgia, serif',
+            margin: '0 0 6px 0'
+          }}>
+            Recharge Travels
+          </h2>
+          <p style={{
+            fontSize: 'clamp(14px, 2vw, 18px)',
+            fontWeight: 300,
+            letterSpacing: '0.5em',
+            textTransform: 'uppercase',
+            color: 'rgba(255, 255, 255, 0.85)',
+            textShadow: '0 2px 10px rgba(0,0,0,0.3)',
+            fontFamily: '"Cormorant Garamond", "Playfair Display", Georgia, serif',
+            margin: 0
+          }}>
+            Sri Lanka
+          </p>
+        </div>
+
         {/* Main Text Content - ALL slides stacked with opacity for sync */}
         <div style={{
           textAlign: 'center',
-          marginBottom: '40px',
+          marginBottom: '20px',
+          marginTop: '80px',
           maxWidth: '900px',
           width: '100%',
           position: 'relative',
@@ -312,7 +372,8 @@ const LuxuryHeroSection = ({ hoveredRegion, onLocationsChange }: LuxuryHeroSecti
             justifyContent: 'center',
             gap: '30px',
             flexWrap: 'wrap',
-            marginBottom: '40px'
+            marginTop: '60px',
+            marginBottom: '20px'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <div style={{ backgroundColor: 'rgba(255,255,255,0.2)', padding: '8px', borderRadius: '50%' }}>
@@ -347,7 +408,7 @@ const LuxuryHeroSection = ({ hoveredRegion, onLocationsChange }: LuxuryHeroSecti
 
           {/* Quick Access Buttons */}
           {!isBookingOpen && (
-            <div className="flex flex-wrap justify-center gap-3 sm:gap-6 mb-6 sm:mb-8 px-2 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
+            <div className="flex flex-wrap justify-center gap-3 sm:gap-6 mt-8 mb-6 sm:mb-8 px-2 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
               <button
                 onClick={handleAIPlannerContinue}
                 className="luxury-secondary-btn group relative overflow-hidden rounded-full bg-gradient-to-r from-green-500/10 to-teal-500/10 backdrop-blur-md border border-green-400/30 px-4 py-3 sm:px-8 sm:py-6 text-white transition-all duration-500 ease-out hover:border-green-400/60 hover:bg-gradient-to-r hover:from-green-500/20 hover:to-teal-500/20 hover:shadow-lg hover:shadow-green-500/20 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-green-400/50 focus:ring-offset-2 focus:ring-offset-transparent"
