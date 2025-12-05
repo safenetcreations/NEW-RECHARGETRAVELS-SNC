@@ -9,7 +9,7 @@ import {
 import { Link, useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { aboutItems } from './menuData'
-import { Info, BookOpen, Users, Car, LucideIcon } from 'lucide-react'
+import { Info, BookOpen, Users, Car, LucideIcon, Shield } from 'lucide-react'
 
 interface AboutDropdownProps {
   animatingItem: string | null
@@ -54,6 +54,14 @@ const aboutCategories = {
       aboutItemsByHref['/vendor/register'],
       aboutItemsByHref['/about/partners/b2b'],
     ].filter(Boolean)
+  },
+  legal: {
+    title: "Legal & Policies",
+    items: [
+      aboutItemsByHref['/legal/privacy'],
+      aboutItemsByHref['/legal/terms'],
+      aboutItemsByHref['/legal/cookies'],
+    ].filter(Boolean)
   }
 } as const
 
@@ -62,6 +70,7 @@ const categoryIconComponents: Record<keyof typeof aboutCategories, LucideIcon> =
   planning: BookOpen,
   community: Users,
   drivers: Car,
+  legal: Shield,
 }
 
 const categoryColors: Record<keyof typeof aboutCategories, string> = {
@@ -69,6 +78,7 @@ const categoryColors: Record<keyof typeof aboutCategories, string> = {
   planning: "from-amber-500 to-orange-500",
   community: "from-purple-500 to-pink-500",
   drivers: "from-sky-500 to-cyan-500",
+  legal: "from-slate-500 to-gray-500",
 }
 
 const AboutDropdown = ({ animatingItem, onMenuClick, isScrolled }: AboutDropdownProps) => {
@@ -129,25 +139,42 @@ const AboutDropdown = ({ animatingItem, onMenuClick, isScrolled }: AboutDropdown
                 {categories.map(([key, category]) => {
                   const IconComponent = categoryIconComponents[key]
                   return (
-                  <button
-                    key={key}
-                    onClick={() => setActiveCategory(key)}
-                    className={cn(
-                      "w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-left text-sm font-medium transition-all duration-200",
-                      activeCategory === key
-                        ? cn(
-                          "bg-gradient-to-r text-white shadow-md",
-                          categoryColors[key]
-                        )
-                        : isScrolled
-                          ? "text-gray-700 hover:bg-emerald-100/50"
-                          : "text-gray-300 hover:bg-white/10"
-                    )}
-                  >
-                    {IconComponent && <IconComponent className="w-4 h-4" />}
-                    <span className="truncate">{category.title}</span>
-                  </button>
-                )})}
+                    <button
+                      key={key}
+                      onClick={() => setActiveCategory(key)}
+                      className={cn(
+                        "w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-left text-sm font-medium transition-all duration-200",
+                        activeCategory === key
+                          ? cn(
+                            "bg-gradient-to-r text-white shadow-md",
+                            categoryColors[key]
+                          )
+                          : isScrolled
+                            ? "text-gray-700 hover:bg-emerald-100/50"
+                            : "text-gray-300 hover:bg-white/10"
+                      )}
+                    >
+                      {IconComponent && <IconComponent className="w-4 h-4" />}
+                      <span className="truncate">{category.title}</span>
+                    </button>
+                  )
+                })}
+              </div>
+
+              {/* View All About */}
+              <div className="mt-4 pt-3 border-t border-emerald-200/30">
+                <Link
+                  to="/about"
+                  className={cn(
+                    "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all",
+                    isScrolled
+                      ? "text-emerald-700 hover:bg-emerald-100"
+                      : "text-emerald-400 hover:bg-white/10"
+                  )}
+                >
+                  <Info className="w-4 h-4" />
+                  View About Us
+                </Link>
               </div>
             </div>
 

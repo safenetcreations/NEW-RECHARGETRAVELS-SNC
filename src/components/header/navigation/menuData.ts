@@ -161,6 +161,22 @@ export const aboutItems = [
     title: "B2B Agency Portal",
     href: "/about/partners/b2b",
     description: "Travel agency partners: Login to book tours with exclusive 10% discounts"
+  },
+  // Legal & Policies
+  {
+    title: "Privacy Policy",
+    href: "/legal/privacy",
+    description: "How we protect and handle your personal information"
+  },
+  {
+    title: "Terms of Service",
+    href: "/legal/terms",
+    description: "Terms and conditions for using our services"
+  },
+  {
+    title: "Cookie Policy",
+    href: "/legal/cookies",
+    description: "How we use cookies to improve your experience"
   }
 ]
 

@@ -56,7 +56,7 @@ const CATEGORIES_COLLECTION = 'exclusiveAccessCategories';
 
 // ============ DEFAULT DATA ============
 export const DEFAULT_HERO: ExclusiveAccessHero = {
-    image: 'https://images.unsplash.com/photo-1596402184320-417e7178b2cd?w=1920&q=90',
+    image: 'https://images.unsplash.com/photo-1456926631375-92c8ce872def?w=1920&q=90',
     title: 'Exclusive Access',
     subtitle: 'Beyond the velvet rope',
     description: 'Private temple blessings. Museum after-hours. Cultural immersions through relationships that took decades to build. Access that money alone cannot buy.',

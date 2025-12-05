@@ -211,25 +211,51 @@ export interface HotelLocation {
 }
 
 export const PRELOADED_HOTELS: HotelLocation[] = [
+  // Colombo Hotels
   { id: 'shangri-la', name: 'Shangri-La Colombo', city: 'Colombo', area: 'Colombo', coordinates: { lat: 6.9271, lng: 79.8445 }, rating: 5, image: '🏨' },
   { id: 'cinnamon-grand', name: 'Cinnamon Grand', city: 'Colombo', area: 'Colombo', coordinates: { lat: 6.9167, lng: 79.85 }, rating: 5, image: '🏨' },
   { id: 'hilton-colombo', name: 'Hilton Colombo', city: 'Colombo', area: 'Colombo', coordinates: { lat: 6.9344, lng: 79.8428 }, rating: 5, image: '🏨' },
+  { id: 'galle-face-hotel', name: 'Galle Face Hotel', city: 'Colombo', area: 'Colombo', coordinates: { lat: 6.9246, lng: 79.8446 }, rating: 5, image: '🏨' },
+  { id: 'movenpick-colombo', name: 'Mövenpick Hotel Colombo', city: 'Colombo', area: 'Colombo', coordinates: { lat: 6.9156, lng: 79.8489 }, rating: 5, image: '🏨' },
+  { id: 'oth-colombo', name: 'OTH Hotel Colombo', city: 'Colombo', area: 'Colombo', coordinates: { lat: 6.9180, lng: 79.8527 }, rating: 4, image: '🏨' },
+  // Negombo Hotels
   { id: 'jetwing-beach', name: 'Jetwing Beach', city: 'Negombo', area: 'Negombo', coordinates: { lat: 7.2354, lng: 79.8337 }, rating: 5, image: '🏖️' },
   { id: 'heritance-negombo', name: 'Heritance Negombo', city: 'Negombo', area: 'Negombo', coordinates: { lat: 7.2167, lng: 79.8333 }, rating: 5, image: '🏖️' },
+  { id: 'jetwing-lagoon', name: 'Jetwing Lagoon', city: 'Negombo', area: 'Negombo', coordinates: { lat: 7.1992, lng: 79.8406 }, rating: 5, image: '🏖️' },
+  { id: 'camelot-beach', name: 'Camelot Beach Hotel', city: 'Negombo', area: 'Negombo', coordinates: { lat: 7.2106, lng: 79.8334 }, rating: 4, image: '🏖️' },
+  // Kandy Hotels
   { id: 'earls-regency', name: "Earl's Regency", city: 'Kandy', area: 'Kandy', coordinates: { lat: 7.3008, lng: 80.673 }, rating: 5, image: '🏔️' },
   { id: 'cinnamon-citadel', name: 'Cinnamon Citadel', city: 'Kandy', area: 'Kandy', coordinates: { lat: 7.2936, lng: 80.6417 }, rating: 4, image: '🏔️' },
+  { id: 'mahaweli-reach', name: 'Mahaweli Reach Hotel', city: 'Kandy', area: 'Kandy', coordinates: { lat: 7.2883, lng: 80.6328 }, rating: 4, image: '🏔️' },
+  { id: 'queens-hotel', name: "Queen's Hotel Kandy", city: 'Kandy', area: 'Kandy', coordinates: { lat: 7.2936, lng: 80.6353 }, rating: 4, image: '🏔️' },
+  // Sigiriya Hotels  
   { id: 'jetwing-vil-uyana', name: 'Jetwing Vil Uyana', city: 'Sigiriya', area: 'Sigiriya', coordinates: { lat: 7.9444, lng: 80.7497 }, rating: 5, image: '🌿' },
   { id: 'aliya-resort', name: 'Aliya Resort & Spa', city: 'Sigiriya', area: 'Sigiriya', coordinates: { lat: 7.955, lng: 80.76 }, rating: 5, image: '🌿' },
+  { id: 'cinnamon-lodge', name: 'Cinnamon Lodge Habarana', city: 'Habarana', area: 'Sigiriya', coordinates: { lat: 8.0381, lng: 80.7531 }, rating: 5, image: '🌿' },
+  // Galle Hotels
   { id: 'amangalla', name: 'Amangalla', city: 'Galle', area: 'Galle', coordinates: { lat: 6.0267, lng: 80.2167 }, rating: 5, image: '🏛️' },
   { id: 'jetwing-lighthouse', name: 'Jetwing Lighthouse', city: 'Galle', area: 'Galle', coordinates: { lat: 6.0314, lng: 80.2156 }, rating: 5, image: '🏛️' },
+  { id: 'fort-bazaar', name: 'Fort Bazaar', city: 'Galle', area: 'Galle', coordinates: { lat: 6.0261, lng: 80.2168 }, rating: 5, image: '🏛️' },
+  // Bentota Hotels
   { id: 'vivanta-bentota', name: 'Vivanta by Taj', city: 'Bentota', area: 'Bentota', coordinates: { lat: 6.4333, lng: 79.9833 }, rating: 5, image: '🏝️' },
+  { id: 'club-bentota', name: 'Club Bentota', city: 'Bentota', area: 'Bentota', coordinates: { lat: 6.4289, lng: 79.9956 }, rating: 4, image: '🏝️' },
+  // Unawatuna/Mirissa Hotels
+  { id: 'cantaloupe-levels', name: 'Cantaloupe Levels', city: 'Unawatuna', area: 'Galle', coordinates: { lat: 5.9983, lng: 80.2483 }, rating: 5, image: '🏖️' },
+  { id: 'paradise-beach-club', name: 'Paradise Beach Club', city: 'Mirissa', area: 'Mirissa', coordinates: { lat: 5.9453, lng: 80.4628 }, rating: 4, image: '🏖️' },
+  // Nuwara Eliya Hotels
   { id: 'heritance-tea-factory', name: 'Heritance Tea Factory', city: 'Nuwara Eliya', area: 'Nuwara Eliya', coordinates: { lat: 7.0, lng: 80.7833 }, rating: 5, image: '❄️' },
+  { id: 'grand-hotel', name: 'Grand Hotel Nuwara Eliya', city: 'Nuwara Eliya', area: 'Nuwara Eliya', coordinates: { lat: 6.9697, lng: 80.7649 }, rating: 4, image: '❄️' },
+  // Ella Hotels
   { id: '98-acres', name: '98 Acres Resort', city: 'Ella', area: 'Ella', coordinates: { lat: 6.8667, lng: 81.05 }, rating: 5, image: '🌄' },
+  { id: 'ella-flower-garden', name: 'Ella Flower Garden Resort', city: 'Ella', area: 'Ella', coordinates: { lat: 6.8722, lng: 81.0464 }, rating: 4, image: '🌄' },
+  // Other Destinations
   { id: 'jetwing-jaffna', name: 'Jetwing Jaffna', city: 'Jaffna', area: 'Jaffna', coordinates: { lat: 9.6667, lng: 80.0167 }, rating: 4, image: '🏛️' },
   { id: 'trinco-blu', name: 'Trinco Blu by Cinnamon', city: 'Trincomalee', area: 'Trincomalee', coordinates: { lat: 8.5778, lng: 81.2312 }, rating: 4, image: '🏖️' },
+  { id: 'jungle-beach-trinco', name: 'Jungle Beach by Uga', city: 'Trincomalee', area: 'Trincomalee', coordinates: { lat: 8.7064, lng: 81.1703 }, rating: 5, image: '🏖️' },
   { id: 'uga-bay', name: 'Uga Bay', city: 'Arugam Bay', area: 'Arugam Bay', coordinates: { lat: 6.8456, lng: 81.8312 }, rating: 5, image: '🏄' },
   { id: 'cinnamon-wild', name: 'Cinnamon Wild Yala', city: 'Yala', area: 'Yala', coordinates: { lat: 6.2789, lng: 81.4012 }, rating: 5, image: '🦁' },
   { id: 'chena-huts', name: 'Chena Huts by Uga', city: 'Yala', area: 'Yala', coordinates: { lat: 6.2834, lng: 81.4156 }, rating: 5, image: '🦁' },
+  { id: 'wild-coast-tented', name: 'Wild Coast Tented Lodge', city: 'Yala', area: 'Yala', coordinates: { lat: 6.2756, lng: 81.4089 }, rating: 5, image: '🦁' },
 ];
 
 // CMB Airport coordinates (Bandaranaike)
@@ -295,9 +321,9 @@ export const calculateHaversineDistance = (
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(toRadians(coord1.lat)) *
-      Math.cos(toRadians(coord2.lat)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos(toRadians(coord2.lat)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   const straightLineDistance = R * c;
   // Apply road factor (roads are ~30% longer than straight line)
@@ -398,7 +424,8 @@ export const calculateTotalWithExtrasUSD = (
   selectedExtras: string[],
   childSeatCount: number = 0,
   isRoundTrip: boolean = false,
-  vehiclePricing?: VehiclePricing[]
+  vehiclePricing?: VehiclePricing[],
+  transferExtras?: TransferExtra[]
 ): PriceBreakdown => {
   // Use dynamic pricing from admin panel or fall back to defaults
   const pricing = vehiclePricing || DEFAULT_VEHICLE_PRICING;
@@ -411,8 +438,12 @@ export const calculateTotalWithExtrasUSD = (
   // Extras calculation in USD
   const extrasDetails: { name: string; price: number }[] = [];
   let extrasPrice = 0;
+
+  // Use dynamic extras or fallback
+  const availableExtras = transferExtras || TRANSFER_EXTRAS;
+
   selectedExtras.forEach(extraId => {
-    const extra = TRANSFER_EXTRAS.find(e => e.id === extraId);
+    const extra = availableExtras.find(e => e.id === extraId);
     if (extra && extra.priceUSD > 0) {
       extrasPrice += extra.priceUSD;
       extrasDetails.push({ name: extra.name, price: extra.priceUSD });
@@ -790,9 +821,9 @@ class AirportTransferService {
           lastName: data.customerInfo.lastName || '',
           email: data.customerInfo.email,
           phone: data.customerInfo.phone || '',
-          whatsapp: data.customerInfo.whatsapp,
+          whatsapp: data.customerInfo.phone || '', // Use phone as whatsapp
           bookingReference: bookingReference,
-          bookingAmount: data.totalPrice || 0,
+          bookingAmount: data.pricing?.totalPrice || 0,
           specialRequests: data.specialRequests
         });
         customerId = customer.customerId;

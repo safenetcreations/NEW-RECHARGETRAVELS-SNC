@@ -26,7 +26,7 @@ const HeaderNavigationMenu = ({
 }: NavigationMenuProps) => {
   return (
     <div className={cn("flex w-full justify-center", className)}>
-      <NavigationMenu className="w-full max-w-fit justify-center" delayDuration={100} skipDelayDuration={300}>
+      <NavigationMenu className="w-full max-w-fit justify-center" delayDuration={0} skipDelayDuration={5000}>
         <NavigationMenuList
           className={cn(
             "gap-0.5 px-2 py-1.5 rounded-full border backdrop-blur-[18px] transition-all duration-500 ease-out",

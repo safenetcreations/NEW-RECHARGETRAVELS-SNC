@@ -138,7 +138,7 @@ export class EnhancedSEOService {
       "sameAs": [
         "https://www.facebook.com/rechargetravels",
         "https://www.instagram.com/rechargetravels",
-        "https://www.tripadvisor.com/rechargetravels"
+        "https://www.tripadvisor.com/Attraction_Review-g293962-d10049587-Reviews-Recharge_Travels_And_Tours-Colombo_Western_Province.html"
       ],
       "hasOfferCatalog": {
         "@type": "OfferCatalog",

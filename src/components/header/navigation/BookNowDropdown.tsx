@@ -140,6 +140,22 @@ const BookNowDropdown = ({ animatingItem, onMenuClick, isScrolled }: BookNowDrop
                 )
               })}
             </div>
+
+            {/* View All Booking */}
+            <div className="mt-3 pt-3 border-t border-amber-200/30">
+              <Link
+                to="/book-now"
+                className={cn(
+                  "flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all w-full",
+                  isScrolled
+                    ? "bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 text-white hover:shadow-lg"
+                    : "bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 text-white hover:shadow-lg"
+                )}
+              >
+                <Calendar className="w-4 h-4" />
+                View All Booking Options
+              </Link>
+            </div>
           </div>
 
           {/* Footer Gradient Bar */}

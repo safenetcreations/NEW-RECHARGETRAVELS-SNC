@@ -33,8 +33,8 @@ const accessPrinciples = [
   { icon: Shield, title: 'Sacred Discretion', desc: 'Some experiences remain unpublicized to protect their sanctity. We share only what our partners permit.' }
 ];
 
-const fallbackImage = 'https://images.unsplash.com/photo-1596402184320-417e7178b2cd?w=1200&q=80';
-const fallbackHeroImage = 'https://images.unsplash.com/photo-1596402184320-417e7178b2cd?w=1920&q=90';
+const fallbackImage = '/exclusive access hero image.jpeg';
+const fallbackHeroImage = '/exclusive access hero image.jpeg';
 
 const ExclusiveAccess = () => {
   const [loading, setLoading] = useState(false);
@@ -121,7 +121,8 @@ const ExclusiveAccess = () => {
     }
   };
 
-  const heroImage = heroData.image && heroData.image.trim() !== '' ? heroData.image : fallbackHeroImage;
+  // Always use leopard image for hero section (ignoring Firestore)
+  const heroImage = fallbackHeroImage;
 
   return (
     <>

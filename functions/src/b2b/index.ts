@@ -49,7 +49,7 @@ const verifyToken = async (req: express.Request, res: express.Response, next: ex
     if (!token) {
       return res.status(401).json({ success: false, message: 'No token provided' });
     }
-    
+
     const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
     (req as any).user = decoded;
     next();
@@ -62,19 +62,19 @@ const verifyAgency = async (req: express.Request, res: express.Response, next: e
   try {
     const agencyId = (req as any).user.agencyId;
     const agencyDoc = await db.collection('b2b_agencies').doc(agencyId).get();
-    
+
     if (!agencyDoc.exists) {
       return res.status(403).json({ success: false, message: 'Agency not found' });
     }
-    
+
     const agencyData = agencyDoc.data();
     if (agencyData?.status !== 'active') {
-      return res.status(403).json({ 
-        success: false, 
-        message: `Account status: ${agencyData?.status}. Please wait for admin approval.` 
+      return res.status(403).json({
+        success: false,
+        message: `Account status: ${agencyData?.status}. Please wait for admin approval.`
       });
     }
-    
+
     (req as any).agency = { id: agencyId, ...agencyData };
     next();
   } catch (error) {
@@ -94,11 +94,11 @@ const sendEmail = async (to: string, subject: string, html: string) => {
 };
 
 const calculateBookingPrice = (basePrice: number, pax: number) => {
-  const discountPercentage = 10;
+  const discountPercentage = 15;
   const grossCents = Math.round(basePrice * pax * 100);
   const discountCents = Math.floor(grossCents * (discountPercentage / 100));
   const netCents = grossCents - discountCents;
-  
+
   return {
     originalPrice: grossCents / 100,
     discountPercentage,
@@ -219,9 +219,9 @@ app.post('/auth/login', async (req, res) => {
     }
 
     if (agencyData.status !== 'active') {
-      return res.status(403).json({ 
-        success: false, 
-        message: `Account status: ${agencyData.status}. Please wait for admin approval.` 
+      return res.status(403).json({
+        success: false,
+        message: `Account status: ${agencyData.status}. Please wait for admin approval.`
       });
     }
 
@@ -399,7 +399,7 @@ app.post('/bookings', verifyToken, verifyAgency, async (req, res) => {
     // Check 48-hour rule
     const departureDate = new Date(tourDate);
     const hoursUntilDeparture = (departureDate.getTime() - Date.now()) / (1000 * 60 * 60);
-    
+
     if (!isEmergency && hoursUntilDeparture < 48) {
       return res.status(400).json({
         success: false,
@@ -585,7 +585,7 @@ app.post('/payments/create-checkout', verifyToken, verifyAgency, async (req, res
       return res.status(500).json({ success: false, message: 'Payment service not configured' });
     }
 
-    const { bookingId, amount, tourName } = req.body;
+    const { bookingId } = req.body;
     const agencyId = (req as any).user.agencyId;
     const agency = (req as any).agency;
 
@@ -595,6 +595,8 @@ app.post('/payments/create-checkout', verifyToken, verifyAgency, async (req, res
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
 
+    const booking = bookingDoc.data();
+
     // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -603,10 +605,10 @@ app.post('/payments/create-checkout', verifyToken, verifyAgency, async (req, res
           price_data: {
             currency: 'usd',
             product_data: {
-              name: tourName || 'Tour Booking',
+              name: booking?.tourName || 'Tour Booking',
               description: `B2B Booking #${bookingId} - ${agency.agencyName}`,
             },
-            unit_amount: Math.round(amount * 100), // Convert to cents
+            unit_amount: Math.round((booking?.finalPrice || 0) * 100), // Use DB price
           },
           quantity: 1,
         },
@@ -893,7 +895,7 @@ app.get('/bookings/:bookingId/voucher', verifyToken, verifyAgency, async (req, r
     }
 
     const booking = bookingDoc.data();
-    
+
     // Get tour details for meeting point/time
     const tourDoc = await db.collection('tours').doc(booking?.tourId).get();
     const tourData = tourDoc.data();
@@ -968,18 +970,18 @@ const verifyAdmin = async (req: express.Request, res: express.Response, next: ex
     if (!authHeader?.startsWith('Bearer ')) {
       return res.status(401).json({ success: false, message: 'No token provided' });
     }
-    
+
     const idToken = authHeader.split('Bearer ')[1];
     const decodedToken = await admin.auth().verifyIdToken(idToken);
-    
+
     // Check if user is admin in Firestore
     const userDoc = await db.collection('users').doc(decodedToken.uid).get();
     const userData = userDoc.data();
-    
+
     if (!userData || !['admin', 'super_admin', 'Super Admin'].includes(userData.role)) {
       return res.status(403).json({ success: false, message: 'Admin access required' });
     }
-    
+
     (req as any).adminUser = { uid: decodedToken.uid, ...userData };
     next();
   } catch (error) {
@@ -1087,7 +1089,7 @@ app.get('/admin/analytics', verifyAdmin, async (req, res) => {
     const agencyBookingCounts: Record<string, { name: string; bookings: number; revenue: number }> = {};
     const agencyMap: Record<string, string> = {};
     agencies.forEach((a: any) => { agencyMap[a.id] = a.agencyName; });
-    
+
     bookings.forEach((b: any) => {
       const agencyId = b.agencyId;
       if (!agencyBookingCounts[agencyId]) {
@@ -1106,12 +1108,12 @@ app.get('/admin/analytics', verifyAdmin, async (req, res) => {
       const monthDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0);
       const monthName = monthDate.toLocaleString('default', { month: 'short', year: '2-digit' });
-      
+
       const monthBookings = bookings.filter((b: any) => {
         const created = b.createdAt?.toDate?.() || new Date(b.createdAt);
         return created >= monthDate && created <= monthEnd;
       });
-      
+
       monthlyRevenue.push({
         month: monthName,
         revenue: monthBookings.reduce((sum: number, b: any) => sum + (b.finalPrice || 0), 0),
@@ -1171,7 +1173,7 @@ app.get('/admin/agencies', verifyAdmin, async (req, res) => {
   try {
     const { status } = req.query;
     let query: admin.firestore.Query = db.collection('b2b_agencies');
-    
+
     if (status) {
       query = query.where('status', '==', status);
     }
@@ -1204,12 +1206,32 @@ app.patch('/admin/agencies/:agencyId/status', verifyAdmin, async (req, res) => {
     if (status === 'active') {
       const agencyDoc = await db.collection('b2b_agencies').doc(agencyId).get();
       const agency = agencyDoc.data();
-      if (agency?.email) {
-        await sendAgencyApproval({
-          to: agency.email,
-          agencyName: agency.agencyName,
-          loginLink: `${FRONTEND_URL}/about/partners/b2b/login`
-        });
+      if (agency) {
+        // 1. Send Email
+        if (agency.email) {
+          await sendAgencyApproval({
+            to: agency.email,
+            agencyName: agency.agencyName,
+            loginLink: `${FRONTEND_URL}/about/partners/b2b/login`
+          });
+        }
+
+        // 2. Send WhatsApp Notification
+        if (agency.phone) {
+          try {
+            await db.collection('whatsappMessages').add({
+              to: agency.phone,
+              message: `🎉 Congratulations! Your Recharge Travels B2B Partner account has been APPROVED.\n\nYou can now login and start booking tours with your exclusive 15% commission.\n\nLogin here: ${FRONTEND_URL}/about/partners/b2b/login\n\nNeed help? Reply to this message.`,
+              status: 'pending',
+              createdAt: admin.firestore.FieldValue.serverTimestamp(),
+              type: 'b2b_approval'
+            });
+            console.log(`WhatsApp approval queued for ${agency.phone}`);
+          } catch (waError) {
+            console.error('Failed to queue WhatsApp message:', waError);
+            // Don't block the response depending on WhatsApp success
+          }
+        }
       }
     }
 
@@ -1361,7 +1383,7 @@ app.get('/health', (req, res) => {
 app.post('/test-email', async (req, res) => {
   try {
     const { email } = req.body;
-    
+
     if (!email) {
       return res.status(400).json({ success: false, message: 'Email address required' });
     }
@@ -1384,22 +1406,22 @@ app.post('/test-email', async (req, res) => {
     });
 
     if (success) {
-      res.json({ 
-        success: true, 
+      res.json({
+        success: true,
         message: `Test email sent successfully to ${email}`,
         note: 'Check your inbox (and spam folder)'
       });
     } else {
-      res.status(500).json({ 
-        success: false, 
+      res.status(500).json({
+        success: false,
         message: 'Failed to send email. Check SendGrid API key configuration.'
       });
     }
   } catch (error: any) {
-    res.status(500).json({ 
-      success: false, 
-      message: 'Email send error', 
-      error: error.message 
+    res.status(500).json({
+      success: false,
+      message: 'Email send error',
+      error: error.message
     });
   }
 });

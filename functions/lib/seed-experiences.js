@@ -978,6 +978,24 @@ const TRIPADVISOR_TOURS_DATA = [
         operatorProfileUrl: RECHARGE_TRIPADVISOR_URL,
         isActive: true,
         sortOrder: 6
+    },
+    {
+        id: 'ta-20',
+        title: 'Transport only - Mirissa to Colombo Airport (CMB)',
+        priceUsd: 95,
+        rating: 5.0,
+        reviews: 50,
+        region: 'south',
+        location: 'Mirissa to Colombo Airport',
+        duration: '3-4 hours',
+        description: 'Private airport transfer from Mirissa to Colombo Bandaranaike International Airport (CMB)',
+        image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&auto=format&fit=crop',
+        tripAdvisorUrl: 'https://www.tripadvisor.com/AttractionProductReview-g1407334-d17684488-Transport_only_Mirissa_to_Colombo_Airport_CMB-Mirissa_Southern_Province.html',
+        operator: 'Recharge Travels & Tours',
+        operatorProfileUrl: RECHARGE_TRIPADVISOR_URL,
+        badge: 'Popular',
+        isActive: true,
+        sortOrder: 7
     }
 ];
 // HTTP callable function to seed experience content

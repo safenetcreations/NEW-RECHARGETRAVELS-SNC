@@ -8,7 +8,7 @@ import {
   ChevronDown, LogOut, Bell, Search, User, Brain, Briefcase, CreditCard,
   Send, Bot, Palette, Shield, Train, Bus, Waves, Leaf, Mountain, Crown,
   TreePine, BookOpen, Share2, Percent, Wallet, UserCheck, Building2,
-  LayoutDashboard, PenTool, ImagePlus, Database, Package, Heart
+  LayoutDashboard, PenTool, ImagePlus, Database, Package, Heart, Plane
 } from 'lucide-react';
 
 interface NavItem {
@@ -88,9 +88,17 @@ const ModernNavigation: React.FC = () => {
         { id: 'global-tour-bookings', label: 'Tour Bookings', icon: Calendar, path: '/global-tour-bookings' },
         { id: 'private-tours', label: 'Private Tours', icon: Car, path: '/private-tours' },
         { id: 'group-transport', label: 'Group Transport', icon: Bus, path: '/group-transport' },
+        { id: 'airport-transfers', label: 'Bookings', icon: Calendar, path: '/airport-transfers' },
+        { id: 'airport-transfers-content', label: 'Manage Content & Pricing', icon: Settings, path: '/airport-transfers-content' },
         { id: 'train-booking', label: 'Train Booking', icon: Train, path: '/train-booking' },
         { id: 'hotels', label: 'Hotels & Lodges', icon: Hotel, path: '/hotels' },
+        { id: 'vehicle-rental', label: 'Vehicle Rental', icon: Car, path: '/vehicle-rental-admin' },
+        { id: 'vehicle-pricing', label: 'Pricing & Drivers', icon: Percent, path: '/vehicle-pricing' },
+        { id: 'vehicle-analytics', label: 'Analytics', icon: BarChart3, path: '/vehicle-analytics' },
+        { id: 'vehicle-emails', label: 'Emails & Templates', icon: Mail, path: '/vehicle-emails' },
+        { id: 'vehicle-payments-contracts', label: 'Payments & Contracts', icon: CreditCard, path: '/vehicle-payments-contracts' },
         { id: 'fleet-vehicles', label: 'Fleet Vehicles', icon: Car, path: '/fleet-vehicles' },
+        { id: 'e-scooters', label: 'E-Scooters (Jaffna)', icon: Zap, path: '/e-scooters' },
         { id: 'activities', label: 'Activities', icon: Zap, path: '/activities' },
       ]
     },
@@ -228,8 +236,8 @@ const ModernNavigation: React.FC = () => {
                     <button
                       onClick={() => setActiveDropdown(activeDropdown === item.id ? null : item.id)}
                       className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${isChildActive(item.children) || activeDropdown === item.id
-                          ? 'bg-emerald-50 text-emerald-700'
-                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                        ? 'bg-emerald-50 text-emerald-700'
+                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                         }`}
                     >
                       <item.icon className="w-4 h-4" />
@@ -240,8 +248,8 @@ const ModernNavigation: React.FC = () => {
                     <Link
                       to={item.path || '/'}
                       className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${isActive(item.path || '')
-                          ? 'bg-emerald-50 text-emerald-700'
-                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                        ? 'bg-emerald-50 text-emerald-700'
+                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                         }`}
                     >
                       <item.icon className="w-4 h-4" />
@@ -251,20 +259,20 @@ const ModernNavigation: React.FC = () => {
 
                   {/* Dropdown Menu */}
                   {item.children && activeDropdown === item.id && (
-                    <div className="absolute top-full left-0 mt-1 w-64 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="absolute top-full left-0 mt-1 w-72 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200 max-h-[80vh] overflow-y-auto">
                       {item.children.map((child) => (
                         <Link
                           key={child.id}
                           to={child.path || '/'}
                           onClick={() => setActiveDropdown(null)}
                           className={`flex items-center gap-3 px-4 py-2.5 text-sm transition-all ${isActive(child.path || '')
-                              ? 'bg-emerald-50 text-emerald-700 font-medium'
-                              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                            ? 'bg-emerald-50 text-emerald-700 font-medium'
+                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                             }`}
                         >
                           <div className={`p-1.5 rounded-lg ${isActive(child.path || '')
-                              ? 'bg-emerald-100'
-                              : 'bg-gray-100'
+                            ? 'bg-emerald-100'
+                            : 'bg-gray-100'
                             }`}>
                             <child.icon className="w-3.5 h-3.5" />
                           </div>
@@ -376,8 +384,8 @@ const ModernNavigation: React.FC = () => {
                       to={item.path || '/'}
                       onClick={() => setMobileMenuOpen(false)}
                       className={`flex items-center gap-3 px-4 py-3 rounded-lg ${isActive(item.path || '')
-                          ? 'bg-emerald-50 text-emerald-700'
-                          : 'text-gray-700 hover:bg-gray-50'
+                        ? 'bg-emerald-50 text-emerald-700'
+                        : 'text-gray-700 hover:bg-gray-50'
                         }`}
                     >
                       <item.icon className="w-5 h-5" />

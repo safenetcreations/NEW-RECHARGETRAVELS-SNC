@@ -66,10 +66,22 @@ interface AirportTransfersContent {
 const defaultContent: AirportTransfersContent = {
   heroSlides: [
     {
-      image: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&q=80",
-      title: "Premium Airport Transfers",
-      subtitle: "Your Journey Begins with Comfort",
-      description: "Professional drivers, luxury vehicles, and seamless transfers to and from Bandaranaike International Airport"
+      image: "https://images.unsplash.com/photo-1606567595334-d39972c85dfd?auto=format&fit=crop&q=80",
+      title: "Sri Lanka Airport Transfers",
+      subtitle: "From Colombo Airport to Anywhere in Sri Lanka",
+      description: "Professional meet & greet service at Bandaranaike International Airport (CMB). Safe, reliable transfers to all destinations."
+    },
+    {
+      image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&q=80",
+      title: "Private Airport Pickup",
+      subtitle: "Your Driver Waits at Arrivals",
+      description: "Name board greeting, flight tracking, and complimentary 60-minute waiting time included with every transfer."
+    },
+    {
+      image: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&q=80",
+      title: "Comfortable Fleet",
+      subtitle: "From Sedans to Luxury SUVs",
+      description: "Air-conditioned vehicles with professional English-speaking drivers. Child seats and wheelchair access available."
     }
   ],
   serviceFeatures: [
@@ -77,15 +89,40 @@ const defaultContent: AirportTransfersContent = {
       title: "Meet & Greet Service",
       description: "Your driver will be waiting at arrivals with a name board",
       icon: "Users",
-      feature: "Complimentary waiting time"
+      feature: "Complimentary 60-min wait"
+    },
+    {
+      title: "Flight Tracking",
+      description: "We monitor your flight and adjust pickup time accordingly",
+      icon: "Plane",
+      feature: "No extra charge for delays"
+    },
+    {
+      title: "24/7 Support",
+      description: "WhatsApp & phone support available around the clock",
+      icon: "Headphones",
+      feature: "Instant response"
+    },
+    {
+      title: "Fixed Prices",
+      description: "No hidden fees, no surge pricing, pay what you see",
+      icon: "DollarSign",
+      feature: "All-inclusive rates"
     }
   ],
   priceRoutes: [
-    {
-      destination: "Colombo City",
-      price: "$35",
-      duration: "45 mins"
-    }
+    { destination: "Colombo City", price: "$35", duration: "45 mins" },
+    { destination: "Negombo Beach", price: "$15", duration: "15 mins" },
+    { destination: "Kandy", price: "$85", duration: "3.5 hrs" },
+    { destination: "Galle Fort", price: "$95", duration: "2.5 hrs" },
+    { destination: "Sigiriya", price: "$110", duration: "4 hrs" },
+    { destination: "Ella", price: "$145", duration: "6 hrs" },
+    { destination: "Mirissa/Weligama", price: "$105", duration: "3 hrs" },
+    { destination: "Bentota", price: "$65", duration: "1.5 hrs" },
+    { destination: "Nuwara Eliya", price: "$120", duration: "5 hrs" },
+    { destination: "Arugam Bay", price: "$175", duration: "7 hrs" },
+    { destination: "Trincomalee", price: "$150", duration: "6 hrs" },
+    { destination: "Jaffna", price: "$195", duration: "8 hrs" }
   ],
   vehiclePricing: [
     { id: 'economy', name: 'Economy Sedan', basePrice: 11, pricePerKm: 0.25, passengers: 3, luggage: 2 },

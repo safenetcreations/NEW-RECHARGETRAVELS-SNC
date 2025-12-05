@@ -119,7 +119,7 @@ const AISEOSchema: React.FC<AISEOSchemaProps> = ({
       "https://twitter.com/rechargetravels",
       "https://www.tiktok.com/@rechargetravels",
       "https://www.pinterest.com/rechargetravels",
-      "https://www.tripadvisor.com/Attraction_Review-Recharge_Travels"
+      "https://www.tripadvisor.com/Attraction_Review-g293962-d10049587-Reviews-Recharge_Travels_And_Tours-Colombo_Western_Province.html"
     ],
     "aggregateRating": {
       "@type": "AggregateRating",

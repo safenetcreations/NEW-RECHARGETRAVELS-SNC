@@ -128,7 +128,11 @@ const RechargeFooter: React.FC = () => {
     { to: '/vendor/register', label: 'Vendor Registration' },
     { to: '/vehicle-rental/owner', label: 'Vehicle Owner Registration' },
     { to: '/list-property', label: 'List Your Property' },
-    { to: '/about/partners/b2b', label: 'B2B Agency Portal' }
+    { to: '/about/partners/b2b', label: 'B2B Agency Portal' },
+    // Legal & Policies
+    { to: '/legal/privacy', label: 'Privacy Policy' },
+    { to: '/legal/terms', label: 'Terms of Service' },
+    { to: '/legal/cookies', label: 'Cookie Policy' }
   ]
 
   const socialLinks = [
@@ -258,6 +262,25 @@ const RechargeFooter: React.FC = () => {
                       </a>
                     ))}
                   </div>
+
+                  {/* Legal Links */}
+                  <div className="mt-6 pt-4 border-t border-white/10">
+                    <h4 className="text-white/50 text-xs uppercase tracking-wider mb-3">Legal & Policies</h4>
+                    <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
+                      <Link to="/legal/privacy" className="text-white/60 hover:text-white transition-colors">
+                        Privacy Policy
+                      </Link>
+                      <Link to="/legal/terms" className="text-white/60 hover:text-white transition-colors">
+                        Terms of Service
+                      </Link>
+                      <Link to="/legal/cookies" className="text-white/60 hover:text-white transition-colors">
+                        Cookie Policy
+                      </Link>
+                      <Link to="/legal/accessibility" className="text-white/60 hover:text-white transition-colors">
+                        Accessibility
+                      </Link>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -266,7 +289,15 @@ const RechargeFooter: React.FC = () => {
             {/* Copyright inside the glass card */}
             <div className="border-t border-white/10 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center text-white/60 text-sm">
               <p>&copy; 2025 Recharge Travels & Tours Pvt Ltd. All Rights Reserved.</p>
-              <div className="flex items-center gap-2 mt-4 md:mt-0">
+              <div className="flex items-center gap-4 mt-4 md:mt-0">
+                <div className="flex gap-3 text-xs">
+                  <Link to="/legal/privacy" className="hover:text-white transition-colors">Privacy</Link>
+                  <span>•</span>
+                  <Link to="/legal/terms" className="hover:text-white transition-colors">Terms</Link>
+                  <span>•</span>
+                  <Link to="/legal/cookies" className="hover:text-white transition-colors">Cookies</Link>
+                </div>
+                <span className="hidden md:inline">|</span>
                 <span>Crafted with 💚 by SafeNet Creations</span>
               </div>
             </div>

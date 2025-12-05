@@ -963,7 +963,7 @@ export const bookingReminderTemplate = (data: {
 // Export existing B2B templates
 export { emailWrapper as b2bEmailWrapper };
 
-// B2B Booking Confirmation Template (keeping existing)
+// B2B Booking Confirmation Template
 export const bookingConfirmationTemplate = (data: {
   bookingId: string;
   agencyName: string;
@@ -979,15 +979,16 @@ export const bookingConfirmationTemplate = (data: {
   specialRequests?: string;
 }) => {
   const content = `
+    <!-- Success Header -->
     <div style="text-align: center; margin-bottom: 32px;">
-      <div style="width: 80px; height: 80px; background-color: #d1fae5; border-radius: 50%; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center;">
+      <div style="width: 80px; height: 80px; background: linear-gradient(135deg, ${BRAND_PRIMARY} 0%, #10b981 100%); border-radius: 50%; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(13,92,70,0.3);">
         <span style="font-size: 40px;">✓</span>
       </div>
       <h2 style="color: #111827; margin: 0; font-size: 28px; font-weight: 700;">
         B2B Booking Confirmed!
       </h2>
       <p style="color: #6b7280; margin: 12px 0 0; font-size: 16px;">
-        Tour booking placed via ${data.agencyName}
+        Booking successfully placed by ${data.agencyName}
       </p>
     </div>
 
@@ -999,6 +1000,9 @@ export const bookingConfirmationTemplate = (data: {
       <p style="color: ${BRAND_DARK}; margin: 0; font-size: 28px; font-weight: 700; font-family: monospace;">
         ${data.bookingId}
       </p>
+      <div style="margin-top: 8px;">
+        <span style="background-color: #10b981; color: white; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;">ACTIVE</span>
+      </div>
     </div>
 
     <!-- Tour Details -->
@@ -1054,14 +1058,14 @@ export const bookingConfirmationTemplate = (data: {
           <td style="padding: 8px 0; color: white; font-size: 14px; text-align: right;">$${data.originalPrice.toFixed(2)}</td>
         </tr>
         <tr>
-          <td style="padding: 8px 0; color: ${BRAND_PRIMARY}; font-size: 14px;">B2B Partner Discount (10%)</td>
+          <td style="padding: 8px 0; color: ${BRAND_PRIMARY}; font-size: 14px;">B2B Partner Commission (15%)</td>
           <td style="padding: 8px 0; color: ${BRAND_PRIMARY}; font-size: 14px; text-align: right;">-$${data.discount.toFixed(2)}</td>
         </tr>
         <tr>
           <td colspan="2" style="border-top: 1px solid #374151; padding-top: 12px;"></td>
         </tr>
         <tr>
-          <td style="padding: 8px 0; color: white; font-size: 18px; font-weight: 700;">Total Amount</td>
+          <td style="padding: 8px 0; color: white; font-size: 18px; font-weight: 700;">Nett Amount Due</td>
           <td style="padding: 8px 0; color: ${BRAND_SECONDARY}; font-size: 24px; font-weight: 700; text-align: right;">$${data.finalPrice.toFixed(2)}</td>
         </tr>
       </table>
@@ -1078,10 +1082,9 @@ export const bookingConfirmationTemplate = (data: {
     </div>
     ` : ''}
 
-    <!-- Agency Info -->
-    <div style="background-color: #eff6ff; border-radius: 12px; padding: 20px; margin-bottom: 24px; text-align: center;">
-      <p style="color: #1e40af; margin: 0; font-size: 14px;">
-        <strong>Booked by:</strong> ${data.agencyName} (B2B Partner)
+    <div style="text-align: center; margin-top: 32px;">
+      <p style="color: #6b7280; font-size: 14px;">
+        Need help? Contact our B2B Support: <a href="mailto:partners@rechargetravels.com" style="color: ${BRAND_PRIMARY}; font-weight: 600;">partners@rechargetravels.com</a>
       </p>
     </div>
   `;
@@ -1097,7 +1100,7 @@ export const agencyWelcomeTemplate = (data: { agencyName: string; email: string;
         Welcome to Recharge Travels B2B! 🎉
       </h2>
       <p style="color: #6b7280; margin: 12px 0 0; font-size: 16px;">
-        Thank you for registering as a B2B partner
+        Partner with Sri Lanka's Premium DMC
       </p>
     </div>
 
@@ -1106,25 +1109,25 @@ export const agencyWelcomeTemplate = (data: { agencyName: string; email: string;
     </p>
 
     <p style="color: #374151; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
-      We're thrilled to have you join our B2B partner network! To complete your registration and start booking tours for your clients, please verify your email address.
+      We're thrilled to welcome you to our B2B partner program. To activate your account and access exclusive nett rates, please verify your email address.
     </p>
 
     <div style="text-align: center; margin: 40px 0;">
       <a href="${data.verificationLink}"
-         style="display: inline-block; background: linear-gradient(135deg, ${BRAND_PRIMARY} 0%, #10b981 100%); color: white; text-decoration: none; padding: 16px 48px; border-radius: 12px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(13,92,70,0.4);">
+         style="display: inline-block; background: linear-gradient(135deg, ${BRAND_PRIMARY} 0%, #10b981 100%); color: white; text-decoration: none; padding: 16px 48px; border-radius: 50px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(13,92,70,0.4);">
         Verify Email Address
       </a>
     </div>
 
     <div style="background-color: #f9fafb; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
       <h3 style="color: #111827; margin: 0 0 16px; font-size: 18px; font-weight: 600;">
-        ✨ Your B2B Partner Benefits
+        ✨ Why Agencies Choose Us
       </h3>
       <ul style="color: #374151; font-size: 14px; line-height: 2; margin: 0; padding-left: 20px;">
-        <li><strong style="color: ${BRAND_PRIMARY};">10% Exclusive Discount</strong> on all tour packages</li>
+        <li><strong style="color: ${BRAND_PRIMARY};">15% Exclusive Commission</strong> (Highest in market)</li>
         <li>Priority booking & instant confirmation</li>
-        <li>Dedicated B2B support line</li>
-        <li>Flexible payment options</li>
+        <li>Dedicated B2B account manager</li>
+        <li>Flexible payment options (Bank Transfer/Card)</li>
       </ul>
     </div>
   `;
@@ -1134,13 +1137,17 @@ export const agencyWelcomeTemplate = (data: { agencyName: string; email: string;
 
 export const agencyApprovalTemplate = (data: { agencyName: string; loginLink: string; }) => {
   const content = `
+    <!-- Celebration Header -->
     <div style="text-align: center; margin-bottom: 32px;">
-      <div style="width: 80px; height: 80px; background-color: #d1fae5; border-radius: 50%; margin: 0 auto 16px;">
-        <span style="font-size: 40px; line-height: 80px;">🎊</span>
+      <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(16,185,129,0.3);">
+        <span style="font-size: 40px;">🎉</span>
       </div>
-      <h2 style="color: #111827; margin: 0; font-size: 28px; font-weight: 700;">
+      <h1 style="color: #1a1a1a; margin: 0; font-size: 32px; font-weight: 700;">
         You're Approved!
-      </h2>
+      </h1>
+      <p style="color: #6b7280; margin: 12px 0 0; font-size: 18px;">
+        Welcome to the <span style="color: #10b981; font-weight: 600;">Recharge Travels Partner Network</span>
+      </p>
     </div>
 
     <p style="color: #374151; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
@@ -1148,14 +1155,39 @@ export const agencyApprovalTemplate = (data: { agencyName: string; loginLink: st
     </p>
 
     <p style="color: #374151; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
-      Your B2B partner application has been approved. You can now access the full range of our tour packages with your exclusive 10% partner discount.
+      We are delighted to inform you that your B2B partner application has been approved. You now have full access to our premium inventory with exclusive partner benefits.
     </p>
 
+    <!-- Benefits Card -->
+    <div style="background-color: #f0fdf4; border: 1px solid #d1fae5; border-radius: 12px; padding: 24px; margin-bottom: 32px;">
+      <h3 style="color: #064e3b; margin: 0 0 16px; font-size: 18px; font-weight: 600;">
+        💎 Your Partner Benefits
+      </h3>
+      <ul style="margin: 0; padding: 0; list-style: none;">
+        <li style="padding: 8px 0; color: #374151; display: flex; align-items: center;">
+          <span style="color: #10b981; margin-right: 12px; font-weight: bold;">✓</span>
+          <strong>15% Commission</strong> on all tour packages
+        </li>
+        <li style="padding: 8px 0; color: #374151; display: flex; align-items: center;">
+          <span style="color: #10b981; margin-right: 12px; font-weight: bold;">✓</span>
+          Real-time availability & instant confirmation
+        </li>
+        <li style="padding: 8px 0; color: #374151; display: flex; align-items: center;">
+          <span style="color: #10b981; margin-right: 12px; font-weight: bold;">✓</span>
+          White-label vouchers for your clients
+        </li>
+      </ul>
+    </div>
+
+    <!-- CTA -->
     <div style="text-align: center; margin: 40px 0;">
       <a href="${data.loginLink}"
-         style="display: inline-block; background: linear-gradient(135deg, ${BRAND_PRIMARY} 0%, #10b981 100%); color: white; text-decoration: none; padding: 16px 48px; border-radius: 12px; font-weight: 600; font-size: 16px;">
-        Start Booking Now
+         style="display: inline-block; background: linear-gradient(135deg, ${BRAND_PRIMARY} 0%, #10b981 100%); color: white; text-decoration: none; padding: 18px 48px; border-radius: 50px; font-weight: 700; font-size: 18px; box-shadow: 0 4px 14px rgba(13,92,70,0.4); text-transform: uppercase; letter-spacing: 1px;">
+        Access Partner Portal
       </a>
+      <p style="color: #6b7280; margin: 20px 0 0; font-size: 14px;">
+        Login now to view nett rates and start booking
+      </p>
     </div>
   `;
 
@@ -1285,6 +1317,709 @@ export const bookingCancellationTemplate = (data: { bookingId: string; tourName:
   return emailWrapper(content, 'Booking Cancelled - Recharge Travels', 'booking');
 };
 
+// ==========================================
+// DRIVER REGISTRATION CONFIRMATION
+// ==========================================
+
+export const driverRegistrationTemplate = (data: {
+  driverName: string;
+  email: string;
+  phone: string;
+  tier: string;
+  applicationId: string;
+  submittedAt: string;
+}) => {
+  const content = `
+    <!-- Success Header -->
+    <div style="text-align: center; margin-bottom: 32px;">
+      <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(249,115,22,0.3);">
+        <span style="font-size: 40px;">🚗</span>
+      </div>
+      <h1 style="color: #1a1a1a; margin: 0; font-size: 28px; font-weight: 700;">
+        Application Received!
+      </h1>
+      <p style="color: #6b7280; margin: 12px 0 0; font-size: 16px;">
+        Thank you for joining Recharge Travels Driver Network
+      </p>
+    </div>
+
+    <!-- Application ID -->
+    <div style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 32px;">
+      <p style="color: rgba(255,255,255,0.8); margin: 0 0 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 2px;">
+        Application ID
+      </p>
+      <p style="color: white; margin: 0; font-size: 28px; font-weight: 700; font-family: monospace; letter-spacing: 2px;">
+        ${data.applicationId}
+      </p>
+    </div>
+
+    <!-- Application Details -->
+    <div style="background-color: #fff7ed; border-radius: 12px; padding: 24px; margin-bottom: 24px; border-left: 4px solid #f97316;">
+      <h3 style="color: #9a3412; margin: 0 0 16px; font-size: 18px; font-weight: 600;">
+        📋 Application Details
+      </h3>
+      <table width="100%" cellspacing="0" cellpadding="0">
+        <tr>
+          <td style="padding: 8px 0; color: #6b7280; font-size: 14px; width: 40%;">Name</td>
+          <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px; font-weight: 600;">${data.driverName}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Email</td>
+          <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px;">${data.email}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Phone</td>
+          <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px;">${data.phone}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Driver Tier</td>
+          <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px; font-weight: 600;">${data.tier}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Submitted</td>
+          <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px;">${data.submittedAt}</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- What's Next -->
+    <div style="background-color: #f0fdf4; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+      <h3 style="color: ${BRAND_PRIMARY}; margin: 0 0 16px; font-size: 18px; font-weight: 600;">
+        🔄 What Happens Next?
+      </h3>
+      <ol style="color: #374151; font-size: 14px; line-height: 2; margin: 0; padding-left: 20px;">
+        <li>Our verification team reviews your documents (24-48 hours)</li>
+        <li>We may contact you for additional information</li>
+        <li>You'll receive an approval email once verified</li>
+        <li>Start receiving bookings immediately!</li>
+      </ol>
+    </div>
+
+    <!-- Support -->
+    <div style="text-align: center;">
+      <p style="color: #6b7280; margin: 0 0 16px; font-size: 14px;">
+        Questions? Contact our driver support team:
+      </p>
+      <a href="${WHATSAPP_LINK}?text=Hi%2C%20I%20submitted%20a%20driver%20application%20(ID%3A%20${data.applicationId})%20and%20have%20a%20question."
+         style="display: inline-block; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; padding: 16px 40px; border-radius: 50px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(249,115,22,0.4);">
+        Chat on WhatsApp
+      </a>
+    </div>
+  `;
+
+  return emailWrapper(content, 'Driver Application Received - Recharge Travels', 'booking');
+};
+
+// ==========================================
+// DRIVER APPROVAL EMAIL
+// ==========================================
+
+export const driverApprovalTemplate = (data: {
+  driverName: string;
+  tier: string;
+  loginLink: string;
+}) => {
+  const content = `
+    <!-- Celebration Header -->
+    <div style="text-align: center; margin-bottom: 32px;">
+      <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(16,185,129,0.3);">
+        <span style="font-size: 40px;">🎉</span>
+      </div>
+      <h1 style="color: #1a1a1a; margin: 0; font-size: 32px; font-weight: 700;">
+        Congratulations, ${data.driverName}!
+      </h1>
+      <p style="color: #6b7280; margin: 12px 0 0; font-size: 18px;">
+        Your driver account has been <span style="color: #10b981; font-weight: 600;">APPROVED</span>!
+      </p>
+    </div>
+
+    <!-- Badge -->
+    <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 16px; padding: 32px; text-align: center; margin-bottom: 32px; color: white;">
+      <p style="margin: 0 0 8px; font-size: 14px; opacity: 0.9;">You are now a verified</p>
+      <p style="margin: 0; font-size: 24px; font-weight: 700;">${data.tier}</p>
+      <p style="margin: 12px 0 0; font-size: 14px; opacity: 0.9;">with Recharge Travels</p>
+    </div>
+
+    <!-- What You Get -->
+    <div style="background-color: #f0fdf4; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+      <h3 style="color: #166534; margin: 0 0 16px; font-size: 18px; font-weight: 600;">
+        ✅ What You Get
+      </h3>
+      <ul style="color: #374151; font-size: 14px; line-height: 2; margin: 0; padding-left: 20px;">
+        <li>Access to tourist bookings across Sri Lanka</li>
+        <li>Verified driver badge on your profile</li>
+        <li>Real-time booking notifications</li>
+        <li>Secure payments directly to your bank</li>
+        <li>24/7 driver support via WhatsApp</li>
+      </ul>
+    </div>
+
+    <!-- CTA -->
+    <div style="text-align: center;">
+      <a href="${data.loginLink}"
+         style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 18px 48px; border-radius: 50px; font-weight: 700; font-size: 18px; box-shadow: 0 4px 14px rgba(16,185,129,0.4);">
+        🚗 Go to Driver Dashboard
+      </a>
+      <p style="color: #6b7280; margin: 20px 0 0; font-size: 14px;">
+        Start receiving bookings today!
+      </p>
+    </div>
+  `;
+
+  return emailWrapper(content, '🎉 You\'re Approved! Welcome to Recharge Travels', 'booking');
+};
+
+// ==========================================
+// ADMIN: NEW DRIVER APPLICATION NOTIFICATION
+// ==========================================
+
+export const adminDriverNotificationTemplate = (data: {
+  driverName: string;
+  email: string;
+  phone: string;
+  tier: string;
+  applicationId: string;
+  vehicleType: string;
+  documentsUploaded: number;
+  reviewLink: string;
+}) => {
+  const content = `
+    <!-- Alert Header -->
+    <div style="text-align: center; margin-bottom: 32px;">
+      <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(59,130,246,0.3);">
+        <span style="font-size: 40px;">🔔</span>
+      </div>
+      <h1 style="color: #1a1a1a; margin: 0; font-size: 24px; font-weight: 700;">
+        New Driver Application
+      </h1>
+      <p style="color: #6b7280; margin: 12px 0 0; font-size: 16px;">
+        A new driver has applied to join the network
+      </p>
+    </div>
+
+    <!-- Application Summary -->
+    <div style="background-color: #eff6ff; border-radius: 12px; padding: 24px; margin-bottom: 24px; border-left: 4px solid #3b82f6;">
+      <table width="100%" cellspacing="0" cellpadding="0">
+        <tr>
+          <td style="padding: 8px 0; color: #6b7280; font-size: 14px; width: 40%;">Application ID</td>
+          <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px; font-weight: 700;">${data.applicationId}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Applicant Name</td>
+          <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px; font-weight: 600;">${data.driverName}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Email</td>
+          <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px;">${data.email}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Phone</td>
+          <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px;">${data.phone}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Requested Tier</td>
+          <td style="padding: 8px 0; font-size: 14px;">
+            <span style="background-color: #fbbf24; color: #1a1a1a; padding: 4px 12px; border-radius: 20px; font-weight: 600;">${data.tier}</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Vehicle Type</td>
+          <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px;">${data.vehicleType}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Documents Uploaded</td>
+          <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px;">${data.documentsUploaded} files</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Action Required -->
+    <div style="background-color: #fef3c7; border-radius: 12px; padding: 20px; margin-bottom: 24px; text-align: center;">
+      <p style="color: #92400e; margin: 0; font-size: 14px; font-weight: 600;">
+        ⚠️ Action Required: Please review and verify the uploaded documents
+      </p>
+    </div>
+
+    <!-- CTA -->
+    <div style="text-align: center;">
+      <a href="${data.reviewLink}"
+         style="display: inline-block; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; padding: 16px 40px; border-radius: 50px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(59,130,246,0.4);">
+        Review Application
+      </a>
+    </div>
+  `;
+
+  return emailWrapper(content, '🔔 New Driver Application - Action Required', 'booking');
+};
+
+// ==========================================
+// VEHICLE RENTAL BOOKING CONFIRMATION
+// ==========================================
+
+export const vehicleRentalConfirmationTemplate = (data: {
+  bookingRef: string;
+  customerName: string;
+  email: string;
+  phone: string;
+  vehicleType: string;
+  pickupDate: string;
+  returnDate: string;
+  pickupLocation: string;
+  returnLocation: string;
+  driverOption: string;
+  totalPrice: number;
+  paymentStatus: string;
+}) => {
+  const content = `
+    <!-- Success Header -->
+    <div style="text-align: center; margin-bottom: 32px;">
+      <div style="width: 80px; height: 80px; background: linear-gradient(135deg, ${BRAND_PRIMARY} 0%, #10b981 100%); border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(13,92,70,0.3);">
+        <span style="font-size: 40px;">🚗</span>
+      </div>
+      <h1 style="color: #1a1a1a; margin: 0; font-size: 28px; font-weight: 700;">
+        Vehicle Rental Confirmed!
+      </h1>
+      <p style="color: #6b7280; margin: 12px 0 0; font-size: 16px;">
+        Your ${data.vehicleType} is reserved and ready
+      </p>
+    </div>
+
+    <!-- Booking Reference -->
+    <div style="background: linear-gradient(135deg, ${BRAND_PRIMARY} 0%, #10b981 100%); border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 32px;">
+      <p style="color: rgba(255,255,255,0.8); margin: 0 0 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 2px;">
+        Booking Reference
+      </p>
+      <p style="color: white; margin: 0; font-size: 32px; font-weight: 700; font-family: monospace; letter-spacing: 2px;">
+        ${data.bookingRef}
+      </p>
+    </div>
+
+    <!-- Rental Details -->
+    <div style="background-color: #f0fdf4; border-radius: 12px; padding: 24px; margin-bottom: 24px; border-left: 4px solid ${BRAND_PRIMARY};">
+      <h3 style="color: #1a1a1a; margin: 0 0 16px; font-size: 18px; font-weight: 600;">
+        🚗 Rental Details
+      </h3>
+      <table width="100%" cellspacing="0" cellpadding="0">
+        <tr>
+          <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Vehicle</td>
+          <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px; font-weight: 600; text-align: right;">${data.vehicleType}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Driver Option</td>
+          <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px; text-align: right;">${data.driverOption}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Pickup Date</td>
+          <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px; font-weight: 600; text-align: right;">${data.pickupDate}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Return Date</td>
+          <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px; text-align: right;">${data.returnDate}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Pickup Location</td>
+          <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px; text-align: right;">${data.pickupLocation}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Return Location</td>
+          <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px; text-align: right;">${data.returnLocation}</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Payment Summary -->
+    <div style="background: linear-gradient(135deg, #1f2937 0%, #374151 100%); border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+      <table width="100%" cellspacing="0" cellpadding="0">
+        <tr>
+          <td style="padding: 12px 0; color: white; font-size: 18px; font-weight: 700;">Total Amount</td>
+          <td style="padding: 12px 0; color: ${BRAND_SECONDARY}; font-size: 28px; font-weight: 700; text-align: right;">$${data.totalPrice.toLocaleString()}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Payment Status</td>
+          <td style="padding: 8px 0; text-align: right;">
+            <span style="background-color: ${data.paymentStatus === 'paid' ? '#10b981' : '#f59e0b'}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">
+              ${data.paymentStatus.toUpperCase()}
+            </span>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- CTA -->
+    <div style="text-align: center;">
+      <a href="${WHATSAPP_LINK}?text=Hi%2C%20I%20have%20a%20vehicle%20rental%20booking%20(Ref%3A%20${data.bookingRef})%20and%20have%20a%20question."
+         style="display: inline-block; background: linear-gradient(135deg, ${BRAND_PRIMARY} 0%, #10b981 100%); color: white; padding: 16px 40px; border-radius: 50px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(13,92,70,0.4);">
+        Contact Support
+      </a>
+    </div>
+  `;
+
+  return emailWrapper(content, 'Vehicle Rental Confirmed - Recharge Travels', 'booking');
+};
+
+// ==========================================
+// REVIEW REQUEST EMAIL
+// ==========================================
+
+export const reviewRequestTemplate = (data: {
+  customerName: string;
+  tourName: string;
+  tourDate: string;
+  reviewLink: string;
+}) => {
+  const content = `
+    <!-- Review Request Header -->
+    <div style="text-align: center; margin-bottom: 32px;">
+      <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
+        <span style="font-size: 40px;">⭐</span>
+      </div>
+      <h1 style="color: #1a1a1a; margin: 0; font-size: 28px; font-weight: 700;">
+        How Was Your Experience?
+      </h1>
+      <p style="color: #6b7280; margin: 12px 0 0; font-size: 16px;">
+        Hi ${data.customerName}, we hope you enjoyed your trip!
+      </p>
+    </div>
+
+    <!-- Tour Info -->
+    <div style="background-color: #fef3c7; border-radius: 12px; padding: 20px; margin-bottom: 24px; text-align: center;">
+      <p style="color: #92400e; margin: 0 0 8px; font-size: 14px;">Your Recent Tour</p>
+      <p style="color: #1a1a1a; margin: 0; font-size: 18px; font-weight: 600;">${data.tourName}</p>
+      <p style="color: #92400e; margin: 8px 0 0; font-size: 14px;">${data.tourDate}</p>
+    </div>
+
+    <!-- Why Review -->
+    <div style="background-color: #f9fafb; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+      <h3 style="color: #1a1a1a; margin: 0 0 16px; font-size: 18px; font-weight: 600;">
+        Your feedback helps us! 🙏
+      </h3>
+      <ul style="color: #374151; font-size: 14px; line-height: 2; margin: 0; padding-left: 20px;">
+        <li>Help other travelers choose their perfect tour</li>
+        <li>Let our drivers know they're doing great</li>
+        <li>Help us improve our services</li>
+        <li>Get featured on our website!</li>
+      </ul>
+    </div>
+
+    <!-- CTA -->
+    <div style="text-align: center;">
+      <a href="${data.reviewLink}"
+         style="display: inline-block; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #1a1a1a; padding: 18px 48px; border-radius: 50px; font-weight: 700; font-size: 18px; box-shadow: 0 4px 14px rgba(251,191,36,0.4);">
+        ⭐ Leave Your Review
+      </a>
+      <p style="color: #6b7280; margin: 20px 0 0; font-size: 12px;">
+        Takes less than 2 minutes
+      </p>
+    </div>
+  `;
+
+  return emailWrapper(content, "How Was Your Tour? Share Your Experience! - Recharge Travels", 'general');
+};
+
+// ==========================================
+// INVOICE EMAIL
+// ==========================================
+
+export const invoiceTemplate = (data: {
+  invoiceNumber: string;
+  customerName: string;
+  bookingRef: string;
+  tourName: string;
+  tourDate: string;
+  items: Array<{ description: string; quantity: number; unitPrice: number; total: number }>;
+  subtotal: number;
+  tax: number;
+  discount: number;
+  total: number;
+  paymentStatus: string;
+  paidAmount: number;
+  balanceDue: number;
+}) => {
+  const itemsHtml = data.items.map(item => `
+    <tr>
+      <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; font-size: 14px;">${item.description}</td>
+      <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; font-size: 14px; text-align: center;">${item.quantity}</td>
+      <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; font-size: 14px; text-align: right;">$${item.unitPrice.toFixed(2)}</td>
+      <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; font-size: 14px; text-align: right; font-weight: 600;">$${item.total.toFixed(2)}</td>
+    </tr>
+  `).join('');
+
+  const content = `
+    <!-- Invoice Header -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px;">
+      <div>
+        <h1 style="color: #1a1a1a; margin: 0; font-size: 32px; font-weight: 700;">INVOICE</h1>
+        <p style="color: #6b7280; margin: 8px 0 0; font-size: 14px;">${data.invoiceNumber}</p>
+      </div>
+      <div style="text-align: right;">
+        <p style="color: ${BRAND_PRIMARY}; margin: 0; font-size: 14px; font-weight: 600;">Recharge Travels & Tours (Pvt) Ltd</p>
+        <p style="color: #6b7280; margin: 4px 0 0; font-size: 12px;">Colombo, Jaffna, Sri Lanka</p>
+        <p style="color: #6b7280; margin: 2px 0 0; font-size: 12px;">info@rechargetravels.com</p>
+      </div>
+    </div>
+
+    <!-- Bill To -->
+    <div style="background-color: #f9fafb; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+      <p style="color: #6b7280; margin: 0 0 8px; font-size: 12px; text-transform: uppercase;">Bill To</p>
+      <p style="color: #1a1a1a; margin: 0; font-size: 16px; font-weight: 600;">${data.customerName}</p>
+      <p style="color: #6b7280; margin: 4px 0 0; font-size: 14px;">Booking Ref: ${data.bookingRef}</p>
+    </div>
+
+    <!-- Tour Info -->
+    <div style="margin-bottom: 24px;">
+      <p style="color: #6b7280; margin: 0 0 4px; font-size: 12px;">Tour Package</p>
+      <p style="color: #1a1a1a; margin: 0; font-size: 16px; font-weight: 600;">${data.tourName}</p>
+      <p style="color: #6b7280; margin: 4px 0 0; font-size: 14px;">${data.tourDate}</p>
+    </div>
+
+    <!-- Items Table -->
+    <table width="100%" cellspacing="0" cellpadding="0" style="margin-bottom: 24px;">
+      <thead>
+        <tr style="background-color: ${BRAND_PRIMARY};">
+          <th style="padding: 12px; text-align: left; color: white; font-size: 12px; font-weight: 600;">Description</th>
+          <th style="padding: 12px; text-align: center; color: white; font-size: 12px; font-weight: 600;">Qty</th>
+          <th style="padding: 12px; text-align: right; color: white; font-size: 12px; font-weight: 600;">Unit Price</th>
+          <th style="padding: 12px; text-align: right; color: white; font-size: 12px; font-weight: 600;">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${itemsHtml}
+      </tbody>
+    </table>
+
+    <!-- Totals -->
+    <div style="background-color: #f9fafb; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+      <table width="100%" cellspacing="0" cellpadding="0">
+        <tr>
+          <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Subtotal</td>
+          <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px; text-align: right;">$${data.subtotal.toFixed(2)}</td>
+        </tr>
+        ${data.discount > 0 ? `
+        <tr>
+          <td style="padding: 8px 0; color: #10b981; font-size: 14px;">Discount</td>
+          <td style="padding: 8px 0; color: #10b981; font-size: 14px; text-align: right;">-$${data.discount.toFixed(2)}</td>
+        </tr>
+        ` : ''}
+        <tr>
+          <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Tax</td>
+          <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px; text-align: right;">$${data.tax.toFixed(2)}</td>
+        </tr>
+        <tr style="border-top: 2px solid ${BRAND_PRIMARY};">
+          <td style="padding: 16px 0 8px; color: #1a1a1a; font-size: 18px; font-weight: 700;">Total</td>
+          <td style="padding: 16px 0 8px; color: ${BRAND_PRIMARY}; font-size: 24px; font-weight: 700; text-align: right;">$${data.total.toFixed(2)}</td>
+        </tr>
+        ${data.paidAmount > 0 ? `
+        <tr>
+          <td style="padding: 8px 0; color: #10b981; font-size: 14px;">Paid</td>
+          <td style="padding: 8px 0; color: #10b981; font-size: 14px; text-align: right;">$${data.paidAmount.toFixed(2)}</td>
+        </tr>
+        ` : ''}
+        ${data.balanceDue > 0 ? `
+        <tr>
+          <td style="padding: 8px 0; color: #ef4444; font-size: 14px; font-weight: 600;">Balance Due</td>
+          <td style="padding: 8px 0; color: #ef4444; font-size: 16px; font-weight: 700; text-align: right;">$${data.balanceDue.toFixed(2)}</td>
+        </tr>
+        ` : ''}
+      </table>
+    </div>
+
+    <!-- Payment Status -->
+    <div style="text-align: center; margin-bottom: 24px;">
+      <span style="background-color: ${data.paymentStatus === 'paid' ? '#10b981' : data.paymentStatus === 'partial' ? '#f59e0b' : '#ef4444'}; color: white; padding: 8px 24px; border-radius: 20px; font-size: 14px; font-weight: 600;">
+        ${data.paymentStatus.toUpperCase()}
+      </span>
+    </div>
+  `;
+
+  return emailWrapper(content, `Invoice ${data.invoiceNumber} - Recharge Travels`, 'booking');
+};
+
+// ==========================================
+// HOTEL BOOKING CONFIRMATION
+// ==========================================
+
+export const hotelBookingTemplate = (data: {
+  bookingRef: string;
+  customerName: string;
+  email: string;
+  phone: string;
+  hotelName: string;
+  hotelImage?: string;
+  checkIn: string;
+  checkOut: string;
+  nights: number;
+  roomType: string;
+  roomCount: number;
+  guests: number;
+  mealPlan: string;
+  totalPrice: number;
+  specialRequests?: string;
+}) => {
+  const content = `
+    <!-- Success Header -->
+    <div style="text-align: center; margin-bottom: 32px;">
+      <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(139,92,246,0.3);">
+        <span style="font-size: 40px;">🏨</span>
+      </div>
+      <h1 style="color: #1a1a1a; margin: 0; font-size: 28px; font-weight: 700;">
+        Hotel Booking Confirmed!
+      </h1>
+      <p style="color: #6b7280; margin: 12px 0 0; font-size: 16px;">
+        ${data.hotelName}
+      </p>
+    </div>
+
+    <!-- Booking Reference -->
+    <div style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 32px;">
+      <p style="color: rgba(255,255,255,0.8); margin: 0 0 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 2px;">
+        Booking Reference
+      </p>
+      <p style="color: white; margin: 0; font-size: 32px; font-weight: 700; font-family: monospace; letter-spacing: 2px;">
+        ${data.bookingRef}
+      </p>
+    </div>
+
+    ${data.hotelImage ? `
+    <!-- Hotel Image -->
+    <div style="margin-bottom: 24px; border-radius: 12px; overflow: hidden;">
+      <img src="${data.hotelImage}" alt="${data.hotelName}" style="width: 100%; height: 200px; object-fit: cover;" />
+    </div>
+    ` : ''}
+
+    <!-- Stay Details -->
+    <div style="background-color: #f5f3ff; border-radius: 12px; padding: 24px; margin-bottom: 24px; border-left: 4px solid #8b5cf6;">
+      <h3 style="color: #5b21b6; margin: 0 0 16px; font-size: 18px; font-weight: 600;">
+        🏨 Stay Details
+      </h3>
+      <table width="100%" cellspacing="0" cellpadding="0">
+        <tr>
+          <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Check-in</td>
+          <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px; font-weight: 600; text-align: right;">${data.checkIn}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Check-out</td>
+          <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px; font-weight: 600; text-align: right;">${data.checkOut}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Duration</td>
+          <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px; text-align: right;">${data.nights} night(s)</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Room Type</td>
+          <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px; text-align: right;">${data.roomType}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Rooms</td>
+          <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px; text-align: right;">${data.roomCount}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Guests</td>
+          <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px; text-align: right;">${data.guests}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Meal Plan</td>
+          <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px; text-align: right;">${data.mealPlan}</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Total -->
+    <div style="background: linear-gradient(135deg, #1f2937 0%, #374151 100%); border-radius: 12px; padding: 24px; margin-bottom: 24px; text-align: center;">
+      <p style="color: #9ca3af; margin: 0 0 8px; font-size: 14px;">Total Amount</p>
+      <p style="color: #a78bfa; margin: 0; font-size: 36px; font-weight: 700;">$${data.totalPrice.toLocaleString()}</p>
+    </div>
+
+    ${data.specialRequests ? `
+    <!-- Special Requests -->
+    <div style="background-color: #fef3c7; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+      <h4 style="color: #92400e; margin: 0 0 8px; font-size: 14px; font-weight: 600;">
+        📝 Special Requests
+      </h4>
+      <p style="color: #78350f; margin: 0; font-size: 14px; line-height: 1.6;">
+        ${data.specialRequests}
+      </p>
+    </div>
+    ` : ''}
+
+    <!-- CTA -->
+    <div style="text-align: center;">
+      <a href="${WHATSAPP_LINK}?text=Hi%2C%20I%20have%20a%20hotel%20booking%20(Ref%3A%20${data.bookingRef})%20at%20${encodeURIComponent(data.hotelName)}"
+         style="display: inline-block; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; padding: 16px 40px; border-radius: 50px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(139,92,246,0.4);">
+        Contact Hotel Support
+      </a>
+    </div>
+  `;
+
+  return emailWrapper(content, 'Hotel Booking Confirmed - Recharge Travels', 'booking');
+};
+
+// ==========================================
+// DRIVER REJECTION EMAIL
+// ==========================================
+
+export const driverRejectionTemplate = (data: {
+  driverName: string;
+  reason: string;
+  canReapply: boolean;
+  reapplyAfterDays?: number;
+}) => {
+  const content = `
+    <!-- Header -->
+    <div style="text-align: center; margin-bottom: 32px;">
+      <div style="width: 80px; height: 80px; background-color: #fee2e2; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
+        <span style="font-size: 40px;">😔</span>
+      </div>
+      <h1 style="color: #1a1a1a; margin: 0; font-size: 28px; font-weight: 700;">
+        Application Update
+      </h1>
+      <p style="color: #6b7280; margin: 12px 0 0; font-size: 16px;">
+        Hi ${data.driverName}
+      </p>
+    </div>
+
+    <!-- Message -->
+    <div style="background-color: #fef2f2; border-radius: 12px; padding: 24px; margin-bottom: 24px; border-left: 4px solid #ef4444;">
+      <p style="color: #374151; margin: 0; font-size: 14px; line-height: 1.6;">
+        Thank you for your interest in joining Recharge Travels. After reviewing your application, 
+        we regret to inform you that we are unable to approve your driver registration at this time.
+      </p>
+    </div>
+
+    <!-- Reason -->
+    <div style="background-color: #f9fafb; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+      <h3 style="color: #1a1a1a; margin: 0 0 12px; font-size: 16px; font-weight: 600;">
+        Reason:
+      </h3>
+      <p style="color: #6b7280; margin: 0; font-size: 14px; line-height: 1.6;">
+        ${data.reason}
+      </p>
+    </div>
+
+    ${data.canReapply ? `
+    <!-- Reapply Info -->
+    <div style="background-color: #f0fdf4; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+      <h3 style="color: #166534; margin: 0 0 12px; font-size: 16px; font-weight: 600;">
+        ✅ Good News!
+      </h3>
+      <p style="color: #374151; margin: 0; font-size: 14px; line-height: 1.6;">
+        You can reapply ${data.reapplyAfterDays ? `after ${data.reapplyAfterDays} days` : 'once the issues are resolved'}. 
+        Please ensure you address the concerns mentioned above before submitting a new application.
+      </p>
+    </div>
+    ` : ''}
+
+    <!-- CTA -->
+    <div style="text-align: center;">
+      <a href="${WHATSAPP_LINK}?text=Hi%2C%20I%20received%20a%20rejection%20for%20my%20driver%20application%20and%20would%20like%20to%20discuss."
+         style="display: inline-block; background: linear-gradient(135deg, ${BRAND_PRIMARY} 0%, #10b981 100%); color: white; padding: 16px 40px; border-radius: 50px; font-weight: 600; font-size: 16px;">
+        Contact Support
+      </a>
+    </div>
+  `;
+
+  return emailWrapper(content, 'Driver Application Update - Recharge Travels', 'general');
+};
+
 export default {
   emailWrapper,
   conciergeBookingTemplate,
@@ -1298,5 +2033,15 @@ export default {
   agencyApprovalTemplate,
   paymentConfirmationTemplate,
   passwordResetTemplate,
-  bookingCancellationTemplate
+  bookingCancellationTemplate,
+  // Driver templates
+  driverRegistrationTemplate,
+  driverApprovalTemplate,
+  adminDriverNotificationTemplate,
+  vehicleRentalConfirmationTemplate,
+  // New additional templates
+  reviewRequestTemplate,
+  invoiceTemplate,
+  hotelBookingTemplate,
+  driverRejectionTemplate
 };

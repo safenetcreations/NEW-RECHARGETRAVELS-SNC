@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
-import Header from '@/components/Header';
-import RechargeFooter from '@/components/ui/RechargeFooter';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Plane, Car, Clock, Shield, MapPin, Calendar, Users, ChevronDown, ChevronUp,
@@ -231,7 +229,7 @@ const AirportTransfers = () => {
     if (pickup) {
       const matchedAirport = SRI_LANKA_AIRPORTS.find(
         a => a.name.toLowerCase().includes(pickup.toLowerCase()) ||
-             a.code.toLowerCase() === pickup.toLowerCase()
+          a.code.toLowerCase() === pickup.toLowerCase()
       );
       if (matchedAirport) {
         setSelectedAirport(matchedAirport);
@@ -260,7 +258,7 @@ const AirportTransfers = () => {
         // Try matching to an airport for departure transfers
         const matchedAirport = SRI_LANKA_AIRPORTS.find(
           a => a.name.toLowerCase().includes(dropoff.toLowerCase()) ||
-               a.code.toLowerCase() === dropoff.toLowerCase()
+            a.code.toLowerCase() === dropoff.toLowerCase()
         );
         if (matchedAirport && type === 'departure') {
           setSelectedAirport(matchedAirport);
@@ -296,8 +294,8 @@ const AirportTransfers = () => {
   useEffect(() => {
     if (selectedHotel && selectedAirport) {
       const airportCoords = selectedAirport.code === 'CMB' ? CMB_AIRPORT_COORDS :
-                           selectedAirport.code === 'JAF' ? JAF_AIRPORT_COORDS :
-                           CMB_AIRPORT_COORDS;
+        selectedAirport.code === 'JAF' ? JAF_AIRPORT_COORDS :
+          CMB_AIRPORT_COORDS;
       const distance = calculateHaversineDistance(airportCoords, selectedHotel.coordinates);
       const duration = calculateDuration(distance);
       setCalculatedDistance(distance);
@@ -332,8 +330,8 @@ const AirportTransfers = () => {
 
           // Get airport coordinates
           const airportCoords = selectedAirport.code === 'CMB' ? CMB_AIRPORT_COORDS :
-                               selectedAirport.code === 'JAF' ? JAF_AIRPORT_COORDS :
-                               CMB_AIRPORT_COORDS;
+            selectedAirport.code === 'JAF' ? JAF_AIRPORT_COORDS :
+              CMB_AIRPORT_COORDS;
 
           // Get destination coordinates (priority: Google Places > Hotel > Static destination)
           let destCoords = { lat: 7.2906, lng: 80.6337 }; // Default Kandy
@@ -454,9 +452,10 @@ const AirportTransfers = () => {
       selectedExtras,
       childSeatCount,
       transferType === 'round-trip',
-      pageContent?.vehiclePricing
+      pageContent?.vehiclePricing,
+      pageContent?.transferExtras
     );
-  }, [selectedVehicle, calculatedDistance, selectedExtras, childSeatCount, transferType, pageContent?.vehiclePricing]);
+  }, [selectedVehicle, calculatedDistance, selectedExtras, childSeatCount, transferType, pageContent?.vehiclePricing, pageContent?.transferExtras]);
 
   // Step validation
   const canProceedToStep = (targetStep: number): boolean => {
@@ -678,21 +677,160 @@ const AirportTransfers = () => {
         <meta name="keywords" content={pageContent?.seoKeywords?.join(', ') || 'airport transfer sri lanka'} />
       </Helmet>
 
-      <Header />
+      {/* Full-Width Hero Section */}
+      <section className="relative min-h-[70vh] md:min-h-[80vh] overflow-hidden">
+        {/* Background Slideshow */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentSlide}
+            initial={{ opacity: 0, scale: 1.05 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.8 }}
+            className="absolute inset-0"
+          >
+            <img
+              src={pageContent?.heroSlides?.[currentSlide]?.image || 'https://images.unsplash.com/photo-1606567595334-d39972c85dfd?auto=format&fit=crop&q=80'}
+              alt={pageContent?.heroSlides?.[currentSlide]?.title || 'Sri Lanka Airport Transfer'}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70" />
+          </motion.div>
+        </AnimatePresence>
 
-      <div className="bg-white border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-          <div className="text-sm text-slate-700 flex items-center gap-2">
-            <Link to="/transport" className="text-emerald-700 font-semibold hover:text-emerald-800">Transport</Link>
-            <span aria-hidden>›</span>
-            <span className="font-semibold text-slate-900">Airport Transfers</span>
-          </div>
-          <div className="flex flex-wrap gap-3 text-xs">
+        {/* Hero Content */}
+        <div className="relative z-10 h-full flex flex-col justify-center items-center text-center px-4 pt-24 pb-16">
+          <motion.div
+            initial={{ y: 30, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.6 }}
+            className="max-w-4xl mx-auto"
+          >
+            {/* Breadcrumb - Subtle */}
+            <div className="flex items-center justify-center gap-2 text-white/70 text-sm mb-6">
+              <Link to="/" className="hover:text-white transition">Home</Link>
+              <ChevronRight className="w-4 h-4" />
+              <Link to="/transport" className="hover:text-white transition">Transport</Link>
+              <ChevronRight className="w-4 h-4" />
+              <span className="text-white font-medium">Airport Transfers</span>
+            </div>
+
+            {/* Badge */}
+            <span className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600/90 backdrop-blur rounded-full text-white text-sm font-semibold mb-6">
+              <Plane className="w-4 h-4" />
+              Premium Sri Lanka Airport Transfers
+            </span>
+
+            {/* Main Title */}
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
+              {pageContent?.heroSlides?.[currentSlide]?.title || 'Seamless Airport Transfers'}
+            </h1>
+
+            {/* Subtitle */}
+            <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-2xl mx-auto">
+              {pageContent?.heroSlides?.[currentSlide]?.subtitle || 'Start your Sri Lanka adventure with comfort and style'}
+            </p>
+
+            {/* Trust Stats Row */}
+            <div className="flex flex-wrap justify-center gap-6 md:gap-10 mb-10">
+              <div className="flex items-center gap-2 text-white">
+                <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
+                <span className="font-bold">{trustIndicators?.rating || '4.9'}</span>
+                <span className="text-white/70">Rating</span>
+              </div>
+              <div className="flex items-center gap-2 text-white">
+                <Users className="w-5 h-5 text-emerald-400" />
+                <span className="font-bold">{trustIndicators?.totalReviews || '2,847+'}</span>
+                <span className="text-white/70">Transfers</span>
+              </div>
+              <div className="flex items-center gap-2 text-white">
+                <Shield className="w-5 h-5 text-blue-400" />
+                <span className="font-bold">100%</span>
+                <span className="text-white/70">Safe</span>
+              </div>
+              <div className="flex items-center gap-2 text-white">
+                <Headphones className="w-5 h-5 text-purple-400" />
+                <span className="font-bold">24/7</span>
+                <span className="text-white/70">Support</span>
+              </div>
+            </div>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-wrap justify-center gap-4">
+              <Button
+                size="lg"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-6 text-lg rounded-full shadow-lg hover:shadow-xl transition-all"
+                onClick={() => document.getElementById('booking-form')?.scrollIntoView({ behavior: 'smooth' })}
+              >
+                Book Your Transfer
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-2 border-white text-white hover:bg-white hover:text-slate-900 px-8 py-6 text-lg rounded-full"
+                onClick={() => window.open(`https://wa.me/94773401305?text=${encodeURIComponent('Hi! I need an airport transfer in Sri Lanka.')}`, '_blank')}
+              >
+                <Phone className="w-5 h-5 mr-2" />
+                WhatsApp Us
+              </Button>
+            </div>
+          </motion.div>
+
+          {/* Slide Navigation */}
+          {pageContent?.heroSlides && pageContent.heroSlides.length > 1 && (
+            <>
+              <button
+                onClick={() => setCurrentSlide(prev => prev === 0 ? pageContent.heroSlides.length - 1 : prev - 1)}
+                className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors"
+                aria-label="Previous slide"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+              <button
+                onClick={() => setCurrentSlide(prev => prev === pageContent.heroSlides.length - 1 ? 0 : prev + 1)}
+                className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors"
+                aria-label="Next slide"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+
+              {/* Slide Dots */}
+              <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
+                {pageContent.heroSlides.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    className={`w-3 h-3 rounded-full transition-all ${index === currentSlide
+                        ? 'bg-white w-8'
+                        : 'bg-white/40 hover:bg-white/60'
+                      }`}
+                    aria-label={`Go to slide ${index + 1}`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Bottom Wave Decoration */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
+            <path d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="#f8fafb" />
+          </svg>
+        </div>
+      </section>
+
+      {/* Quick Transport Links */}
+      <div className="bg-[#f8fafb] py-4 border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <span className="text-sm text-slate-500 mr-2">More Transport:</span>
             {relatedTransport.map(link => (
               <Link
                 key={link.href}
                 to={link.href}
-                className="rounded-full border border-slate-200 bg-white px-3 py-1 font-semibold text-slate-700 hover:border-emerald-400 hover:text-emerald-700 transition"
+                className="inline-flex items-center gap-1 px-4 py-2 bg-white rounded-full border border-slate-200 text-sm font-medium text-slate-700 hover:border-emerald-400 hover:text-emerald-700 transition-all shadow-sm hover:shadow"
               >
                 {link.title}
               </Link>
@@ -701,163 +839,18 @@ const AirportTransfers = () => {
         </div>
       </div>
 
-      {/* Main Container with Green Gradient Background */}
+      {/* Main Container */}
       <div
-        className="min-h-screen pt-20"
+        id="booking-form"
+        className="min-h-screen"
         style={{
-          background: 'linear-gradient(135deg, #f6fbf8 0%, #dcede4 45%, #eef7f3 100%)',
+          background: 'linear-gradient(180deg, #f8fafb 0%, #f1f5f9 100%)',
           fontFamily: '"DM Sans", -apple-system, BlinkMacSystemFont, sans-serif'
         }}
       >
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          {/* Hero Slideshow Section - Above Booking Form */}
-          {pageContent?.heroSlides && pageContent.heroSlides.length > 0 && (
-            <div className="mb-10">
-              {/* Hero Slideshow */}
-              <div className="relative rounded-3xl overflow-hidden shadow-2xl" style={{ boxShadow: '0 30px 80px rgba(13, 92, 70, 0.2)' }}>
-                <div className="relative h-[350px] md:h-[450px]">
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={currentSlide}
-                      initial={{ opacity: 0, scale: 1.05 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ duration: 0.7 }}
-                      className="absolute inset-0"
-                    >
-                      <img
-                        src={pageContent.heroSlides[currentSlide]?.image || 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&q=80'}
-                        alt={pageContent.heroSlides[currentSlide]?.title || 'Airport Transfer'}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+        <div className="max-w-7xl mx-auto px-4 py-12">
 
-                      {/* Slide Content */}
-                      <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12 text-white">
-                        <motion.div
-                          initial={{ y: 30, opacity: 0 }}
-                          animate={{ y: 0, opacity: 1 }}
-                          transition={{ delay: 0.3 }}
-                        >
-                          <span className="inline-block px-4 py-1.5 bg-emerald-600 rounded-full text-sm font-semibold mb-4">
-                            Recharge Travels
-                          </span>
-                          <h1 className="text-3xl md:text-5xl font-bold mb-3" style={{ fontFamily: '"Playfair Display", serif' }}>
-                            {pageContent.heroSlides[currentSlide]?.title || 'Premium Transfers'}
-                          </h1>
-                          <p className="text-lg md:text-xl text-white/90 max-w-2xl">
-                            {pageContent.heroSlides[currentSlide]?.subtitle || 'Your Journey Begins with Comfort'}
-                          </p>
-                          {pageContent.heroSlides[currentSlide]?.description && (
-                            <p className="text-white/70 mt-2 max-w-xl">
-                              {pageContent.heroSlides[currentSlide].description}
-                            </p>
-                          )}
-                        </motion.div>
-                      </div>
-                    </motion.div>
-                  </AnimatePresence>
-
-                  {/* Slide Navigation Arrows */}
-                  {pageContent.heroSlides.length > 1 && (
-                    <>
-                      <button
-                        onClick={() => setCurrentSlide(prev => prev === 0 ? pageContent.heroSlides.length - 1 : prev - 1)}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors"
-                      >
-                        <ChevronLeft className="w-6 h-6" />
-                      </button>
-                      <button
-                        onClick={() => setCurrentSlide(prev => prev === pageContent.heroSlides.length - 1 ? 0 : prev + 1)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors"
-                      >
-                        <ChevronRight className="w-6 h-6" />
-                      </button>
-                    </>
-                  )}
-                </div>
-
-                {/* Slide Dots */}
-                {pageContent.heroSlides.length > 1 && (
-                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-                    {pageContent.heroSlides.map((_, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setCurrentSlide(index)}
-                        className={`w-3 h-3 rounded-full transition-all ${
-                          index === currentSlide
-                            ? 'bg-white w-8'
-                            : 'bg-white/40 hover:bg-white/60'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Trust Indicators */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-                {[
-                  { icon: Star, label: trustIndicators?.rating || '4.9/5', sublabel: 'Customer Rating' },
-                  { icon: Users, label: trustIndicators?.totalReviews || '2,847', sublabel: 'Happy Travelers' },
-                  { icon: Shield, label: '100%', sublabel: 'Safe & Secure' },
-                  { icon: Headphones, label: trustIndicators?.support || '24/7', sublabel: 'Support Available' },
-                ].map(({ icon: Icon, label, sublabel }, i) => (
-                  <div key={i} className="bg-white rounded-2xl p-4 text-center shadow-lg border border-emerald-100">
-                    <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <Icon className="w-5 h-5 text-emerald-700" />
-                    </div>
-                    <p className="text-xl font-bold text-emerald-800">{label}</p>
-                    <p className="text-xs text-slate-500">{sublabel}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Default Hero if no content loaded */}
-          {(!pageContent?.heroSlides || pageContent.heroSlides.length === 0) && (
-            <div className="mb-10">
-              <div className="relative rounded-3xl overflow-hidden shadow-2xl h-[350px]" style={{ boxShadow: '0 30px 80px rgba(13, 92, 70, 0.2)' }}>
-                <img
-                  src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&q=80"
-                  alt="Airport Transfer"
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12 text-white">
-                  <span className="inline-block px-4 py-1.5 bg-emerald-600 rounded-full text-sm font-semibold mb-4">
-                    Recharge Travels
-                  </span>
-                  <h1 className="text-3xl md:text-5xl font-bold mb-3" style={{ fontFamily: '"Playfair Display", serif' }}>
-                    Premium Airport Transfers
-                  </h1>
-                  <p className="text-lg md:text-xl text-white/90 max-w-2xl">
-                    Your Journey Begins with Comfort
-                  </p>
-                </div>
-              </div>
-
-              {/* Trust Indicators */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-                {[
-                  { icon: Star, label: '4.9/5', sublabel: 'Customer Rating' },
-                  { icon: Users, label: '2,847+', sublabel: 'Happy Travelers' },
-                  { icon: Shield, label: '100%', sublabel: 'Safe & Secure' },
-                  { icon: Headphones, label: '24/7', sublabel: 'Support Available' },
-                ].map(({ icon: Icon, label, sublabel }, i) => (
-                  <div key={i} className="bg-white rounded-2xl p-4 text-center shadow-lg border border-emerald-100">
-                    <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <Icon className="w-5 h-5 text-emerald-700" />
-                    </div>
-                    <p className="text-xl font-bold text-emerald-800">{label}</p>
-                    <p className="text-xs text-slate-500">{sublabel}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
+          {/* Booking Form Section */}
           {/* Progress Steps - Green Theme */}
           {!bookingComplete && (
             <div className="flex justify-center gap-2 md:gap-4 mb-8 relative pb-4">
@@ -873,20 +866,18 @@ const AirportTransfers = () => {
                     <button
                       onClick={() => isCompleted && setStep(stepInfo.id)}
                       disabled={!isCompleted}
-                      className={`w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center font-semibold text-sm border-3 transition-all ${
-                        isCompleted
+                      className={`w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center font-semibold text-sm border-3 transition-all ${isCompleted
                           ? 'bg-amber-400 border-amber-400 text-white cursor-pointer'
                           : isActive
-                          ? 'bg-emerald-700 border-emerald-700 text-white'
-                          : 'bg-white border-slate-200 text-slate-400'
-                      }`}
+                            ? 'bg-emerald-700 border-emerald-700 text-white'
+                            : 'bg-white border-slate-200 text-slate-400'
+                        }`}
                       style={{ borderWidth: '3px' }}
                     >
                       {isCompleted ? <Check className="w-5 h-5" /> : stepInfo.id}
                     </button>
-                    <span className={`mt-2 text-xs font-semibold uppercase tracking-wider ${
-                      isActive || isCompleted ? 'text-slate-700' : 'text-slate-400'
-                    }`}>
+                    <span className={`mt-2 text-xs font-semibold uppercase tracking-wider ${isActive || isCompleted ? 'text-slate-700' : 'text-slate-400'
+                      }`}>
                       {stepInfo.label}
                     </span>
                   </div>
@@ -923,11 +914,10 @@ const AirportTransfers = () => {
                       <button
                         key={value}
                         onClick={() => setTransferType(value as any)}
-                        className={`flex items-center gap-2 px-5 py-3 rounded-xl font-medium transition-all ${
-                          transferType === value
+                        className={`flex items-center gap-2 px-5 py-3 rounded-xl font-medium transition-all ${transferType === value
                             ? 'bg-emerald-700 text-white shadow-lg'
                             : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border-2 border-emerald-100'
-                        }`}
+                          }`}
                         style={transferType === value ? { boxShadow: '0 10px 30px rgba(13, 92, 70, 0.25)' } : {}}
                       >
                         <Icon className="w-4 h-4" />
@@ -1075,13 +1065,12 @@ const AirportTransfers = () => {
                               onClick={() => handleDestinationSelect(dest)}
                               className="w-full px-4 py-3 text-left hover:bg-amber-50 flex items-center gap-3 border-b border-slate-50 last:border-0 transition-colors"
                             >
-                              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                                dest.type === 'beach' ? 'bg-cyan-100 text-cyan-600' :
-                                dest.type === 'city' ? 'bg-emerald-100 text-emerald-600' :
-                                dest.type === 'attraction' ? 'bg-amber-100 text-amber-600' :
-                                dest.type === 'wildlife' ? 'bg-green-100 text-green-600' :
-                                'bg-purple-100 text-purple-600'
-                              }`}>
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${dest.type === 'beach' ? 'bg-cyan-100 text-cyan-600' :
+                                  dest.type === 'city' ? 'bg-emerald-100 text-emerald-600' :
+                                    dest.type === 'attraction' ? 'bg-amber-100 text-amber-600' :
+                                      dest.type === 'wildlife' ? 'bg-green-100 text-green-600' :
+                                        'bg-purple-100 text-purple-600'
+                                }`}>
                                 <MapPin className="w-4 h-4" />
                               </div>
                               <div>
@@ -1433,11 +1422,10 @@ const AirportTransfers = () => {
                         <div
                           key={vehicle.id}
                           onClick={() => setSelectedVehicle(vehicle)}
-                          className={`relative rounded-2xl border-2 overflow-hidden cursor-pointer transition-all ${
-                            selectedVehicle?.id === vehicle.id
+                          className={`relative rounded-2xl border-2 overflow-hidden cursor-pointer transition-all ${selectedVehicle?.id === vehicle.id
                               ? 'border-emerald-600 bg-emerald-50/50'
                               : 'border-slate-200 hover:border-slate-300 hover:shadow-md'
-                          }`}
+                            }`}
                           style={selectedVehicle?.id === vehicle.id ? { boxShadow: '0 10px 30px rgba(13, 92, 70, 0.15)' } : {}}
                         >
                           {selectedVehicle?.id === vehicle.id && (
@@ -1519,7 +1507,7 @@ const AirportTransfers = () => {
 
                   {/* Extras Grid */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {TRANSFER_EXTRAS.map((extra) => {
+                    {(pageContent?.transferExtras || TRANSFER_EXTRAS).map((extra) => {
                       const Icon = extraIconMap[extra.icon] || Sparkles;
                       const isSelected = selectedExtras.includes(extra.id);
                       const isIncluded = extra.isIncluded;
@@ -1528,13 +1516,12 @@ const AirportTransfers = () => {
                         <div
                           key={extra.id}
                           onClick={() => !isIncluded && toggleExtra(extra.id)}
-                          className={`relative p-4 rounded-xl border-2 transition-all ${
-                            isIncluded
+                          className={`relative p-4 rounded-xl border-2 transition-all ${isIncluded
                               ? 'bg-emerald-50 border-emerald-300 cursor-default'
                               : isSelected
-                              ? 'bg-emerald-50 border-emerald-600 cursor-pointer'
-                              : 'bg-white border-slate-200 cursor-pointer hover:border-slate-300 hover:shadow-sm'
-                          }`}
+                                ? 'bg-emerald-50 border-emerald-600 cursor-pointer'
+                                : 'bg-white border-slate-200 cursor-pointer hover:border-slate-300 hover:shadow-sm'
+                            }`}
                           style={isSelected && !isIncluded ? { boxShadow: '0 10px 30px rgba(13, 92, 70, 0.12)' } : {}}
                         >
                           {isIncluded && (
@@ -1548,12 +1535,10 @@ const AirportTransfers = () => {
                             </div>
                           )}
 
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-3 ${
-                            isIncluded ? 'bg-emerald-100' : isSelected ? 'bg-emerald-100' : 'bg-slate-100'
-                          }`}>
-                            <Icon className={`w-5 h-5 ${
-                              isIncluded ? 'text-emerald-700' : isSelected ? 'text-emerald-700' : 'text-slate-500'
-                            }`} />
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-3 ${isIncluded ? 'bg-emerald-100' : isSelected ? 'bg-emerald-100' : 'bg-slate-100'
+                            }`}>
+                            <Icon className={`w-5 h-5 ${isIncluded ? 'text-emerald-700' : isSelected ? 'text-emerald-700' : 'text-slate-500'
+                              }`} />
                           </div>
 
                           <h4 className="font-semibold text-sm text-slate-800 mb-1">{extra.name}</h4>
@@ -1916,17 +1901,15 @@ const AirportTransfers = () => {
                         <button
                           key={id}
                           onClick={() => setPaymentMethod(id as any)}
-                          className={`p-4 rounded-xl border-2 text-left transition-all ${
-                            paymentMethod === id
+                          className={`p-4 rounded-xl border-2 text-left transition-all ${paymentMethod === id
                               ? 'border-emerald-600 bg-emerald-50'
                               : 'border-slate-200 hover:border-slate-300'
-                          }`}
+                            }`}
                           style={paymentMethod === id ? { boxShadow: '0 10px 30px rgba(13, 92, 70, 0.12)' } : {}}
                         >
                           <div className="flex items-center gap-3">
-                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                              paymentMethod === id ? 'bg-emerald-100' : 'bg-slate-100'
-                            }`}>
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${paymentMethod === id ? 'bg-emerald-100' : 'bg-slate-100'
+                              }`}>
                               <Icon className={`w-5 h-5 ${paymentMethod === id ? 'text-emerald-700' : 'text-slate-600'}`} />
                             </div>
                             <div>
@@ -2303,25 +2286,125 @@ const AirportTransfers = () => {
               </aside>
             )}
           </div>
-        </div>
 
-        {/* Footer */}
-        <div className="bg-white border-t border-slate-100 mt-12">
-          <div className="max-w-7xl mx-auto px-4 py-4 flex flex-wrap justify-between items-center gap-4 text-sm text-slate-500">
-            <span>© 2025 Recharge Travels & Tours • Colombo • Jaffna • Yala</span>
-            <div className="flex items-center gap-4">
-              <span className="flex items-center gap-1">
-                <Shield className="w-4 h-4 text-emerald-600" /> PCI-DSS Secure
-              </span>
-              <span className="flex items-center gap-1">
-                <Plane className="w-4 h-4 text-emerald-600" /> IATA-accredited
-              </span>
-              <span className="flex items-center gap-1">
-                <Headphones className="w-4 h-4 text-emerald-600" /> 24/7 Hotline
-              </span>
+          {/* Popular Routes Section */}
+          <div className="mt-16">
+            <h2 className="text-2xl md:text-3xl font-bold text-emerald-800 text-center mb-2" style={{ fontFamily: '"Playfair Display", serif' }}>
+              Popular Routes from Colombo Airport
+            </h2>
+            <p className="text-slate-500 text-center mb-8">Fixed prices for economy sedan • All-inclusive rates</p>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {[
+                { dest: 'Colombo City', price: 35, time: '45 min' },
+                { dest: 'Negombo', price: 15, time: '15 min' },
+                { dest: 'Kandy', price: 85, time: '3.5 hrs' },
+                { dest: 'Galle Fort', price: 95, time: '2.5 hrs' },
+                { dest: 'Sigiriya', price: 110, time: '4 hrs' },
+                { dest: 'Ella', price: 145, time: '6 hrs' },
+                { dest: 'Mirissa', price: 105, time: '3 hrs' },
+                { dest: 'Bentota', price: 65, time: '1.5 hrs' },
+                { dest: 'Nuwara Eliya', price: 120, time: '5 hrs' },
+                { dest: 'Yala', price: 160, time: '6 hrs' },
+                { dest: 'Trincomalee', price: 150, time: '6 hrs' },
+                { dest: 'Jaffna', price: 195, time: '8 hrs' },
+              ].map((route, i) => (
+                <div key={i} className="bg-white rounded-xl p-4 shadow-md hover:shadow-lg transition-shadow border border-emerald-50 text-center">
+                  <p className="font-semibold text-slate-800">{route.dest}</p>
+                  <p className="text-2xl font-bold text-emerald-700 my-1">${route.price}</p>
+                  <p className="text-xs text-slate-500">{route.time}</p>
+                </div>
+              ))}
+            </div>
+            <p className="text-center text-sm text-slate-500 mt-4">
+              * Prices for Economy Sedan (1-3 passengers). SUV and Van rates available on request.
+            </p>
+          </div>
+
+          {/* FAQ Section */}
+          <div className="mt-16 bg-white rounded-3xl p-8 shadow-xl">
+            <h2 className="text-2xl md:text-3xl font-bold text-emerald-800 text-center mb-8" style={{ fontFamily: '"Playfair Display", serif' }}>
+              Frequently Asked Questions
+            </h2>
+
+            <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+              {[
+                {
+                  q: "What happens if my flight is delayed?",
+                  a: "We track all flights in real-time. Your driver will adjust their arrival time based on your actual landing. There's no extra charge for flight delays."
+                },
+                {
+                  q: "How do I find my driver at the airport?",
+                  a: "Your driver will wait at the arrivals hall with a name board showing your name. You'll receive their photo and contact number before arrival."
+                },
+                {
+                  q: "Can I book a transfer from my hotel to the airport?",
+                  a: "Yes! Select 'Airport Drop-off' or 'Round Trip' when booking. We offer transfers from any location in Sri Lanka to all airports."
+                },
+                {
+                  q: "What payment methods do you accept?",
+                  a: "We accept credit/debit cards (Visa, Mastercard), PayPal, and cash payment to driver. Pre-payment secures your booking."
+                },
+                {
+                  q: "Can I cancel or modify my booking?",
+                  a: "Free cancellation up to 24 hours before pickup. Modifications can be made anytime by contacting our support team."
+                },
+                {
+                  q: "Do you provide child seats?",
+                  a: "Yes, we offer infant seats (0-12 months) and child seats (1-4 years) for $5 per seat. Please request when booking."
+                },
+                {
+                  q: "What's included in the price?",
+                  a: "All prices include: vehicle, professional driver, fuel, tolls, parking, meet & greet service, flight tracking, and 60-minute free waiting time."
+                },
+                {
+                  q: "How long is the free waiting time?",
+                  a: "60 minutes free waiting time from your flight landing. Additional waiting is charged at $10 per 30 minutes."
+                },
+              ].map((faq, i) => (
+                <div key={i} className="bg-emerald-50/50 rounded-xl p-5">
+                  <h3 className="font-semibold text-slate-800 mb-2 flex items-start gap-2">
+                    <span className="bg-emerald-700 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm flex-shrink-0">?</span>
+                    {faq.q}
+                  </h3>
+                  <p className="text-slate-600 text-sm pl-8">{faq.a}</p>
+                </div>
+              ))}
             </div>
           </div>
+
+          {/* WhatsApp CTA Section */}
+          <div className="mt-16 bg-gradient-to-r from-green-600 to-green-500 rounded-3xl p-8 text-white text-center">
+            <h2 className="text-2xl md:text-3xl font-bold mb-4" style={{ fontFamily: '"Playfair Display", serif' }}>
+              Need a Custom Quote?
+            </h2>
+            <p className="text-white/90 mb-6 max-w-xl mx-auto">
+              Message us on WhatsApp for instant quotes, multi-day transfers, or special requests. Our team responds within minutes!
+            </p>
+            <a
+              href="https://wa.me/94777721999?text=Hi%2C%20I%20need%20a%20quote%20for%20airport%20transfer%20in%20Sri%20Lanka"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-3 px-8 py-4 bg-white text-green-600 font-bold rounded-full text-lg hover:bg-gray-100 transition-colors shadow-lg"
+            >
+              <MessageCircle className="w-6 h-6" /> Get Instant Quote on WhatsApp
+            </a>
+            <p className="text-white/70 text-sm mt-4">
+              +94 77 772 1999 • Available 24/7
+            </p>
+          </div>
         </div>
+
+        {/* Floating WhatsApp Button */}
+        <a
+          href="https://wa.me/94777721999?text=Hi%2C%20I%20need%20help%20with%20airport%20transfer"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="fixed bottom-6 right-6 z-50 w-16 h-16 bg-green-500 rounded-full shadow-2xl flex items-center justify-center hover:bg-green-600 transition-all hover:scale-110"
+          title="Chat on WhatsApp"
+        >
+          <MessageCircle className="w-8 h-8 text-white" />
+        </a>
       </div>
     </>
   );

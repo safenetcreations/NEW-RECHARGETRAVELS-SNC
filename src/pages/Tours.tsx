@@ -12,8 +12,6 @@ import { SEOMetaTags } from '@/components/seo/SEOMetaTags'
 import { SEOSchema } from '@/components/seo/SEOSchema'
 import AISEOSchema from '@/components/seo/AISEOSchema'
 import AIOptimizedFAQ from '@/components/seo/AIOptimizedFAQ'
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
 import { toursByCategory } from '@/components/header/navigation/menuData'
 import { cn } from '@/lib/utils'
 
@@ -143,8 +141,6 @@ const Tours = () => {
 
   return (
     <>
-      <Header />
-
       {/* SEO Meta Tags */}
       <SEOMetaTags
         title="Sri Lanka Tours & Travel Packages - Best Deals 2025"
@@ -694,8 +690,6 @@ const Tours = () => {
         itemId={selectedTour?.id}
         price={selectedTour?.price_per_person}
       />
-
-      <Footer />
     </>
   )
 }

@@ -1050,12 +1050,32 @@ app.patch('/admin/agencies/:agencyId/status', verifyAdmin, async (req, res) => {
         if (status === 'active') {
             const agencyDoc = await db.collection('b2b_agencies').doc(agencyId).get();
             const agency = agencyDoc.data();
-            if (agency === null || agency === void 0 ? void 0 : agency.email) {
-                await (0, sendgrid_1.sendAgencyApproval)({
-                    to: agency.email,
-                    agencyName: agency.agencyName,
-                    loginLink: `${FRONTEND_URL}/about/partners/b2b/login`
-                });
+            if (agency) {
+                // 1. Send Email
+                if (agency.email) {
+                    await (0, sendgrid_1.sendAgencyApproval)({
+                        to: agency.email,
+                        agencyName: agency.agencyName,
+                        loginLink: `${FRONTEND_URL}/about/partners/b2b/login`
+                    });
+                }
+                // 2. Send WhatsApp Notification
+                if (agency.phone) {
+                    try {
+                        await db.collection('whatsappMessages').add({
+                            to: agency.phone,
+                            message: `🎉 Congratulations! Your Recharge Travels B2B Partner account has been APPROVED.\n\nYou can now login and start booking tours with your exclusive 15% commission.\n\nLogin here: ${FRONTEND_URL}/about/partners/b2b/login\n\nNeed help? Reply to this message.`,
+                            status: 'pending',
+                            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                            type: 'b2b_approval'
+                        });
+                        console.log(`WhatsApp approval queued for ${agency.phone}`);
+                    }
+                    catch (waError) {
+                        console.error('Failed to queue WhatsApp message:', waError);
+                        // Don't block the response depending on WhatsApp success
+                    }
+                }
             }
         }
         res.json({ success: true, message: `Agency ${status}` });

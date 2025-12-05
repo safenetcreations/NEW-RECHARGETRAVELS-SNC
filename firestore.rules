@@ -1528,8 +1528,96 @@ service cloud.firestore {
 
     // WhatsApp Messages Queue (for B2B confirmations)
     match /whatsappMessages/{messageId} {
+      allow read, write: if isAdmin();
+    }
+
+    // ==========================================
+    // VEHICLE RENTAL COLLECTIONS
+    // ==========================================
+
+    // Vehicle Owners - Public create (registration), owner read/update own, admin full
+    match /vehicle_owners/{ownerId} {
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
+      allow create: if isAuthenticated();
+      allow update: if isAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    // Vehicles - Public read active, owner create/update own, admin full
+    match /vehicles/{vehicleId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update: if isAdmin() || (isAuthenticated() && resource.data.ownerId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    // Vehicle Documents - Owner read/write own, admin full
+    match /vehicle_documents/{docId} {
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.ownerId == request.auth.uid);
+      allow create, update: if isAdmin() || (isAuthenticated() && request.resource.data.ownerId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    // Vehicle Pricing - Public read, owner/admin write
+    match /vehicle_pricing/{pricingId} {
+      allow read: if true;
+      allow create, update: if isAdmin() || isAuthenticated();
+      allow delete: if isAdmin();
+    }
+
+    // Vehicle Availability - Public read, owner/admin write
+    match /vehicle_availability/{availId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin() || isAuthenticated();
+    }
+
+    // Vehicle Rental Bookings - Public create, customer/owner read own, admin full
+    match /vehicle_bookings/{bookingId} {
+      allow read: if isAdmin()
+                  || (isAuthenticated() && resource.data.customerId == request.auth.uid)
+                  || (isAuthenticated() && resource.data.ownerId == request.auth.uid);
       allow create: if true;
-      allow read, update: if isAdmin();
+      allow update: if isAdmin()
+                    || (isAuthenticated() && resource.data.ownerId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    // Vehicle Reviews - Public read, authenticated create, admin manage
+    match /vehicle_reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && resource.data.customerId == request.auth.uid;
+      allow delete: if isAdmin();
+    }
+
+    // Owner Earnings - Owner read own, admin full
+    match /owner_earnings/{earningId} {
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.ownerId == request.auth.uid);
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Vehicle Promo Codes - Public read active, admin full
+    match /vehicle_promo_codes/{promoId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Customer Blacklist - Admin only
+    match /customer_blacklist/{customerId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Seasonal Pricing - Public read, admin full
+    match /seasonal_pricing/{pricingId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Fleet Maintenance - Owner read own, admin full
+    match /fleet_maintenance/{maintenanceId} {
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.ownerId == request.auth.uid);
+      allow create, update: if isAdmin() || (isAuthenticated() && request.resource.data.ownerId == request.auth.uid);
+      allow delete: if isAdmin();
     }
 
     // Default rule - Deny all access to any other collections

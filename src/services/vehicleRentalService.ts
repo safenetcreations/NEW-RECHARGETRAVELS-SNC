@@ -15,7 +15,7 @@ import {
   writeBatch
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage } from './firebase-config';
+import { db, storage } from '@/lib/firebase';
 import type { 
   VehicleOwner, 
   Vehicle, 

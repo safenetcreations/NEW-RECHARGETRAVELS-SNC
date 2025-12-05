@@ -1,9 +1,16 @@
 /**
  * Vehicle Rental Email Notification Service
  * Handles email notifications for vehicle rental bookings
- * 
+ * Uses SendGrid via Firebase Cloud Functions
+ *
  * @module services/vehicleRentalEmailService
  */
+
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import { functions as firebaseFunctions } from '@/lib/firebase';
+
+const functionsInstance = firebaseFunctions ?? getFunctions();
+const ADMIN_EMAIL = 'nanthan@rechargetravels.com';
 
 // Email template types for vehicle rental
 export type VehicleEmailType = 
@@ -922,6 +929,26 @@ const emailTemplates: Record<VehicleEmailType, {
 };
 
 /**
+ * Send email via Firebase Cloud Functions (SendGrid)
+ */
+async function sendEmailViaFunction(to: string, subject: string, html: string): Promise<boolean> {
+  try {
+    const sendEmailFunction = httpsCallable(functionsInstance, 'sendEmail');
+    await sendEmailFunction({
+      to,
+      subject,
+      html,
+      text: html.replace(/<[^>]*>/g, '')
+    });
+    console.log(`Email sent successfully to ${to}`);
+    return true;
+  } catch (error) {
+    console.error('Error sending email via Firebase:', error);
+    return false;
+  }
+}
+
+/**
  * Send vehicle rental email notification
  */
 export async function sendVehicleRentalEmail(
@@ -943,23 +970,13 @@ export async function sendVehicleRentalEmail(
 
     const htmlContent = template.getHtml(data);
 
-    // In production, integrate with your email service (SendGrid, AWS SES, etc.)
-    // For now, log the email details
-    console.log('Sending email:', {
-      to: recipientEmail,
-      subject,
-      type,
-      timestamp: new Date().toISOString(),
-      htmlLength: htmlContent.length,
-    });
-
-    // Simulate email sending
-    // In production, replace with actual email service call:
-    // const response = await emailProvider.send({ to: recipientEmail, subject, html: htmlContent });
+    // Send via Firebase Cloud Functions (SendGrid)
+    const success = await sendEmailViaFunction(recipientEmail, subject, htmlContent);
 
     return {
-      success: true,
-      messageId: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      success,
+      messageId: success ? `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}` : undefined,
+      error: success ? undefined : 'Failed to send email'
     };
   } catch (error) {
     console.error('Email send error:', error);
@@ -971,18 +988,88 @@ export async function sendVehicleRentalEmail(
 }
 
 /**
- * Send booking confirmation emails to both customer and owner
+ * Send booking confirmation emails to customer, owner, AND admin
  */
 export async function sendBookingConfirmationEmails(
   bookingData: VehicleBookingEmailData
-): Promise<void> {
+): Promise<{ customer: boolean; owner: boolean; admin: boolean }> {
+  const results = { customer: false, owner: false, admin: false };
+
   // Send to customer
-  await sendVehicleRentalEmail('booking_confirmation', bookingData.customerEmail, bookingData);
-  
+  const customerResult = await sendVehicleRentalEmail('booking_confirmation', bookingData.customerEmail, bookingData);
+  results.customer = customerResult.success;
+
   // Send to owner
   if (bookingData.ownerEmail) {
-    await sendVehicleRentalEmail('owner_new_booking', bookingData.ownerEmail, bookingData);
+    const ownerResult = await sendVehicleRentalEmail('owner_new_booking', bookingData.ownerEmail, bookingData);
+    results.owner = ownerResult.success;
   }
+
+  // Send to admin
+  const adminSubject = `[ADMIN] New Vehicle Rental - ${bookingData.bookingReference}`;
+  const adminHtml = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background: #f4f4f4; }
+        .container { max-width: 600px; margin: 0 auto; background: #fff; }
+        .header { background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%); color: white; padding: 30px; text-align: center; }
+        .content { padding: 30px; }
+        .info-box { background: #f8fafc; border-radius: 8px; padding: 15px; margin: 15px 0; }
+        .highlight { background: #dbeafe; padding: 15px; border-radius: 8px; margin: 15px 0; }
+        .footer { background: #1f2937; color: #9ca3af; padding: 20px; text-align: center; font-size: 14px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>New Vehicle Rental Booking</h1>
+        </div>
+        <div class="content">
+          <div class="highlight">
+            <strong>Booking Reference:</strong> ${bookingData.bookingReference}<br>
+            <strong>Total Amount:</strong> $${bookingData.totalAmount.toFixed(2)}<br>
+            <strong>Commission (15%):</strong> $${(bookingData.totalAmount * 0.15).toFixed(2)}
+          </div>
+
+          <div class="info-box">
+            <h3 style="margin-top: 0;">Vehicle Details</h3>
+            <p><strong>Vehicle:</strong> ${bookingData.vehicleName}</p>
+            <p><strong>Type:</strong> ${bookingData.vehicleType}</p>
+            <p><strong>Dates:</strong> ${bookingData.pickupDate} - ${bookingData.returnDate}</p>
+            <p><strong>Duration:</strong> ${bookingData.totalDays} days</p>
+            <p><strong>Pickup Location:</strong> ${bookingData.pickupLocation}</p>
+          </div>
+
+          <div class="info-box">
+            <h3 style="margin-top: 0;">Customer Details</h3>
+            <p><strong>Name:</strong> ${bookingData.customerName}</p>
+            <p><strong>Email:</strong> ${bookingData.customerEmail}</p>
+            <p><strong>Phone:</strong> ${bookingData.customerPhone || 'Not provided'}</p>
+          </div>
+
+          <div class="info-box">
+            <h3 style="margin-top: 0;">Owner Details</h3>
+            <p><strong>Name:</strong> ${bookingData.ownerName}</p>
+            <p><strong>Email:</strong> ${bookingData.ownerEmail || 'Not provided'}</p>
+            <p><strong>Phone:</strong> ${bookingData.ownerPhone || 'Not provided'}</p>
+          </div>
+
+          <p><a href="https://recharge-travels-admin.web.app/vehicle-rental" style="display: inline-block; background: #1e40af; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600;">View in Admin Panel</a></p>
+        </div>
+        <div class="footer">
+          <p>Recharge Travels Admin Notification</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+  results.admin = await sendEmailViaFunction(ADMIN_EMAIL, adminSubject, adminHtml);
+
+  console.log('Booking confirmation emails sent:', results);
+  return results;
 }
 
 /**

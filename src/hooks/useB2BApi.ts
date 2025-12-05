@@ -1,11 +1,11 @@
 import { useState, useCallback } from 'react';
 import { useB2BAuth } from '@/contexts/B2BAuthContext';
-import { 
-  B2BTour, 
-  B2BBooking, 
-  B2BBookingRequest, 
+import {
+  B2BTour,
+  B2BBooking,
+  B2BBookingRequest,
   B2BApiResponse,
-  B2BPriceCalculation 
+  B2BPriceCalculation
 } from '@/types/b2b';
 
 const B2B_API_BASE = '/api/b2b';
@@ -138,14 +138,14 @@ export const useB2BApi = () => {
 
   // Price Calculator (client-side preview)
   const calculatePrice = useCallback((
-    basePrice: number, 
+    basePrice: number,
     guestCount: number
   ): B2BPriceCalculation => {
-    const discountPercentage = 10;
+    const discountPercentage = 15;
     const grossCents = Math.round(basePrice * guestCount * 100);
     const discountCents = Math.floor(grossCents * (discountPercentage / 100));
     const netCents = grossCents - discountCents;
-    
+
     return {
       originalPrice: grossCents / 100,
       discountPercentage,

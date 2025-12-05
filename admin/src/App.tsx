@@ -113,6 +113,12 @@ function App() {
                 <Route path="/tripadvisor-tours" element={<AdminPanelWithSection section="tripadvisor-tours" />} />
                 <Route path="/hotels" element={<AdminPanelWithSection section="hotels" />} />
                 <Route path="/fleet-vehicles" element={<AdminPanelWithSection section="fleet-vehicles" />} />
+                <Route path="/e-scooters" element={<AdminPanelWithSection section="e-scooters" />} />
+                <Route path="/vehicle-rental-admin" element={<AdminPanelWithSection section="vehicle-rental" />} />
+                <Route path="/vehicle-pricing" element={<AdminPanelWithSection section="vehicle-pricing" />} />
+                <Route path="/vehicle-analytics" element={<AdminPanelWithSection section="vehicle-analytics" />} />
+                <Route path="/vehicle-emails" element={<AdminPanelWithSection section="vehicle-emails" />} />
+                <Route path="/vehicle-payments-contracts" element={<AdminPanelWithSection section="vehicle-payments-contracts" />} />
                 <Route path="/tours" element={<AdminPanelWithSection section="tours" />} />
                 <Route path="/activities" element={<AdminPanelWithSection section="activities" />} />
                 <Route path="/drivers" element={<AdminPanelWithSection section="drivers" />} />
@@ -123,6 +129,8 @@ function App() {
                 {/* Management */}
                 <Route path="/bookings" element={<AdminPanelWithSection section="bookings" />} />
                 <Route path="/group-transport-bookings" element={<AdminPanelWithSection section="group-transport-bookings" />} />
+                <Route path="/airport-transfers" element={<AdminPanelWithSection section="airport-transfers" />} />
+                <Route path="/airport-transfers-content" element={<AdminPanelWithSection section="airport-transfers-content" />} />
                 <Route path="/customers" element={<AdminPanelWithSection section="customers" />} />
                 <Route path="/reviews" element={<AdminPanelWithSection section="reviews" />} />
                 <Route path="/users" element={<AdminPanelWithSection section="users" />} />

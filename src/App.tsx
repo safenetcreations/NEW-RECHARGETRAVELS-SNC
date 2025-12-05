@@ -386,7 +386,7 @@ const AllRoutes = () => (
     <Route path="/destinations/:destinationId" element={withSiteChrome(DestinationDetail)} />
     <Route path="/list-property" element={withSiteChrome(ListProperty)} />
     <Route path="/transport" element={withSiteChrome(TransportLanding)} />
-    <Route path="/transport/airport-transfers" element={<AirportTransfers />} />
+    <Route path="/transport/airport-transfers" element={withSiteChrome(AirportTransfers)} />
     <Route path="/transport/private-tours" element={<PrivateTours />} />
     <Route path="/transport/group-transport" element={<GroupTransport />} />
     <Route path="/transport/train-booking" element={<TrainBooking />} />

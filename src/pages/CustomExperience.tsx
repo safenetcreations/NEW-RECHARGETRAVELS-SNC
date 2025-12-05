@@ -18,8 +18,6 @@ import {
   Star,
   Users
 } from 'lucide-react';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -349,8 +347,6 @@ const CustomExperience = () => {
         <meta property="og:image" content={pageContent?.seo.ogImage} />
         <link rel="canonical" href="https://www.rechargetravels.com/custom-experience" />
       </Helmet>
-
-      <Header />
 
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
@@ -879,8 +875,6 @@ const CustomExperience = () => {
           </div>
         </div>
       </section>
-
-      <Footer />
     </>
   );
 };

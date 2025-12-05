@@ -16,7 +16,12 @@ import {
   agencyApprovalTemplate,
   paymentConfirmationTemplate,
   passwordResetTemplate,
-  bookingCancellationTemplate
+  bookingCancellationTemplate,
+  // Driver templates
+  driverRegistrationTemplate,
+  driverApprovalTemplate,
+  adminDriverNotificationTemplate,
+  vehicleRentalConfirmationTemplate
 } from './templates';
 
 // Initialize SendGrid
@@ -449,6 +454,134 @@ export const sendGenericEmail = async (data: {
   });
 };
 
+// ==========================================
+// DRIVER REGISTRATION EMAIL
+// ==========================================
+
+export const sendDriverRegistrationConfirmation = async (data: {
+  to: string;
+  driverName: string;
+  phone: string;
+  tier: string;
+  applicationId: string;
+}): Promise<boolean> => {
+  const html = driverRegistrationTemplate({
+    driverName: data.driverName,
+    email: data.to,
+    phone: data.phone,
+    tier: data.tier,
+    applicationId: data.applicationId,
+    submittedAt: new Date().toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  });
+
+  // Send to driver
+  await sendEmail({
+    to: data.to,
+    subject: `🚗 Driver Application Received | Ref: ${data.applicationId}`,
+    html
+  });
+
+  return true;
+};
+
+// ==========================================
+// ADMIN NOTIFICATION FOR NEW DRIVER
+// ==========================================
+
+export const sendDriverAdminNotification = async (data: {
+  driverName: string;
+  email: string;
+  phone: string;
+  tier: string;
+  applicationId: string;
+  vehicleType: string;
+  documentsUploaded: number;
+}): Promise<boolean> => {
+  const html = adminDriverNotificationTemplate({
+    ...data,
+    reviewLink: `https://recharge-travels-admin.web.app/admin/drivers/${data.applicationId}`
+  });
+
+  return sendEmail({
+    to: ADMIN_EMAIL,
+    subject: `🔔 NEW Driver Application | ${data.driverName} | ${data.tier}`,
+    html
+  });
+};
+
+// ==========================================
+// DRIVER APPROVAL EMAIL
+// ==========================================
+
+export const sendDriverApproval = async (data: {
+  to: string;
+  driverName: string;
+  tier: string;
+}): Promise<boolean> => {
+  const html = driverApprovalTemplate({
+    driverName: data.driverName,
+    tier: data.tier,
+    loginLink: 'https://recharge-travels-73e76.web.app/driver/dashboard'
+  });
+
+  return sendEmail({
+    to: data.to,
+    subject: `🎉 Congratulations! Your Driver Account is Approved - Recharge Travels`,
+    html
+  });
+};
+
+// ==========================================
+// VEHICLE RENTAL CONFIRMATION
+// ==========================================
+
+export const sendVehicleRentalConfirmation = async (data: {
+  to: string;
+  bookingRef: string;
+  customerName: string;
+  phone: string;
+  vehicleType: string;
+  pickupDate: string;
+  returnDate: string;
+  pickupLocation: string;
+  returnLocation: string;
+  driverOption: string;
+  totalPrice: number;
+  paymentStatus: string;
+}): Promise<boolean> => {
+  const html = vehicleRentalConfirmationTemplate({
+    bookingRef: data.bookingRef,
+    customerName: data.customerName,
+    email: data.to,
+    phone: data.phone,
+    vehicleType: data.vehicleType,
+    pickupDate: data.pickupDate,
+    returnDate: data.returnDate,
+    pickupLocation: data.pickupLocation,
+    returnLocation: data.returnLocation,
+    driverOption: data.driverOption,
+    totalPrice: data.totalPrice,
+    paymentStatus: data.paymentStatus
+  });
+
+  // Send to customer
+  await sendEmail({
+    to: data.to,
+    subject: `🚗 Vehicle Rental Confirmed | Ref: ${data.bookingRef}`,
+    html,
+    bcc: [ADMIN_EMAIL]
+  });
+
+  return true;
+};
+
 export default {
   sendEmail,
   sendConciergeBookingConfirmation,
@@ -463,5 +596,10 @@ export default {
   sendPaymentConfirmation,
   sendPasswordReset,
   sendBookingCancellation,
-  sendGenericEmail
+  sendGenericEmail,
+  // Driver emails
+  sendDriverRegistrationConfirmation,
+  sendDriverAdminNotification,
+  sendDriverApproval,
+  sendVehicleRentalConfirmation
 };

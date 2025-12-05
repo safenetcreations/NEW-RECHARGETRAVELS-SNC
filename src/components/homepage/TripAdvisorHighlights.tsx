@@ -24,7 +24,11 @@ const renderStars = (rating: number) => {
 // Featured tour titles to highlight on homepage
 const FEATURED_TOUR_TITLES = [
   "Discover Sri Lanka's Unique Marine Farming Culture",
-  "Sigiriya Rock and Dambulla Cave Temple all inclusive Private Day Trip"
+  "Sigiriya Rock and Dambulla Cave Temple all inclusive Private Day Trip",
+  "Transport only - Mirissa to Colombo Airport (CMB)",
+  "Colombo International Airport to Anywhere in Kalutara - Transport only",
+  "Yala Safari Experience",
+  "Private Airport Transfer - Colombo City to Colombo (CMB) Airport"
 ]
 
 const TripAdvisorHighlights = () => {

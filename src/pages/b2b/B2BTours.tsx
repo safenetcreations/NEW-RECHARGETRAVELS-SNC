@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { 
+import {
   Search,
   Filter,
   MapPin,
@@ -10,10 +10,13 @@ import {
   Percent,
   ArrowLeft,
   Loader2,
-  ChevronDown
+  ChevronDown,
+  Globe
 } from 'lucide-react';
 import { useB2BAuth } from '@/contexts/B2BAuthContext';
 import { useB2BApi } from '@/hooks/useB2BApi';
+import { useB2BLanguage } from '@/hooks/useB2BLanguage';
+import { languageFlags, languageNames, B2BLanguage } from '@/i18n/b2b-translations';
 import { B2BTour } from '@/types/b2b';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -32,11 +35,13 @@ const categories = [
 const B2BTours = () => {
   const { isAuthenticated, isLoading: authLoading } = useB2BAuth();
   const { getTours, calculatePrice, loading } = useB2BApi();
-  
+  const { t, language, setLanguage } = useB2BLanguage();
+
   const [tours, setTours] = useState<B2BTour[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [showLangMenu, setShowLangMenu] = useState(false);
 
   useEffect(() => {
     const fetchTours = async () => {
@@ -76,9 +81,44 @@ const B2BTours = () => {
       <Helmet>
         <title>Browse Tours | B2B Portal | Recharge Travels</title>
       </Helmet>
-      
+
       <Header />
-      
+
+      {/* Language Bar */}
+      <div className="bg-slate-900 text-white px-4 py-2 border-b border-slate-800">
+        <div className="container mx-auto flex justify-end">
+          <div className="relative">
+            <button
+              onClick={() => setShowLangMenu(!showLangMenu)}
+              className="flex items-center gap-2 hover:text-emerald-400 transition-colors text-sm font-medium"
+            >
+              <Globe className="w-4 h-4" />
+              <span>{languageFlags[language]} {languageNames[language]}</span>
+              <ChevronDown className="w-3 h-3" />
+            </button>
+
+            {showLangMenu && (
+              <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50 max-h-64 overflow-y-auto">
+                {(Object.keys(languageNames) as B2BLanguage[]).map((lang) => (
+                  <button
+                    key={lang}
+                    onClick={() => {
+                      setLanguage(lang);
+                      setShowLangMenu(false);
+                    }}
+                    className={`w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-3 ${language === lang ? 'text-emerald-600 bg-emerald-50 font-medium' : 'text-slate-600'
+                      }`}
+                  >
+                    <span className="text-lg">{languageFlags[lang]}</span>
+                    {languageNames[lang]}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
       <main className="min-h-screen bg-gradient-to-br from-slate-100 via-emerald-50/30 to-teal-50/30 py-8">
         <div className="container mx-auto px-4">
           {/* Header */}
@@ -91,7 +131,7 @@ const B2BTours = () => {
               Back to Dashboard
             </Link>
             <h1 className="text-3xl font-bold text-slate-900 mb-2">Browse Tours</h1>
-            <p className="text-slate-600">All tours include automatic 10% B2B discount</p>
+            <p className="text-slate-600">All tours include automatic <span className="font-bold text-emerald-600">15% B2B commission</span></p>
           </div>
 
           {/* Search & Filters */}
@@ -146,9 +186,9 @@ const B2BTours = () => {
                         />
                       )}
                       {/* Discount Badge */}
-                      <div className="absolute top-4 right-4 bg-amber-500 text-white px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1">
+                      <div className="absolute top-4 right-4 bg-amber-500 text-white px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1 shadow-lg">
                         <Percent className="w-3 h-3" />
-                        10% OFF
+                        15% COMM
                       </div>
                       {/* Category Badge */}
                       <div className="absolute bottom-4 left-4 bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-medium capitalize">
@@ -158,7 +198,7 @@ const B2BTours = () => {
 
                     {/* Content */}
                     <div className="p-6">
-                      <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-emerald-600 transition-colors">
+                      <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-emerald-600 transition-colors line-clamp-1">
                         {tour.tourName}
                       </h3>
                       <p className="text-slate-600 text-sm mb-4 line-clamp-2">
@@ -180,13 +220,13 @@ const B2BTours = () => {
                       {/* Pricing */}
                       <div className="flex items-end justify-between pt-4 border-t border-slate-100">
                         <div>
-                          <p className="text-xs text-slate-500 line-through">${tour.priceUSD}/person</p>
+                          <p className="text-xs text-slate-500 line-through">${Math.round(tour.priceUSD * 1.15)} Retail</p>
                           <p className="text-2xl font-bold text-emerald-600">${pricing.finalPrice}</p>
-                          <p className="text-xs text-slate-500">per person (with B2B discount)</p>
+                          <p className="text-[10px] uppercase font-semibold text-emerald-600/80">Nett Rate (15% Included)</p>
                         </div>
                         <Link
                           to={`/about/partners/b2b/book/${tour.id}`}
-                          className="bg-emerald-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-emerald-600 transition-all"
+                          className="bg-emerald-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-emerald-600 transition-all shadow-md hover:shadow-lg"
                         >
                           Book Now
                         </Link>
@@ -205,7 +245,7 @@ const B2BTours = () => {
           )}
         </div>
       </main>
-      
+
       <Footer />
     </>
   );

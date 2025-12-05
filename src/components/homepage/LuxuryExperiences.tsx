@@ -18,16 +18,6 @@ import 'react-lazy-load-image-component/src/effects/blur.css';
 import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 
-// Default images as fallback
-const defaultImages: Record<string, string> = {
-  'dream-journeys': 'https://images.unsplash.com/photo-1596402184320-417e7178b2cd?w=1200&q=80',
-  'vip-concierge': 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&q=80',
-  'exclusive-access': 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=1200&q=80',
-  'helicopter-charters': 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=1200&q=80',
-  'private-yachts': 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=1200&q=80',
-  'luxury-vehicles': 'https://images.unsplash.com/photo-1563720360172-67b8f3dce741?w=1200&q=80'
-};
-
 const luxuryExperiencesData = [
   {
     id: 'dream-journeys',
@@ -57,7 +47,7 @@ const luxuryExperiencesData = [
     subtitle: 'VIP Privileges',
     description: 'Private temple blessings, museum openings, and cultural immersions',
     icon: Sparkles,
-    image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=1200&q=80',
+    image: '/exclusive access hero image.jpeg',
     color: 'violet',
     link: '/experiences/luxury/exclusive-access',
     stats: { duration: 'Custom', guests: '2-10', rating: 5.0 }
@@ -106,10 +96,10 @@ const LuxuryExperiences = () => {
       const imageMap: Record<string, string> = {};
 
       // Map of ALL page IDs to their Firestore document names
+      // Note: exclusive-access uses static image (leopard) - not fetched from Firestore
       const pageDocMap: Record<string, string> = {
         'dream-journeys': 'dream-journeys',
         'vip-concierge': 'vip-concierge',
-        'exclusive-access': 'exclusive-access',
         'helicopter-charters': 'helicopter-charters',
         'private-yachts': 'private-yachts',
         'luxury-vehicles': 'luxury-vehicles'

@@ -10,8 +10,6 @@ import { AdminAccountManager } from '@/components/social/AdminAccountManager'
 import { SocialWelcomeSection } from '@/components/social/SocialWelcomeSection'
 import { LiveSocialFeed } from '@/components/social/LiveSocialFeed'
 import { TourismNewsSection } from '@/components/social/TourismNewsSection'
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
 
 const AboutSocial = () => {
   const { user } = useAuth()
@@ -77,11 +75,9 @@ const AboutSocial = () => {
         <meta name="description" content="Watch our live YouTube channel and follow Recharge Travels across Instagram, Facebook, TikTok, Twitter, LinkedIn and TripAdvisor. Join 50,000+ travelers in the #RechargeLife community." />
       </Helmet>
 
-      <Header />
       <SocialWelcomeSection />
       <LiveSocialFeed />
       <TourismNewsSection />
-      <Footer />
     </>
   )
 }

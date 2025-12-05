@@ -85,6 +85,14 @@ const FleetVehiclesManager = lazy(() => import('@/components/admin/panel/FleetVe
 const YaluManager = lazy(() => import('@/components/admin/panel/YaluManager'));
 const WildToursManager = lazy(() => import('@/components/cms/WildToursManager'));
 const ExclusiveAccessAdmin = lazy(() => import('@/pages/admin/ExclusiveAccessAdmin'));
+const EScootersManager = lazy(() => import('@/components/admin/panel/EScootersManager'));
+const VehicleRentalManager = lazy(() => import('@/components/admin/panel/VehicleRentalManager'));
+const VehiclePricingManager = lazy(() => import('@/components/admin/panel/VehiclePricingManager'));
+const VehicleAnalytics = lazy(() => import('@/components/admin/panel/VehicleAnalytics'));
+const VehicleEmailTemplates = lazy(() => import('@/components/admin/panel/VehicleEmailTemplates'));
+const VehiclePaymentContracts = lazy(() => import('@/components/admin/panel/VehiclePaymentContracts'));
+const AirportTransferBookingManager = lazy(() => import('@/components/admin/panel/AirportTransferBookingManager'));
+const AirportTransfersContentManager = lazy(() => import('@/components/admin/panel/AirportTransfersContentManager'));
 
 interface AdminPanelProps {
   initialSection?: string;
@@ -187,6 +195,23 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ initialSection }) => {
           return <PropertyListingsManager />;
         case 'fleet-vehicles':
           return <FleetVehiclesManager />;
+        case 'e-scooters':
+          return <EScootersManager />;
+        case 'vehicle-rental':
+          return <VehicleRentalManager />;
+        case 'vehicle-pricing':
+          return <VehiclePricingManager />;
+        case 'vehicle-analytics':
+          return <VehicleAnalytics />;
+        case 'vehicle-emails':
+          return <VehicleEmailTemplates />;
+        case 'vehicle-payments-contracts':
+          return <VehiclePaymentContracts />;
+        case 'airport-transfers':
+        case 'airport-transfer-bookings':
+          return <AirportTransferBookingManager />;
+        case 'airport-transfers-content':
+          return <AirportTransfersContentManager />;
         case 'tours':
           return <ToursManagement />;
         case 'tours-old':

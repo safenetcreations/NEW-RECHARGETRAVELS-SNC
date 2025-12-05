@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, Navigate, useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { 
+import {
   ArrowLeft,
   Calendar,
   Users,
@@ -14,11 +14,15 @@ import {
   Upload,
   CheckCircle2,
   Loader2,
-  Percent
+  Percent,
+  Globe,
+  ChevronDown
 } from 'lucide-react';
 import { useB2BAuth } from '@/contexts/B2BAuthContext';
 import { useB2BApi } from '@/hooks/useB2BApi';
 import { B2BTour, B2BPriceCalculation } from '@/types/b2b';
+import { useB2BLanguage } from '@/hooks/useB2BLanguage';
+import { languageFlags, languageNames, B2BLanguage } from '@/i18n/b2b-translations';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
@@ -27,13 +31,15 @@ const B2BBookingForm = () => {
   const navigate = useNavigate();
   const { isAuthenticated, isLoading: authLoading } = useB2BAuth();
   const { getTourById, createBooking, calculatePrice, loading } = useB2BApi();
-  
+  const { t, language, setLanguage } = useB2BLanguage();
+
   const [tour, setTour] = useState<B2BTour | null>(null);
   const [pricing, setPricing] = useState<B2BPriceCalculation | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [bookingId, setBookingId] = useState<string | null>(null);
+  const [showLangMenu, setShowLangMenu] = useState(false);
 
   const [formData, setFormData] = useState({
     guestCount: 2,
@@ -79,7 +85,7 @@ const B2BBookingForm = () => {
     // Check 48-hour rule for non-emergency bookings
     const tourDate = new Date(formData.tourDate);
     const hoursUntilDeparture = (tourDate.getTime() - Date.now()) / (1000 * 60 * 60);
-    
+
     if (!formData.isEmergency && hoursUntilDeparture < 48) {
       setError('Bookings must be made at least 48 hours in advance. Enable "Emergency Booking" for urgent requests.');
       setIsSubmitting(false);
@@ -171,9 +177,44 @@ const B2BBookingForm = () => {
       <Helmet>
         <title>Book Tour | B2B Portal | Recharge Travels</title>
       </Helmet>
-      
+
       <Header />
-      
+
+      {/* Language Bar */}
+      <div className="bg-slate-900 text-white px-4 py-2 border-b border-slate-800">
+        <div className="container mx-auto flex justify-end">
+          <div className="relative">
+            <button
+              onClick={() => setShowLangMenu(!showLangMenu)}
+              className="flex items-center gap-2 hover:text-emerald-400 transition-colors text-sm font-medium"
+            >
+              <Globe className="w-4 h-4" />
+              <span>{languageFlags[language]} {languageNames[language]}</span>
+              <ChevronDown className="w-3 h-3" />
+            </button>
+
+            {showLangMenu && (
+              <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50 max-h-64 overflow-y-auto">
+                {(Object.keys(languageNames) as B2BLanguage[]).map((lang) => (
+                  <button
+                    key={lang}
+                    onClick={() => {
+                      setLanguage(lang);
+                      setShowLangMenu(false);
+                    }}
+                    className={`w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-3 ${language === lang ? 'text-emerald-600 bg-emerald-50 font-medium' : 'text-slate-600'
+                      }`}
+                  >
+                    <span className="text-lg">{languageFlags[lang]}</span>
+                    {languageNames[lang]}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
       <main className="min-h-screen bg-gradient-to-br from-slate-100 via-emerald-50/30 to-teal-50/30 py-8">
         <div className="container mx-auto px-4">
           <Link
@@ -376,7 +417,7 @@ const B2BBookingForm = () => {
               <div>
                 <div className="bg-white rounded-2xl shadow-lg border border-slate-200/50 p-6 sticky top-24">
                   <h3 className="font-bold text-slate-900 mb-4">Price Summary</h3>
-                  
+
                   {/* Tour Image */}
                   {tour.images?.[0] && (
                     <div className="rounded-xl overflow-hidden mb-4">
@@ -395,7 +436,7 @@ const B2BBookingForm = () => {
                       <div className="flex justify-between text-sm text-emerald-600">
                         <span className="flex items-center gap-1">
                           <Percent className="w-4 h-4" />
-                          B2B Discount (10%)
+                          B2B Commission (15%)
                         </span>
                         <span>-${pricing.discount.toFixed(2)}</span>
                       </div>
@@ -409,7 +450,7 @@ const B2BBookingForm = () => {
                   <div className="mt-6 p-4 bg-emerald-50 rounded-xl">
                     <p className="text-xs text-emerald-700">
                       ✓ Instant confirmation via WhatsApp<br />
-                      ✓ 10% B2B discount applied<br />
+                      ✓ 15% B2B commission applied<br />
                       ✓ Free cancellation (48h notice)
                     </p>
                   </div>
@@ -419,7 +460,7 @@ const B2BBookingForm = () => {
           )}
         </div>
       </main>
-      
+
       <Footer />
     </>
   );

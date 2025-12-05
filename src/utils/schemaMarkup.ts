@@ -53,7 +53,7 @@ export const COMPANY = {
     youtube: 'https://www.youtube.com/@rechargetravelsltdColombo',
     twitter: 'https://twitter.com/rechargetravels',
     linkedin: 'https://www.linkedin.com/company/rechargetravels',
-    tripadvisor: 'https://www.tripadvisor.com/Attraction_Review-g293962-d24145389-Reviews-Recharge_Travels-Colombo_Western_Province.html',
+    tripadvisor: 'https://www.tripadvisor.com/Attraction_Review-g293962-d10049587-Reviews-Recharge_Travels_And_Tours-Colombo_Western_Province.html',
     pinterest: 'https://www.pinterest.com/rechargetravels'
   },
   rating: {

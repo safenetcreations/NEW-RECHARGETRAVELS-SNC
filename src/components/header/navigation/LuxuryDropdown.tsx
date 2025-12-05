@@ -44,7 +44,7 @@ const LuxuryDropdown = ({ animatingItem, onMenuClick, isScrolled }: LuxuryDropdo
 
   return (
     <BaseNavigationMenuItem>
-      <NavigationMenuTrigger 
+      <NavigationMenuTrigger
         className={cn(
           "px-5 py-2.5 text-sm font-bold transition-all duration-300 rounded-lg",
           "bg-gradient-to-r from-amber-500/10 via-amber-400/5 to-amber-500/10",
@@ -79,13 +79,13 @@ const LuxuryDropdown = ({ animatingItem, onMenuClick, isScrolled }: LuxuryDropdo
               </div>
             </div>
           </div>
-          
+
           {/* Categories Grid */}
           <div className="grid grid-cols-3 divide-x divide-amber-200/20">
             {categories.map(({ key, data }) => {
               const IconComponent = categoryIcons[key as keyof typeof categoryIcons]
               const colorClass = categoryColors[key as keyof typeof categoryColors]
-              
+
               return (
                 <div key={key} className="p-4">
                   {/* Category Header */}
@@ -107,7 +107,7 @@ const LuxuryDropdown = ({ animatingItem, onMenuClick, isScrolled }: LuxuryDropdo
                       )}>{data.description}</p>
                     </div>
                   </div>
-                  
+
                   {/* Items */}
                   <div className="space-y-1">
                     {data.items.map((item) => (
@@ -162,7 +162,7 @@ const LuxuryDropdown = ({ animatingItem, onMenuClick, isScrolled }: LuxuryDropdo
               )
             })}
           </div>
-          
+
           {/* Footer CTA */}
           <div className={cn(
             "px-4 py-3 flex items-center justify-between border-t",
@@ -175,14 +175,14 @@ const LuxuryDropdown = ({ animatingItem, onMenuClick, isScrolled }: LuxuryDropdo
               </span>
             </div>
             <Link
-              to="/experiences/luxury/dream-journeys"
+              to="/luxury"
               className={cn(
                 "text-xs font-medium px-4 py-2 rounded-full transition-all",
                 "bg-gradient-to-r from-amber-500 to-amber-600 text-white",
                 "hover:shadow-lg hover:shadow-amber-500/30 hover:scale-105"
               )}
             >
-              Explore VIP Experiences
+              View All Luxury
             </Link>
           </div>
         </div>

@@ -3,8 +3,6 @@ import { Helmet } from 'react-helmet-async';
 import { useAboutSriLankaContent } from '@/hooks/useAboutSriLankaContent';
 import { getAboutSriLankaHeroSlides, AboutSriLankaHeroSlide, DEFAULT_ABOUT_SLIDES } from '@/services/aboutSriLankaHeroService';
 import { motion, AnimatePresence } from 'framer-motion';
-import Header from '@/components/Header';
-// import Footer from '@/components/Footer';
 import {
   Globe, Users, Leaf, Award, MapPin, Camera,
   Play, X, ChevronLeft, ChevronRight, Star,
@@ -326,8 +324,6 @@ const AboutSriLanka: React.FC<AboutSriLankaProps> = ({ embedded = false }) => {
           <link rel="canonical" href="https://recharge-travels.com/about/sri-lanka" />
         </Helmet>
       )}
-
-      {!embedded && <Header />}
 
       <div className="bg-white">
         {/* ========== HERO SECTION - COMPLETELY REBUILT ========== */}

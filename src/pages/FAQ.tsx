@@ -1,7 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 import { HelpCircle, ChevronDown, ChevronUp, Search, Car, Plane, Train, Shield, DollarSign, Sun, Phone, FileText, Globe, Heart } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -1322,8 +1320,6 @@ const FAQ: React.FC = () => {
                 </script>
             </Helmet>
 
-            <Header />
-
             <div className="min-h-screen bg-white">
                 {/* Hero Section */}
                 <section className="relative bg-gradient-to-r from-teal-600 via-emerald-600 to-green-600 text-white py-16 md:py-20 overflow-hidden">
@@ -1569,8 +1565,6 @@ const FAQ: React.FC = () => {
                     </div>
                 </section>
             </div>
-
-            <Footer />
         </>
     );
 };

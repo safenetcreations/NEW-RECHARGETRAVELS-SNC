@@ -27,7 +27,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 var _a, _b;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendGenericEmail = exports.sendBookingCancellation = exports.sendPasswordReset = exports.sendPaymentConfirmation = exports.sendAgencyApproval = exports.sendAgencyWelcome = exports.sendBookingConfirmation = exports.sendBookingReminder = exports.sendWelcomeEmail = exports.sendWhaleWatchingConfirmation = exports.sendTransferBookingConfirmation = exports.sendTourBookingConfirmation = exports.sendConciergeBookingConfirmation = exports.sendEmail = void 0;
+exports.sendVehicleRentalConfirmation = exports.sendDriverApproval = exports.sendDriverAdminNotification = exports.sendDriverRegistrationConfirmation = exports.sendGenericEmail = exports.sendBookingCancellation = exports.sendPasswordReset = exports.sendPaymentConfirmation = exports.sendAgencyApproval = exports.sendAgencyWelcome = exports.sendBookingConfirmation = exports.sendBookingReminder = exports.sendWelcomeEmail = exports.sendWhaleWatchingConfirmation = exports.sendTransferBookingConfirmation = exports.sendTourBookingConfirmation = exports.sendConciergeBookingConfirmation = exports.sendEmail = void 0;
 // SendGrid Email Service for Recharge Travels
 // Handles all email sending with beautiful branded templates
 const functions = __importStar(require("firebase-functions"));
@@ -300,6 +300,90 @@ const sendGenericEmail = async (data) => {
     });
 };
 exports.sendGenericEmail = sendGenericEmail;
+// ==========================================
+// DRIVER REGISTRATION EMAIL
+// ==========================================
+const sendDriverRegistrationConfirmation = async (data) => {
+    const html = (0, templates_1.driverRegistrationTemplate)({
+        driverName: data.driverName,
+        email: data.to,
+        phone: data.phone,
+        tier: data.tier,
+        applicationId: data.applicationId,
+        submittedAt: new Date().toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        })
+    });
+    // Send to driver
+    await (0, exports.sendEmail)({
+        to: data.to,
+        subject: `🚗 Driver Application Received | Ref: ${data.applicationId}`,
+        html
+    });
+    return true;
+};
+exports.sendDriverRegistrationConfirmation = sendDriverRegistrationConfirmation;
+// ==========================================
+// ADMIN NOTIFICATION FOR NEW DRIVER
+// ==========================================
+const sendDriverAdminNotification = async (data) => {
+    const html = (0, templates_1.adminDriverNotificationTemplate)(Object.assign(Object.assign({}, data), { reviewLink: `https://recharge-travels-admin.web.app/admin/drivers/${data.applicationId}` }));
+    return (0, exports.sendEmail)({
+        to: ADMIN_EMAIL,
+        subject: `🔔 NEW Driver Application | ${data.driverName} | ${data.tier}`,
+        html
+    });
+};
+exports.sendDriverAdminNotification = sendDriverAdminNotification;
+// ==========================================
+// DRIVER APPROVAL EMAIL
+// ==========================================
+const sendDriverApproval = async (data) => {
+    const html = (0, templates_1.driverApprovalTemplate)({
+        driverName: data.driverName,
+        tier: data.tier,
+        loginLink: 'https://recharge-travels-73e76.web.app/driver/dashboard'
+    });
+    return (0, exports.sendEmail)({
+        to: data.to,
+        subject: `🎉 Congratulations! Your Driver Account is Approved - Recharge Travels`,
+        html
+    });
+};
+exports.sendDriverApproval = sendDriverApproval;
+// ==========================================
+// VEHICLE RENTAL CONFIRMATION
+// ==========================================
+const sendVehicleRentalConfirmation = async (data) => {
+    const html = (0, templates_1.vehicleRentalConfirmationTemplate)({
+        bookingRef: data.bookingRef,
+        customerName: data.customerName,
+        email: data.to,
+        phone: data.phone,
+        vehicleType: data.vehicleType,
+        pickupDate: data.pickupDate,
+        returnDate: data.returnDate,
+        pickupLocation: data.pickupLocation,
+        returnLocation: data.returnLocation,
+        driverOption: data.driverOption,
+        totalPrice: data.totalPrice,
+        paymentStatus: data.paymentStatus
+    });
+    // Send to customer
+    await (0, exports.sendEmail)({
+        to: data.to,
+        subject: `🚗 Vehicle Rental Confirmed | Ref: ${data.bookingRef}`,
+        html,
+        bcc: [ADMIN_EMAIL]
+    });
+    return true;
+};
+exports.sendVehicleRentalConfirmation = sendVehicleRentalConfirmation;
 exports.default = {
     sendEmail: exports.sendEmail,
     sendConciergeBookingConfirmation: exports.sendConciergeBookingConfirmation,
@@ -314,6 +398,11 @@ exports.default = {
     sendPaymentConfirmation: exports.sendPaymentConfirmation,
     sendPasswordReset: exports.sendPasswordReset,
     sendBookingCancellation: exports.sendBookingCancellation,
-    sendGenericEmail: exports.sendGenericEmail
+    sendGenericEmail: exports.sendGenericEmail,
+    // Driver emails
+    sendDriverRegistrationConfirmation: exports.sendDriverRegistrationConfirmation,
+    sendDriverAdminNotification: exports.sendDriverAdminNotification,
+    sendDriverApproval: exports.sendDriverApproval,
+    sendVehicleRentalConfirmation: exports.sendVehicleRentalConfirmation
 };
 //# sourceMappingURL=sendgrid.js.map

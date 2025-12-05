@@ -1,5 +1,5 @@
 
-import React, { createContext, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode } from 'react';
 import { User } from 'firebase/auth';
 import { useFirebaseAuthState } from './auth/useFirebaseAuthState';
 import { useFirebaseAuthMethods } from './auth/useFirebaseAuthMethods';
@@ -23,15 +23,15 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { user, loading, isAdmin } = useFirebaseAuthState();
-  const { 
-    signUp, 
-    signIn, 
+  const {
+    signUp,
+    signIn,
     signInWithGoogle,
-    signOut, 
-    resetPassword, 
+    signOut,
+    resetPassword,
     updateProfile,
     updatePassword,
-    updateEmail 
+    updateEmail
   } = useFirebaseAuthMethods(user);
 
   const value = {
@@ -53,4 +53,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       {children}
     </AuthContext.Provider>
   );
+};
+
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 };
