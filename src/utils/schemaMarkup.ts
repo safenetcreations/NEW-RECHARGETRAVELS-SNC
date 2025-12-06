@@ -48,11 +48,11 @@ export const COMPANY = {
     longitude: 79.8612
   },
   social: {
-    facebook: 'https://www.facebook.com/rechargetravels',
-    instagram: 'https://www.instagram.com/rechargetravels',
+    facebook: 'https://www.facebook.com/Rechargetours',
+    instagram: 'https://instagram.com/rechargetravels',
     youtube: 'https://www.youtube.com/@rechargetravelsltdColombo',
     twitter: 'https://twitter.com/rechargetravels',
-    linkedin: 'https://www.linkedin.com/company/rechargetravels',
+    linkedin: 'https://linkedin.com/company/rechargetravels',
     tripadvisor: 'https://www.tripadvisor.com/Attraction_Review-g293962-d10049587-Reviews-Recharge_Travels_And_Tours-Colombo_Western_Province.html',
     pinterest: 'https://www.pinterest.com/rechargetravels'
   },

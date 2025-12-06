@@ -228,9 +228,11 @@ const ComprehensiveSEO: React.FC<SEOProps> = ({
             "availableLanguage": ["English", "Tamil", "Sinhala"]
           },
           "sameAs": [
-            "https://www.facebook.com/rechargetravels",
-            "https://www.instagram.com/rechargetravels",
-            "https://www.youtube.com/rechargetravels"
+            "https://www.facebook.com/Rechargetours",
+            "https://instagram.com/rechargetravels",
+            "https://www.youtube.com/@rechargetravelsltdColombo",
+            "https://twitter.com/rechargetravels",
+            "https://linkedin.com/company/rechargetravels"
           ]
         })}
       </script>

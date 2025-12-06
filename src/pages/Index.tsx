@@ -26,6 +26,7 @@ const AboutSriLanka = lazy(() => import("@/pages/AboutSriLanka"));
 const TravelGuide = lazy(() => import("@/components/homepage/TravelGuide"));
 const LuxuryBlogSection = lazy(() => import("@/components/homepage/LuxuryBlogSection"));
 const ReviewsSection = lazy(() => import("@/components/homepage/ReviewsSection"));
+const SEOHomepageContent = lazy(() => import("@/components/seo/SEOHomepageContent"));
 
 // Minimal fallback for lazy components
 const LazyFallback = memo(() => (
@@ -171,6 +172,9 @@ const Index = memo(() => {
 
           {/* Luxury Blog Section - Auto-updates from Admin Panel */}
           <LuxuryBlogSection />
+
+          {/* SEO Content Section - Improves text-to-code ratio for search engines */}
+          <SEOHomepageContent />
         </Suspense>
       </div>
 

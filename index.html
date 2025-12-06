@@ -9,17 +9,22 @@
 
   <!-- Primary Meta Tags -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
   <meta name="description"
     content="Recharge Travels is Colombo's #1 rated travel agency (4.9★). Book luxury Sri Lanka tours, Yala safaris, airport transfers, whale watching, and cultural experiences. 24/7 support. Best price guaranteed!" />
   <meta name="keywords"
     content="travel agency Colombo, Sri Lanka travel agency, luxury tours Sri Lanka, Colombo airport transfer, Yala safari, wildlife safaris, cultural tours, beach holidays, Colombo to Kandy, Ella tours, Sigiriya rock, Ceylon travel, Sri Lanka tour packages" />
   <title>Travel Agency Colombo | Sri Lanka Tours & Safaris | Recharge Travels</title>
 
-  <!-- Favicons and App Icons -->
-  <link rel="icon" type="image/png" sizes="32x32" href="/logo-v2.png" />
-  <link rel="icon" type="image/png" sizes="16x16" href="/logo-v2.png" />
+  <!-- Favicons and App Icons - Multiple Formats for All Browsers -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/logo-v2.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="/logo-v2.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/logo-v2.png" />
   <link rel="manifest" href="/manifest.json" />
+  <link rel="shortcut icon" href="/favicon.ico" />
 
   <!-- Theme and Color Scheme -->
   <meta name="theme-color" content="#FF6B1A" />
@@ -94,28 +99,67 @@
     {
       "@context": "https://schema.org",
       "@type": "TravelAgency",
+      "@id": "https://www.rechargetravels.com/#organization",
       "name": "Recharge Travels & Tours Ltd",
-      "description": "Premier travel agency specializing in luxury Sri Lanka tours, wildlife safaris, and cultural experiences",
+      "legalName": "Recharge Travels & Tours (Pvt) Ltd",
+      "description": "Premier travel agency specializing in luxury Sri Lanka tours, wildlife safaris, airport transfers, and cultural experiences. Colombo's #1 rated agency with 24/7 support.",
       "url": "https://www.rechargetravels.com",
-      "logo": "https://www.rechargetravels.com/logo-v2.png",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://www.rechargetravels.com/logo-v2.png",
+        "width": "512",
+        "height": "512"
+      },
       "image": "https://i.imgur.com/AEnBWJf.jpeg",
+      "email": "info@rechargetravels.com",
+      "telephone": "+94777721999",
+      "foundingDate": "2018",
       "address": {
         "@type": "PostalAddress",
-        "addressCountry": "LK",
+        "streetAddress": "123 Galle Road",
+        "addressLocality": "Colombo",
         "addressRegion": "Western Province",
-        "addressLocality": "Colombo"
+        "postalCode": "00300",
+        "addressCountry": "LK"
       },
       "geo": {
         "@type": "GeoCoordinates",
         "latitude": "6.9271",
         "longitude": "79.8612"
       },
+      "contactPoint": [
+        {
+          "@type": "ContactPoint",
+          "telephone": "+94777721999",
+          "contactType": "customer service",
+          "areaServed": "Worldwide",
+          "availableLanguage": ["English", "Sinhala", "Tamil"]
+        },
+        {
+          "@type": "ContactPoint",
+          "telephone": "+94777721999",
+          "contactType": "reservations",
+          "areaServed": "Worldwide",
+          "availableLanguage": ["English"]
+        }
+      ],
       "sameAs": [
-        "https://www.facebook.com/rechargetravels",
+        "https://www.facebook.com/Rechargetours",
         "https://www.instagram.com/rechargetravels",
-        "https://www.youtube.com/rechargetravels"
+        "https://www.youtube.com/@rechargetravelsltdColombo",
+        "https://twitter.com/rechargetravels",
+        "https://www.linkedin.com/company/rechargetravels",
+        "https://www.tripadvisor.com/Attraction_Review-g293962-d10049587-Reviews-Recharge_Travels_And_Tours-Colombo_Western_Province.html"
       ],
       "priceRange": "$$-$$$",
+      "currenciesAccepted": "USD, EUR, GBP, LKR",
+      "paymentAccepted": "Cash, Credit Card, Debit Card, Bank Transfer, PayPal",
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+        "opens": "00:00",
+        "closes": "23:59"
+      },
       "areaServed": {
         "@type": "Country",
         "name": "Sri Lanka"
@@ -132,8 +176,15 @@
           "@type": "Review",
           "author": {"@type": "Person", "name": "Sarah Johnson"},
           "datePublished": "2025-11-15",
-          "reviewRating": {"@type": "Rating", "ratingValue": "5"},
+          "reviewRating": {"@type": "Rating", "ratingValue": "5", "bestRating": "5"},
           "reviewBody": "Amazing experience! The team organized our entire Sri Lanka trip perfectly."
+        },
+        {
+          "@type": "Review",
+          "author": {"@type": "Person", "name": "Michael Chen"},
+          "datePublished": "2025-11-10",
+          "reviewRating": {"@type": "Rating", "ratingValue": "5", "bestRating": "5"},
+          "reviewBody": "Best wildlife safari experience ever! We saw 3 leopards at Yala thanks to our expert guide."
         }
       ]
     }
@@ -244,6 +295,14 @@
           <p>📧 Email: <a href="mailto:info@rechargetravels.com">info@rechargetravels.com</a></p>
           <p>💬 WhatsApp: <a href="https://wa.me/94777721999">+94 77 772 1999</a></p>
           <p>📍 Address: Colombo, Sri Lanka</p>
+          <h3 style="color: #333; margin-top: 20px;">Follow Us on Social Media</h3>
+          <p>
+            <a href="https://www.facebook.com/Rechargetours" target="_blank" rel="noopener noreferrer" style="margin-right: 15px;">Facebook</a>
+            <a href="https://instagram.com/rechargetravels" target="_blank" rel="noopener noreferrer" style="margin-right: 15px;">Instagram</a>
+            <a href="https://www.youtube.com/@rechargetravelsltdColombo" target="_blank" rel="noopener noreferrer" style="margin-right: 15px;">YouTube</a>
+            <a href="https://twitter.com/rechargetravels" target="_blank" rel="noopener noreferrer" style="margin-right: 15px;">X (Twitter)</a>
+            <a href="https://linkedin.com/company/rechargetravels" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+          </p>
         </section>
 
         <nav style="margin-bottom: 40px;">

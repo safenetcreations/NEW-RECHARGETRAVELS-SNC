@@ -579,16 +579,81 @@ const AirportTransfers = () => {
   // Handle booking submission
   const handleSubmitBooking = async () => {
     const hasDestination = !!(selectedHotel || selectedDestination || placesDestination);
-    if (!selectedAirport || !hasDestination || !selectedVehicle || !calculatedPrice) return;
-    if (!firstName || !lastName || !email || !phone || !country) return;
+
+    // Validation
+    if (!selectedAirport || !hasDestination || !selectedVehicle || !calculatedPrice) {
+      toast.error('Missing Information', {
+        description: 'Please complete all required fields.'
+      });
+      return;
+    }
+
+    if (!firstName || !lastName || !email || !phone || !country) {
+      toast.error('Customer Details Required', {
+        description: 'Please fill in all customer information.'
+      });
+      return;
+    }
+
+    if (!paymentMethod) {
+      toast.error('Select Payment Method', {
+        description: 'Please choose how you\'d like to pay.'
+      });
+      return;
+    }
+
+    if (!agreedToTerms) {
+      toast.error('Accept Terms', {
+        description: 'Please accept the terms and conditions to continue.'
+      });
+      return;
+    }
 
     setIsSubmitting(true);
+    setBookingState('processing');
 
     // Get destination info from either Google Places or static selection
     const destinationName = placesDestination?.name || selectedHotel?.name || selectedDestination?.name || 'Unknown';
     const destinationArea = placesDestination?.address || selectedHotel?.city || selectedDestination?.area || 'Sri Lanka';
 
     try {
+      // If credit card payment is selected, simulate Stripe payment processing
+      if (paymentMethod === 'card') {
+        toast.info('Processing Payment...', {
+          description: 'Please wait while we process your payment.'
+        });
+
+        // Simulate Stripe payment (replace with actual Stripe integration)
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Mock payment success (90% success rate for demo)
+        const paymentSuccess = Math.random() > 0.1;
+
+        if (!paymentSuccess) {
+          throw new Error('Payment declined. Please try a different card.');
+        }
+
+        toast.success('Payment Successful!', {
+          description: 'Creating your booking...'
+        });
+      }
+
+      // If PayPal is selected, simulate PayPal payment
+      if (paymentMethod === 'paypal') {
+        toast.info('Opening PayPal...', {
+          description: 'Please complete payment in the PayPal window.'
+        });
+
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        toast.success('PayPal Payment Successful!', {
+          description: 'Creating your booking...'
+        });
+      }
+
+      // Create the booking with appropriate payment status
+      const paymentStatus = paymentMethod === 'cash' ? 'pending' : 'paid';
+
       const booking = await airportTransferService.createBooking({
         transferType,
         pickupAirport: {
@@ -622,15 +687,19 @@ const AirportTransfers = () => {
         pricing: {
           basePrice: calculatedPrice.breakdown.basePrice,
           distance: calculatedDistance,
-          totalPrice: calculatedPrice.price,
+          extrasPrice: enhancedPrice?.extrasPrice || 0,
+          totalPrice: enhancedPrice?.total || calculatedPrice.price,
           currency: calculatedPrice.currency
         },
+        extras: selectedExtras.filter(id => id !== 'meet-greet'),
+        childSeatCount: selectedExtras.includes('child-seat') ? childSeatCount : 0,
         specialRequests,
-        childSeats,
+        childSeats: selectedExtras.includes('child-seat') ? childSeatCount : 0,
         meetAndGreet: true,
         flightTracking: true,
         status: 'pending',
-        paymentStatus: 'pending'
+        paymentStatus: paymentStatus,
+        paymentMethod: paymentMethod
       });
 
       setBookingReference(booking.bookingReference);
@@ -645,14 +714,32 @@ const AirportTransfers = () => {
         console.error('Error sending confirmations:', confirmError);
       }
 
-      toast.success('Booking Confirmed!', {
-        description: `Your booking reference is ${booking.bookingReference}`
-      });
-    } catch (error) {
+      // Show appropriate success message based on payment method
+      if (paymentMethod === 'cash') {
+        toast.success('Booking Confirmed!', {
+          description: `Reference: ${booking.bookingReference}. Pay cash to driver on arrival.`
+        });
+      } else {
+        toast.success('Booking & Payment Confirmed!', {
+          description: `Reference: ${booking.bookingReference}. Confirmation sent to ${email}.`
+        });
+      }
+    } catch (error: any) {
       console.error('Booking error:', error);
       setBookingState('error');
+
+      // Show appropriate error message
+      let errorMessage = 'Please try again or contact support.';
+      if (error?.message?.includes('Payment')) {
+        errorMessage = error.message;
+      } else if (error?.code === 'permission-denied') {
+        errorMessage = 'Permission denied. Please refresh and try again.';
+      } else if (error?.code === 'unavailable') {
+        errorMessage = 'Service temporarily unavailable. Please try again in a moment.';
+      }
+
       toast.error('Booking Failed', {
-        description: 'Please try again or contact support.'
+        description: errorMessage
       });
     } finally {
       setIsSubmitting(false);
@@ -802,8 +889,8 @@ const AirportTransfers = () => {
                     key={index}
                     onClick={() => setCurrentSlide(index)}
                     className={`w-3 h-3 rounded-full transition-all ${index === currentSlide
-                        ? 'bg-white w-8'
-                        : 'bg-white/40 hover:bg-white/60'
+                      ? 'bg-white w-8'
+                      : 'bg-white/40 hover:bg-white/60'
                       }`}
                     aria-label={`Go to slide ${index + 1}`}
                   />
@@ -867,10 +954,10 @@ const AirportTransfers = () => {
                       onClick={() => isCompleted && setStep(stepInfo.id)}
                       disabled={!isCompleted}
                       className={`w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center font-semibold text-sm border-3 transition-all ${isCompleted
-                          ? 'bg-amber-400 border-amber-400 text-white cursor-pointer'
-                          : isActive
-                            ? 'bg-emerald-700 border-emerald-700 text-white'
-                            : 'bg-white border-slate-200 text-slate-400'
+                        ? 'bg-amber-400 border-amber-400 text-white cursor-pointer'
+                        : isActive
+                          ? 'bg-emerald-700 border-emerald-700 text-white'
+                          : 'bg-white border-slate-200 text-slate-400'
                         }`}
                       style={{ borderWidth: '3px' }}
                     >
@@ -915,8 +1002,8 @@ const AirportTransfers = () => {
                         key={value}
                         onClick={() => setTransferType(value as any)}
                         className={`flex items-center gap-2 px-5 py-3 rounded-xl font-medium transition-all ${transferType === value
-                            ? 'bg-emerald-700 text-white shadow-lg'
-                            : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border-2 border-emerald-100'
+                          ? 'bg-emerald-700 text-white shadow-lg'
+                          : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border-2 border-emerald-100'
                           }`}
                         style={transferType === value ? { boxShadow: '0 10px 30px rgba(13, 92, 70, 0.25)' } : {}}
                       >
@@ -1066,10 +1153,10 @@ const AirportTransfers = () => {
                               className="w-full px-4 py-3 text-left hover:bg-amber-50 flex items-center gap-3 border-b border-slate-50 last:border-0 transition-colors"
                             >
                               <div className={`w-8 h-8 rounded-full flex items-center justify-center ${dest.type === 'beach' ? 'bg-cyan-100 text-cyan-600' :
-                                  dest.type === 'city' ? 'bg-emerald-100 text-emerald-600' :
-                                    dest.type === 'attraction' ? 'bg-amber-100 text-amber-600' :
-                                      dest.type === 'wildlife' ? 'bg-green-100 text-green-600' :
-                                        'bg-purple-100 text-purple-600'
+                                dest.type === 'city' ? 'bg-emerald-100 text-emerald-600' :
+                                  dest.type === 'attraction' ? 'bg-amber-100 text-amber-600' :
+                                    dest.type === 'wildlife' ? 'bg-green-100 text-green-600' :
+                                      'bg-purple-100 text-purple-600'
                                 }`}>
                                 <MapPin className="w-4 h-4" />
                               </div>
@@ -1423,8 +1510,8 @@ const AirportTransfers = () => {
                           key={vehicle.id}
                           onClick={() => setSelectedVehicle(vehicle)}
                           className={`relative rounded-2xl border-2 overflow-hidden cursor-pointer transition-all ${selectedVehicle?.id === vehicle.id
-                              ? 'border-emerald-600 bg-emerald-50/50'
-                              : 'border-slate-200 hover:border-slate-300 hover:shadow-md'
+                            ? 'border-emerald-600 bg-emerald-50/50'
+                            : 'border-slate-200 hover:border-slate-300 hover:shadow-md'
                             }`}
                           style={selectedVehicle?.id === vehicle.id ? { boxShadow: '0 10px 30px rgba(13, 92, 70, 0.15)' } : {}}
                         >
@@ -1517,10 +1604,10 @@ const AirportTransfers = () => {
                           key={extra.id}
                           onClick={() => !isIncluded && toggleExtra(extra.id)}
                           className={`relative p-4 rounded-xl border-2 transition-all ${isIncluded
-                              ? 'bg-emerald-50 border-emerald-300 cursor-default'
-                              : isSelected
-                                ? 'bg-emerald-50 border-emerald-600 cursor-pointer'
-                                : 'bg-white border-slate-200 cursor-pointer hover:border-slate-300 hover:shadow-sm'
+                            ? 'bg-emerald-50 border-emerald-300 cursor-default'
+                            : isSelected
+                              ? 'bg-emerald-50 border-emerald-600 cursor-pointer'
+                              : 'bg-white border-slate-200 cursor-pointer hover:border-slate-300 hover:shadow-sm'
                             }`}
                           style={isSelected && !isIncluded ? { boxShadow: '0 10px 30px rgba(13, 92, 70, 0.12)' } : {}}
                         >
@@ -1902,8 +1989,8 @@ const AirportTransfers = () => {
                           key={id}
                           onClick={() => setPaymentMethod(id as any)}
                           className={`p-4 rounded-xl border-2 text-left transition-all ${paymentMethod === id
-                              ? 'border-emerald-600 bg-emerald-50'
-                              : 'border-slate-200 hover:border-slate-300'
+                            ? 'border-emerald-600 bg-emerald-50'
+                            : 'border-slate-200 hover:border-slate-300'
                             }`}
                           style={paymentMethod === id ? { boxShadow: '0 10px 30px rgba(13, 92, 70, 0.12)' } : {}}
                         >

@@ -637,17 +637,22 @@ export interface AirportTransferBooking {
   pricing: {
     basePrice: number;
     distance: number;
+    extrasPrice?: number;
     totalPrice: number;
     currency: string;
   };
+  // Extras
+  extras?: string[];
   // Special requests
   specialRequests?: string;
   childSeats?: number;
+  childSeatCount?: number;
   meetAndGreet: boolean;
   flightTracking: boolean;
   // Status
   status: 'pending' | 'confirmed' | 'assigned' | 'in-progress' | 'completed' | 'cancelled';
   paymentStatus: 'pending' | 'paid' | 'refunded';
+  paymentMethod?: 'card' | 'paypal' | 'cash';
   // Assignment
   assignedDriverId?: string;
   assignedDriverName?: string;
@@ -714,6 +719,7 @@ export interface AirportTransferPageContent {
     date: string;
   }[];
   vehiclePricing?: VehiclePricing[]; // Dynamic pricing from admin panel
+  transferExtras?: TransferExtra[]; // Dynamic extras from admin panel
   seoTitle: string;
   seoDescription: string;
   seoKeywords: string[];
