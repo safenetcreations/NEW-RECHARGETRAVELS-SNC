@@ -1029,7 +1029,12 @@ const AirportTransfers = () => {
                             setShowAirportResults(true);
                             if (!e.target.value) setSelectedAirport(null);
                           }}
-                          onFocus={() => setShowAirportResults(true)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && showAirportResults && airportResults.length > 0) {
+                              e.preventDefault();
+                              handleAirportSelect(airportResults[0]);
+                            }
+                          }}
                           placeholder="Search airports..."
                           className="pl-10 py-3 h-14 bg-white border-2 border-emerald-200 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 rounded-xl text-slate-800 placeholder:text-slate-400 font-medium"
                         />
@@ -1112,6 +1117,12 @@ const AirportTransfers = () => {
                               setDestinationSearch(e.target.value);
                               setShowDestinationResults(true);
                               if (!e.target.value) setSelectedDestination(null);
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && showDestinationResults && destinationResults.length > 0) {
+                                e.preventDefault();
+                                handleDestinationSelect(destinationResults[0]);
+                              }
                             }}
                             onFocus={() => setShowDestinationResults(true)}
                             placeholder="Hotel, city, or destination..."
